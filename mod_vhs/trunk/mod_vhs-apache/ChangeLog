@@ -1,6 +1,14 @@
 Since mod_vhs 1.0.8
 -------------------
 
+o Thanks to apache-dev now DOCUMENT_ROOT now gets the right value form
+  mod_vhs.
+o Server admin email, pathinfo and hostname now gets values from VHS.
+
+
+Since mod_vhs 1.0.8
+-------------------
+
 o Removed unused code.
 o Empty VH_ENVIRONMENT variable is removed and replaced by VH_GECOS
   with values from gecos returned from libhome or system.
