@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.25 2005-01-18 12:38:46 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.26 2005-01-18 13:38:07 kiwi Exp $
 */
 
 /* 
@@ -148,12 +148,13 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg);
 static const char* set_flag (cmd_parms *parms, void *mconfig, int flag);
 
 static const command_rec vhs_commands[] = {
-	AP_INIT_TAKE1("vhs_libhome_tag",	set_field,(void*) 0,RSRC_CONF,"Set libhome tag." ),
-	AP_INIT_TAKE1("vhs_Path_Prefix",	set_field,(void*) 1,RSRC_CONF,"Set path prefix." ),
-	AP_INIT_TAKE1("vhs_Default_Host",	set_field,(void*) 2,RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),
-	AP_INIT_FLAG("vhs_Lamer",		set_flag, (void*) 0,RSRC_CONF,"Enable Lamer Friendly mode"),
-	AP_INIT_FLAG("vhs_PHPsafe_mode",	set_flag, (void*) 1,RSRC_CONF,"Enable PHP Safe Mode" ),
-	AP_INIT_FLAG("vhs_PHPopen_basedir",	set_flag, (void*) 2,RSRC_CONF,"Set PHP open_basedir to path" ),
+	AP_INIT_TAKE1("vhs_libhome_tag",		set_field,(void*) 0,RSRC_CONF,"Set libhome tag." ),
+	AP_INIT_TAKE1("vhs_Path_Prefix",		set_field,(void*) 1,RSRC_CONF,"Set path prefix." ),
+	AP_INIT_TAKE1("vhs_Default_Host",		set_field,(void*) 2,RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),
+	AP_INIT_FLAG("vhs_Lamer",			set_flag, (void*) 0,RSRC_CONF,"Enable Lamer Friendly mode"),
+	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,RSRC_CONF,"Enable PHP Safe Mode" ),
+	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,RSRC_CONF,"Set PHP open_basedir to path" ),
+	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,RSRC_CONF,"Set PHP open_basedir to path" ),
 	{ NULL }
 };
 
@@ -189,8 +190,9 @@ typedef struct {
 	char			*default_host;	/* Default host to redirect to */
 	
 	unsigned short int	lamer_mode;	/* Lamer friendly mode */
-	unsigned short int 	safe_mode; 	/* PHP Safe mode */
-	unsigned short int 	open_basedir   /* PHP open_basedir */
+	unsigned short int 	safe_mode;	/* PHP Safe mode */
+	unsigned short int 	open_basedir;	/* PHP open_basedir */
+	unsigned short int	default_rdr;	/* Default host redirect ? */
 	
 } vhs_config_rec;
 
@@ -217,8 +219,9 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 
 	conf->path_prefix  = (child->path_prefix ? child->path_prefix : parent->path_prefix);
 	conf->default_host = (child->default_host ? child->default_host : parent->default_host);
-	conf->safe_mode = (child->safe_mode ? child->safe_mode : parent->safe_mode);
+	conf->safe_mode    = (child->safe_mode ? child->safe_mode : parent->safe_mode);
 	conf->open_basedir = (child->open_basedir ? child->open_basedir : parent->open_basedir);
+	conf->default_rdr  = (child->default_rdr ? child->default_rdr : parent->default_rdr);
 
 	return conf;
 }
@@ -276,6 +279,13 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->open_basedir = 0;
 			}
 			break;
+		case 3:
+			if(flag) {
+				vhr->default_rdr = 1;
+			} else {
+				vhr->default_rdr = 0;
+			}
+			break:
 	}
 
 	return NULL;
@@ -318,7 +328,15 @@ static int vhs_translate_name(request_rec *r)
 			return DECLINED;
 		}
 		else {
-			host = vhr->default_host;
+			if(!vhr->default_rdr) {
+				host = vhr->default_host;
+			} else {
+				apr_table_setn(r->headers_out, "Location", vhr->default_host);
+#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: using a redirect to %s for %s", vhr->default_host, host);
+#endif
+				return HTTP_MOVED_TEMPORARILY;
+			}
 		}
 	}
 
