@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.17 2004-12-30 12:23:19 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.18 2004-12-30 14:31:19 kiwi Exp $
 */
 
 /* 
@@ -101,6 +101,23 @@
  */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
+
+/*
+ * Utility functions
+ */
+
+static char *strtolower(char *str) {
+	char *c = str;
+
+	if (str == NULL) return NULL;
+
+	while (*c != 0) {
+		*c = tolower(*c);
+		c++;
+	}
+
+	return str;
+}
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
@@ -270,7 +287,8 @@ static int vhs_translate_name(request_rec *r)
 	}
 
 	/* DNS names are case insensitives */
-	apr_tolower(host);
+	/*apr_tolower(host); */
+	host = strtolower(host);
 
 	if (ptr = strchr(host,':')) {
 		*ptr = '\0';
