@@ -55,13 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.41 2005-03-02 13:18:29 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.42 2005-03-03 15:41:16 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.15"
+#define VH_VERSION	"mod_vhs/1.0.16"
 
 /* 
  * Set this if you'd like to have looooots of debug
@@ -760,7 +760,6 @@ static int vhs_translate_name(request_rec *r)
 	apr_thread_mutex_unlock(mutex);
 #endif
 
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer mode is %d\n",vhr->lamer_mode);
 	if(p!=NULL) {
 		path = p->pw_dir;
 #ifdef VH_DEBUG
