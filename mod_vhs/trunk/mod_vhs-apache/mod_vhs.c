@@ -55,18 +55,18 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.37 2005-02-27 11:00:27 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.38 2005-02-28 10:51:24 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.14"
+#define VH_VERSION	"mod_vhs/1.0.15"
 
 /* 
  * Set this if you'd like to have looooots of debug
-#define VH_DEBUG 1
  */
+#define VH_DEBUG 1
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
@@ -152,6 +152,7 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  * Configuration structure
  */
 typedef struct {
+	unsigned short int	enabled;	/* Enable the module */
 	char			*libhome_tag;	/* Tags to be used by libhome */
 	
 	char			*path_prefix;	/* Prefix to add to path returned by libhome */
@@ -200,6 +201,10 @@ static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
 	vhs_config_rec *vhr = (vhs_config_rec*) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
 	/*
+	 * Pre default the module is not enabled
+	 */
+	vhr->enabled = 0;
+	/*
 	 * From mod_alias.c
 	 */
 	vhr->aliases   = apr_array_make(p, 20, sizeof(alias_entry));
@@ -207,7 +212,7 @@ static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
 	/*
 	 * End of borrowing
 	 */
-	return vhr;
+	return (void *) vhr;
 }
 
 /*
@@ -227,6 +232,7 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->open_basedir  = (child->open_basedir   ? child->open_basedir   : parent->open_basedir);
 	conf->default_rdr   = (child->default_rdr    ? child->default_rdr    : parent->default_rdr);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
+	conf->enable        = (child->enable         ? child->enable         : parent->enable);
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
 
@@ -631,6 +637,13 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->display_errors = 0;
 			}
 			break;
+		case 5: 
+			if(flag) {
+				vhr->enable = 1;
+			} else {
+				vhr->enable = 0;
+			}
+			break;
 	}
 
 	return NULL;
@@ -660,6 +673,10 @@ static int vhs_translate_name(request_rec *r)
 	int status;
 	/* libhome */
 	struct passwd *p;
+
+	if (!vhr->enbled) {
+		return DECLINED;
+	}
 #if	APR_HAS_THREADS
 	/* Thread stuff */
 	apr_status_t rv;
@@ -853,6 +870,7 @@ static int vhs_translate_name(request_rec *r)
  * Stuff for register the module
  */
 static const command_rec vhs_commands[] = {
+	AP_INIT_FLAG("EnableVHS",			set_flag, (void*) 5,    RSRC_CONF,"Enable VHS module"),
 	AP_INIT_TAKE1("vhs_libhome_tag",		set_field,(void*) 0,    RSRC_CONF,"Set libhome tag." ),
 	AP_INIT_TAKE1("vhs_Path_Prefix",		set_field,(void*) 1,    RSRC_CONF,"Set path prefix." ),
 	AP_INIT_TAKE1("vhs_Default_Host",		set_field,(void*) 2,    RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),

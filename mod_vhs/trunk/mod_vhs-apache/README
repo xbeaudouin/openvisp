@@ -36,6 +36,8 @@ will need to be configured with mod_vh configuration directives described
 in the table below. mod_vhs configuration directives must be located in a
 server configuration block (ie <VirtualHost></VirtualHost>).
 
+EnableVHS:		Enable or Disable mod_vhs. Per default VHS is NOT
+			enabled.
 vhs_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
 			This option is not required, if not set the libhome
 			tage will be set to "mod_vhs".
