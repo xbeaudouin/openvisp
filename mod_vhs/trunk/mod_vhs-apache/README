@@ -72,7 +72,7 @@ vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will enable display_errors to be shown,
 			otherwise php.ini defaults will be used.
-vhs_Alias, vhs_ScriptAlias, vhs_ScriptAliasMatch, vhs_RedirectTempa and
+vhs_Alias, vhs_ScriptAlias, vhs_ScriptAliasMatch, vhs_RedirectTemp and
 vhs_RedirectPermanent :	mod_alias 100% compatible options inside mod_vhs.
 			Please see http://httpd.apache.org/docs-2.0/mod_alias.html
 			for more informations.
