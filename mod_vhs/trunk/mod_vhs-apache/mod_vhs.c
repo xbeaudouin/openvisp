@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.11 2004-12-08 16:45:37 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.12 2004-12-10 14:05:56 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -258,7 +258,6 @@ static int vhs_translate_name(request_rec *r)
 	char *path;
 	char *env = NULL;
 	char *ptr;
-	apr_table_t *e;
 	int i;
 	/* libhome */
 	struct passwd *p;
@@ -328,13 +327,11 @@ static int vhs_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VH_HOST", host);
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
 	apr_table_set(r->subprocess_env, "VH_ENVIRONMENT", env ? env : "");
+	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+	apr_table_set(r->subprocess_env, "DOCUMENT_ROOT", path);
 	
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
-	// set some usefull environment variables (mainly for PHP)
-	e = r->subprocess_env;
-	apr_table_addn (e, "SERVER_ROOT", path);
-	
 	return OK;
 }

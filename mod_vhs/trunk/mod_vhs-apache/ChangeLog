@@ -1,7 +1,9 @@
 Since mod_vhs 1.0.4
 -------------------
 
-o SERVER_ROOT environment variable for PHP 
+o DOCUMENT_ROOT & SERVER_ROOT environment variables 
+  are now completly setup for PHP and some other
+  scriptable environments. 
 
 Since mod_vhs 1.0.2
 -------------------
