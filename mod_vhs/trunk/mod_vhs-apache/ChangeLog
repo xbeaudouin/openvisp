@@ -1,0 +1,7 @@
+Since mod_vhs 1.0
+-----------------
+
+o Create a ChangeLog file
+o Fix compile.sh script
+o DNS names are case sensitives, so HTTP/1.1 Host header is also case
+  sensitive (all host headers are lower case now)
