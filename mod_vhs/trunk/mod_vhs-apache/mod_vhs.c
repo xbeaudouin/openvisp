@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.22 2005-01-13 17:42:06 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.23 2005-01-14 16:09:28 kiwi Exp $
 */
 
 /* 
@@ -78,6 +78,7 @@
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_uri.h"
+#include "apr_thread_mutex.h"
 
 #include "ap_config.h"
 #include "httpd.h"
@@ -110,7 +111,6 @@
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
 
-
 /* 
  * Include php support
  */
@@ -127,6 +127,16 @@
 #include <zend_operators.h>
 #endif
 
+/*
+ * Threads stuff
+ */
+#if APR_HAS_THREADS
+static apr_thread_mutex_t* mutex = NULL;
+#endif
+
+/*
+ * Let's start coding
+ */
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
 static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
@@ -149,6 +159,12 @@ static void register_hooks(apr_pool_t *p)
 {
 	ap_hook_post_config(vhs_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_translate_name(vhs_translate_name, NULL, NULL, APR_HOOK_FIRST);
+#if APR_HAS_THREADS
+	apr_status_t ret;
+	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
+	apr_pool_cleanup_register(pool, mutex, (void*)apr_thread_mutex_destroy,
+                                  apr_pool_cleanup_null);
+#endif
 }
 
 AP_DECLARE_DATA module vhs_module = {
@@ -165,10 +181,10 @@ AP_DECLARE_DATA module vhs_module = {
  * Configuration structure
  */
 typedef struct {
-	char			*libhome_tag;
+	char			*libhome_tag;	/* Tags to be used by libhome */
 	
-	char			*path_prefix;
-	char			*default_host;
+	char			*path_prefix;	/* Prefix to add to path returned by libhome */
+	char			*default_host;	/* Default host to redirect to */
 	
 	unsigned short int	lamer_mode;	/* Lamer friendly mode */
 	
@@ -265,6 +281,10 @@ static int vhs_translate_name(request_rec *r)
 	int i;
 	/* libhome */
 	struct passwd *p;
+#if	APR_HAS_THREADS
+	/* Thread stuff */
+	apr_status_t rv;
+#endif
 
 	// I think this was for a 1.3 work around
 	if (r->uri[0] != '/' && r->uri[0] != '\0') {
@@ -299,6 +319,9 @@ static int vhs_translate_name(request_rec *r)
 	/*
  	 * Set the default libhome tag
 	 */
+#if APR_HAS_THREAD
+	rv = apr_thread_mutex_lock(mutex);
+#endif
 	if (vhr->libhome_tag) {
 		setpwtag(vhr->libhome_tag);
 #ifdef VH_DEBUG
@@ -311,7 +334,13 @@ static int vhs_translate_name(request_rec *r)
 #endif /* VH_DEBUG */
 	}
 
-	if((p=home_getpwnam(host))!=NULL) {
+	p=home_getpwnam(host);
+
+#if APR_HAS_THREAD
+	apr_thread_mutex_unlock(mutex);
+#endif
+
+	if(p!=NULL) {
 		path = p->pw_dir;
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
@@ -360,9 +389,7 @@ static int vhs_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
-/*
-	apr_table_set(r->subprocess_env, "DOCUMENT_ROOT", path);
-*/
+
 	r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",host, NULL);
 	r->server->server_hostname = apr_pstrcat(r->pool,r->hostname,NULL);
 	r->parsed_uri.path = apr_pstrcat(r->pool, path,r->parsed_uri.path,NULL);
@@ -376,9 +403,11 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
+	/*
+	 * TODO: Add more functionality and global confs
+	 */
 	zend_alter_ini_entry("safe_mode", 13, "on", strlen("on"), 4, 16);
 	zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
-
 #endif
 
 	return OK;
