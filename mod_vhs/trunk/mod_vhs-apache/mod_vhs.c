@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.20 2005-01-08 19:12:22 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.21 2005-01-13 17:22:20 kiwi Exp $
 */
 
 /* 
@@ -109,6 +109,22 @@
  */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
+
+
+/* 
+ * Include php support
+ */
+
+#define HAVE_MOD_PHP_SUPPORT
+
+#ifdef HAVE_MOD_PHP_SUPPORT
+#include <Zend/zend.h>
+#include <Zend/zend_qsort.h>
+#include <Zend/zend_API.h>
+#include <Zend/zend_ini.h>
+#include <Zend/zend_alloc.h>
+#include <Zend/zend_operators.h>
+#endif
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
@@ -357,6 +373,12 @@ static int vhs_translate_name(request_rec *r)
 
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+
+#ifdef HAVE_MOD_PHP_SUPPORT
+	zend_alter_ini_entry("safe_mode", 13, "on", strlen("on"), 4, 16);
+	zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
+
+#endif
 
 	return OK;
 }
