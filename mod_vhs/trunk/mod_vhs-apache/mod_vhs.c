@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.10 2004-08-11 16:22:41 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.11 2004-12-08 16:45:37 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -246,7 +246,7 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vhs/1.0.3");
+	ap_add_version_component(pconf, "mod_vhs/1.0.4");
 	
 	return OK;
 }
@@ -258,6 +258,7 @@ static int vhs_translate_name(request_rec *r)
 	char *path;
 	char *env = NULL;
 	char *ptr;
+	apr_table_t *e;
 	int i;
 	/* libhome */
 	struct passwd *p;
@@ -330,6 +331,10 @@ static int vhs_translate_name(request_rec *r)
 	
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+
+	// set some usefull environment variables (mainly for PHP)
+	e = r->subprocess_env;
+	apr_table_addn (e, "SERVER_ROOT", path);
 	
 	return OK;
 }
