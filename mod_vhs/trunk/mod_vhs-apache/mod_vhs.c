@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.6 2004-08-04 15:31:12 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.7 2004-08-04 15:34:43 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -246,7 +246,7 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vhs/1.0.1");
+	ap_add_version_component(pconf, "mod_vhs/1.0.2");
 	
 	return OK;
 }
