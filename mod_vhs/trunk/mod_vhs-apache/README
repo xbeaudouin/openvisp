@@ -1,43 +1,43 @@
-mod_vh 1.0 - Virtual Hosting module
+mod_vhs 1.0 - Virtual Hosting module
 
-mod_vh is an Apache 2.0 Web Server module allowing mass virtual hosting without
+mod_vhs is an Apache 2.0 Web Server module allowing mass virtual hosting without
 the need for file based configuration. The virtual host paths are translated
 from a any database supported by libhome at request time.
 
 Building and Installing Apache with mod_vh
 
-mod_vh is configured using the Apache 2.0 apxs system. Normaly all Apache 2.0
+mod_vhs is configured using the Apache 2.0 apxs system. Normaly all Apache 2.0
 system should have this tool installed, so if you don't have it, you'll have
 a problem :)
 
 You will need a installed libhome into your system. Please fetch it at
 http://pll.sourceforge.net/ before.
 
-mod_vh can be installed and configured using Apache 2.0 apxs tool :
+mod_vhs can be installed and configured using Apache 2.0 apxs tool :
 
-$ apxs -i -a -c -L/usr/local/lib -lhome mod_vh.c
+$ apxs -i -a -c -L/usr/local/lib -lhome mod_vhs.c
 
-This will, as root, install mod_vh into Apache 2.0 module directory and 
+This will, as root, install mod_vhs into Apache 2.0 module directory and 
 enable it in the configuration file. This is the prefered way to do it.
-mod_vh is enabled by default once the Apache configuration has been rebuilt.
+mod_vhs is enabled by default once the Apache configuration has been rebuilt.
 
 Note: you can use a "slow" way to install it (eg: add the files into 
       apache 2 source tree and remake the configuration file, but I have
       never try that... so use a your own risk !).
 
-Configuring mod_vh in Apache Configure Files
+Configuring mod_vhs in Apache Configure Files
 
-In order to use mod_vh with Apache Web Server server configuration blocks
+In order to use mod_vhs with Apache Web Server server configuration blocks
 will need to be configured with mod_vh configuration directives described
-in the table below. mod_vh configuration directives must be located in a
+in the table below. mod_vhs configuration directives must be located in a
 server configuration block (ie <VirtualHost></VirtualHost>).
 
-vh_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
+vhs_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
 			This option is not required, if not set the libhome
-			tage will be set to "mod_vh".
-vh_Path_Prefix :	Sets an optional location to prefix translations by.
+			tage will be set to "mod_vhs".
+vhs_Path_Prefix :	Sets an optional location to prefix translations by.
 			This option is not required.
-vh_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
+vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
 			was received. This option is not required and usually
 			won't do anything because the Apache Web Server by
 			default catches these errors.
@@ -52,7 +52,7 @@ ld_base . ou=whosting,dc=kazar,dc=net
 ld_version 3
 ld_timeout 5
 
-[mod_vh]
+[mod_vhs]
 log.stderr y
 where wwwDomain
 user wwwDomain
@@ -91,7 +91,7 @@ FTPQuotaMBytes: 50
 
 A simple test to see if your libhome map will work :
 
-$ home_finger -t mod_vh jb.kazar.net
+$ home_finger -t mod_vhs jb.kazar.net
 login: jb.kazar.net
 passwd: *
 uid: 65534
@@ -110,15 +110,15 @@ apache2 configuration file will look for jb.kazar.net files in
 NameVirtualHost 10.1.2.3
 
 <VirtualHost 10.1.2.3>
-    vh_Default_Host devnull.oav.net
+    vhs_Default_Host devnull.oav.net
 </VirtualHost>
 
-Other handlers should still work accordingly.  mod_vh declares its
+Other handlers should still work accordingly.  mod_vhs declares its
 translate_name phase as AP_HOOK_FIRST so it can run before other translations.
 An example configuration allowing mod_tcl in specific directories follows.
 
 <VirtualHost 10.2.3.4>
-    vh_Default_Host devnull.oav.net
+    vhs_Default_Host devnull.oav.net
 
     <Directory /hosting/http/j/b/k/jb.kazar.net>
         AddHandler tcl-handler tm
@@ -129,13 +129,13 @@ An example configuration allowing mod_tcl in specific directories follows.
 
 Additional Information
 
-mod_vh will check on every connection if data exist or not. If you don't want
+mod_vhs will check on every connection if data exist or not. If you don't want
 to hammer your LDAP/MySQL server please use cache_file and cache_ttl values in
 home.conf(5).
 
 References
 
-mod_vh is an Apache 2.0 module using libhome library, more about 
+mod_vhs is an Apache 2.0 module using libhome library, more about 
 Apache Web Server can be found at http://www.apache.org/.
 Documentation regarding libhome can be found at http://pll.sourceforge.net/
 This module was highly inspired from mod_vdbh, I wishe to send many thanks
@@ -145,9 +145,9 @@ good start to make my module work, mod_vdbh homepage : http://www.synthemesc.com
 
 Author
 
-Send bug, ideas, fixes, patches, and food to :
+Send bugs, ideas, fixes, patches, and food to :
 Xavier Beaudouin <kiwi@oav.net>
 
 Home page of this module 
 
-http://www.oav.net/
+http://www.oav.net/projects/mod_vhs/
