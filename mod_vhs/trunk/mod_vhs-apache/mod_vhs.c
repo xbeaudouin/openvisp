@@ -55,11 +55,11 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.3 2004-07-25 19:47:36 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.4 2004-07-26 10:54:42 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
-/* mod_vh author : Xavier Beaudouin <kiwi@oav.net> */
+/* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
 
 #include "apr.h"
 #include "apr_strings.h"
@@ -152,34 +152,34 @@ static int match(const char* pattern, const char* string)
 	return 0;
 }
 
-static int vh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
-static void* vh_create_server_config(apr_pool_t *p, server_rec *s);
-static void *vh_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
+static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
+static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
+static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
 
-/* 2  */ static int vh_translate_name(request_rec *r);
+static int vhs_translate_name(request_rec *r);
 
 static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg);
 
-static const command_rec vh_commands[] = {
-	AP_INIT_TAKE1("vh_libhome_tag",set_field,(void*) 0,RSRC_CONF,"set libhome tag." ),
-	AP_INIT_TAKE1("vh_Path_Prefix",set_field,(void*) 1,RSRC_CONF,"set path prefix." ),
-	AP_INIT_TAKE1("vh_Default_Host",set_field,(void*) 2,RSRC_CONF,"set default host if HTTP/1.1 is not used." ),
+static const command_rec vhs_commands[] = {
+	AP_INIT_TAKE1("vhs_libhome_tag",set_field,(void*) 0,RSRC_CONF,"set libhome tag." ),
+	AP_INIT_TAKE1("vhs_Path_Prefix",set_field,(void*) 1,RSRC_CONF,"set path prefix." ),
+	AP_INIT_TAKE1("vhs_Default_Host",set_field,(void*) 2,RSRC_CONF,"set default host if HTTP/1.1 is not used." ),
 	{ NULL }
 };
 
 static void register_hooks(apr_pool_t *p)
 {
-	ap_hook_post_config(vh_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_translate_name(vh_translate_name, NULL, NULL, APR_HOOK_FIRST);
+	ap_hook_post_config(vhs_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_translate_name(vhs_translate_name, NULL, NULL, APR_HOOK_FIRST);
 }
 
-AP_DECLARE_DATA module vh_module = {
+AP_DECLARE_DATA module vhs_module = {
     STANDARD20_MODULE_STUFF,
     NULL,			/* create per-directory config structure */
     NULL,			/* merge per-directory config structures */
-    vh_create_server_config,	/* create per-server config structure */
-    vh_merge_server_config,	/* merge per-server config structures */
-    vh_commands,		/* command apr_table_t */
+    vhs_create_server_config,	/* create per-server config structure */
+    vhs_merge_server_config,	/* merge per-server config structures */
+    vhs_commands,		/* command apr_table_t */
     register_hooks		/* register hooks */
 };
 
@@ -192,14 +192,14 @@ typedef struct {
 	char			*path_prefix;
 	char			*default_host;
 	
-} vh_config_rec;
+} vhs_config_rec;
 
 /*
  * Apache per server config structure
  */
-static void* vh_create_server_config(apr_pool_t *p, server_rec *s)
+static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
 {
-	vh_config_rec *vhr = (vh_config_rec*) apr_pcalloc(p, sizeof(vh_config_rec));
+	vhs_config_rec *vhr = (vhs_config_rec*) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
 	return vhr;
 }
@@ -207,11 +207,11 @@ static void* vh_create_server_config(apr_pool_t *p, server_rec *s)
 /*
  * Apache merge per server config structures
  */
-static void *vh_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
+static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 {
-	vh_config_rec *parent = (vh_config_rec *) parentv;
-	vh_config_rec *child = (vh_config_rec *) childv;
-	vh_config_rec *conf = (vh_config_rec*) apr_pcalloc(p, sizeof(vh_config_rec));
+	vhs_config_rec *parent = (vhs_config_rec *) parentv;
+	vhs_config_rec *child = (vhs_config_rec *) childv;
+	vhs_config_rec *conf = (vhs_config_rec*) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
 	conf->libhome_tag  = (child->libhome_tag ? child->libhome_tag : parent->libhome_tag);
 
@@ -227,7 +227,7 @@ static void *vh_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 {
 	int pos = (int) parms->info;
-	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(parms->server->module_config, &vh_module);
+	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(parms->server->module_config, &vhs_module);
 	
 	switch (pos) {
 	  case 0:	
@@ -244,16 +244,16 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 	return NULL;
 }
 
-static int vh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vh/1.0");
+	ap_add_version_component(pconf, "mod_vhs/1.0");
 	
 	return OK;
 }
 
-static int vh_translate_name(request_rec *r)
+static int vhs_translate_name(request_rec *r)
 {
-	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(r->server->module_config, &vh_module);
+	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
 	const char *host;
 	char *path;
 	char *env = NULL;
@@ -264,13 +264,13 @@ static int vh_translate_name(request_rec *r)
 	
 	// I think this was for a 1.3 work around
 	if (r->uri[0] != '/') {
-		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: declined %s no leading `/'", r->uri);
+		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
 		return DECLINED;
 	}
 	
 	if (!(host = apr_table_get(r->headers_in, "Host"))) {
 		if (!vhr->default_host) {
-			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
+			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
 			return DECLINED;
 		}
 		else {
@@ -283,7 +283,7 @@ static int vh_translate_name(request_rec *r)
 	}
 
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: looking for %s", host);
+	ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif /* VH_DEBUG */
 
 	/*
@@ -292,28 +292,28 @@ static int vh_translate_name(request_rec *r)
 	if (vhr->libhome_tag) {
 		setpwtag(vhr->libhome_tag);
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: setpwtag set %s", vhr->libhome_tag);
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: setpwtag set %s", vhr->libhome_tag);
 #endif /* VH_DEBUG */
 	} else {
-		setpwtag("mod_vh");
+		setpwtag("mod_vhs");
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: setpwtag set %s", "mod_vh");
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: setpwtag set %s", "mod_vhs");
 #endif /* VH_DEBUG */
 	}
 
 	if((p=home_getpwnam(host))!=NULL) {
 		path = p->pw_dir;
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: path found in database for %s is %s", host, path);
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
 #endif /* VH_DEBUG */
 
 	} else {
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: no host found in database for %s", host);
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
 		return DECLINED;
 	}
 
 	if(path == NULL) {
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: no path found found in database for %s", host);
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s", host);
 		return DECLINED;
 	}
 
@@ -323,7 +323,7 @@ static int vh_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VH_ENVIRONMENT", env ? env : "");
 	
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vh_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 	
 	return OK;
 }
