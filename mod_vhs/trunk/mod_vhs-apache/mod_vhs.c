@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.26 2005-01-18 13:38:07 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.27 2005-01-21 12:29:19 kiwi Exp $
 */
 
 /* 
@@ -445,7 +445,7 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode engaged");
 #endif
-		zend_alter_ini_entry("safe_mode", 10, "on", strlen("on"), 4, 16);
+		zend_alter_ini_entry("safe_mode", 10, "1", 1, 4, 16);
 	} else {
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode inactive %s", vhr->safe_mode);
