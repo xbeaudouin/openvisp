@@ -1,6 +1,8 @@
 Since mod_vhs 1.0.xx
 --------------------
 
+o Added option vhs_Default_Host_Redirect (on/off) to force HTTP redirect
+  if default host is triggered.
 o The module should be now threads safe. Note that we don't garantee
   that your Apache will still be thread safe if you use non thread
   safe module (like mod_php for example).

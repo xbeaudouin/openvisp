@@ -45,10 +45,25 @@ vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
 			was received. This option is not required and usually
 			won't do anything because the Apache Web Server by
 			default catches these errors.
-vhs_Lamer :		boolean (On / Off), default to Off
-			Is set, this will enable "lamer mode" option to
+vhs_Lamer :		boolean (On / Off), default to Off.
+			If set, this will enable "lamer mode" option to
 			allow people that always add an "www." to web
 			addresses to be magicaly handled by this module.
+vhs_PHPsafe_mode :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support it will set safe_mode to on for the 
+			virtual host.
+vhs_PHPopen_basedir :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will set open_basedir to the home 
+			directory given by libhome/mod_vhs
+
+Notes about vhs_PHP* values :
+
+	All this options *will* override the default PHP values you have
+	set into php.ini. For example if you have in php.ini safe_mode = On,
+	and in a <VirtualHost></> you get a vhs_PHPsafe_mode Off then the
+	value of php.ini will be safe_mode = Off. 
 
 Example :
 
@@ -134,6 +149,22 @@ An example configuration allowing mod_tcl in specific directories follows.
         Tcl_ContentHandler content_handler
     </Directory>
 </VirtualHost>
+
+With PHP support you can do also :
+
+<VirtualHost 1.2.3.4>
+   vhs_Default_Host www.mydomain.com
+   vhs_PHPsafe_mode On
+   vhs_PHPopen_basedir On
+</VirtualHost>
+
+
+<VirtualHost 1.2.3.5>
+   vhs_Default_Host www.mydomain.com
+   vhs_PHPsafe_mode Off
+   vhs_PHPopen_basedir Off
+</VirtualHost>
+
 
 Additional Information
 
