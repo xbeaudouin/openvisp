@@ -1,5 +1,5 @@
-mod_vdbh.la: mod_vdbh.lo
-	$(MOD_LINK) mod_vdbh.lo
+mod_vdbh.la: mod_vh.lo
+	$(MOD_LINK) mod_vh.lo
 DISTCLEAN_TARGETS = modules.mk
-static =  mod_vdbh.la
+static =  mod_vh.la
 shared =

@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vdbh.c,v 1.1 2004-07-25 14:48:44 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.1 2004-07-25 15:43:56 kiwi Exp $
 */
 
 /* Author: Michael Link <mlink@apache.org> */
@@ -151,50 +151,50 @@ static int match(const char* pattern, const char* string)
 	return 0;
 }
 
-static int vdbh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
-static void* vdbh_create_server_config(apr_pool_t *p, server_rec *s);
-static void *vdbh_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
+static int vh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
+static void* vh_create_server_config(apr_pool_t *p, server_rec *s);
+static void *vh_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
 
-/* 2  */ static int vdbh_translate_name(request_rec *r);
+/* 2  */ static int vh_translate_name(request_rec *r);
 
 static const char* set_switch(cmd_parms *parms, void *mconfig, int flag);
 static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg);
 static const char* set_port(cmd_parms *parms, void *mconfig, const char *arg);
 static const char* set_decline(cmd_parms *parms, void *mconfig, const char *arg);
 
-static const command_rec vdbh_commands[] = {
-	AP_INIT_FLAG(		"vdbh",							set_switch,		(void*) 1,	RSRC_CONF,		"turn mod_vdbh on or off." ),
-	AP_INIT_FLAG(		"vdbh_CLIENT_COMPRESS",			set_switch,		(void*) 2,	RSRC_CONF,		"use mysql CLIENT_COMPRESS feature." ),
-	AP_INIT_FLAG(		"vdbh_CLIENT_SSL",				set_switch,		(void*) 4,	RSRC_CONF,		"use mysql CLIENT_SSL feature." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Database",			set_field,		(void*) 0,	RSRC_CONF,		"set mysql database." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Table",				set_field,		(void*) 1,	RSRC_CONF,		"set mysql table." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Host_Field",		set_field,		(void*) 2,	RSRC_CONF,		"set mysql server field." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Path_Field",		set_field,		(void*) 3,	RSRC_CONF,		"set mysql path field." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Host",				set_field,		(void*) 4,	RSRC_CONF,		"set mysql host." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Port",				set_port,		NULL,		RSRC_CONF,		"set mysql port." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Password",			set_field,		(void*) 5,	RSRC_CONF,		"set mysql password." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Username",			set_field,		(void*) 6,	RSRC_CONF,		"set mysql username." ),
-	AP_INIT_TAKE1(		"vdbh_MySQL_Environment_Field",	set_field,		(void*) 7,	RSRC_CONF,		"set mysql environment table." ),
-	AP_INIT_TAKE1(		"vdbh_Path_Prefix",				set_field,		(void*) 8,	RSRC_CONF,		"set path prefix." ),
-	AP_INIT_TAKE1(		"vdbh_Default_Host",			set_field,		(void*) 9,	RSRC_CONF,		"set default host if HTTP/1.1 is not used." ),
-	AP_INIT_ITERATE(	"vdbh_Declines",				set_decline,	NULL,		RSRC_CONF,		"declined path." ),
+static const command_rec vh_commands[] = {
+	AP_INIT_FLAG(		"vh",							set_switch,		(void*) 1,	RSRC_CONF,		"turn mod_vh on or off." ),
+	AP_INIT_FLAG(		"vh_CLIENT_COMPRESS",			set_switch,		(void*) 2,	RSRC_CONF,		"use mysql CLIENT_COMPRESS feature." ),
+	AP_INIT_FLAG(		"vh_CLIENT_SSL",				set_switch,		(void*) 4,	RSRC_CONF,		"use mysql CLIENT_SSL feature." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Database",			set_field,		(void*) 0,	RSRC_CONF,		"set mysql database." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Table",				set_field,		(void*) 1,	RSRC_CONF,		"set mysql table." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Host_Field",		set_field,		(void*) 2,	RSRC_CONF,		"set mysql server field." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Path_Field",		set_field,		(void*) 3,	RSRC_CONF,		"set mysql path field." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Host",				set_field,		(void*) 4,	RSRC_CONF,		"set mysql host." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Port",				set_port,		NULL,		RSRC_CONF,		"set mysql port." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Password",			set_field,		(void*) 5,	RSRC_CONF,		"set mysql password." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Username",			set_field,		(void*) 6,	RSRC_CONF,		"set mysql username." ),
+	AP_INIT_TAKE1(		"vh_MySQL_Environment_Field",	set_field,		(void*) 7,	RSRC_CONF,		"set mysql environment table." ),
+	AP_INIT_TAKE1(		"vh_Path_Prefix",				set_field,		(void*) 8,	RSRC_CONF,		"set path prefix." ),
+	AP_INIT_TAKE1(		"vh_Default_Host",			set_field,		(void*) 9,	RSRC_CONF,		"set default host if HTTP/1.1 is not used." ),
+	AP_INIT_ITERATE(	"vh_Declines",				set_decline,	NULL,		RSRC_CONF,		"declined path." ),
 	{ NULL }
 };
 
 static void register_hooks(apr_pool_t *p)
 {
-	ap_hook_post_config(vdbh_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_translate_name(vdbh_translate_name, NULL, NULL, APR_HOOK_FIRST);
+	ap_hook_post_config(vh_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_translate_name(vh_translate_name, NULL, NULL, APR_HOOK_FIRST);
 }
 
-AP_DECLARE_DATA module vdbh_module = {
+AP_DECLARE_DATA module vh_module = {
     STANDARD20_MODULE_STUFF,
-    NULL,							/* create per-directory config structure */
-    NULL,							/* merge per-directory config structures */
-    vdbh_create_server_config,		/* create per-server config structure */
-	vdbh_merge_server_config,		/* merge per-server config structures */
-    vdbh_commands,					/* command apr_table_t */
-    register_hooks					/* register hooks */
+    NULL,			/* create per-directory config structure */
+    NULL,			/* merge per-directory config structures */
+    vh_create_server_config,	/* create per-server config structure */
+    vh_merge_server_config,	/* merge per-server config structures */
+    vh_commands,		/* command apr_table_t */
+    register_hooks		/* register hooks */
 };
 
 enum {
@@ -226,22 +226,22 @@ typedef struct {
 	apr_array_header_t	*declines;
 	
 	MYSQL			*mysql;
-} vdbh_config_rec;
+} vh_config_rec;
 
-static void* vdbh_create_server_config(apr_pool_t *p, server_rec *s)
+static void* vh_create_server_config(apr_pool_t *p, server_rec *s)
 {
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) apr_pcalloc(p, sizeof(vdbh_config_rec));
+	vh_config_rec *vhr = (vh_config_rec*) apr_pcalloc(p, sizeof(vh_config_rec));
 	
-	vdbhr->declines = apr_array_make(p, 0, sizeof(decline_string));
+	vhr->declines = apr_array_make(p, 0, sizeof(decline_string));
 	
-	return vdbhr;
+	return vhr;
 }
 
-static void *vdbh_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
+static void *vh_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 {
-	vdbh_config_rec *parent = (vdbh_config_rec *) parentv;
-	vdbh_config_rec *child = (vdbh_config_rec *) childv;
-	vdbh_config_rec *conf = (vdbh_config_rec*) apr_pcalloc(p, sizeof(vdbh_config_rec));
+	vh_config_rec *parent = (vh_config_rec *) parentv;
+	vh_config_rec *child = (vh_config_rec *) childv;
+	vh_config_rec *conf = (vh_config_rec*) apr_pcalloc(p, sizeof(vh_config_rec));
 	
 	if (child->fl & f_on) {
 		conf->fl						= child->fl;
@@ -279,13 +279,13 @@ static void *vdbh_merge_server_config(apr_pool_t *p, void *parentv, void *childv
 static const char* set_switch(cmd_parms *parms, void *mconfig, int flag)
 {
 	ptrdiff_t pos = (ptrdiff_t) parms->info;
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) ap_get_module_config(parms->server->module_config, &vdbh_module);
+	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(parms->server->module_config, &vh_module);
 	
 	if (flag) {
-		vdbhr->fl |= pos;
+		vhr->fl |= pos;
 	}
 	else {
-		vdbhr->fl &= ~pos;
+		vhr->fl &= ~pos;
 	}
 	
 	return NULL;
@@ -294,19 +294,19 @@ static const char* set_switch(cmd_parms *parms, void *mconfig, int flag)
 static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 {
 	ptrdiff_t pos = (ptrdiff_t) parms->info;
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) ap_get_module_config(parms->server->module_config, &vdbh_module);
+	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(parms->server->module_config, &vh_module);
 	
 	switch (pos) {
-	  case 0:	vdbhr->mysql_database = apr_pstrdup(parms->pool, arg);				break;
-	  case 1:	vdbhr->mysql_table = apr_pstrdup(parms->pool, arg);					break;
-	  case 2:	vdbhr->mysql_host_field = apr_pstrdup(parms->pool, arg);			break;
-	  case 3:	vdbhr->mysql_path_field = apr_pstrdup(parms->pool, arg);			break;
-	  case 4:	vdbhr->mysql_host = apr_pstrdup(parms->pool, arg);					break;
-	  case 5:	vdbhr->mysql_password = apr_pstrdup(parms->pool, arg);				break;
-	  case 6:	vdbhr->mysql_username = apr_pstrdup(parms->pool, arg);				break;
-	  case 7:	vdbhr->mysql_environment_field = apr_pstrdup(parms->pool, arg);		break;
-	  case 8:	vdbhr->path_prefix = apr_pstrdup(parms->pool, arg);					break;
-	  case 9:	vdbhr->default_host = apr_pstrdup(parms->pool, arg);				break;
+	  case 0:	vhr->mysql_database = apr_pstrdup(parms->pool, arg);				break;
+	  case 1:	vhr->mysql_table = apr_pstrdup(parms->pool, arg);					break;
+	  case 2:	vhr->mysql_host_field = apr_pstrdup(parms->pool, arg);			break;
+	  case 3:	vhr->mysql_path_field = apr_pstrdup(parms->pool, arg);			break;
+	  case 4:	vhr->mysql_host = apr_pstrdup(parms->pool, arg);					break;
+	  case 5:	vhr->mysql_password = apr_pstrdup(parms->pool, arg);				break;
+	  case 6:	vhr->mysql_username = apr_pstrdup(parms->pool, arg);				break;
+	  case 7:	vhr->mysql_environment_field = apr_pstrdup(parms->pool, arg);		break;
+	  case 8:	vhr->path_prefix = apr_pstrdup(parms->pool, arg);					break;
+	  case 9:	vhr->default_host = apr_pstrdup(parms->pool, arg);				break;
 	}
 	
 	return NULL;
@@ -315,9 +315,9 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 static const char* set_port(cmd_parms *parms, void *mconfig, const char *arg)
 {
 	ptrdiff_t pos = (ptrdiff_t) parms->info;
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) ap_get_module_config(parms->server->module_config, &vdbh_module);
+	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(parms->server->module_config, &vh_module);
 
-	vdbhr->mysql_port = (unsigned int) atoi(arg);
+	vhr->mysql_port = (unsigned int) atoi(arg);
 	
 	return NULL;
 }
@@ -325,8 +325,8 @@ static const char* set_port(cmd_parms *parms, void *mconfig, const char *arg)
 static const char* set_decline(cmd_parms *parms, void *mconfig, const char *arg)
 {
 	ptrdiff_t pos = (ptrdiff_t) parms->info;
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) ap_get_module_config(parms->server->module_config, &vdbh_module);
-	decline_string *d = apr_array_push(vdbhr->declines);
+	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(parms->server->module_config, &vh_module);
+	decline_string *d = apr_array_push(vhr->declines);
 
 	d->decline = apr_pstrdup(parms->pool, arg);
 		
@@ -341,58 +341,58 @@ static const char* set_decline(cmd_parms *parms, void *mconfig, const char *arg)
 # define CLIENT_SSL 0
 #endif
 
-static char* get_path(request_rec *r, const char *host, char **env, vdbh_config_rec *vdbhr)
+static char* get_path(request_rec *r, const char *host, char **env, vh_config_rec *vhr)
 {
 	MYSQL_RES *res;
 	MYSQL_ROW row;
 	char *qstr;
 	char *rstr;
 	
-	if (!vdbhr->mysql) {
+	if (!vhr->mysql) {
 		unsigned int client_flags = 0;
 		
-		if (!(vdbhr->mysql = mysql_init(NULL))) {
-			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: unable to allocate MYSQL connection.");
+		if (!(vhr->mysql = mysql_init(NULL))) {
+			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: unable to allocate MYSQL connection.");
 	
 			return NULL;
 		}
 		
-		if (vdbhr->fl & f_compress) {
+		if (vhr->fl & f_compress) {
 			client_flags |= CLIENT_COMPRESS;
 		}
 		
-		if (vdbhr->fl & f_ssl) {
+		if (vhr->fl & f_ssl) {
 			client_flags |= CLIENT_SSL;
 		}
 		
-		if (!mysql_real_connect(vdbhr->mysql, vdbhr->mysql_host, vdbhr->mysql_username, vdbhr->mysql_password, vdbhr->mysql_database, vdbhr->mysql_port, NULL, client_flags)) {
-			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: unable to connect to database: %s.", mysql_error(vdbhr->mysql));
-			mysql_close(vdbhr->mysql);
-			vdbhr->mysql = NULL;
+		if (!mysql_real_connect(vhr->mysql, vhr->mysql_host, vhr->mysql_username, vhr->mysql_password, vhr->mysql_database, vhr->mysql_port, NULL, client_flags)) {
+			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: unable to connect to database: %s.", mysql_error(vhr->mysql));
+			mysql_close(vhr->mysql);
+			vhr->mysql = NULL;
 	
 			return NULL;
 		}
 	}
 	
-	if (vdbhr->mysql_environment_field) {
-		qstr = apr_psprintf(r->pool, "SELECT %s,%s FROM %s WHERE %s = '%s'", vdbhr->mysql_path_field, vdbhr->mysql_environment_field, vdbhr->mysql_table, vdbhr->mysql_host_field, host);
+	if (vhr->mysql_environment_field) {
+		qstr = apr_psprintf(r->pool, "SELECT %s,%s FROM %s WHERE %s = '%s'", vhr->mysql_path_field, vhr->mysql_environment_field, vhr->mysql_table, vhr->mysql_host_field, host);
 	}
 	else {
-		qstr = apr_psprintf(r->pool, "SELECT %s FROM %s WHERE %s = '%s'", vdbhr->mysql_path_field, vdbhr->mysql_table, vdbhr->mysql_host_field, host);
+		qstr = apr_psprintf(r->pool, "SELECT %s FROM %s WHERE %s = '%s'", vhr->mysql_path_field, vhr->mysql_table, vhr->mysql_host_field, host);
 	}
 	
-	if (mysql_real_query(vdbhr->mysql, qstr, strlen(qstr))) {
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: %s/%s", mysql_error(vdbhr->mysql), host);
-		mysql_close(vdbhr->mysql);
-		vdbhr->mysql = NULL;
+	if (mysql_real_query(vhr->mysql, qstr, strlen(qstr))) {
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: %s/%s", mysql_error(vhr->mysql), host);
+		mysql_close(vhr->mysql);
+		vhr->mysql = NULL;
 		
 		return NULL;
 	}
 	
-	if (!(res = mysql_store_result(vdbhr->mysql))) {
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: %s/%s", mysql_error(vdbhr->mysql), host);
-		mysql_close(vdbhr->mysql);
-		vdbhr->mysql = NULL;
+	if (!(res = mysql_store_result(vhr->mysql))) {
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: %s/%s", mysql_error(vhr->mysql), host);
+		mysql_close(vhr->mysql);
+		vhr->mysql = NULL;
 		
 		return NULL;
 	}
@@ -400,30 +400,29 @@ static char* get_path(request_rec *r, const char *host, char **env, vdbh_config_
 	switch (mysql_num_rows(res)) {
 	  case 1:	break;
 	  case 0:
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: no results for %s", host);
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: no results for %s", host);
 		mysql_free_result(res);
-		mysql_close(vdbhr->mysql);
-		vdbhr->mysql = NULL;
+		mysql_close(vhr->mysql);
+		vhr->mysql = NULL;
 		
 		return NULL;
 	  default:
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: %s has more than 1 server row, failing.", host);
-		
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: %s has more than 1 server row, failing.", host);
 		return NULL;
 	}
 	
 	if (!(row = mysql_fetch_row(res))) {
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vdbh: get_path: %s/%s", mysql_error(vdbhr->mysql), host);
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "vh: get_path: %s/%s", mysql_error(vhr->mysql), host);
 		mysql_free_result(res);
-		mysql_close(vdbhr->mysql);
-		vdbhr->mysql = NULL;
+		mysql_close(vhr->mysql);
+		vhr->mysql = NULL;
 		
 		return NULL;
 	}
 	
 	rstr = apr_pstrdup(r->pool, row[0]);
 	
-	if (vdbhr->mysql_environment_field) {
+	if (vhr->mysql_environment_field) {
 		*env = apr_pstrdup(r->pool, row[1]);
 	}
 	
@@ -432,48 +431,48 @@ static char* get_path(request_rec *r, const char *host, char **env, vdbh_config_
 	return rstr;
 }
 
-static int vdbh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+static int vh_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vdbh/1.0.3");
+	ap_add_version_component(pconf, "mod_vh/1.0");
 	
 	return OK;
 }
 
-static int vdbh_translate_name(request_rec *r)
+static int vh_translate_name(request_rec *r)
 {
-	vdbh_config_rec *vdbhr = (vdbh_config_rec*) ap_get_module_config(r->server->module_config, &vdbh_module);
+	vh_config_rec *vhr = (vh_config_rec*) ap_get_module_config(r->server->module_config, &vh_module);
 	const char *host;
 	char *path;
 	char *env = NULL;
 	char *ptr;
-	decline_string *d = (decline_string*) vdbhr->declines->elts;
+	decline_string *d = (decline_string*) vhr->declines->elts;
 	int i;
 	
-	if (!(vdbhr->fl & f_on)) {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vdbh_translate_name: declined http://%s%s module is not configured for this server", apr_table_get(r->headers_in, "Host"), r->uri);
+	if (!(vhr->fl & f_on)) {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vh_translate_name: declined http://%s%s module is not configured for this server", apr_table_get(r->headers_in, "Host"), r->uri);
 		return DECLINED;
 	}
 	
 	// I think this was for a 1.3 work around
 	if (r->uri[0] != '/') {
-		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vdbh_translate_name: declined %s no leading `/'", r->uri);
+		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: declined %s no leading `/'", r->uri);
 		return DECLINED;
 	}
 	
-	for (i = 0; i < vdbhr->declines->nelts; i++) {
+	for (i = 0; i < vhr->declines->nelts; i++) {
 		if (match(d[i].decline, r->uri)) {
-			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vdbh_translate_name: declined %s", r->uri);
+			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: declined %s", r->uri);
 			return DECLINED;
 		}
 	}
 	
 	if (!(host = apr_table_get(r->headers_in, "Host"))) {
-		if (!vdbhr->default_host) {
-			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vdbh_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
+		if (!vhr->default_host) {
+			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
 			return DECLINED;
 		}
 		else {
-			host = vdbhr->default_host;
+			host = vhr->default_host;
 		}
 	}
 
@@ -481,8 +480,8 @@ static int vdbh_translate_name(request_rec *r)
 		*ptr = '\0';
 	}
 		
-	if (!(path = get_path(r, host, &env, vdbhr))) {
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vdbh_translate_name: no host found in database for %s", host);
+	if (!(path = get_path(r, host, &env, vhr))) {
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: no host found in database for %s", host);
 		return DECLINED;
 	}
 	
@@ -490,8 +489,8 @@ static int vdbh_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VDBH_PATH", path);
 	apr_table_set(r->subprocess_env, "VDBH_ENVIRONMENT", env ? env : "");
 	
-	r->filename = apr_psprintf(r->pool, "%s%s%s", vdbhr->path_prefix ? vdbhr->path_prefix : "", path, r->uri);
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vdbh_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vh_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 	
 	return OK;
 }
