@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.18 2004-12-30 14:31:19 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.19 2004-12-30 15:52:25 kiwi Exp $
 */
 
 /* 
@@ -101,23 +101,6 @@
  */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
-
-/*
- * Utility functions
- */
-
-static char *strtolower(char *str) {
-	char *c = str;
-
-	if (str == NULL) return NULL;
-
-	while (*c != 0) {
-		*c = tolower(*c);
-		c++;
-	}
-
-	return str;
-}
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
@@ -245,23 +228,9 @@ static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *pte
 	return OK;
 }
 
-/* XXX: WTF with http_core.h ??? */
-typedef struct {
-#ifdef GPROF
-	char *gprof_dir;
-#endif
-	const char *ap_document_root;
-	char *access_name;
-	apr_array_header_t *sec_dir;
-	apr_array_header_t *sec_url;
-	int redirect_limit;
-	int subreq_limit;
-} core_server_config;
-
 static int vhs_translate_name(request_rec *r)
 {
 	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
-	core_server_config *conf = (core_server_config *)ap_get_module_config(r->server->module_config, &vhs_module);
 	const char *host;
 	char *path;
 	char *env = NULL;
@@ -287,8 +256,7 @@ static int vhs_translate_name(request_rec *r)
 	}
 
 	/* DNS names are case insensitives */
-	/*apr_tolower(host); */
-	host = strtolower(host);
+	apr_tolower(host);
 
 	if (ptr = strchr(host,':')) {
 		*ptr = '\0';
@@ -373,8 +341,6 @@ static int vhs_translate_name(request_rec *r)
 	r->parsed_uri.path = apr_pstrcat(r->pool, path,r->parsed_uri.path,NULL);
 	r->parsed_uri.hostname = r->server->server_hostname;	
 	r->parsed_uri.hostinfo = r->server->server_hostname;	
-
-	conf->ap_document_root = path;	/* Set the bloody DOCUMENT_ROOT */
 
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
