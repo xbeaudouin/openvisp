@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.35 2005-02-24 15:30:04 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.36 2005-02-27 10:34:10 kiwi Exp $
 */
 
 /* 
@@ -216,16 +216,16 @@ static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
 static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 {
 	vhs_config_rec *parent = (vhs_config_rec *) parentv;
-	vhs_config_rec *child = (vhs_config_rec *) childv;
-	vhs_config_rec *conf = (vhs_config_rec*) apr_pcalloc(p, sizeof(vhs_config_rec));
+	vhs_config_rec *child  = (vhs_config_rec *) childv;
+	vhs_config_rec *conf   = (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
-	conf->libhome_tag   = (child->libhome_tag ? child->libhome_tag : parent->libhome_tag);
-
-	conf->path_prefix   = (child->path_prefix ? child->path_prefix : parent->path_prefix);
-	conf->default_host  = (child->default_host ? child->default_host : parent->default_host);
-	conf->safe_mode     = (child->safe_mode ? child->safe_mode : parent->safe_mode);
-	conf->open_basedir  = (child->open_basedir ? child->open_basedir : parent->open_basedir);
-	conf->default_rdr   = (child->default_rdr ? child->default_rdr : parent->default_rdr);
+	conf->libhome_tag   = (child->libhome_tag    ? child->libhome_tag    : parent->libhome_tag);
+	conf->path_prefix   = (child->path_prefix    ? child->path_prefix    : parent->path_prefix);
+	conf->default_host  = (child->default_host   ? child->default_host   : parent->default_host);
+	conf->lamer_mode    = (child->lamer_mode     ? child->lamer_mode     : parent->lamer_mode);
+	conf->safe_mode     = (child->safe_mode      ? child->safe_mode      : parent->safe_mode);
+	conf->open_basedir  = (child->open_basedir   ? child->open_basedir   : parent->open_basedir);
+	conf->default_rdr   = (child->default_rdr    ? child->default_rdr    : parent->default_rdr);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
@@ -764,7 +764,14 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",host, lhost);
 #endif
-				if((p=home_getpwnam(lhost)) != NULL) {
+#if APR_HAS_THREAD
+				rv = apr_thread_mutex_lock(mutex);
+#endif
+				p=home_getpwnam(lhost);
+#if APR_HAS_THREAD
+				apr_thread_mutex_unlock(mutex);
+#endif
+				if(p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
 					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",host, lhost, path);
