@@ -1,6 +1,9 @@
 Since mod_vhs 1.0.8
 -------------------
 
+o Removed unused code.
+o Empty VH_ENVIRONMENT variable is removed and replaced by VH_GECOS
+  with values from gecos returned from libhome or system.
 o Removed DOCUMENT_ROOT "hack" since it doesn't seems to work
 o Added "lamer mode" option (VHS option vhs_Lamer On/Off) to
   allow people that always add "www." to an address to be 
