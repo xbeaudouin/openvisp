@@ -41,6 +41,10 @@ vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
 			was received. This option is not required and usually
 			won't do anything because the Apache Web Server by
 			default catches these errors.
+vhs_Lamer :		boolean (On / Off), default to Off
+			Is set, this will enable "lamer mode" option to
+			allow people that always add an "www." to web
+			addresses to be magicaly handled by this module.
 
 Example :
 
