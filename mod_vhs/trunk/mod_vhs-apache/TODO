@@ -1,1 +1,2 @@
-Nothing yet ... :)
+- Make this module thread safe on Apache2 MPM=worker.
+- Make PHP entries more complete and configurable.

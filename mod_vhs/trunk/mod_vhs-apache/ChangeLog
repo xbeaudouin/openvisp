@@ -1,5 +1,12 @@
-Since mod_vhs 1.0.8
--------------------
+Since mod_vhs 1.0.xx
+--------------------
+
+o Add support for PHP 4.3.x. The following entries are modified :
+  - safe_mode is set to on
+  - open_basedir is set to the home directory of the virtual host
+
+Since mod_vhs 1.0.10
+--------------------
 
 o Thanks to apache-dev now DOCUMENT_ROOT now gets the right value form
   mod_vhs.

@@ -55,13 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.21 2005-01-13 17:22:20 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.22 2005-01-13 17:42:06 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.10"
+#define VH_VERSION	"mod_vhs/1.0.11"
 
 /* 
  * Set this if you'd like to have looooots of debug
@@ -114,16 +114,17 @@
 /* 
  * Include php support
  */
-
+/*
 #define HAVE_MOD_PHP_SUPPORT
+*/
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-#include <Zend/zend.h>
-#include <Zend/zend_qsort.h>
-#include <Zend/zend_API.h>
-#include <Zend/zend_ini.h>
-#include <Zend/zend_alloc.h>
-#include <Zend/zend_operators.h>
+#include <zend.h>
+#include <zend_qsort.h>
+#include <zend_API.h>
+#include <zend_ini.h>
+#include <zend_alloc.h>
+#include <zend_operators.h>
 #endif
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
