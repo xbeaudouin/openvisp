@@ -1,5 +1,5 @@
-Since mod_vhs 1.0.12
---------------------
+Since mod_vhs 1.0.12 B1
+-----------------------
 
 o Added options on load that mod_vhs wait for input from mod_alias and
   mod_userdir before mod_vhs make things works.
