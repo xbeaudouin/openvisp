@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.38 2005-02-28 10:51:24 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.39 2005-02-28 13:29:18 kiwi Exp $
 */
 
 /* 
@@ -152,7 +152,7 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  * Configuration structure
  */
 typedef struct {
-	unsigned short int	enabled;	/* Enable the module */
+	unsigned short int	enable;		/* Enable the module */
 	char			*libhome_tag;	/* Tags to be used by libhome */
 	
 	char			*path_prefix;	/* Prefix to add to path returned by libhome */
@@ -203,7 +203,7 @@ static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
 	/*
 	 * Pre default the module is not enabled
 	 */
-	vhr->enabled = 0;
+	vhr->enable = 0;
 	/*
 	 * From mod_alias.c
 	 */
@@ -674,7 +674,7 @@ static int vhs_translate_name(request_rec *r)
 	/* libhome */
 	struct passwd *p;
 
-	if (!vhr->enbled) {
+	if (!vhr->enable) {
 		return DECLINED;
 	}
 #if	APR_HAS_THREADS
