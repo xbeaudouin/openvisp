@@ -1,3 +1,14 @@
+Since mod_vhs 1.0.14
+--------------------
+
+o Lamer friendly mode is now fixed.
+o Fixed a non thread safe call when lamer friendly mode is engaged.
+o Added mod_alias "compatible" configuration values, eg : vhs_Alias, 
+  vhs_ScriptAlias, vhs_Redirect, vhs_AliasMatch, vhs_ScriptAliasMatch,
+  vhs_RedirectMatch, vhs_RedirectTemp and vhs_RedirectPermanent configuration
+  directives. See mod_alias manual for more informations.
+
+
 Since mod_vhs 1.0.12
 --------------------
 
