@@ -1,6 +1,8 @@
 Since mod_vhs 1.0.15
 --------------------
 
+o Fixed a crash reported by Renato when parent lamer mode is on and the
+  hostname was not found.
 o New flag to enable / disble VHS (EnableVHS) default to Off to allow
   some VirtualServer to no have mod_vhs enabled.
 

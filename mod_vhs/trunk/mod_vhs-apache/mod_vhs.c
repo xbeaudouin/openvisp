@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.40 2005-02-28 13:30:48 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.41 2005-03-02 13:18:29 kiwi Exp $
 */
 
 /* 
@@ -664,7 +664,7 @@ static int vhs_translate_name(request_rec *r)
 	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
 	const char *host;
-	char *path;
+	char *path = NULL;
 	char *env = NULL;
 	char *ptr;
 	int i;
@@ -900,7 +900,7 @@ static void register_hooks(apr_pool_t *p)
 {
 	/* Modules that have to be loaded before mod_vhs */
 	static const char *const aszPre[] =
-        	{ "mod_userdir.c","mod_vhost_alias", NULL };
+        	{ "mod_userdir.c","mod_vhost_alias.c", NULL };
 	/* Modules that have to be loaded after mod_vhs */
 	static const char *const aszSucc[] =
 		{ "mod_rewrite.c", "mod_php.c", NULL };
