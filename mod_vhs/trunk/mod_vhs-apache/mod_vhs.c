@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.15 2004-12-13 17:10:48 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.16 2004-12-29 15:38:01 kiwi Exp $
 */
 
 /* 
@@ -335,6 +335,7 @@ static int vhs_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
 	apr_table_set(r->subprocess_env, "DOCUMENT_ROOT", path);
 	
+	r->ap_document_root = path;
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
