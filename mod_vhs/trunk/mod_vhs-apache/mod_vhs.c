@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.23 2005-01-14 16:09:28 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.24 2005-01-17 08:29:42 kiwi Exp $
 */
 
 /* 
@@ -162,7 +162,7 @@ static void register_hooks(apr_pool_t *p)
 #if APR_HAS_THREADS
 	apr_status_t ret;
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
-	apr_pool_cleanup_register(pool, mutex, (void*)apr_thread_mutex_destroy,
+	apr_pool_cleanup_register(p, mutex, (void*)apr_thread_mutex_destroy,
                                   apr_pool_cleanup_null);
 #endif
 }
