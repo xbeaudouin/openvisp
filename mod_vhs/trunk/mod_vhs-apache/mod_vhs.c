@@ -55,8 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.14 2004-12-13 13:03:45 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.15 2004-12-13 17:10:48 kiwi Exp $
 */
+
+/* 
+ * Set this if you'd like to have looooots of debug
+#define VH_DEBUG 1
+ */
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
@@ -97,73 +102,21 @@
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
 
-#define	mkupper(c)	(((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : c)
-
-static int match(const char* pattern, const char* string)
-{
-	char type;
-	char delim = ' ';
-
-	if (!pattern || !string) {
-		return 0;
-	}
-
-	while (*string && *pattern && *pattern != '*' && *pattern != '%') {
-		if (*pattern == '\\' && *(pattern + 1)) {
-			if (!*++pattern || !(mkupper(*pattern) == mkupper(*string))) {
-				return 0;
-			}
-			else {
-				pattern++, string++;
-			}
-		}
-
-
-		if (*pattern == '?') {
-			pattern++, string++;
-		}
-		else if (mkupper(*pattern) == mkupper(*string)) {
-			pattern++, string++;
-		}
-		else {
-			break;
-		}
-	}
-	
-	if (*pattern == '*' || *pattern == '%') {
-		type = (*pattern++);
-		while (*string) {
-			if (match(pattern, string)) {
-				return 1;
-			}
-			else if (type == '*' || *string != delim) {
-				string++;
-			}
-			else {
-				break;
-			}
-		}
-	}
-	
-	if (!*string && !*pattern) {
-		return 1;
-	}
-	
-	return 0;
-}
-
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s);
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s);
 static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv);
 
 static int vhs_translate_name(request_rec *r);
 
+/* Prototypes for configuration work */
 static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg);
+static const char* set_flag (cmd_parms *parms, void *mconfig, int flag);
 
 static const command_rec vhs_commands[] = {
-	AP_INIT_TAKE1("vhs_libhome_tag",set_field,(void*) 0,RSRC_CONF,"set libhome tag." ),
-	AP_INIT_TAKE1("vhs_Path_Prefix",set_field,(void*) 1,RSRC_CONF,"set path prefix." ),
-	AP_INIT_TAKE1("vhs_Default_Host",set_field,(void*) 2,RSRC_CONF,"set default host if HTTP/1.1 is not used." ),
+	AP_INIT_TAKE1("vhs_libhome_tag",	set_field,(void*) 0,RSRC_CONF,"Set libhome tag." ),
+	AP_INIT_TAKE1("vhs_Path_Prefix",	set_field,(void*) 1,RSRC_CONF,"Set path prefix." ),
+	AP_INIT_TAKE1("vhs_Default_Host",	set_field,(void*) 2,RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),
+	AP_INIT_FLAG("vhs_Lamer",		set_flag, (void*) 0,RSRC_CONF,"Enable Lamer Friendly mode"),
 	{ NULL }
 };
 
@@ -191,6 +144,8 @@ typedef struct {
 	
 	char			*path_prefix;
 	char			*default_host;
+	
+	unsigned short int	lamer_mode;	/* Lamer friendly mode */
 	
 } vhs_config_rec;
 
@@ -244,9 +199,31 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 	return NULL;
 }
 
+/*
+ * To setting flags
+ */
+static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
+{
+	int pos = (int) parms->info;
+	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(parms->server->module_config, &vhs_module);
+
+	switch (pos) {
+		case 0:
+			if(flag) {
+				vhr->lamer_mode = 1;
+			} else {
+				vhr->lamer_mode = 0;
+			}
+			break;
+	}
+
+	return NULL;
+}
+
+
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vhs/1.0.7");
+	ap_add_version_component(pconf, "mod_vhs/1.0.8");
 	
 	return OK;
 }
@@ -286,7 +263,7 @@ static int vhs_translate_name(request_rec *r)
 	}
 
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: looking for %s", host);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif /* VH_DEBUG */
 
 	/*
@@ -298,24 +275,52 @@ static int vhs_translate_name(request_rec *r)
 	if (vhr->libhome_tag) {
 		setpwtag(vhr->libhome_tag);
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: setpwtag set %s", vhr->libhome_tag);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: setpwtag set %s", vhr->libhome_tag);
 #endif /* VH_DEBUG */
 	} else {
 		setpwtag("mod_vhs");
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: setpwtag set %s", "mod_vhs");
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: setpwtag set %s", "mod_vhs");
 #endif /* VH_DEBUG */
 	}
 
 	if((p=home_getpwnam(host))!=NULL) {
 		path = p->pw_dir;
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
 #endif /* VH_DEBUG */
 
 	} else {
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
-		return DECLINED;
+		/*
+		 * Trying to get lamer mode or not 
+		 */
+		if (vhr->lamer_mode) {
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
+#endif
+			if( (strncasecmp(host,"www.",4) == 0) && (strlen(host) > 4) ) {
+				char *lhost;
+/*
+				lhost = strdup( host + 5-1);
+*/
+				lhost = apr_pstrdup( r->pool, host + 5-1);
+#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",host, lhost);
+#endif
+				if((p=home_getpwnam(lhost)) != NULL) {
+					path = p->pw_dir;
+#ifdef VH_DEBUG
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",host, lhost, path);
+#endif
+				} else {
+					ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
+					return DECLINED;
+				}
+			}
+		} else {
+			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
+			return DECLINED;
+		}
 	}
 
 	if(path == NULL) {
@@ -326,7 +331,7 @@ static int vhs_translate_name(request_rec *r)
 	
 	apr_table_set(r->subprocess_env, "VH_HOST", host);
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
-	apr_table_set(r->subprocess_env, "VH_ENVIRONMENT", env ? env : "");
+	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
 	apr_table_set(r->subprocess_env, "DOCUMENT_ROOT", path);
 	
