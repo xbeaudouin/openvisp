@@ -55,18 +55,18 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.42 2005-03-03 15:41:16 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.43 2005-03-03 21:22:39 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.16"
+#define VH_VERSION	"mod_vhs/1.0.17"
 
 /* 
  * Set this if you'd like to have looooots of debug
-#define VH_DEBUG 1
  */
+#define VH_DEBUG 1
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
