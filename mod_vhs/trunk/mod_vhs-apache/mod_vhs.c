@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.24 2005-01-17 08:29:42 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.25 2005-01-18 12:38:46 kiwi Exp $
 */
 
 /* 
@@ -152,6 +152,8 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_TAKE1("vhs_Path_Prefix",	set_field,(void*) 1,RSRC_CONF,"Set path prefix." ),
 	AP_INIT_TAKE1("vhs_Default_Host",	set_field,(void*) 2,RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),
 	AP_INIT_FLAG("vhs_Lamer",		set_flag, (void*) 0,RSRC_CONF,"Enable Lamer Friendly mode"),
+	AP_INIT_FLAG("vhs_PHPsafe_mode",	set_flag, (void*) 1,RSRC_CONF,"Enable PHP Safe Mode" ),
+	AP_INIT_FLAG("vhs_PHPopen_basedir",	set_flag, (void*) 2,RSRC_CONF,"Set PHP open_basedir to path" ),
 	{ NULL }
 };
 
@@ -187,6 +189,8 @@ typedef struct {
 	char			*default_host;	/* Default host to redirect to */
 	
 	unsigned short int	lamer_mode;	/* Lamer friendly mode */
+	unsigned short int 	safe_mode; 	/* PHP Safe mode */
+	unsigned short int 	open_basedir   /* PHP open_basedir */
 	
 } vhs_config_rec;
 
@@ -213,6 +217,8 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 
 	conf->path_prefix  = (child->path_prefix ? child->path_prefix : parent->path_prefix);
 	conf->default_host = (child->default_host ? child->default_host : parent->default_host);
+	conf->safe_mode = (child->safe_mode ? child->safe_mode : parent->safe_mode);
+	conf->open_basedir = (child->open_basedir ? child->open_basedir : parent->open_basedir);
 
 	return conf;
 }
@@ -254,6 +260,20 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->lamer_mode = 1;
 			} else {
 				vhr->lamer_mode = 0;
+			}
+			break;
+		case 1:
+			if(flag) {
+				vhr->safe_mode = 1;
+			} else {
+				vhr->safe_mode = 0;
+			}
+			break;
+		case 2:
+			if(flag) {
+				vhr->open_basedir = 1;
+			} else {
+				vhr->open_basedir = 0;
 			}
 			break;
 	}
@@ -403,12 +423,26 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	/*
-	 * TODO: Add more functionality and global confs
-	 */
-	zend_alter_ini_entry("safe_mode", 13, "on", strlen("on"), 4, 16);
+	if (vhr->safe_mode) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode engaged");
+#endif
+		zend_alter_ini_entry("safe_mode", 10, "on", strlen("on"), 4, 16);
+	} else {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode inactive %s", vhr->safe_mode);
+#endif
+	}
+	if (vhr->open_basedir) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
+#endif
 	zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
 #endif
-
+	} else {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir inactive");
+#endif
+	}
 	return OK;
 }

@@ -4,9 +4,25 @@ Since mod_vhs 1.0.xx
 o The module should be now threads safe. Note that we don't garantee
   that your Apache will still be thread safe if you use non thread
   safe module (like mod_php for example).
-o Add support for PHP 4.3.x. The following entries are modified :
-  - safe_mode is set to on
-  - open_basedir is set to the home directory of the virtual host
+o Add support for PHP 4.3.x. The following entries are modified according
+  to <VirtualHost></> httpd.conf.
+  Example :
+
+   <VirtualHost 1.2.3.4>
+   vhs_Default_Host www.mydomain.com
+   vhs_PHPsafe_mode On
+   vhs_PHPopen_basedir On
+   </VirtualHost>
+
+
+   <VirtualHost 1.2.3.5>
+   vhs_Default_Host www.mydomain.com
+   vhs_PHPsafe_mode Off
+   vhs_PHPopen_basedir Off
+   </VirtualHost>
+  
+  Option from Koen de Boeve
+
 
 Since mod_vhs 1.0.10
 --------------------
