@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.36 2005-02-27 10:34:10 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.37 2005-02-27 11:00:27 kiwi Exp $
 */
 
 /* 
@@ -65,8 +65,8 @@
 
 /* 
  * Set this if you'd like to have looooots of debug
- */
 #define VH_DEBUG 1
+ */
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
