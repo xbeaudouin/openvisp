@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.29 2005-01-21 12:59:26 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.30 2005-01-22 10:09:15 kiwi Exp $
 */
 
 /* 
@@ -291,7 +291,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 			} else {
 				vhr->default_rdr = 0;
 			}
-			break:
+			break;
 	}
 
 	return NULL;
