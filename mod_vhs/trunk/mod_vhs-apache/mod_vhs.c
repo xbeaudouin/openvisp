@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.9 2004-08-11 16:10:19 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.10 2004-08-11 16:22:41 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -96,18 +96,6 @@
  */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
-
-/*
- * Thread safe stuff
- */
-#include <pthread.h>
-
-pthread_mutex_t __getaddrinfo_thread_lock = PTHREAD_MUTEX_INITIALIZER;
-#define THREAD_LOCK() \
-        if (__isthreaded) _pthread_mutex_lock(&__getaddrinfo_thread_lock);
-#define THREAD_UNLOCK() \
-        if (__isthreaded) _pthread_mutex_unlock(&__getaddrinfo_thread_lock);
-
 
 #define	mkupper(c)	(((c) >= 'a' && (c) <= 'z') ? ((c) - 'a' + 'A') : c)
 
@@ -304,7 +292,6 @@ static int vhs_translate_name(request_rec *r)
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
-        THREAD_LOCK();
 	/*
  	 * Set the default libhome tag
 	 */
@@ -322,17 +309,14 @@ static int vhs_translate_name(request_rec *r)
 
 	if((p=home_getpwnam(host))!=NULL) {
 		path = p->pw_dir;
-                THREAD_UNLOCK();
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
 #endif /* VH_DEBUG */
 
 	} else {
-                THREAD_UNLOCK();
 		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
 		return DECLINED;
 	}
-        THREAD_UNLOCK();
 
 	if(path == NULL) {
 		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s", host);
