@@ -1,32 +1,54 @@
-mod_vdbh 1.0 - Virtual Database Hosting module
+mod_vh 1.0 - Virtual Hosting module
 
-mod_vdbh is an Apache Web Server module allowing mass virtual hosting without the need for file based configuration. The virtual host paths are translated from a MySQL database at request time, thus the configuration can be changed without having to restart Apache Web Server.
+mod_vh is an Apache 2.0 Web Server module allowing mass virtual hosting without
+the need for file based configuration. The virtual host paths are translated
+from a any database supported by libhome at request time.
 
-Building and Installing Apache with mod_vdbh
+Building and Installing Apache with mod_vh
 
-mod_vdbh is configured using the Apache 2.0 configuration system. Normally a vanilla install of Apache doesn’t require a rebuild of the configuration system, but since mod_vdbh requires libraries not usually built into Apache it is necessary to rebuild the configure script using GNU autoconf. If the GNU autoconf tools are not installed on the system then they can be downloaded from a GNU distribution site, for more information check the GNU autoconf website http://www.gnu.org/software/autoconf/. Please note that GNU autoconf also requires a recent release of an m4 macro processor which can also be found at a GNU distribution site. The next step is to download the mod_vdbh source from http://www.synthemesc.com/
+mod_vdbh is configured using the Apache 2.0 configuration system. Normally a
+vanilla install of Apache does not require a rebuild of the configuration
+system, but since mod_vh requires libraries not usually built into Apache
+it is necessary to rebuild the configure script using GNU autoconf. If the
+GNU autoconf tools are not installed on the system then they can be downloaded
+from a GNU distribution site, for more information check the GNU autoconf
+website http://www.gnu.org/software/autoconf/. Please note that GNU autoconf
+also requires a recent release of an m4 macro processor which can also be
+found at a GNU distribution site. The next step is to download the mod_vh
+source from http://www.oav.net/
 
-Once the package is downloaded de-archive it and move it to the Apache 2.0 modules directory. The resultant directory name should be mod_vdbh after de-archiving.
+Once the package is downloaded de-archive it and move it to the Apache 2.0
+modules directory. The resultant directory name should be mod_vh after
+de-archiving.
 
-$ mv mod_vdbh httpd-2.0.43/modules/mod_vdbh
+$ mv mod_vh httpd-2.0.50/modules/mod_vh
 
-Now the Apache configuration system is ready to be rebuilt and include mod_vdbh. Change directory to the root level of the Apache 2.0 source and rebuild the configuration system by typing the following commands.
+Now the Apache configuration system is ready to be rebuilt and include
+mod_vh. Change directory to the root level of the Apache 2.0 source and
+rebuild the configuration system by typing the following commands.
 
 $ ./buildconf
 
-Running the configure script with the help flag will show that mod_vdbh configuration macros have been assimilated into the Apache configuration system.
+Running the configure script with the help flag will show that mod_vh
+configuration macros have been assimilated into the Apache 2.0
+configuration system.
 
 $ ./configure --help
-  --disable-vdbh          mass virtual hosting module
+  --disable-vh            mass virtual hosting module
   --with-mysqldir=DIR     MySQL directory prefix
 
-mod_vdbh is enabled by default once the Apache configuration has been rebuilt. If it is necessary to disable mod_vdbh then this may be accomplished with the --disable-vdbh option passed to the configure script.
+mod_vdbh is enabled by default once the Apache configuration has been rebuilt.
+If it is necessary to disable mod_vdbh then this may be accomplished with 
+the --disable-vdbh option passed to the configure script.
 
-The --with-mysqldir=DIR will specify a non-default location to find the MySQL libraries and include files, usually located by default in /usr/local.
+The --with-mysqldir=DIR will specify a non-default location to find the MySQL
+libraries and include files, usually located by default in /usr/local.
 
-The next step is to configure the Apache build process by running the configure script. During configuration we will see status output, the mod_vdbh configuration status output will look similar to the following.
+The next step is to configure the Apache build process by running the
+configure script. During configuration we will see status output, the mod_vh
+configuration status output will look similar to the following.
 
-checking whether to enable mod_vdbh... yes (default)
+checking whether to enable mod_vh... yes (default)
 using `/usr/local' as MySQL directory prefix
   adding "-L/usr/local/lib/mysql" to LDFLAGS
 checking for mysql_init in -lmysqlclient... yes
@@ -34,112 +56,137 @@ checking for mysql_init in -lmysqlclient... yes
   adding "-R/usr/local/lib/mysql" to LDFLAGS
   adding "-I/usr/local/include/mysql" to INCLUDES
 
-If configuration fails the most likely problem is that the MySQL distribution isn't installed or is in a directory that couldn't be found, try passing --with-mysqldir=DIR to configure to specify a directory tree that MySQL is installed at.
+If configuration fails the most likely problem is that the MySQL distribution
+isn't installed or is in a directory that couldn't be found, try passing
+--with-mysqldir=DIR to configure to specify a directory tree that MySQL is
+installed at.
 
-After configuration has completed the Apache web server can be compiled. Change directory to the root level of the Apache 2.0 source distribution and execute the following commands.
+After configuration has completed the Apache web server can be compiled.
+Change directory to the root level of the Apache 2.0 source distribution and
+execute the following commands.
 
 $ make
 $ make install
 
-This will compile Apache 2.0 with mod_vdbh and install the distribution in the location specified at configuration time. The Apache 2.0 binary will contain a statically linked mod_vdbh module which may also statically link MySQL libraries depending on your MySQL installation.
+This will compile Apache 2.0 with mod_vh and install the distribution in
+the location specified at configuration time. The Apache 2.0 binary will
+contain a statically linked mod_vh module which may also statically link
+MySQL libraries depending on your MySQL installation.
 
-Configuring mod_vdbh in Apache Configure Files
+Configuring mod_vh in Apache Configure Files
 
-In order to use mod_vdbh with Apache Web Server server configuration blocks will need to be configured with mod_vdbh configuration directives described in the table below. mod_vdbh configuration directives must be located in a server configuration block (ie <VirtualHost></VirtualHost>).
+In order to use mod_vh with Apache Web Server server configuration blocks
+will need to be configured with mod_vh configuration directives described
+in the table below. mod_vh configuration directives must be located in a
+server configuration block (ie <VirtualHost></VirtualHost>).
 
-vdbh	This switch makes mod_vdbh active for the specified server.
-vdbh_CLIENT_COMPRESS	Enables the CLIENT_COMPRESS option with a MySQL server allowing the connection data to be compressed. Using this option will likely require more cpu time and less network bandwidth.
-vdbh_CLIENT_SSL	Enables the CLIENT_SSL option when communicating with a MySQL server.
-vdbh_MySQL_Database	Sets the database name to use when running a query for file name translations.
-vdbh_MySQL_Table	Sets the table name to use when running a query for file name translations.
-vdbh_MySQL_Host_Field	Sets the name of the host field in the table specified by vdbh_MySQL_Table.
-vdbh_MySQL_Path_Field	Sets the name of the path field in the table specified by vdbh_MySQL_Table.
-vdbh_MySQL_Environment_Field	Sets the name of the environment field in the table specified by vdbh_MySQL_Table. This optional field contains data that will be set to the VDBH_ENVIRONMENT variable.
-vdbh_MySQL_Host	Sets the internet hostname where the MySQL server is located at. This option is not required and defaults to localhost.
-vdbh_MySQL_Port	Sets the port number to connect to when making a connection to a MySQL server. This option is not required and defaults to 0 for using a UNIX domain socket.
-vdbh_MySQL_Username	Sets the username required to gain access to the MySQL server. This option is not required.
-vdbh_MySQL_Password	Sets the password required to gain access to the MySQL server. This option is not required.
-vdbh_Path_Prefix	Sets an optional location to prefix translations by. This option is not required.
-vdbh_Default_Host	Sets the default host to use if a non-HTTP/1.1 request was received. This option is not required and usually won't do anything because the Apache Web Server by default catches these errors.
-vdbh_Declines	Sets a list of glob patterns to match URIs against. If any match occurs then the URI is declined to the next translate phase.
+vh_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
+			This option is not required, if not set the libhome
+			tage will be set to "mod_vh".
+vh_Path_Prefix :	Sets an optional location to prefix translations by.
+			This option is not required.
+vh_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
+			was received. This option is not required and usually
+			won't do anything because the Apache Web Server by
+			default catches these errors.
 
-The vdbh_MySQL_Host_Field and vdbh_MySQL_Path_Field along with vdbh_MySQL_Environment_Field are available as environment variables and can be included in logs if a LogFormat is defined for them. The environment variables are labled VDBH_HOST, VDBH_PATH, and VDBH_ENVIRONMENT. Information on how to use LogFormat is available at http://httpd.apache.org/docs/mod/mod_log_config.html. An example configuration may look something like this.
+Example :
 
-NameVirtualHost 206.9.161.29
+You have set home.conf with such data :
 
-<VirtualHost 206.9.161.29>
-    vdbh On
-    vdbh_CLIENT_COMPRESS On
-    vdbh_MySQL_Database virtual_hosts
-    vdbh_MySQL_Table virtual_hosts
-    vdbh_MySQL_Host_Field server
-    vdbh_MySQL_Path_Field path
-    vdbh_MySQL_Environment_Field environment_variable
-    vdbh_Default_Host julia.fractal.net
-    vdbh_Declines .htpasswd *.txt
+mode ldap
+ld_hosts 127.0.0.1
+ld_base . ou=whosting,dc=kazar,dc=net
+ld_version 3
+ld_timeout 5
+
+[mod_vh]
+log.stderr y
+where wwwDomain
+user wwwDomain
+home homeDirectory
+uid uidNumber
+gid gidNumber
+gecos description
+passwd "*"
+shell /dev/null
+quota FTPQuotaMBytes
+
+You get such ldap entry :
+
+#
+# LDAPv3
+# base <ou=whosting,dc=kazar,dc=net> with scope sub
+# filter: wwwDomain=jb.kazar.net
+# requesting: ALL
+#
+
+# 'jb.kazar.net', whosting, kazar.net
+dn: wwwDomain='jb.kazar.net',ou=whosting,dc=kazar,dc=net
+objectClass: top
+objectClass: kazarPerson
+objectClass: PureFTPdUser
+uid: jb
+description: JB Home page
+uidNumber: 65534
+gidNumber: 65534
+FTPuid: 65534
+FTPgid: 65534
+FTPStatus: enabled
+userPassword:: xxxxxxxxxxxxx
+homeDirectory: /hosting/http/j/b/k/jb.kazar.net/
+FTPQuotaMBytes: 50
+
+A simple test to see if your libhome map will work :
+
+$ home_finger -t mod_vh jb.kazar.net
+login: jb.kazar.net
+passwd: *
+uid: 65534
+gid: 65534
+gecos: JB Home page
+home: /hosting/http/j/b/k/jb.kazar.net/
+shell: 
+expire: 0
+quota: 50
+class: 
+
+Then if you set the DNS entry for jb.kazar.net to 10.1.2.3, the following 
+apache2 configuration file will look for jb.kazar.net files in 
+/hosting/http/j/b/k/jb.kazar.net/ :-)
+
+NameVirtualHost 10.1.2.3
+
+<VirtualHost 10.1.2.3>
+    vh_Default_Host devnull.oav.net
 </VirtualHost>
 
-The corresponding database schema would look like this.
+Other handlers should still work accordingly.  mod_vh declares its
+translate_name phase as AP_HOOK_FIRST so it can run before other translations.
+An example configuration allowing mod_tcl in specific directories follows.
 
-CREATE TABLE virtual_hosts (
-  server char(255) NOT NULL,
-  path char(255),
-  environment_variable char(255),
-  PRIMARY KEY (server)
-);
+<VirtualHost 10.2.3.4>
+    vh_Default_Host devnull.oav.net
 
-INSERT INTO virtual_hosts VALUES ('julia.fractal.net','/export/home/mlink/public_html','julia.fractal.net');
-INSERT INTO virtual_hosts VALUES ('visualphixation.com','/export/home/carlosp','visualphixation.com');
-INSERT INTO virtual_hosts VALUES ('www.visualphixation.com','/export/home/carlosp','www.visualphixation.com');
-INSERT INTO virtual_hosts VALUES ('www.fractal.net','/export/web/www.fractal.net','www.fractal.net');
-INSERT INTO virtual_hosts VALUES ('fractal.net','/export/web/www.fractal.net','fractal.net');
-
-Other handlers should still work accordingly.  mod_vdbh declares its translate_name phase as AP_HOOK_FIRST so it can run before other translations.  An example configuration allowing mod_tcl in specific directories follows.
-
-<VirtualHost 206.9.161.29>
-    vdbh On
-    vdbh_CLIENT_COMPRESS On
-    vdbh_MySQL_Database virtual_hosts
-    vdbh_MySQL_Table virtual_hosts
-    vdbh_MySQL_Host_Field server
-    vdbh_MySQL_Path_Field path
-    vdbh_MySQL_Environment_Field environment_variable
-    vdbh_Default_Host julia.fractal.net
-    vdbh_Declines .htpasswd *.txt
-
-    <Directory /export/web/www.fractal.net>
+    <Directory /hosting/http/j/b/k/jb.kazar.net>
         AddHandler tcl-handler tm
 
         Tcl_ContentHandler content_handler
     </Directory>
-
-    <Directory /export/web/www.fractal.net/images>
-        SetHandler default-handler
-
-        Options Indexes FollowSymLinks
-
-        AllowOverride None
-
-        Order allow,deny
-        Allow from all
-    </Directory>
-
-    <Directory /export/web/www.fractal.net/files>
-        SetHandler default-handler
-
-        Options Indexes FollowSymLinks
-
-        AllowOverride None
-
-        Order allow,deny
-        Allow from all
-     </Directory>
 </VirtualHost>
 
 Additional Information
 
-mod_vdbh assumes that its connection to the MySQL server is persistent. If there are excessive disconnections try setting the wait_timeout variable for MySQL to a larger value. Apache Web Server 2.0 is required, and at least MySQL 3.23 is required.
+mod_vh will check on every connection if data exist or not. If you don't want
+to hammer your LDAP/MySQL server please use cache_file and cache_ttl values in
+home.conf(5).
 
 References
 
-mod_vdbh is an Apache 2.0 module using MySQL libraries, more about Apache Web Server can be found at http://www.apache.org/. Documentation regarding MySQL can be found at http://www.mysql.com/
+mod_vh is an Apache 2.0 module using libhome library, more about 
+Apache Web Server can be found at http://www.apache.org/.
+Documentation regarding libhome can be found at http://pll.sourceforge.net/
+This module was highly inspired from mod_vdbh, I wishe to send many thanks
+to Michael K Link <mlink@apache.org> that helped me a lot to give me a 
+good start to make my module work, mod_vdbh homepage : http://www.synthemesc.com/mod_vdbh/.
+

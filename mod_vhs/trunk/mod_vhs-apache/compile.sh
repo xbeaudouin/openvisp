@@ -1,1 +1,1 @@
-apxs -i -a -c mod_vh.c
+apxs -i -a -c -L/usr/local/lib -lhome mod_vh.c
