@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.4 2004-07-26 10:54:42 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.5 2004-08-04 15:23:42 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -246,7 +246,7 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 
 static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
-	ap_add_version_component(pconf, "mod_vhs/1.0");
+	ap_add_version_component(pconf, "mod_vhs/1.0.1");
 	
 	return OK;
 }
@@ -277,6 +277,9 @@ static int vhs_translate_name(request_rec *r)
 			host = vhr->default_host;
 		}
 	}
+
+	/* DNS names are case insensitives */
+	apr_str_tolower(host);
 
 	if (ptr = strchr(host,':')) {
 		*ptr = '\0';
