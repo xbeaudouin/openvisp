@@ -3,13 +3,10 @@ Warning about threaded PHP
 
 This software has been tested and developped ONLY on prefork apache 2.
 
-The library (libhome) is NOT thread safe so mod_vhs is NOT thread safe too.
-
-Since there is no (or too less) documentation about apr + mutex I cannot
-find a clean and fast way to use a Mutex when calling libhome.
-
-So you have been warned : THIS MODULE IS NOT THREAD SAFE AND CANNOT BE
-                          USED ON WORKER or ANY THREADED Apache 2.
+I have added mutex against libhome accesses. So this module _should_ be
+thread safe. Anyway I don't have to opportunity to test mod_vhs and
+apache2 in NPM=worker. So please submit bugs reports and patches to
+mod_vhs@lists.oav.net.
 
 Thanks for you attention.
 
