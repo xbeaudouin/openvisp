@@ -61,11 +61,17 @@ vhs_Lamer :		boolean (On / Off), default to Off.
 vhs_PHPsafe_mode :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support it will set safe_mode to on for the 
-			virtual host.
+			virtual host otherwise php.ini defaults will be
+			used.
 vhs_PHPopen_basedir :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will set open_basedir to the home 
-			directory given by libhome/mod_vhs
+			directory given by libhome/mod_vhs otherwise php.ini
+			defaults will be used.
+vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will enable display_errors to be shown,
+			otherwise php.ini defaults will be used.
 
 Notes about vhs_PHP* values :
 

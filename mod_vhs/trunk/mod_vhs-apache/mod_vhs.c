@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.30 2005-01-22 10:09:15 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.31 2005-01-24 16:08:55 kiwi Exp $
 */
 
 /* 
@@ -154,7 +154,8 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_Lamer",			set_flag, (void*) 0,RSRC_CONF,"Enable Lamer Friendly mode"),
 	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,RSRC_CONF,"Enable PHP Safe Mode" ),
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,RSRC_CONF,"Set PHP open_basedir to path" ),
-	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,RSRC_CONF,"Set PHP open_basedir to path" ),
+	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,RSRC_CONF,"Allow redirect to default host instead of looking it localy" ),
+	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,RSRC_CONF,"Enable PHP display_errors" ),
 	{ NULL }
 };
 
@@ -198,6 +199,7 @@ typedef struct {
 	unsigned short int	lamer_mode;	/* Lamer friendly mode */
 	unsigned short int 	safe_mode;	/* PHP Safe mode */
 	unsigned short int 	open_basedir;	/* PHP open_basedir */
+	unsigned short int 	display_errors;	/* PHP display_error */
 	unsigned short int	default_rdr;	/* Default host redirect ? */
 	
 } vhs_config_rec;
@@ -221,13 +223,14 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	vhs_config_rec *child = (vhs_config_rec *) childv;
 	vhs_config_rec *conf = (vhs_config_rec*) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
-	conf->libhome_tag  = (child->libhome_tag ? child->libhome_tag : parent->libhome_tag);
+	conf->libhome_tag   = (child->libhome_tag ? child->libhome_tag : parent->libhome_tag);
 
-	conf->path_prefix  = (child->path_prefix ? child->path_prefix : parent->path_prefix);
-	conf->default_host = (child->default_host ? child->default_host : parent->default_host);
-	conf->safe_mode    = (child->safe_mode ? child->safe_mode : parent->safe_mode);
-	conf->open_basedir = (child->open_basedir ? child->open_basedir : parent->open_basedir);
-	conf->default_rdr  = (child->default_rdr ? child->default_rdr : parent->default_rdr);
+	conf->path_prefix   = (child->path_prefix ? child->path_prefix : parent->path_prefix);
+	conf->default_host  = (child->default_host ? child->default_host : parent->default_host);
+	conf->safe_mode     = (child->safe_mode ? child->safe_mode : parent->safe_mode);
+	conf->open_basedir  = (child->open_basedir ? child->open_basedir : parent->open_basedir);
+	conf->default_rdr   = (child->default_rdr ? child->default_rdr : parent->default_rdr);
+	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
 
 	return conf;
 }
@@ -290,6 +293,13 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->default_rdr = 1;
 			} else {
 				vhr->default_rdr = 0;
+			}
+			break;
+		case 4:
+			if(flag) {
+				vhr->display_errors = 1;
+			} else {
+				vhr->display_errors = 0;
 			}
 			break;
 	}
@@ -450,23 +460,33 @@ static int vhs_translate_name(request_rec *r)
 	if (vhr->safe_mode) {
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode engaged");
-#endif
+#endif /* VH_DEBUG */
 		zend_alter_ini_entry("safe_mode", 10, "1", 1, 4, 16);
-	} else {
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode inactive %s", vhr->safe_mode);
-#endif
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode inactive, defaulting to php.ini values");
+#endif /* VH_DEBUG */
 	}
 	if (vhr->open_basedir) {
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
-#endif
-	zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
-#endif
-	} else {
+#endif /* VH_DEBUG */
+		zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir inactive");
-#endif
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir inactive defaulting to php.ini values");
+#endif /* VH_DEBUG */
 	}
+	if (vhr->display_errors) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP display_errors engaged");
+#endif /* VH_DEBUG */
+		zend_alter_ini_entry("display_errors", 10, "1", 1, 4, 16);
+#ifdef VH_DEBUG
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP display_errors inactive defaulting to php.ini values");
+#endif /* VH_DEBUG */
+	}
+#endif /* HAVE_MOD_PHP_SUPPORT */
 	return OK;
 }
