@@ -1,11 +1,11 @@
-# New ports collection makefile for:	mod_vh
+# New ports collection makefile for:	mod_vhs
 # Date created:				Sun Jul 25 2004
 # Whom:					Xavier Beaudouin <kiwi@oav.net>
 #
 # $FreeBSD$
 #
 
-PORTNAME=	mod_vh
+PORTNAME=	mod_vhs
 PORTVERSION=	1.0
 CATEGORIES=	www
 MASTER_SITES=	ftp://ftp.oav.net/users/kiwi/
