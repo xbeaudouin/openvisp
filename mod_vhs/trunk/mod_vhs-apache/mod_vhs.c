@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.33 2005-02-08 14:21:15 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.34 2005-02-08 14:29:49 kiwi Exp $
 */
 
 /* 
@@ -76,7 +76,7 @@
 #define CORE_PRIVATE
 
 #define APR_WANT_STRFUNC
-#include "apt_want.h"
+#include "apr_want.h"
 
 #include "apr.h"
 #include "apr_strings.h"
@@ -186,7 +186,7 @@ typedef struct {
 } alias_entry;
 
 typedef struct {
-	apr_array_header_t *redirect;
+	apr_array_header_t *redirects;
 } alias_dir_conf;
 /*
  * End of borrowin
@@ -227,7 +227,7 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->open_basedir  = (child->open_basedir ? child->open_basedir : parent->open_basedir);
 	conf->default_rdr   = (child->default_rdr ? child->default_rdr : parent->default_rdr);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
-	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases):
+	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
 
 	return conf;
