@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.16 2004-12-29 15:38:01 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.17 2004-12-30 12:23:19 kiwi Exp $
 */
 
 /* 
@@ -228,9 +228,23 @@ static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *pte
 	return OK;
 }
 
+/* XXX: WTF with http_core.h ??? */
+typedef struct {
+#ifdef GPROF
+	char *gprof_dir;
+#endif
+	const char *ap_document_root;
+	char *access_name;
+	apr_array_header_t *sec_dir;
+	apr_array_header_t *sec_url;
+	int redirect_limit;
+	int subreq_limit;
+} core_server_config;
+
 static int vhs_translate_name(request_rec *r)
 {
 	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
+	core_server_config *conf = (core_server_config *)ap_get_module_config(r->server->module_config, &vhs_module);
 	const char *host;
 	char *path;
 	char *env = NULL;
@@ -238,7 +252,7 @@ static int vhs_translate_name(request_rec *r)
 	int i;
 	/* libhome */
 	struct passwd *p;
-	
+
 	// I think this was for a 1.3 work around
 	if (r->uri[0] != '/') {
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
@@ -333,9 +347,17 @@ static int vhs_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+/*
 	apr_table_set(r->subprocess_env, "DOCUMENT_ROOT", path);
-	
-	r->ap_document_root = path;
+*/
+	r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",host, NULL);
+	r->server->server_hostname = apr_pstrcat(r->pool,r->hostname,NULL);
+	r->parsed_uri.path = apr_pstrcat(r->pool, path,r->parsed_uri.path,NULL);
+	r->parsed_uri.hostname = r->server->server_hostname;	
+	r->parsed_uri.hostinfo = r->server->server_hostname;	
+
+	conf->ap_document_root = path;	/* Set the bloody DOCUMENT_ROOT */
+
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
