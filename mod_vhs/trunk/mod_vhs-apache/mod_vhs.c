@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.2 2004-07-25 19:14:26 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.3 2004-07-25 19:47:36 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -77,10 +77,6 @@
 #include "util_script.h"
 
 #include "ap_config_auto.h"
-
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -286,23 +282,30 @@ static int vh_translate_name(request_rec *r)
 		*ptr = '\0';
 	}
 
-	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: looking for %s", host);
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: looking for %s", host);
+#endif /* VH_DEBUG */
 
 	/*
  	 * Set the default libhome tag
 	 */
-	/* XXX: Todo use autoconf */
 	if (vhr->libhome_tag) {
 		setpwtag(vhr->libhome_tag);
-		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: setpwtag set %s", vhr->libhome_tag);
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: setpwtag set %s", vhr->libhome_tag);
+#endif /* VH_DEBUG */
 	} else {
 		setpwtag("mod_vh");
-		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vh_translate_name: setpwtag set %s", "mod_vh");
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: setpwtag set %s", "mod_vh");
+#endif /* VH_DEBUG */
 	}
 
 	if((p=home_getpwnam(host))!=NULL) {
 		path = p->pw_dir;
+#ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: path found in database for %s is %s", host, path);
+#endif /* VH_DEBUG */
 
 	} else {
 		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vh_translate_name: no host found in database for %s", host);

@@ -6,72 +6,24 @@ from a any database supported by libhome at request time.
 
 Building and Installing Apache with mod_vh
 
-mod_vdbh is configured using the Apache 2.0 configuration system. Normally a
-vanilla install of Apache does not require a rebuild of the configuration
-system, but since mod_vh requires libraries not usually built into Apache
-it is necessary to rebuild the configure script using GNU autoconf. If the
-GNU autoconf tools are not installed on the system then they can be downloaded
-from a GNU distribution site, for more information check the GNU autoconf
-website http://www.gnu.org/software/autoconf/. Please note that GNU autoconf
-also requires a recent release of an m4 macro processor which can also be
-found at a GNU distribution site. The next step is to download the mod_vh
-source from http://www.oav.net/
+mod_vh is configured using the Apache 2.0 apxs system. Normaly all Apache 2.0
+system should have this tool installed, so if you don't have it, you'll have
+a problem :)
 
-Once the package is downloaded de-archive it and move it to the Apache 2.0
-modules directory. The resultant directory name should be mod_vh after
-de-archiving.
+You will need a installed libhome into your system. Please fetch it at
+http://pll.sourceforge.net/ before.
 
-$ mv mod_vh httpd-2.0.50/modules/mod_vh
+mod_vh can be installed and configured using Apache 2.0 apxs tool :
 
-Now the Apache configuration system is ready to be rebuilt and include
-mod_vh. Change directory to the root level of the Apache 2.0 source and
-rebuild the configuration system by typing the following commands.
+$ apxs -i -a -c -L/usr/local/lib -lhome mod_vh.c
 
-$ ./buildconf
+This will, as root, install mod_vh into Apache 2.0 module directory and 
+enable it in the configuration file. This is the prefered way to do it.
+mod_vh is enabled by default once the Apache configuration has been rebuilt.
 
-Running the configure script with the help flag will show that mod_vh
-configuration macros have been assimilated into the Apache 2.0
-configuration system.
-
-$ ./configure --help
-  --disable-vh            mass virtual hosting module
-  --with-mysqldir=DIR     MySQL directory prefix
-
-mod_vdbh is enabled by default once the Apache configuration has been rebuilt.
-If it is necessary to disable mod_vdbh then this may be accomplished with 
-the --disable-vdbh option passed to the configure script.
-
-The --with-mysqldir=DIR will specify a non-default location to find the MySQL
-libraries and include files, usually located by default in /usr/local.
-
-The next step is to configure the Apache build process by running the
-configure script. During configuration we will see status output, the mod_vh
-configuration status output will look similar to the following.
-
-checking whether to enable mod_vh... yes (default)
-using `/usr/local' as MySQL directory prefix
-  adding "-L/usr/local/lib/mysql" to LDFLAGS
-checking for mysql_init in -lmysqlclient... yes
-  adding "-lmysqlclient" to LIBS
-  adding "-R/usr/local/lib/mysql" to LDFLAGS
-  adding "-I/usr/local/include/mysql" to INCLUDES
-
-If configuration fails the most likely problem is that the MySQL distribution
-isn't installed or is in a directory that couldn't be found, try passing
---with-mysqldir=DIR to configure to specify a directory tree that MySQL is
-installed at.
-
-After configuration has completed the Apache web server can be compiled.
-Change directory to the root level of the Apache 2.0 source distribution and
-execute the following commands.
-
-$ make
-$ make install
-
-This will compile Apache 2.0 with mod_vh and install the distribution in
-the location specified at configuration time. The Apache 2.0 binary will
-contain a statically linked mod_vh module which may also statically link
-MySQL libraries depending on your MySQL installation.
+Note: you can use a "slow" way to install it (eg: add the files into 
+      apache 2 source tree and remake the configuration file, but I have
+      never try that... so use a your own risk !).
 
 Configuring mod_vh in Apache Configure Files
 
@@ -190,3 +142,12 @@ This module was highly inspired from mod_vdbh, I wishe to send many thanks
 to Michael K Link <mlink@apache.org> that helped me a lot to give me a 
 good start to make my module work, mod_vdbh homepage : http://www.synthemesc.com/mod_vdbh/.
 
+
+Author
+
+Send bug, ideas, fixes, patches, and food to :
+Xavier Beaudouin <kiwi@oav.net>
+
+Home page of this module 
+
+http://www.oav.net/
