@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.5 2004-08-04 15:23:42 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.6 2004-08-04 15:31:12 kiwi Exp $
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -279,7 +279,7 @@ static int vhs_translate_name(request_rec *r)
 	}
 
 	/* DNS names are case insensitives */
-	apr_str_tolower(host);
+	apr_tolower(host);
 
 	if (ptr = strchr(host,':')) {
 		*ptr = '\0';
