@@ -1,6 +1,10 @@
-Since mod_vhs 1.0.xx
+Since mod_vhs 1.0.12
 --------------------
 
+o Added options on load that mod_vhs wait for input from mod_alias and
+  mod_userdir before mod_vhs make things works.
+o Added options on load that mod_vhs is making his work before mod_rewrite
+  and mod_php is making their works.
 o Added option vhs_Default_Host_Redirect (on/off) to force HTTP redirect
   if default host is triggered.
 o The module should be now threads safe. Note that we don't garantee

@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.27 2005-01-21 12:29:19 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.28 2005-01-21 12:37:19 kiwi Exp $
 */
 
 /* 
@@ -160,8 +160,14 @@ static const command_rec vhs_commands[] = {
 
 static void register_hooks(apr_pool_t *p)
 {
+	/* Modules that have to be loaded before mod_vhs */
+	static const char *const aszPre[] =
+        	{ "mod_alias.c", "mod_userdir.c", NULL };
+	/* Modules that have to be loaded after mod_vhs */
+	static const char *const aszSucc[] =
+		{ "mod_rewrite.c", "mod_php.c", NULL };
 	ap_hook_post_config(vhs_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
-	ap_hook_translate_name(vhs_translate_name, NULL, NULL, APR_HOOK_FIRST);
+	ap_hook_translate_name(vhs_translate_name, aszPre, aszSucc, APR_HOOK_FIRST);
 #if APR_HAS_THREADS
 	apr_status_t ret;
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
