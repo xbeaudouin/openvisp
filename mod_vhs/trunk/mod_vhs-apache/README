@@ -72,6 +72,10 @@ vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will enable display_errors to be shown,
 			otherwise php.ini defaults will be used.
+vhs_Alias, vhs_ScriptAlias, vhs_ScriptAliasMatch, vhs_RedirectTempa and
+vhs_RedirectPermanent :	mod_alias 100% compatible options inside mod_vhs.
+			Please see http://httpd.apache.org/docs-2.0/mod_alias.html
+			for more informations.
 
 Notes about vhs_PHP* values :
 
@@ -101,6 +105,7 @@ gecos description
 passwd "*"
 shell /dev/null
 quota FTPQuotaMBytes
+class admin@foo.com
 
 You get such ldap entry :
 
@@ -139,7 +144,10 @@ home: /hosting/http/j/b/k/jb.kazar.net/
 shell: 
 expire: 0
 quota: 50
-class: 
+class: admin@foo.com
+
+Note that class will be used for server admin mail inside Apache (usualy 
+diplayed for webmasters, and/or errors).
 
 Then if you set the DNS entry for jb.kazar.net to 10.1.2.3, the following 
 apache2 configuration file will look for jb.kazar.net files in 
