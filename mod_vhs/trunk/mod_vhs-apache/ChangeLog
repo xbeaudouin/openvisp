@@ -1,6 +1,8 @@
-Since mod_vhs 1.0.12 B1
------------------------
+Since mod_vhs 1.0.12
+--------------------
 
+o Added option vhs_PHPdisplay_errors used on PHP support to show 
+  php errors when needed on <VirtualHost></> basis.
 o Added options on load that mod_vhs wait for input from mod_alias and
   mod_userdir before mod_vhs make things works.
 o Added options on load that mod_vhs is making his work before mod_rewrite
