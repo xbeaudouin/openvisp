@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.43 2005-03-03 21:22:39 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.44 2005-04-27 18:10:52 kiwi Exp $
 */
 
 /* 
@@ -182,7 +182,7 @@ typedef struct {
 	const char *real;
 	const char *fake;
 	char *handler;
-	regex_t *regexp;
+	ap_regex_t *regexp;
 	int redir_status;	/* 301, 302, 303, 410, etc... */
 } alias_entry;
 
@@ -335,7 +335,7 @@ static const char *add_redirect_internal(cmd_parms *cmd,
      vhs_config_rec *serverconf = ap_get_module_config(s->module_config,
                                                           &vhs_module);
      int status = (int) (long) cmd->info;
-     regex_t *r = NULL;
+     ap_regex_t *r = NULL;
      const char *f = arg2;
      const char *url = arg3;
  
@@ -902,7 +902,7 @@ static void register_hooks(apr_pool_t *p)
         	{ "mod_userdir.c","mod_vhost_alias.c", NULL };
 	/* Modules that have to be loaded after mod_vhs */
 	static const char *const aszSucc[] =
-		{ "mod_rewrite.c", "mod_php.c", NULL };
+		{ "mod_php.c", NULL };
 	ap_hook_post_config(vhs_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_translate_name(vhs_translate_name, aszPre, aszSucc, APR_HOOK_FIRST);
 	ap_hook_fixups(fixup_redir,NULL,NULL,APR_HOOK_MIDDLE);

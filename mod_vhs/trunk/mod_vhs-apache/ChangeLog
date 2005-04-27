@@ -1,3 +1,12 @@
+Since mod_vhs 1.0.17
+--------------------
+o According to Frédéric VANNIERE, mod_rewrite don't work when it
+  is specified in module list... Another neat exception of Apache...
+  Now mod_vhs should work with mod_rewrite...
+o Use Apache internal regexp than "system" ones. This fix portability
+  of this code on Debian
+
+
 Since mod_vhs 1.0.16
 --------------------
 
