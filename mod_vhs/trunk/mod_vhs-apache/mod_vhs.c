@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.44 2005-04-27 18:10:52 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.45 2005-05-18 19:43:57 kiwi Exp $
 */
 
 /* 
@@ -129,6 +129,17 @@
 #include <zend_ini.h>
 #include <zend_alloc.h>
 #include <zend_operators.h>
+#endif
+
+/* 
+ * SUEXEC support
+ */
+#if !defined(WIN32) && !defined(OS2) && !defined(BEOS) && !defined(NETWARE)
+#define HAVE_UNIX_SUEXEC
+#endif
+
+#ifdef HAVE_UNIX_SUEXEC
+#include "unixd.h"              /* Contains the suexec_identity hook used on Unix */
 #endif
 
 /*
@@ -895,6 +906,31 @@ static const command_rec vhs_commands[] = {
 	{ NULL }
 };
 
+#ifdef HAVE_UNIX_SUEXEC
+static ap_unix_identity_t *get_suexec_id_doer(const request_rec * r)
+{
+    ap_unix_identity_t *ugid = NULL;
+
+    const char *username = apr_table_get(r->notes, "mod_vhost_dbi_user");
+
+    if (username == NULL) {
+        return NULL;
+    }
+
+    if ((ugid = apr_palloc(r->pool, sizeof(ap_unix_identity_t *))) == NULL) {
+        return NULL;
+    }
+
+    if (apr_uid_get(&ugid->uid, &ugid->gid, username, r->pool) != APR_SUCCESS) {
+        return NULL;
+    }
+
+    ugid->userdir = 0;
+
+    return ugid;
+}
+#endif
+
 static void register_hooks(apr_pool_t *p)
 {
 	/* Modules that have to be loaded before mod_vhs */
@@ -911,6 +947,10 @@ static void register_hooks(apr_pool_t *p)
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
 	apr_pool_cleanup_register(p, mutex, (void*)apr_thread_mutex_destroy,
                                   apr_pool_cleanup_null);
+#endif
+#ifdef HAVE_UNIX_SUEXEC
+	ap_hook_get_suexec_identity(get_suexec_id_doer, NULL, NULL,
+                                    APR_HOOK_FIRST + 1);
 #endif
 }
 
