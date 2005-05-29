@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.45 2005-05-18 19:43:57 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.46 2005-05-29 14:47:21 kiwi Exp $
 */
 
 /* 
@@ -168,10 +168,13 @@ typedef struct {
 	
 	char			*path_prefix;	/* Prefix to add to path returned by libhome */
 	char			*default_host;	/* Default host to redirect to */
+
+	char			*openbdir_path;	/* PHP open_basedir default path */
 	
 	unsigned short int	lamer_mode;	/* Lamer friendly mode */
 	unsigned short int 	safe_mode;	/* PHP Safe mode */
 	unsigned short int 	open_basedir;	/* PHP open_basedir */
+	unsigned short int 	append_basedir;	/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;	/* PHP display_error */
 	unsigned short int	default_rdr;	/* Default host redirect ? */
 
@@ -244,6 +247,8 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->default_rdr   = (child->default_rdr    ? child->default_rdr    : parent->default_rdr);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->enable        = (child->enable         ? child->enable         : parent->enable);
+	conf->append_basedir= (child->append_basedir ? child->append_basedir : parent->append_basedir);
+	conf->openbdir_path = (child->openbdir_path  ? child->openbdir_path  : parent->openbdir_path);
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
 
@@ -409,8 +414,8 @@ static const char *add_redirect2(cmd_parms *cmd, void *dirconf,
 }
  
 static const char *add_redirect_regex(cmd_parms *cmd, void *dirconf,
-                                       const char *arg1, const char *arg2,
-                                       const char *arg3)
+                                      const char *arg1, const char *arg2,
+                                      const char *arg3)
 {
     return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 1);
 }
@@ -599,6 +604,9 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 	  case 2:
 		vhr->default_host = apr_pstrdup(parms->pool, arg);
 		break;
+	  case 3:
+		vhr->openbdir_path = apr_pstrdup(parms->pool, arg);
+		break;
 	}
 	
 	return NULL;
@@ -653,6 +661,13 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->enable = 1;
 			} else {
 				vhr->enable = 0;
+			}
+			break;
+		case 6:
+			if(flag) {
+				vhr->append_basedir = 1;
+			} else {
+				vhr->append_basedir = 0;
 			}
 			break;
 	}
@@ -856,7 +871,14 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
 #endif /* VH_DEBUG */
-		zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
+		if (vhr->append_basedir && vhr->openbdir_path) {
+			/* There is a default open_basedir path and configuration allow appending them */
+			char *obasedir_path;
+			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
+			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
+		} else {
+			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
+		}
 #ifdef VH_DEBUG
 	} else {
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir inactive defaulting to php.ini values");
@@ -889,6 +911,8 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,    RSRC_CONF,"Set PHP open_basedir to path" ),
 	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,    RSRC_CONF,"Allow redirect to default host instead of looking it localy" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
+	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
+	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 4,    RSRC_CONF,"The default PHP open_basedir path." ),
         AP_INIT_TAKE2("vhs_Alias",			add_alias, NULL,        RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE2("vhs_ScriptAlias",		add_alias, "cgi-script",RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE23("vhs_Redirect",			add_redirect, (void *) HTTP_MOVED_TEMPORARILY,OR_FILEINFO,

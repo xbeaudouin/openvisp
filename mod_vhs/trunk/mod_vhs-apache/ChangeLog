@@ -1,5 +1,7 @@
 Since mod_vhs 1.0.17
 --------------------
+o Added open_basedir functions to append homedir to a default open_basedir
+  path.
 o Added experimental SUEXEC support. Not tested and not documented !
 o According to Frédéric VANNIERE, mod_rewrite don't work when it
   is specified in module list... Another neat exception of Apache...

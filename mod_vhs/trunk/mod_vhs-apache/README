@@ -70,6 +70,14 @@ vhs_PHPopen_basedir :	boolean (On / Off), default Off.
 			support, it will set open_basedir to the home 
 			directory given by libhome/mod_vhs otherwise php.ini
 			defaults will be used.
+vhs_open_basedir_path:	string. The open_basedir path that will be used to
+			be set when vhs_PHPopen_basedir is set AND 
+			vhs_append_open_basedir.
+vhs_append_open_basedir:boolean (On / Off), default Off.
+			Is set, mod_vhs will append the homedir path into
+			vhs_open_basedir_path.
+			NOTE :	mod_vhs open_basedir option will OVERIDE
+				php.ini settings.
 vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will enable display_errors to be shown,
