@@ -55,13 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.46 2005-05-29 14:47:21 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.47 2005-05-29 15:57:23 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.17"
+#define VH_VERSION	"mod_vhs/1.0.18rc1"
 
 /* 
  * Set this if you'd like to have looooots of debug
@@ -83,6 +83,9 @@
 #include "apr_lib.h"
 #include "apr_uri.h"
 #include "apr_thread_mutex.h"
+#if APR_MAJOR_VERSION > 0
+#include "apr_regexp.h"
+#endif
 
 #include "ap_config.h"
 #include "httpd.h"
@@ -196,7 +199,12 @@ typedef struct {
 	const char *real;
 	const char *fake;
 	char *handler;
+
+#if APR_MAJOR_VERSION > 0
 	ap_regex_t *regexp;
+#else
+	regex_t *regexp;
+#endif
 	int redir_status;	/* 301, 302, 303, 410, etc... */
 } alias_entry;
 
@@ -351,7 +359,11 @@ static const char *add_redirect_internal(cmd_parms *cmd,
      vhs_config_rec *serverconf = ap_get_module_config(s->module_config,
                                                           &vhs_module);
      int status = (int) (long) cmd->info;
+#if APR_MAJOR_VERSION > 0
      ap_regex_t *r = NULL;
+#else
+     regex_t *r = NULL;
+#endif
      const char *f = arg2;
      const char *url = arg3;
  
