@@ -1,0 +1,52 @@
+Here is some hint to get logs per db-vhost
+
+Hello.
+
+I've read the archives at http://lists.oav.net/wws/arc/mod_vhs
+You have experience problem with per virtual host stored in database.
+Suggested sollution was to split log with perl or awk.
+Some time ago after little search i made my own. I think my sollution is simpliest.
+You can put it in the FAQ or something similar or... just ignore this email :-)
+Works like a charm with mod_vdbh, but i think it should work with mod_vhs also.
+Just give me a few days and i'll test it.
+
+So... here it is:
+
+1. In httpd.conf:
+LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\""
+vdbh_combined
+Which is exatly the same as:
+LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+except %V at the beginning.
+
+So for 'common':
+LogFormat "%h %l %u %t \"%r\" %>s %b" common
+LogFormat "%V %h %l %u %t \"%r\" %>s %b" vdbh_common
+
+and so other...
+
+2. Make an executable script, in my case:
+root@mip ~# cat /usr/sbin/mod_vdbh_log
+#!/bin/bash
+LOG_PATH=$1
+while read name line; do
+    echo $line >> $LOG_PATH/${name}_access_log;
+done
+root@mip ~#
+
+3. Inside <VirtualHost></> define CustomLog like this:
+CustomLog "|/usr/sbin/mod_vdbh_log /var/log/httpd/vdbh" vdbh_combined
+
+Restart apache. At this moment you can enjoy separate logs for every database vhost.
+Remember to make /var/log/httpd/vdbh directory, and give apache write permission to it.
+
+This can't be done for ErrorLog, because ErrorLog isn't customizable.
+
+Herewith greetings from Poland :-)
+
+-- 
+Micha Dalecki
+mihau@great.net.pl
+
+
+
