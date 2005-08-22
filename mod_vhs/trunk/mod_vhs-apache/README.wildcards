@@ -1,0 +1,11 @@
+mod_vhs doesn't support wildcard because libhome does it very well so there
+is no need to add duplicate code in this module.
+
+Here is some line to add under [mod_vhs] statments :
+
+fallback ^(.*)\.(.*)\.(.*)$  $2.$3
+
+This will support things like *.stuff.com if you have stuff.com in your 
+database/ldap sources.
+
+
