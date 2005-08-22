@@ -1,23 +1,28 @@
-Here is some hint to get logs per db-vhost
+Here is some hint to get logs per db-vhost given from 
+Micha Dalecki and updated by me :)
 
-Hello.
+1. home.conf (libhome)
 
-I've read the archives at http://lists.oav.net/wws/arc/mod_vhs
-You have experience problem with per virtual host stored in database.
-Suggested sollution was to split log with perl or awk.
-Some time ago after little search i made my own. I think my sollution is simpliest.
-You can put it in the FAQ or something similar or... just ignore this email :-)
-Works like a charm with mod_vdbh, but i think it should work with mod_vhs also.
-Just give me a few days and i'll test it.
+Add a line to add gecos field with database stuff:
+(Here is LDAP configuration, adapt it to your setup)
 
-So... here it is:
+[mod_vhs]
+where wwwDomain
+user wwwDomain
+home homeDirectory
+uid uidNumber
+gid gidNumber
+gecos wwwDomain
+passwd "*"
+shell /dev/null
 
-1. In httpd.conf:
+2. In httpd.conf:
 LogFormat "%{VH_GECOS}e %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" vdbh_combined
 Which is exatly the same as:
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
 except %{VH_GECOS}e at the beginning.
 Don't use %V because it is the content of Host: HTTP header so it cannot be trusted.
+Also you must be aware that ${VH_HOST}e is directly extracted from Host: header with some more modifications than %V, but it should NOT be trusted.
 
 So for 'common':
 LogFormat "%h %l %u %t \"%r\" %>s %b" common
@@ -25,7 +30,7 @@ LogFormat "%{VH_GECOS}e %h %l %u %t \"%r\" %>s %b" vdbh_common
 
 and so other...
 
-2. Make an executable script, in my case:
+3. Make an executable script, in my case:
 root@mip ~# cat /usr/sbin/mod_vdbh_log
 #!/bin/bash
 LOG_PATH=$1
@@ -41,12 +46,5 @@ Restart apache. At this moment you can enjoy separate logs for every database vh
 Remember to make /var/log/httpd/vdbh directory, and give apache write permission to it.
 
 This can't be done for ErrorLog, because ErrorLog isn't customizable.
-
-Herewith greetings from Poland :-)
-
--- 
-Micha Dalecki
-mihau@great.net.pl
-
 
 
