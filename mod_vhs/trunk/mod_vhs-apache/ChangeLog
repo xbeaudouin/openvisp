@@ -1,5 +1,7 @@
-Since mod_vhs 1.0.18rc1
------------------------
+Since mod_vhs 1.0.18
+--------------------
+o Removed VH_HOST variable since it is more or less unusuable and somewhat
+  dangerous. You can enable it again by compiling mod_vhs with -DWANT_VH_HOST.
 o Fixed compilation of mod_vhs when using Apache 2.0 branch (problems
   with ap_regex_t that exists only on Apache 2.1)
 o Added open_basedir functions to append homedir to a default open_basedir

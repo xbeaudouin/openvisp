@@ -55,18 +55,20 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.47 2005-05-29 15:57:23 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.48 2005-08-22 12:13:45 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.18rc1"
+#define VH_VERSION	"mod_vhs/1.0.18"
 
 /* 
  * Set this if you'd like to have looooots of debug
  */
+/*
 #define VH_DEBUG 1
+*/
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
@@ -846,8 +848,9 @@ static int vhs_translate_name(request_rec *r)
 		return DECLINED;
 	}
 
-	
+#ifdef WANT_VH_HOST	
 	apr_table_set(r->subprocess_env, "VH_HOST", host);
+#endif /* WANT_VH_HOST */
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
