@@ -13,15 +13,15 @@ Just give me a few days and i'll test it.
 So... here it is:
 
 1. In httpd.conf:
-LogFormat "%V %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\""
-vdbh_combined
+LogFormat "%{VH_GECOS}e %h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" vdbh_combined
 Which is exatly the same as:
 LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-except %V at the beginning.
+except %{VH_GECOS}e at the beginning.
+Don't use %V because it is the content of Host: HTTP header so it cannot be trusted.
 
 So for 'common':
 LogFormat "%h %l %u %t \"%r\" %>s %b" common
-LogFormat "%V %h %l %u %t \"%r\" %>s %b" vdbh_common
+LogFormat "%{VH_GECOS}e %h %l %u %t \"%r\" %>s %b" vdbh_common
 
 and so other...
 
