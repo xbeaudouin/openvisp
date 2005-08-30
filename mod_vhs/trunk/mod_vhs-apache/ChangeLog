@@ -1,3 +1,7 @@
+Since mod_vhs 1.0.xx
+--------------------
+o Try to fix struct passwd conficts. To be tested.
+
 Since mod_vhs 1.0.18
 --------------------
 o Removed VH_HOST variable since it is more or less unusuable and somewhat
