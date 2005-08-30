@@ -55,13 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.48 2005-08-22 12:13:45 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.49 2005-08-30 21:37:40 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.18"
+#define VH_VERSION	"mod_vhs/1.0.19"
 
 /* 
  * Set this if you'd like to have looooots of debug
@@ -119,6 +119,7 @@
  */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
+#define hpasswd passwd
 
 /* 
  * Include php support
@@ -144,7 +145,9 @@
 #endif
 
 #ifdef HAVE_UNIX_SUEXEC
+#undef passwd
 #include "unixd.h"              /* Contains the suexec_identity hook used on Unix */
+#define passwd hpasswd
 #endif
 
 /*
