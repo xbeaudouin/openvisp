@@ -1,6 +1,9 @@
 Since mod_vhs 1.0.xx
 --------------------
 o Try to fix struct passwd conficts. To be tested.
+o Added vhs_LogNotFound flag to enable / disable (disabled per default) logs
+  into apache error log when a host or a path is not found. Patch by 
+  Raphaël Jeudy.
 
 Since mod_vhs 1.0.18
 --------------------

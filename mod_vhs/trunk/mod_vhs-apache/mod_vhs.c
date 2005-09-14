@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.49 2005-08-30 21:37:40 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.50 2005-09-14 13:06:11 kiwi Exp $
 */
 
 /* 
@@ -117,6 +117,8 @@
 /*
  * Libhome stuff
  */
+#define	HOME_DONT_SUBSTITUTE_SYSTEM 1
+/* libhome compatibility */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
 #define hpasswd passwd
@@ -185,6 +187,7 @@ typedef struct {
 	unsigned short int 	append_basedir;	/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;	/* PHP display_error */
 	unsigned short int	default_rdr;	/* Default host redirect ? */
+	unsigned short int	log_notfound;	/* Log request for vhost/path is not found */
 
 	/* 
 	 * From mod_alias.c
@@ -264,6 +267,8 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->openbdir_path = (child->openbdir_path  ? child->openbdir_path  : parent->openbdir_path);
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
+
+	conf->log_notfound  = (child->log_notfound   ? child->log_notfound   : parent->log_notfound);
 
 	return conf;
 }
@@ -687,6 +692,14 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->append_basedir = 0;
 			}
 			break;
+		case 7:
+			if(flag) {
+				vhr->log_notfound = 1;
+			} else {
+				vhr->log_notfound = 0;
+			}
+			break;
+
 	}
 
 	return NULL;
@@ -836,18 +849,24 @@ static int vhs_translate_name(request_rec *r)
 					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",host, lhost, path);
 #endif
 				} else {
-					ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
+					if (vhr->log_notfound) {
+						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
+					}
 					return DECLINED;
 				}
 			}
 		} else {
-			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
+			if (vhr->log_notfound) {
+				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
+			}
 			return DECLINED;
 		}
 	}
 
 	if(path == NULL) {
-		ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s", host);
+		if (vhr->log_notfound) {
+			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s", host);
+		}
 		return DECLINED;
 	}
 
@@ -930,6 +949,7 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,    RSRC_CONF,"Allow redirect to default host instead of looking it localy" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
+	AP_INIT_FLAG("vhs_LogNotFound",			set_flag, (void*) 7,    RSRC_CONF,"Log on error log when host or path is not found." ),
 	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 4,    RSRC_CONF,"The default PHP open_basedir path." ),
         AP_INIT_TAKE2("vhs_Alias",			add_alias, NULL,        RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE2("vhs_ScriptAlias",		add_alias, "cgi-script",RSRC_CONF,"a fakename and a realname"),
