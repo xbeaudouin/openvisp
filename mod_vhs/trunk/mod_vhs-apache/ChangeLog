@@ -1,5 +1,6 @@
 Since mod_vhs 1.0.xx
 --------------------
+o Removed unused variables, and make some code cleanup
 o SuEXEC support has been removed because of conflict of structures
   between libhome and pwd.h (included by the needs of SuExec).
 o vhs_Default_Host, always use redirect now. The vhs_Default_Host_Redirect
