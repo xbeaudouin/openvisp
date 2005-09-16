@@ -38,6 +38,9 @@ server configuration block (ie <VirtualHost></VirtualHost>).
 
 EnableVHS:		Enable or Disable mod_vhs. Per default VHS is NOT
 			enabled.
+vhs_LogNotFound:	Enable or Disable logging into error log when
+			mod_vhs cannot find the hostname in database.
+			Per default this option is disabled.
 vhs_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
 			This option is not required, if not set the libhome
 			tage will be set to "mod_vhs".
@@ -47,15 +50,6 @@ vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
 			was received. This option is not required and usually
 			won't do anything because the Apache Web Server by
 			default catches these errors.
-vhs_Default_Host_redirect:
-			boolean (On / Off), default to Off.
-			If set, the mod_vhs module will issue a redirect 
-			instead of parsing the request into internal Apache
-			handler. If you use this option, then vhs_Default_Host
-			MUST have the correct URI protocol (eg http://the.domain.com/)
-			instead of only a plain host.
-			Also notice that there is *NO* tests against infinite
-			loops of redirects.
 vhs_Lamer :		boolean (On / Off), default to Off.
 			If set, this will enable "lamer mode" option to
 			allow people that always add an "www." to web

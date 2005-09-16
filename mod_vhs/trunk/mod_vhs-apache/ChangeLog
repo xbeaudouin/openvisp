@@ -1,5 +1,7 @@
 Since mod_vhs 1.0.xx
 --------------------
+o vhs_Default_Host, always use redirect now. The vhs_Default_Host_Redirect
+  configuration option is now removed
 o Try to fix struct passwd conficts. To be tested.
 o Added vhs_LogNotFound flag to enable / disable (disabled per default) logs
   into apache error log when a host or a path is not found. Patch by 
