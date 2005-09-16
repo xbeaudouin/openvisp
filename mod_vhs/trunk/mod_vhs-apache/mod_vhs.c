@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.52 2005-09-16 09:48:46 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.53 2005-09-16 12:44:45 kiwi Exp $
 */
 
 /* 
@@ -691,6 +691,9 @@ static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *pte
 	return OK;
 }
 
+/* 
+ * Used for redirect subsystem when a hostname is not found
+ */
 static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 {
 
@@ -706,61 +709,14 @@ static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 	return DECLINED;
 }
 
-static int vhs_translate_name(request_rec *r)
+/* Get the entries for hostname */
+static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
 {
-	ap_conf_vector_t *sconf = r->server->module_config;
-	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
-	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
-
-	char *path = NULL;
-	char *env = NULL;
-	char *ptr;
-	int i;
-	/* mod_alias like functions */
-	char *ret;
-	int status;
-	/* libhome */
 	struct passwd *p;
-
-	if (!vhr->enable) {
-		return DECLINED;
-	}
 #if	APR_HAS_THREADS
 	/* Thread stuff */
 	apr_status_t rv;
 #endif
-
-	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
-		if (ap_is_HTTP_REDIRECT(status)) {
-		/* include QUERY_STRING if any */
-			if (r->args) {
-				ret = apr_pstrcat(r->pool, ret, "?", r->args, NULL);
-			}
-			apr_table_setn(r->headers_out, "Location", ret);
-		}
-		return status;
-	}
-
-	if ((ret = try_alias_list(r, vhr->aliases, 0, &status)) != NULL) {
-		r->filename = ret;
-		return OK;
-	}
-
-	// I think this was for a 1.3 work around
-	if (r->uri[0] != '/' && r->uri[0] != '\0') {
-		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
-		return DECLINED;
-	}
-
-	/* If there is no Host: header given */	
-	if (r->hostname == NULL) {
-		return redirect_stuff(r,vhr);
-	}
-
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
-#endif /* VH_DEBUG */
-
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
@@ -782,13 +738,70 @@ static int vhs_translate_name(request_rec *r)
 #endif /* VH_DEBUG */
 	}
 
-	p=home_getpwnam(r->hostname);
+	p=home_getpwnam(host);
 
 #if APR_HAS_THREAD
 	apr_thread_mutex_unlock(mutex);
 #endif
+	return p;
+}
+
+static int vhs_translate_name(request_rec *r)
+{
+	ap_conf_vector_t *sconf = r->server->module_config;
+	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
+	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
+
+	char *path = NULL;
+	char *env = NULL;
+	char *ptr;
+	int i;
+	/* mod_alias like functions */
+	char *ret;
+	int status;
+	/* libhome */
+	struct passwd *p;
+
+	/* If VHS is not enabled, then don't process request */
+	if (!vhr->enable) {
+		return DECLINED;
+	}
+
+	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
+		if (ap_is_HTTP_REDIRECT(status)) {
+		/* include QUERY_STRING if any */
+			if (r->args) {
+				ret = apr_pstrcat(r->pool, ret, "?", r->args, NULL);
+			}
+			apr_table_setn(r->headers_out, "Location", ret);
+		}
+		return status;
+	}
+
+	if ((ret = try_alias_list(r, vhr->aliases, 0, &status)) != NULL) {
+		r->filename = ret;
+		return OK;
+	}
+
+	/* Avoid handling request that don't start with '/' */
+	if (r->uri[0] != '/' && r->uri[0] != '\0') {
+		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
+		return DECLINED;
+	}
+
+	/* If there is no Host: header given */	
+	if (r->hostname == NULL) {
+		return redirect_stuff(r,vhr);
+	}
+
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
+#endif /* VH_DEBUG */
+
+	p = get_home_stuff(r, vhr, (char *)r->hostname);
 
 	if(p!=NULL) {
+		/* Ok we have a path so we are sure we have a VHS host */
 		path = p->pw_dir;
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", r->hostname, path);
@@ -808,13 +821,7 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",r->hostname, lhost);
 #endif
-#if APR_HAS_THREAD
-				rv = apr_thread_mutex_lock(mutex);
-#endif
-				p=home_getpwnam(lhost);
-#if APR_HAS_THREAD
-				apr_thread_mutex_unlock(mutex);
-#endif
+				p = get_home_stuff(r, vhr, lhost);
 				if(p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
