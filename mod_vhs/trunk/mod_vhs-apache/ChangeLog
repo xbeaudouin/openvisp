@@ -1,3 +1,7 @@
+Since mod_vhs 1.0.xx
+--------------------
+o Added warning about Apache2 NameVirtualHost oddyty ...
+
 Since mod_vhs 1.0.20
 --------------------
 o Removed unused variables, and make some code cleanup
