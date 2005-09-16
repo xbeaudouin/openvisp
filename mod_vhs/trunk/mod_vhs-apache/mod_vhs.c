@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.51 2005-09-16 09:12:16 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.52 2005-09-16 09:48:46 kiwi Exp $
 */
 
 /* 
@@ -66,9 +66,9 @@
 /* 
  * Set this if you'd like to have looooots of debug
  */
-/*
+/* */
 #define VH_DEBUG 1
-*/
+/* */
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
@@ -121,7 +121,6 @@
 /* libhome compatibility */
 #define	DONT_SUBSTITUTE_SYSTEM 1
 #include <home/hpwd.h>
-#define hpasswd passwd
 
 /* 
  * Include php support
@@ -137,19 +136,6 @@
 #include <zend_ini.h>
 #include <zend_alloc.h>
 #include <zend_operators.h>
-#endif
-
-/* 
- * SUEXEC support
- */
-#if !defined(WIN32) && !defined(OS2) && !defined(BEOS) && !defined(NETWARE)
-#define HAVE_UNIX_SUEXEC
-#endif
-
-#ifdef HAVE_UNIX_SUEXEC
-#undef passwd
-#include "unixd.h"              /* Contains the suexec_identity hook used on Unix */
-#define passwd hpasswd
 #endif
 
 /*
@@ -186,7 +172,6 @@ typedef struct {
 	unsigned short int 	open_basedir;	/* PHP open_basedir */
 	unsigned short int 	append_basedir;	/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;	/* PHP display_error */
-	unsigned short int	default_rdr;	/* Default host redirect ? */
 	unsigned short int	log_notfound;	/* Log request for vhost/path is not found */
 
 	/* 
@@ -260,7 +245,6 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->lamer_mode    = (child->lamer_mode     ? child->lamer_mode     : parent->lamer_mode);
 	conf->safe_mode     = (child->safe_mode      ? child->safe_mode      : parent->safe_mode);
 	conf->open_basedir  = (child->open_basedir   ? child->open_basedir   : parent->open_basedir);
-	conf->default_rdr   = (child->default_rdr    ? child->default_rdr    : parent->default_rdr);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->enable        = (child->enable         ? child->enable         : parent->enable);
 	conf->append_basedir= (child->append_basedir ? child->append_basedir : parent->append_basedir);
@@ -664,13 +648,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->open_basedir = 0;
 			}
 			break;
-		case 3:
-			if(flag) {
-				vhr->default_rdr = 1;
-			} else {
-				vhr->default_rdr = 0;
-			}
-			break;
+		/* case 3: is not used anymore */
 		case 4:
 			if(flag) {
 				vhr->display_errors = 1;
@@ -713,13 +691,27 @@ static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *pte
 	return OK;
 }
 
+static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
+{
+
+	if (vhr->default_host) {
+		apr_table_setn(r->headers_out, "Location", vhr->default_host);
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: using a redirect to %s for %s", vhr->default_host, r->hostname);
+#endif
+		return HTTP_MOVED_TEMPORARILY;
+	}
+	/* Failsafe */
+	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
+	return DECLINED;
+}
+
 static int vhs_translate_name(request_rec *r)
 {
 	ap_conf_vector_t *sconf = r->server->module_config;
 	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
 	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
-	const char *host;
 	char *path = NULL;
 	char *env = NULL;
 	char *ptr;
@@ -759,34 +751,14 @@ static int vhs_translate_name(request_rec *r)
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
 		return DECLINED;
 	}
-	/* XXX: Use r->hostname instead of apr_table_get(stuff) */	
-	if (!(host = apr_table_get(r->headers_in, "Host"))) {
-		if (!vhr->default_host) {
-			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
-			return DECLINED;
-		}
-		else {
-			if(!vhr->default_rdr) {
-				host = vhr->default_host;
-			} else {
-				apr_table_setn(r->headers_out, "Location", vhr->default_host);
-#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: using a redirect to %s for %s", vhr->default_host, host);
-#endif
-				return HTTP_MOVED_TEMPORARILY;
-			}
-		}
-	}
 
-	/* DNS names are case insensitives */
-	apr_tolower(host);
-
-	if (ptr = strchr(host,':')) {
-		*ptr = '\0';
+	/* If there is no Host: header given */	
+	if (r->hostname == NULL) {
+		return redirect_stuff(r,vhr);
 	}
 
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
 #endif /* VH_DEBUG */
 
 	/*
@@ -810,7 +782,7 @@ static int vhs_translate_name(request_rec *r)
 #endif /* VH_DEBUG */
 	}
 
-	p=home_getpwnam(host);
+	p=home_getpwnam(r->hostname);
 
 #if APR_HAS_THREAD
 	apr_thread_mutex_unlock(mutex);
@@ -819,7 +791,7 @@ static int vhs_translate_name(request_rec *r)
 	if(p!=NULL) {
 		path = p->pw_dir;
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", r->hostname, path);
 #endif /* VH_DEBUG */
 
 	} else {
@@ -830,11 +802,11 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
 #endif
-			if( (strncasecmp(host,"www.",4) == 0) && (strlen(host) > 4) ) {
+			if( (strncasecmp(r->hostname,"www.",4) == 0) && (strlen(r->hostname) > 4) ) {
 				char *lhost;
-				lhost = apr_pstrdup( r->pool, host + 5-1);
+				lhost = apr_pstrdup( r->pool, r->hostname + 5-1);
 #ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",host, lhost);
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",r->hostname, lhost);
 #endif
 #if APR_HAS_THREAD
 				rv = apr_thread_mutex_lock(mutex);
@@ -846,32 +818,32 @@ static int vhs_translate_name(request_rec *r)
 				if(p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",host, lhost, path);
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",r->hostname, lhost, path);
 #endif
 				} else {
 					if (vhr->log_notfound) {
-						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
+						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", r->hostname, lhost);
 					}
-					return DECLINED;
+					return redirect_stuff(r, vhr);
 				}
 			}
 		} else {
 			if (vhr->log_notfound) {
-				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s", host);
+				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", r->hostname);
 			}
-			return DECLINED;
+			return redirect_stuff(r, vhr);
 		}
 	}
 
 	if(path == NULL) {
 		if (vhr->log_notfound) {
-			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s", host);
+			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", r->hostname);
 		}
-		return DECLINED;
+		return redirect_stuff(r, vhr);
 	}
 
 #ifdef WANT_VH_HOST	
-	apr_table_set(r->subprocess_env, "VH_HOST", host);
+	apr_table_set(r->subprocess_env, "VH_HOST", r->hostname);
 #endif /* WANT_VH_HOST */
 	apr_table_set(r->subprocess_env, "VH_PATH", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
@@ -880,7 +852,7 @@ static int vhs_translate_name(request_rec *r)
 	if(p->pw_class) {
 		r->server->server_admin = apr_pstrcat(r->pool,p->pw_class, NULL);
 	} else {
-		r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",host, NULL);
+		r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",r->hostname, NULL);
 	}
 	r->server->server_hostname = apr_pstrcat(r->pool,r->hostname,NULL);
 	r->parsed_uri.path = apr_pstrcat(r->pool, path,r->parsed_uri.path,NULL);
@@ -891,7 +863,7 @@ static int vhs_translate_name(request_rec *r)
 	conf->ap_document_root = apr_pstrcat(r->pool, path, NULL);
 
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", r->hostname, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 	if (vhr->safe_mode) {
@@ -946,7 +918,6 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_Lamer",			set_flag, (void*) 0,    RSRC_CONF,"Enable Lamer Friendly mode"),
 	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,    RSRC_CONF,"Enable PHP Safe Mode" ),
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,    RSRC_CONF,"Set PHP open_basedir to path" ),
-	AP_INIT_FLAG("vhs_Default_Host_Redirect",	set_flag, (void*) 3,    RSRC_CONF,"Allow redirect to default host instead of looking it localy" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
 	AP_INIT_FLAG("vhs_LogNotFound",			set_flag, (void*) 7,    RSRC_CONF,"Log on error log when host or path is not found." ),
@@ -968,31 +939,6 @@ static const command_rec vhs_commands[] = {
 	{ NULL }
 };
 
-#ifdef HAVE_UNIX_SUEXEC
-static ap_unix_identity_t *get_suexec_id_doer(const request_rec * r)
-{
-    ap_unix_identity_t *ugid = NULL;
-
-    const char *username = apr_table_get(r->notes, "mod_vhost_dbi_user");
-
-    if (username == NULL) {
-        return NULL;
-    }
-
-    if ((ugid = apr_palloc(r->pool, sizeof(ap_unix_identity_t *))) == NULL) {
-        return NULL;
-    }
-
-    if (apr_uid_get(&ugid->uid, &ugid->gid, username, r->pool) != APR_SUCCESS) {
-        return NULL;
-    }
-
-    ugid->userdir = 0;
-
-    return ugid;
-}
-#endif
-
 static void register_hooks(apr_pool_t *p)
 {
 	/* Modules that have to be loaded before mod_vhs */
@@ -1009,10 +955,6 @@ static void register_hooks(apr_pool_t *p)
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
 	apr_pool_cleanup_register(p, mutex, (void*)apr_thread_mutex_destroy,
                                   apr_pool_cleanup_null);
-#endif
-#ifdef HAVE_UNIX_SUEXEC
-	ap_hook_get_suexec_identity(get_suexec_id_doer, NULL, NULL,
-                                    APR_HOOK_FIRST + 1);
 #endif
 }
 
