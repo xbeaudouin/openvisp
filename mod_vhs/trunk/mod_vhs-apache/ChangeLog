@@ -1,5 +1,7 @@
 Since mod_vhs 1.0.xx
 --------------------
+o SuEXEC support has been removed because of conflict of structures
+  between libhome and pwd.h (included by the needs of SuExec).
 o vhs_Default_Host, always use redirect now. The vhs_Default_Host_Redirect
   configuration option is now removed
 o Try to fix struct passwd conficts. To be tested.
