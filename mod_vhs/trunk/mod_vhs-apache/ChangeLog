@@ -1,4 +1,4 @@
-Since mod_vhs 1.0.xx
+Since mod_vhs 1.0.20
 --------------------
 o Removed unused variables, and make some code cleanup
 o SuEXEC support has been removed because of conflict of structures

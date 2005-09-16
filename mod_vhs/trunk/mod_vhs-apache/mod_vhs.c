@@ -55,13 +55,13 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.54 2005-09-16 12:52:36 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.55 2005-09-16 17:13:51 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.19"
+#define VH_VERSION	"mod_vhs/1.0.20"
 
 /* 
  * Set this if you'd like to have looooots of debug
