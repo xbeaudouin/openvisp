@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.53 2005-09-16 12:44:45 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.54 2005-09-16 12:52:36 kiwi Exp $
 */
 
 /* 
@@ -753,9 +753,6 @@ static int vhs_translate_name(request_rec *r)
 	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
 	char *path = NULL;
-	char *env = NULL;
-	char *ptr;
-	int i;
 	/* mod_alias like functions */
 	char *ret;
 	int status;
