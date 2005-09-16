@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.50 2005-09-14 13:06:11 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.51 2005-09-16 09:12:16 kiwi Exp $
 */
 
 /* 
@@ -759,7 +759,7 @@ static int vhs_translate_name(request_rec *r)
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: declined %s no leading `/'", r->uri);
 		return DECLINED;
 	}
-	
+	/* XXX: Use r->hostname instead of apr_table_get(stuff) */	
 	if (!(host = apr_table_get(r->headers_in, "Host"))) {
 		if (!vhr->default_host) {
 			ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", host);
