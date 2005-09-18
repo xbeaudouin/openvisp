@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.56 2005-09-16 21:30:50 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.57 2005-09-18 19:50:32 kiwi Exp $
 */
 
 /* 
@@ -881,16 +881,19 @@ static int vhs_translate_name(request_rec *r)
 #endif /* VH_DEBUG */
 	}
 	if (vhr->open_basedir) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
-#endif /* VH_DEBUG */
 		if (vhr->append_basedir && vhr->openbdir_path) {
 			/* There is a default open_basedir path and configuration allow appending them */
 			char *obasedir_path;
 			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
 			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", obasedir_path);
+#endif /* VH_DEBUG */
 		} else {
 			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
+#endif /* VH_DEBUG */
 		}
 #ifdef VH_DEBUG
 	} else {

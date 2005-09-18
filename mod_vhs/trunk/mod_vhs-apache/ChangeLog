@@ -1,5 +1,6 @@
 Since mod_vhs 1.0.xx
 --------------------
+o Fixed debug for openbasedir stuff.
 o Added warning about Apache2 NameVirtualHost oddyty ...
 
 Since mod_vhs 1.0.20
