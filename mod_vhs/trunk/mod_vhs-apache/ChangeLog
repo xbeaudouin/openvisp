@@ -1,3 +1,6 @@
+Since mod_vhs 1.0.2x
+--------------------
+
 Since mod_vhs 1.0.22
 --------------------
 o Fixed openbasedir append function that didn't worked as it should.
