@@ -55,20 +55,20 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.57 2005-09-18 19:50:32 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.58 2005-09-19 09:47:16 kiwi Exp $
 */
 
 /* 
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.21"
+#define VH_VERSION	"mod_vhs/1.0.22"
 
 /* 
  * Set this if you'd like to have looooots of debug
  */
-/* */
+/*
 #define VH_DEBUG 1
-/* */
+*/
 
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
@@ -701,11 +701,13 @@ static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 		apr_table_setn(r->headers_out, "Location", vhr->default_host);
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: using a redirect to %s for %s", vhr->default_host, r->hostname);
-#endif
+#endif /* VH_DEBUG */
 		return HTTP_MOVED_TEMPORARILY;
 	}
 	/* Failsafe */
+#ifdef VH_DEBUG
 	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
+#endif /* VH_DEBUG */
 	return DECLINED;
 }
 
@@ -887,7 +889,7 @@ static int vhs_translate_name(request_rec *r)
 			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
 			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
 #ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", obasedir_path);
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s (appending mode)", obasedir_path);
 #endif /* VH_DEBUG */
 		} else {
 			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
@@ -928,7 +930,7 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
 	AP_INIT_FLAG("vhs_LogNotFound",			set_flag, (void*) 7,    RSRC_CONF,"Log on error log when host or path is not found." ),
-	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 4,    RSRC_CONF,"The default PHP open_basedir path." ),
+	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 3,    RSRC_CONF,"The default PHP open_basedir path." ),
         AP_INIT_TAKE2("vhs_Alias",			add_alias, NULL,        RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE2("vhs_ScriptAlias",		add_alias, "cgi-script",RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE23("vhs_Redirect",			add_redirect, (void *) HTTP_MOVED_TEMPORARILY,OR_FILEINFO,
