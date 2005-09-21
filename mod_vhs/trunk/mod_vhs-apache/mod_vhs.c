@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.60 2005-09-21 21:26:21 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.61 2005-09-21 21:40:05 kiwi Exp $
 */
 
 /* 
@@ -229,10 +229,10 @@ char **my_explode(request_rec *r, char *str, char separator)
 			newbuf = NULL;
 			newbuf = (char **) realloc(res, ++nbstr * sizeof (char *));
 			if (newbuf != res)  {
-			if (res) {
-				apr_pool_cleanup_kill(r->pool, res, (void*) free);
-				apr_pool_cleanup_register(r->pool, newbuff, (void*)free, apr_pool_cleanup_null);
-				res = newbuff;
+				if (res) 
+					apr_pool_cleanup_kill(r->pool, res, (void*) free);
+				apr_pool_cleanup_register(r->pool, newbuf, (void*)free, apr_pool_cleanup_null);
+				res = newbuf;
 			}
 			/* end of realloc stuff for apache */
 			res[nbstr - 2] = (char *) apr_palloc(r->pool, (i - from + 1) * sizeof (char));
