@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.59 2005-09-19 09:56:24 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.60 2005-09-21 21:26:21 kiwi Exp $
 */
 
 /* 
@@ -207,6 +207,45 @@ typedef struct {
 /*
  * End of borrowin
  */
+
+/*
+ * Function to explodes caracters
+ */
+char **my_explode(request_rec *r, char *str, char separator)
+{
+	char **res = NULL;
+	int  nbstr = 1;
+	int  len;
+	int  from = 0;
+	int  i;
+	int  j;
+	char **newbuf = NULL;
+
+	res = (char **) apr_palloc(r->pool, sizeof (char *));
+	len = strlen(str);
+	for (i = 0; i <= len; ++i) {
+		if ((i == len) || (str[i] == separator)) {
+			/* res = (char **) realloc(res, ++nbstr * sizeof (char *)); */
+			newbuf = NULL;
+			newbuf = (char **) realloc(res, ++nbstr * sizeof (char *));
+			if (newbuf != res)  {
+			if (res) {
+				apr_pool_cleanup_kill(r->pool, res, (void*) free);
+				apr_pool_cleanup_register(r->pool, newbuff, (void*)free, apr_pool_cleanup_null);
+				res = newbuff;
+			}
+			/* end of realloc stuff for apache */
+			res[nbstr - 2] = (char *) apr_palloc(r->pool, (i - from + 1) * sizeof (char));
+			for (j = 0; j < (i - from); ++j)
+				res[nbstr - 2][j] = str[j + from];
+			res[nbstr - 2][i - from] = '\0';
+			from = i + 1;
+			++i;
+		}
+	}
+	res[nbstr - 1] =  NULL;
+	return res;
+}
 
 /*
  * Apache per server config structure
