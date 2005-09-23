@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.61 2005-09-21 21:40:05 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.62 2005-09-23 14:39:42 kiwi Exp $
 */
 
 /* 
@@ -165,14 +165,17 @@ typedef struct {
 	char			*path_prefix;	/* Prefix to add to path returned by libhome */
 	char			*default_host;	/* Default host to redirect to */
 
+	unsigned short int	lamer_mode;	/* Lamer friendly mode */
+	unsigned short int	log_notfound;	/* Log request for vhost/path is not found */
+
+#ifdef HAVE_MOD_PHP_SUPPORT
 	char			*openbdir_path;	/* PHP open_basedir default path */
 	
-	unsigned short int	lamer_mode;	/* Lamer friendly mode */
 	unsigned short int 	safe_mode;	/* PHP Safe mode */
 	unsigned short int 	open_basedir;	/* PHP open_basedir */
 	unsigned short int 	append_basedir;	/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;	/* PHP display_error */
-	unsigned short int	log_notfound;	/* Log request for vhost/path is not found */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 	/* 
 	 * From mod_alias.c
@@ -209,45 +212,6 @@ typedef struct {
  */
 
 /*
- * Function to explodes caracters
- */
-char **my_explode(request_rec *r, char *str, char separator)
-{
-	char **res = NULL;
-	int  nbstr = 1;
-	int  len;
-	int  from = 0;
-	int  i;
-	int  j;
-	char **newbuf = NULL;
-
-	res = (char **) apr_palloc(r->pool, sizeof (char *));
-	len = strlen(str);
-	for (i = 0; i <= len; ++i) {
-		if ((i == len) || (str[i] == separator)) {
-			/* res = (char **) realloc(res, ++nbstr * sizeof (char *)); */
-			newbuf = NULL;
-			newbuf = (char **) realloc(res, ++nbstr * sizeof (char *));
-			if (newbuf != res)  {
-				if (res) 
-					apr_pool_cleanup_kill(r->pool, res, (void*) free);
-				apr_pool_cleanup_register(r->pool, newbuf, (void*)free, apr_pool_cleanup_null);
-				res = newbuf;
-			}
-			/* end of realloc stuff for apache */
-			res[nbstr - 2] = (char *) apr_palloc(r->pool, (i - from + 1) * sizeof (char));
-			for (j = 0; j < (i - from); ++j)
-				res[nbstr - 2][j] = str[j + from];
-			res[nbstr - 2][i - from] = '\0';
-			from = i + 1;
-			++i;
-		}
-	}
-	res[nbstr - 1] =  NULL;
-	return res;
-}
-
-/*
  * Apache per server config structure
  */
 static void* vhs_create_server_config(apr_pool_t *p, server_rec *s)
@@ -278,20 +242,23 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	vhs_config_rec *child  = (vhs_config_rec *) childv;
 	vhs_config_rec *conf   = (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 	
+	conf->enable        = (child->enable         ? child->enable         : parent->enable);
 	conf->libhome_tag   = (child->libhome_tag    ? child->libhome_tag    : parent->libhome_tag);
 	conf->path_prefix   = (child->path_prefix    ? child->path_prefix    : parent->path_prefix);
 	conf->default_host  = (child->default_host   ? child->default_host   : parent->default_host);
 	conf->lamer_mode    = (child->lamer_mode     ? child->lamer_mode     : parent->lamer_mode);
+	conf->log_notfound  = (child->log_notfound   ? child->log_notfound   : parent->log_notfound);
+
+#ifdef HAVE_MOD_PHP_SUPPORT
 	conf->safe_mode     = (child->safe_mode      ? child->safe_mode      : parent->safe_mode);
 	conf->open_basedir  = (child->open_basedir   ? child->open_basedir   : parent->open_basedir);
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
-	conf->enable        = (child->enable         ? child->enable         : parent->enable);
 	conf->append_basedir= (child->append_basedir ? child->append_basedir : parent->append_basedir);
 	conf->openbdir_path = (child->openbdir_path  ? child->openbdir_path  : parent->openbdir_path);
+#endif /* HAVE_MOD_PHP_SUPPORT */
+
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects     = apr_array_append(p, child->redirects, parent->redirects);
-
-	conf->log_notfound  = (child->log_notfound   ? child->log_notfound   : parent->log_notfound);
 
 	return conf;
 }
@@ -649,9 +616,11 @@ static const char* set_field(cmd_parms *parms, void *mconfig, const char *arg)
 	  case 2:
 		vhr->default_host = apr_pstrdup(parms->pool, arg);
 		break;
+#ifdef HAVE_MOD_PHP_SUPPORT
 	  case 3:
 		vhr->openbdir_path = apr_pstrdup(parms->pool, arg);
 		break;
+#endif /* HAVE_MOD_PHP_SUPPORT */
 	}
 	
 	return NULL;
@@ -673,6 +642,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->lamer_mode = 0;
 			}
 			break;
+#ifdef HAVE_MOD_PHP_SUPPORT
 		case 1:
 			if(flag) {
 				vhr->safe_mode = 1;
@@ -695,6 +665,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->display_errors = 0;
 			}
 			break;
+#endif /* HAVE_MOD_PHP_SUPPORT */
 		case 5: 
 			if(flag) {
 				vhr->enable = 1;
@@ -702,6 +673,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->enable = 0;
 			}
 			break;
+#ifdef HAVE_MOD_PHP_SUPPORT
 		case 6:
 			if(flag) {
 				vhr->append_basedir = 1;
@@ -709,6 +681,7 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->append_basedir = 0;
 			}
 			break;
+#endif /* HAVE_MOD_PHP_SUPPORT */
 		case 7:
 			if(flag) {
 				vhr->log_notfound = 1;
@@ -739,18 +712,20 @@ static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 	if (vhr->default_host) {
 		apr_table_setn(r->headers_out, "Location", vhr->default_host);
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: using a redirect to %s for %s", vhr->default_host, r->hostname);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "redirect_stuff: using a redirect to %s for %s", vhr->default_host, r->hostname);
 #endif /* VH_DEBUG */
 		return HTTP_MOVED_TEMPORARILY;
 	}
 	/* Failsafe */
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "vhs_translate_name: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
+	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "redirect_stuff: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
 #endif /* VH_DEBUG */
 	return DECLINED;
 }
 
-/* Get the entries for hostname */
+/*
+ * Get libhome the entries for hostname
+ */
 static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
 {
 	struct passwd *p;
@@ -770,12 +745,12 @@ static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *
 	if (vhr->libhome_tag) {
 		setpwtag(vhr->libhome_tag);
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: setpwtag set %s", vhr->libhome_tag);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set %s", vhr->libhome_tag);
 #endif /* VH_DEBUG */
 	} else {
 		setpwtag("mod_vhs");
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: setpwtag set %s", "mod_vhs");
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set %s", "mod_vhs");
 #endif /* VH_DEBUG */
 	}
 
@@ -786,6 +761,55 @@ static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *
 #endif
 	return p;
 }
+
+#ifdef HAVE_MOD_PHP_SUPPORT
+/*
+ * This function will configure on the fly the php like php.ini will do
+ */
+static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path)
+{
+	if (vhr->safe_mode) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode engaged");
+#endif /* VH_DEBUG */
+		zend_alter_ini_entry("safe_mode", 10, "1", 1, 4, 16);
+#ifdef VH_DEBUG
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode inactive, defaulting to php.ini values");
+#endif /* VH_DEBUG */
+	}
+	if (vhr->open_basedir) {
+		if (vhr->append_basedir && vhr->openbdir_path) {
+			/* There is a default open_basedir path and configuration allow appending them */
+			char *obasedir_path;
+			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
+			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s (appending mode)", obasedir_path);
+#endif /* VH_DEBUG */
+		} else {
+			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s", path);
+#endif /* VH_DEBUG */
+		}
+#ifdef VH_DEBUG
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir inactive defaulting to php.ini values");
+#endif /* VH_DEBUG */
+	}
+	if (vhr->display_errors) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors engaged");
+#endif /* VH_DEBUG */
+		zend_alter_ini_entry("display_errors", 10, "1", 1, 4, 16);
+#ifdef VH_DEBUG
+	} else {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors inactive defaulting to php.ini values");
+#endif /* VH_DEBUG */
+	}
+}
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 static int vhs_translate_name(request_rec *r)
 {
@@ -911,46 +935,7 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", r->hostname, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	if (vhr->safe_mode) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode engaged");
-#endif /* VH_DEBUG */
-		zend_alter_ini_entry("safe_mode", 10, "1", 1, 4, 16);
-#ifdef VH_DEBUG
-	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP safe_mode inactive, defaulting to php.ini values");
-#endif /* VH_DEBUG */
-	}
-	if (vhr->open_basedir) {
-		if (vhr->append_basedir && vhr->openbdir_path) {
-			/* There is a default open_basedir path and configuration allow appending them */
-			char *obasedir_path;
-			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
-			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
-#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s (appending mode)", obasedir_path);
-#endif /* VH_DEBUG */
-		} else {
-			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
-#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir set to %s", path);
-#endif /* VH_DEBUG */
-		}
-#ifdef VH_DEBUG
-	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP open_basedir inactive defaulting to php.ini values");
-#endif /* VH_DEBUG */
-	}
-	if (vhr->display_errors) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP display_errors engaged");
-#endif /* VH_DEBUG */
-		zend_alter_ini_entry("display_errors", 10, "1", 1, 4, 16);
-#ifdef VH_DEBUG
-	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: PHP display_errors inactive defaulting to php.ini values");
-#endif /* VH_DEBUG */
-	}
+	vhs_php_config(r, vhr, path);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 	return OK;
 }
@@ -964,12 +949,16 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_TAKE1("vhs_Path_Prefix",		set_field,(void*) 1,    RSRC_CONF,"Set path prefix." ),
 	AP_INIT_TAKE1("vhs_Default_Host",		set_field,(void*) 2,    RSRC_CONF,"Set default host if HTTP/1.1 is not used." ),
 	AP_INIT_FLAG("vhs_Lamer",			set_flag, (void*) 0,    RSRC_CONF,"Enable Lamer Friendly mode"),
+	AP_INIT_FLAG("vhs_LogNotFound",			set_flag, (void*) 7,    RSRC_CONF,"Log on error log when host or path is not found." ),
+
+#ifdef HAVE_MOD_PHP_SUPPORT
 	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,    RSRC_CONF,"Enable PHP Safe Mode" ),
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,    RSRC_CONF,"Set PHP open_basedir to path" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
-	AP_INIT_FLAG("vhs_LogNotFound",			set_flag, (void*) 7,    RSRC_CONF,"Log on error log when host or path is not found." ),
 	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 3,    RSRC_CONF,"The default PHP open_basedir path." ),
+#endif /* HAVE_MOD_PHP_SUPPORT */
+
         AP_INIT_TAKE2("vhs_Alias",			add_alias, NULL,        RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE2("vhs_ScriptAlias",		add_alias, "cgi-script",RSRC_CONF,"a fakename and a realname"),
 	AP_INIT_TAKE23("vhs_Redirect",			add_redirect, (void *) HTTP_MOVED_TEMPORARILY,OR_FILEINFO,

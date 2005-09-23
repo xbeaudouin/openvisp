@@ -1,5 +1,7 @@
 Since mod_vhs 1.0.2x
 --------------------
+o Compile only what is needed. eg don't include php code or config
+  variables when PHP support is not compiled into.
 
 Since mod_vhs 1.0.22
 --------------------
