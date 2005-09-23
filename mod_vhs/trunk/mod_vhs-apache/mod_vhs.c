@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.62 2005-09-23 14:39:42 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.63 2005-09-23 15:11:23 kiwi Exp $
 */
 
 /* 
@@ -175,6 +175,7 @@ typedef struct {
 	unsigned short int 	open_basedir;	/* PHP open_basedir */
 	unsigned short int 	append_basedir;	/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;	/* PHP display_error */
+	unsigned short int	phpopt_fromdb;	/* Get PHP options from libhome */
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 	/* 
@@ -255,6 +256,7 @@ static void *vhs_merge_server_config(apr_pool_t *p, void *parentv, void *childv)
 	conf->display_errors= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->append_basedir= (child->append_basedir ? child->append_basedir : parent->append_basedir);
 	conf->openbdir_path = (child->openbdir_path  ? child->openbdir_path  : parent->openbdir_path);
+	conf->phpopt_fromdb = (child->phpopt_fromdb  ? child->phpopt_fromdb  : parent->phpopt_fromdb);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 	conf->aliases       = apr_array_append(p, child->aliases, parent->aliases);
@@ -657,7 +659,13 @@ static const char* set_flag (cmd_parms *parms, void *mconfig, int flag)
 				vhr->open_basedir = 0;
 			}
 			break;
-		/* case 3: is not used anymore */
+		case 3:
+			if(flag) {
+				vhr->phpopt_fromdb = 1;
+			} else {
+				vhr->phpopt_fromdb = 0;
+			}
+			break;
 		case 4:
 			if(flag) {
 				vhr->display_errors = 1;
@@ -766,8 +774,11 @@ static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *
 /*
  * This function will configure on the fly the php like php.ini will do
  */
-static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path)
+static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd)
 {
+	/*
+	 * vhs_PHPsafe_mode support
+	 */
 	if (vhr->safe_mode) {
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode engaged");
@@ -778,6 +789,12 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path)
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode inactive, defaulting to php.ini values");
 #endif /* VH_DEBUG */
 	}
+
+	/*
+	 * vhs_PHPopen_baserdir    \
+	 * vhs_append_open_basedir |  support
+	 * vhs_open_basedir_path   /
+	 */
 	if (vhr->open_basedir) {
 		if (vhr->append_basedir && vhr->openbdir_path) {
 			/* There is a default open_basedir path and configuration allow appending them */
@@ -798,6 +815,10 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path)
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir inactive defaulting to php.ini values");
 #endif /* VH_DEBUG */
 	}
+
+	/*
+	 * vhs_PHPdisplay_errors support
+	 */
 	if (vhr->display_errors) {
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors engaged");
@@ -807,6 +828,29 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path)
 	} else {
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors inactive defaulting to php.ini values");
 #endif /* VH_DEBUG */
+	}
+
+	/*
+	 * vhs_PHPopt_fromdb
+	 */
+	if (vhr->phpopt_fromdb) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP from DB engaged");
+#endif /* VH_DEBUG */
+		char *retval1, *retval2;
+		char *state;
+		char *myphpoptions;
+
+		myphpoptions = apr_pstrdup( r->pool, passwd);
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
+#endif /* VH_DEBUG */
+
+		while((retval1 = apr_strtok(myphpoptions, ";", &state)) != NULL) {
+#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Line => %s", retval1);
+#endif /* VH_DEBUG */
+		}
 	}
 }
 #endif /* HAVE_MOD_PHP_SUPPORT */
@@ -935,7 +979,7 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", r->hostname, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	vhs_php_config(r, vhr, path);
+	vhs_php_config(r, vhr, path, (char *)p->pw_passwd);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 	return OK;
 }
