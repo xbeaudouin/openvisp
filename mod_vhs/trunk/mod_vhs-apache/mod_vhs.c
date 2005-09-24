@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.65 2005-09-24 14:57:28 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.66 2005-09-24 15:08:14 kiwi Exp $
 */
 
 /* 
@@ -963,9 +963,10 @@ static int vhs_translate_name(request_rec *r)
 #ifdef WANT_VH_HOST	
 	apr_table_set(r->subprocess_env, "VH_HOST", r->hostname);
 #endif /* WANT_VH_HOST */
-	apr_table_set(r->subprocess_env, "VH_PATH", vhr->path_prefix ? vhr->path_prefix : "", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
-	apr_table_set(r->subprocess_env, "SERVER_ROOT", vhr->path_prefix ? vhr->path_prefix : "", path);
+	/* XXX: handle vhr_Path_Prefix here (vhr->path_prefix ? blah : ""); */
+	apr_table_set(r->subprocess_env, "VH_PATH", path);
+	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
 
 	if(p->pw_class) {
 		r->server->server_admin = apr_pstrcat(r->pool,p->pw_class, NULL);
