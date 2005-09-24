@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.64 2005-09-24 10:16:30 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.65 2005-09-24 14:57:28 kiwi Exp $
 */
 
 /* 
@@ -799,7 +799,12 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 		if (vhr->append_basedir && vhr->openbdir_path) {
 			/* There is a default open_basedir path and configuration allow appending them */
 			char *obasedir_path;
-			obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
+
+			if (vhr->path_prefix) {
+				obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", vhr->path_prefix, path, NULL);
+			} else {
+				obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
+			}
 			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
 #ifdef VH_DEBUG
 			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s (appending mode)", obasedir_path);
@@ -958,9 +963,9 @@ static int vhs_translate_name(request_rec *r)
 #ifdef WANT_VH_HOST	
 	apr_table_set(r->subprocess_env, "VH_HOST", r->hostname);
 #endif /* WANT_VH_HOST */
-	apr_table_set(r->subprocess_env, "VH_PATH", path);
+	apr_table_set(r->subprocess_env, "VH_PATH", vhr->path_prefix ? vhr->path_prefix : "", path);
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
-	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+	apr_table_set(r->subprocess_env, "SERVER_ROOT", vhr->path_prefix ? vhr->path_prefix : "", path);
 
 	if(p->pw_class) {
 		r->server->server_admin = apr_pstrcat(r->pool,p->pw_class, NULL);
@@ -973,7 +978,11 @@ static int vhs_translate_name(request_rec *r)
 	r->parsed_uri.hostinfo = r->server->server_hostname;	
 
 	/* document_root */
-	conf->ap_document_root = apr_pstrcat(r->pool, path, NULL);
+	if (vhr->path_prefix) {
+		conf->ap_document_root = apr_pstrcat(r->pool, vhr->path_prefix, path, NULL);
+	} else {
+		conf->ap_document_root = apr_pstrcat(r->pool, path, NULL);
+	}
 
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", r->hostname, r->uri, r->filename);

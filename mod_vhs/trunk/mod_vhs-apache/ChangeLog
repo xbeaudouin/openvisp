@@ -1,5 +1,6 @@
 Since mod_vhs 1.0.2x
 --------------------
+o Fix some missing path values when used vhr_Path_Prefix
 o Compile only what is needed. eg don't include php code or config
   variables when PHP support is not compiled into.
 
