@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.63 2005-09-23 15:11:23 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.64 2005-09-24 10:16:30 kiwi Exp $
 */
 
 /* 
@@ -998,6 +998,7 @@ static const command_rec vhs_commands[] = {
 #ifdef HAVE_MOD_PHP_SUPPORT
 	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,    RSRC_CONF,"Enable PHP Safe Mode" ),
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,    RSRC_CONF,"Set PHP open_basedir to path" ),
+	AP_INIT_FLAG("vhs_PHPopt_fromdb",		set_flag, (void*) 2,    RSRC_CONF,"Gets PHP options from db/libhome" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
 	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 3,    RSRC_CONF,"The default PHP open_basedir path." ),
