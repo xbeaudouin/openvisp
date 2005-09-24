@@ -50,6 +50,8 @@ vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
 			was received. This option is not required and usually
 			won't do anything because the Apache Web Server by
 			default catches these errors.
+			Since we use internaly HTTP Rediect you MUST use 
+			an URI.
 vhs_Lamer :		boolean (On / Off), default to Off.
 			If set, this will enable "lamer mode" option to
 			allow people that always add an "www." to web
@@ -160,7 +162,7 @@ apache2 configuration file will look for jb.kazar.net files in
 NameVirtualHost 10.1.2.3
 
 <VirtualHost 10.1.2.3>
-    vhs_Default_Host devnull.oav.net
+    vhs_Default_Host http://devnull.oav.net
 </VirtualHost>
 
 Other handlers should still work accordingly.  mod_vhs declares its
@@ -168,7 +170,7 @@ translate_name phase as AP_HOOK_FIRST so it can run before other translations.
 An example configuration allowing mod_tcl in specific directories follows.
 
 <VirtualHost 10.2.3.4>
-    vhs_Default_Host devnull.oav.net
+    vhs_Default_Host http://devnull.oav.net
 
     <Directory /hosting/http/j/b/k/jb.kazar.net>
         AddHandler tcl-handler tm
@@ -180,14 +182,14 @@ An example configuration allowing mod_tcl in specific directories follows.
 With PHP support you can do also :
 
 <VirtualHost 1.2.3.4>
-   vhs_Default_Host www.mydomain.com
+   vhs_Default_Host http://www.mydomain.com
    vhs_PHPsafe_mode On
    vhs_PHPopen_basedir On
 </VirtualHost>
 
 
 <VirtualHost 1.2.3.5>
-   vhs_Default_Host www.mydomain.com
+   vhs_Default_Host http://www.mydomain.com
    vhs_PHPsafe_mode Off
    vhs_PHPopen_basedir Off
 </VirtualHost>
