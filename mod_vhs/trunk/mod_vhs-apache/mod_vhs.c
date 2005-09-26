@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.66 2005-09-24 15:08:14 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.67 2005-09-26 08:46:47 kiwi Exp $
 */
 
 /* 
@@ -842,7 +842,7 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 #ifdef VH_DEBUG
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP from DB engaged");
 #endif /* VH_DEBUG */
-		char *retval1, *retval2;
+		char *retval;
 		char *state;
 		char *myphpoptions;
 
@@ -851,10 +851,19 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
 #endif /* VH_DEBUG */
 
-		while((retval1 = apr_strtok(myphpoptions, ";", &state)) != NULL) {
+		retval = apr_strtok(myphpoptions, ";", &state);
+		while(retval != NULL) {
+			char *key = NULL;
+			char *val = NULL;
+			char *strtokstate = NULL;
+
+			key = apr_strtok(retval, "=", &strtokstate);
+			val = apr_strtok(NULL, "=", &strtokstate);
 #ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Line => %s", retval1);
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
 #endif /* VH_DEBUG */
+			zend_alter_ini_entry(key, strlen(key) + 1, val, strlen(val), 4, 16);
+			retval = apr_strtok(NULL, ";", &state);
 		}
 	}
 }
@@ -1008,7 +1017,7 @@ static const command_rec vhs_commands[] = {
 #ifdef HAVE_MOD_PHP_SUPPORT
 	AP_INIT_FLAG("vhs_PHPsafe_mode",		set_flag, (void*) 1,    RSRC_CONF,"Enable PHP Safe Mode" ),
 	AP_INIT_FLAG("vhs_PHPopen_basedir",		set_flag, (void*) 2,    RSRC_CONF,"Set PHP open_basedir to path" ),
-	AP_INIT_FLAG("vhs_PHPopt_fromdb",		set_flag, (void*) 2,    RSRC_CONF,"Gets PHP options from db/libhome" ),
+	AP_INIT_FLAG("vhs_PHPopt_fromdb",		set_flag, (void*) 3,    RSRC_CONF,"Gets PHP options from db/libhome" ),
 	AP_INIT_FLAG("vhs_PHPdisplay_errors",		set_flag, (void*) 4,    RSRC_CONF,"Enable PHP display_errors" ),
 	AP_INIT_FLAG("vhs_append_open_basedir",		set_flag, (void*) 6,    RSRC_CONF,"Append homedir path to PHP open_basedir to vhs_open_basedir_path." ),
 	AP_INIT_TAKE1("vhs_open_basedir_path",		set_field,(void*) 3,    RSRC_CONF,"The default PHP open_basedir path." ),
