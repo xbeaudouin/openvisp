@@ -1,4 +1,4 @@
-Since mod_vhs 1.0.2x
+Since mod_vhs 1.0.24
 --------------------
 o Fix wrong paths and informations sent to apache / environment variables
   when vhs_Path_Prefix is used.
