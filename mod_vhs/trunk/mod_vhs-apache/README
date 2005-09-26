@@ -66,7 +66,7 @@ vhs_PHPopen_basedir :	boolean (On / Off), default Off.
 			support, it will set open_basedir to the home 
 			directory given by libhome/mod_vhs otherwise php.ini
 			defaults will be used.
-vhs_open_basedir_path:	string. The open_basedir path that will be used to
+vhs_open_basedir_path :	string. The open_basedir path that will be used to
 			be set when vhs_PHPopen_basedir is set AND 
 			vhs_append_open_basedir.
 vhs_append_open_basedir:boolean (On / Off), default Off.
@@ -78,6 +78,11 @@ vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will enable display_errors to be shown,
 			otherwise php.ini defaults will be used.
+vhs_PHPopt_fromdb :	boolean (On / Off), default Off,
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will alter PHP configuration using
+			libhome passwd unused field. See README.phpopt
+			for more detailed example.
 vhs_Alias, vhs_ScriptAlias, vhs_ScriptAliasMatch, vhs_RedirectTemp and
 vhs_RedirectPermanent :	mod_alias 100% compatible options inside mod_vhs.
 			Please see http://httpd.apache.org/docs-2.0/mod_alias.html
