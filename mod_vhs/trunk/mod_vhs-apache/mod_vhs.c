@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.67 2005-09-26 08:46:47 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.68 2005-09-26 14:06:02 kiwi Exp $
 */
 
 /* 
@@ -973,9 +973,14 @@ static int vhs_translate_name(request_rec *r)
 	apr_table_set(r->subprocess_env, "VH_HOST", r->hostname);
 #endif /* WANT_VH_HOST */
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
-	/* XXX: handle vhr_Path_Prefix here (vhr->path_prefix ? blah : ""); */
-	apr_table_set(r->subprocess_env, "VH_PATH", path);
-	apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+	/* Do we have handle vhr_Path_Prefix here ? */
+	if(vhr->path_prefix) {
+		apr_table_set(r->subprocess_env, "VH_PATH", apr_pstrcat(r->pool,vhr->path_prefix,path,NULL));
+		apr_table_set(r->subprocess_env, "SERVER_ROOT", apr_pstrcat(r->pool,vhr->path_prefix,path,NULL));
+	} else {
+		apr_table_set(r->subprocess_env, "VH_PATH", path);
+		apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+	}
 
 	if(p->pw_class) {
 		r->server->server_admin = apr_pstrcat(r->pool,p->pw_class, NULL);
@@ -983,7 +988,7 @@ static int vhs_translate_name(request_rec *r)
 		r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",r->hostname, NULL);
 	}
 	r->server->server_hostname = apr_pstrcat(r->pool,r->hostname,NULL);
-	r->parsed_uri.path = apr_pstrcat(r->pool, path,r->parsed_uri.path,NULL);
+	r->parsed_uri.path = apr_pstrcat(r->pool, vhr->path_prefix ? vhr->path_prefix : "" , path,r->parsed_uri.path,NULL);
 	r->parsed_uri.hostname = r->server->server_hostname;	
 	r->parsed_uri.hostinfo = r->server->server_hostname;	
 

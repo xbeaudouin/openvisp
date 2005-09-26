@@ -1,5 +1,7 @@
 Since mod_vhs 1.0.2x
 --------------------
+o Fix wrong paths and informations sent to apache / environment variables
+  when vhs_Path_Prefix is used.
 o PHP can be configured now using "passwd" libhome field.
 o Fix some missing path values when used vhr_Path_Prefix
 o Compile only what is needed. eg don't include php code or config
