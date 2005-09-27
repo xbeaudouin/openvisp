@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.70 2005-09-26 17:55:40 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.71 2005-09-27 16:21:09 kiwi Exp $
 */
 
 /* 
@@ -758,7 +758,7 @@ static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *
 	} else {
 		setpwtag("mod_vhs");
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set %s", "mod_vhs");
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set default mod_vhs");
 #endif /* VH_DEBUG */
 	}
 
@@ -918,7 +918,8 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
 #endif /* VH_DEBUG */
 
-	p = get_home_stuff(r, vhr, (char *)r->hostname);
+	//p = get_home_stuff(r, vhr, (char *)r->hostname);
+	p = get_home_stuff(r, vhr, r->hostname);
 
 	if(p!=NULL) {
 		/* Ok we have a path so we are sure we have a VHS host */
