@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.72 2005-09-28 19:15:10 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.73 2005-09-28 21:01:36 kiwi Exp $
 */
 
 /* 
@@ -734,7 +734,7 @@ static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 /*
  * Get libhome the entries for hostname
  */
-static struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
+struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
 {
 	struct passwd *p;
 #if	APR_HAS_THREADS
@@ -927,8 +927,7 @@ static int vhs_translate_name(request_rec *r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
 #endif /* VH_DEBUG */
 
-	//p = get_home_stuff(r, vhr, (char *)r->hostname);
-	p = get_home_stuff(r, vhr, r->hostname);
+	p = get_home_stuff(r, vhr, (char *)r->hostname);
 
 	if(p!=NULL) {
 		/* Ok we have a path so we are sure we have a VHS host */
