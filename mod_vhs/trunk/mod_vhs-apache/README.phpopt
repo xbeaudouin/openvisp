@@ -68,9 +68,13 @@ The format is :
 With <parameter> = php.ini parameter (like safe_mode for example)
      <value>     = php.ini value of this parameter (On for example)
 
-WARNING : you MUST NOT add space or forgot a ";" at the end of ligne
-          CR / LF are passed as is to PHP. So double check the entries
-          in database.
+WARNING 1 : you MUST NOT add space or forgot a ";" at the end of ligne
+            CR / LF are passed as is to PHP. So double check the entries
+            in database.
+WARNING 2 : If you don't have anything in you "passwd" entry libhome
+            will not return anything from DB because this can be
+            a null password. So add an default string when php options are
+            not used (like for example "*").
 
 vhs_PHPopt_fromdb full example
 ------------------------------
@@ -152,4 +156,4 @@ vhs_PHPopt_fromdb can only configure php.ini values like foo=value, but it
 cannot configure specific section of php.ini (eg [mysql] for example). So
 you'll have to keep that in mind when designing your system.
 
-$Id: README.phpopt,v 1.1 2005-09-26 09:31:58 kiwi Exp $
+$Id: README.phpopt,v 1.2 2005-09-28 20:41:31 kiwi Exp $
