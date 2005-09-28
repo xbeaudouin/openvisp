@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.71 2005-09-27 16:21:09 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.72 2005-09-28 19:15:10 kiwi Exp $
 */
 
 /* 
@@ -851,20 +851,29 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
 #endif /* VH_DEBUG */
 
-		retval = apr_strtok(myphpoptions, ";", &state);
-		while(retval != NULL) {
-			char *key = NULL;
-			char *val = NULL;
-			char *strtokstate = NULL;
+		if( (apr_strchr(myphpoptions, ';') != NULL) && (apr_strchr(myphpoptions,'=') != NULL) ) {
+			/* Getting values for PHP there so we can proceed */
 
-			key = apr_strtok(retval, "=", &strtokstate);
-			val = apr_strtok(NULL, "=", &strtokstate);
+			retval = apr_strtok(myphpoptions, ";", &state);
+			while(retval != NULL) {
+				char *key = NULL;
+				char *val = NULL;
+				char *strtokstate = NULL;
+
+				key = apr_strtok(retval, "=", &strtokstate);
+				val = apr_strtok(NULL, "=", &strtokstate);
 #ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
 #endif /* VH_DEBUG */
-			zend_alter_ini_entry(key, strlen(key) + 1, val, strlen(val), 4, 16);
-			retval = apr_strtok(NULL, ";", &state);
+				zend_alter_ini_entry(key, strlen(key) + 1, val, strlen(val), 4, 16);
+				retval = apr_strtok(NULL, ";", &state);
+			}
 		}
+#ifdef VH_DEBUG
+		else {
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: no PHP stuff found.");
+		}
+#endif /* VH_DEBUG */
 	}
 }
 #endif /* HAVE_MOD_PHP_SUPPORT */

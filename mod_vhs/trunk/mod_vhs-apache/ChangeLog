@@ -1,5 +1,6 @@
 Since mod_vhs 1.0.2x
 --------------------
+o Fixed a segfault when php entries are not corrects.
 
 Since mod_vhs 1.0.24
 --------------------
