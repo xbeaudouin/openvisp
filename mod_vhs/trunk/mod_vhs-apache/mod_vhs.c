@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.74 2005-09-30 12:20:28 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.75 2005-09-30 15:09:57 kiwi Exp $
 */
 
 /* 
@@ -896,18 +896,21 @@ static int vhs_translate_name(request_rec *r)
 	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
 	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
+	const char *host;
 	char *path = NULL;
 	/* mod_alias like functions */
 	char *ret;
 	int status;
 	/* libhome */
 	struct passwd *p;
+	char *ptr;
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
 		return DECLINED;
 	}
 
+	/* Handle alias stuff */
 	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
 		if (ap_is_HTTP_REDIRECT(status)) {
 		/* include QUERY_STRING if any */
@@ -930,22 +933,32 @@ static int vhs_translate_name(request_rec *r)
 		return DECLINED;
 	}
 
+	if(!(host=apr_table_get(r->headers_in, "Host"))) {
+		return vhs_redirect_stuff(r, vhr);
+	}
+	if(ptr = ap_strchr(host, ':')) {
+		*ptr = '\0';
+	}
+#if 0
 	/* If there is no Host: header given */	
 	if (r->hostname == NULL) {
 		return vhs_redirect_stuff(r,vhr);
+	} else {
+		host = r->hostname;
 	}
+#endif
 
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif /* VH_DEBUG */
 
-	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
+	p = vhs_get_home_stuff(r, vhr,(char *) host);
 
 	if(p!=NULL) {
 		/* Ok we have a path so we are sure we have a VHS host */
 		path = p->pw_dir;
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", r->hostname, path);
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
 #endif /* VH_DEBUG */
 
 	} else {
@@ -956,28 +969,28 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
 #endif
-			if( (strncasecmp(r->hostname,"www.",4) == 0) && (strlen(r->hostname) > 4) ) {
+			if( (strncasecmp(host,"www.",4) == 0) && (strlen(host) > 4) ) {
 				char *lhost;
-				lhost = apr_pstrdup( r->pool, r->hostname + 5-1);
+				lhost = apr_pstrdup( r->pool, host + 5-1);
 #ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",r->hostname, lhost);
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",host, lhost);
 #endif
 				p = vhs_get_home_stuff(r, vhr, lhost);
 				if(p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",r->hostname, lhost, path);
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s",host, lhost, path);
 #endif
 				} else {
 					if (vhr->log_notfound) {
-						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", r->hostname, lhost);
+						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
 					}
 					return vhs_redirect_stuff(r, vhr);
 				}
 			}
 		} else {
 			if (vhr->log_notfound) {
-				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", r->hostname);
+				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", host);
 			}
 			return vhs_redirect_stuff(r, vhr);
 		}
@@ -985,13 +998,13 @@ static int vhs_translate_name(request_rec *r)
 
 	if(path == NULL) {
 		if (vhr->log_notfound) {
-			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", r->hostname);
+			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", host);
 		}
 		return vhs_redirect_stuff(r, vhr);
 	}
 
 #ifdef WANT_VH_HOST	
-	apr_table_set(r->subprocess_env, "VH_HOST", r->hostname);
+	apr_table_set(r->subprocess_env, "VH_HOST", host);
 #endif /* WANT_VH_HOST */
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	/* Do we have handle vhr_Path_Prefix here ? */
@@ -1008,7 +1021,7 @@ static int vhs_translate_name(request_rec *r)
 	} else {
 		r->server->server_admin = apr_pstrcat(r->pool,"webmaster@",r->hostname, NULL);
 	}
-	r->server->server_hostname = apr_pstrcat(r->pool,r->hostname,NULL);
+	r->server->server_hostname = apr_pstrcat(r->pool,host,NULL);
 	r->parsed_uri.path = apr_pstrcat(r->pool, vhr->path_prefix ? vhr->path_prefix : "" , path,r->parsed_uri.path,NULL);
 	r->parsed_uri.hostname = r->server->server_hostname;	
 	r->parsed_uri.hostinfo = r->server->server_hostname;	
@@ -1021,7 +1034,7 @@ static int vhs_translate_name(request_rec *r)
 	}
 
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", r->hostname, r->uri, r->filename);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 	vhs_php_config(r, vhr, path, (char *)p->pw_passwd);
