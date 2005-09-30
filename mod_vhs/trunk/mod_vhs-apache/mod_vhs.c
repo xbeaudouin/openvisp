@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.73 2005-09-28 21:01:36 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.74 2005-09-30 12:20:28 kiwi Exp $
 */
 
 /* 
@@ -714,7 +714,7 @@ static int vhs_init_handler(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *pte
 /* 
  * Used for redirect subsystem when a hostname is not found
  */
-static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
+static int vhs_redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 {
 
 	if (vhr->default_host) {
@@ -734,7 +734,7 @@ static int redirect_stuff(request_rec *r, vhs_config_rec *vhr)
 /*
  * Get libhome the entries for hostname
  */
-struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
+struct passwd *vhs_get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host) 
 {
 	struct passwd *p;
 #if	APR_HAS_THREADS
@@ -766,7 +766,19 @@ struct passwd *get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *host)
 
 #if APR_HAS_THREAD
 	apr_thread_mutex_unlock(mutex);
-#endif
+#endif /* APR_HAS_TREAD */
+
+#ifdef VH_DEBUG
+	if (p == NULL) {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned nothing");
+	} else {
+		if(p->pw_dir == NULL) {
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned NULL path");
+		} else {
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned \"%s\" path",p->pw_dir);
+		}
+	}
+#endif /* VH_DEBUG */
 	return p;
 }
 
@@ -851,7 +863,7 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
 #endif /* VH_DEBUG */
 
-		if( (apr_strchr(myphpoptions, ';') != NULL) && (apr_strchr(myphpoptions,'=') != NULL) ) {
+		if( (ap_strchr(myphpoptions, ';') != NULL) && (ap_strchr(myphpoptions,'=') != NULL) ) {
 			/* Getting values for PHP there so we can proceed */
 
 			retval = apr_strtok(myphpoptions, ";", &state);
@@ -920,14 +932,14 @@ static int vhs_translate_name(request_rec *r)
 
 	/* If there is no Host: header given */	
 	if (r->hostname == NULL) {
-		return redirect_stuff(r,vhr);
+		return vhs_redirect_stuff(r,vhr);
 	}
 
 #ifdef VH_DEBUG
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", r->hostname);
 #endif /* VH_DEBUG */
 
-	p = get_home_stuff(r, vhr, (char *)r->hostname);
+	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
 
 	if(p!=NULL) {
 		/* Ok we have a path so we are sure we have a VHS host */
@@ -950,7 +962,7 @@ static int vhs_translate_name(request_rec *r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s",r->hostname, lhost);
 #endif
-				p = get_home_stuff(r, vhr, lhost);
+				p = vhs_get_home_stuff(r, vhr, lhost);
 				if(p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
@@ -960,14 +972,14 @@ static int vhs_translate_name(request_rec *r)
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", r->hostname, lhost);
 					}
-					return redirect_stuff(r, vhr);
+					return vhs_redirect_stuff(r, vhr);
 				}
 			}
 		} else {
 			if (vhr->log_notfound) {
 				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", r->hostname);
 			}
-			return redirect_stuff(r, vhr);
+			return vhs_redirect_stuff(r, vhr);
 		}
 	}
 
@@ -975,7 +987,7 @@ static int vhs_translate_name(request_rec *r)
 		if (vhr->log_notfound) {
 			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", r->hostname);
 		}
-		return redirect_stuff(r, vhr);
+		return vhs_redirect_stuff(r, vhr);
 	}
 
 #ifdef WANT_VH_HOST	
