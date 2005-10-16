@@ -148,6 +148,15 @@ Listen 8000
   vhs_PHPopt_fromdb On
 </VirtualHost>
 
+IMPORTANT NOTE
+--------------
+
+Since mod_vhs use Zend functions to change the php ini values, you NEED
+to load mod_php *before* mod_vhs otherwise errors like :
+
+Syntax error on line 269 of /etc/apache/httpd.conf:
+Cannot load /usr/libexec/apache/mod_vhs.so into server: /usr/libexec/apache/mod_vhs.so: undefined symbol: zend_alter_ini_entry  
+
 
 Conclusion
 ----------
@@ -156,4 +165,4 @@ vhs_PHPopt_fromdb can only configure php.ini values like foo=value, but it
 cannot configure specific section of php.ini (eg [mysql] for example). So
 you'll have to keep that in mind when designing your system.
 
-$Id: README.phpopt,v 1.2 2005-09-28 20:41:31 kiwi Exp $
+$Id: README.phpopt,v 1.3 2005-10-16 10:02:53 kiwi Exp $
