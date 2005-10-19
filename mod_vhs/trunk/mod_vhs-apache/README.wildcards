@@ -8,4 +8,34 @@ fallback ^(.*)\.(.*)\.(.*)$  $2.$3
 This will support things like *.stuff.com if you have stuff.com in your 
 database/ldap sources.
 
+NOTE: 
+  Reports has said that sometimes regexp doesn't work as it should on mod_vhs
+  and still work on home_finger.
 
+  Problem is mostly due to undefined and still looked problem between apache
+  regexp, libhome regexp and some library symbol that have being "rewritten"
+  on apache.
+
+  To fix this problem the most recommended way is to use the proxy mode of
+  libhome (recent version of libhome does support that, if you don't have
+  support of proxy mode, then upgrade !!!!).
+
+  Quick howto use proxy mode with libhome :
+
+  1- copy your home.conf to home_proxy.conf
+  2- in home.conf replace all database system and values and set the mode :
+     mode proxy
+  3- in both files (home.conf and home_proxy.conf) add the line :
+     proxy_socket /tmp/home_proxy.sock
+     (adapt the file to your system)
+  4- Start home_proxy :
+     /usr/local/sbin/home_proxy -C /usr/local/etc/home_proxy.conf
+     You maybe need to add -u <uid> -g <gid> if your apache has problems
+     to access to proxy_socket file.
+
+  (This quick howto has been provided by Rémi Héluin that had wildcard problems
+   and give us this solution while we are looking inside libhome how to fix it).
+
+
+$Id: README.wildcards,v 1.2 2005-10-19 13:31:10 kiwi Exp $
+     

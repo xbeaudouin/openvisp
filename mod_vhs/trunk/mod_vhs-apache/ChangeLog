@@ -1,5 +1,6 @@
-Since mod_vhs 1.0.2x
+Since mod_vhs 1.0.26
 --------------------
+o Added note about regexp problems with libhome
 o Fixed a segfault when php entries are not corrects.
 
 Since mod_vhs 1.0.24
