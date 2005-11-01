@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.77 2005-10-19 13:45:57 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.78 2005-11-01 10:41:38 kiwi Exp $
 */
 
 /* 
@@ -68,6 +68,14 @@
  */
 /*
 #define VH_DEBUG 1
+*/
+
+/*
+ * Define this if you have Linux/Debian since it seems
+ * to have non standards includes 
+ */
+/*
+#define DEBIAN 1
 */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -200,7 +208,11 @@ typedef struct {
 #if APR_MAJOR_VERSION > 0
 	ap_regex_t *regexp;
 #else
+#ifdef DEBIAN
+	ap_regex_t *regexp;
+#else
 	regex_t *regexp;
+#endif /* DEBIAN */
 #endif
 	int redir_status;	/* 301, 302, 303, 410, etc... */
 } alias_entry;
@@ -364,7 +376,11 @@ static const char *add_redirect_internal(cmd_parms *cmd,
 #if APR_MAJOR_VERSION > 0
      ap_regex_t *r = NULL;
 #else
+#ifdef DEBIAN
+     ap_regex_t *r = NULL;
+#else
      regex_t *r = NULL;
+#endif /* DEBIAN */
 #endif
      const char *f = arg2;
      const char *url = arg3;
