@@ -55,7 +55,7 @@
  * originally written at the National Center for Supercomputing Applications,
  * University of Illinois, Urbana-Champaign.
  */
-/*  $Id: mod_vhs.c,v 1.78 2005-11-01 10:41:38 kiwi Exp $
+/*  $Id: mod_vhs.c,v 1.79 2005-11-29 22:15:24 kiwi Exp $
 */
 
 /* 
@@ -803,7 +803,12 @@ struct passwd *vhs_get_home_stuff(request_rec *r, vhs_config_rec *vhr, char *hos
  * This function will configure on the fly the php like php.ini will do
  */
 static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd)
-{
+{	
+	/* 
+	 * Some Basic PHP stuff, thank to Igor Popov module
+	 */
+	apr_table_set(r->subprocess_env, "PHP_DOCUMENT_ROOT", path);
+	zend_alter_ini_entry("doc_root", sizeof("doc_root"), path, strlen(path), 4, 1);
 	/*
 	 * vhs_PHPsafe_mode support
 	 */
@@ -908,18 +913,18 @@ static void vhs_php_config(request_rec *r, vhs_config_rec *vhr, char *path, char
 
 static int vhs_translate_name(request_rec *r)
 {
-	ap_conf_vector_t *sconf = r->server->module_config;
+	/* ap_conf_vector_t *sconf = r->server->module_config; */
 	vhs_config_rec *vhr = (vhs_config_rec*) ap_get_module_config(r->server->module_config, &vhs_module);
 	core_server_config * conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
-	const char *host;
+	const char *host = 0;
 	char *path = NULL;
 	/* mod_alias like functions */
-	char *ret;
-	int status;
+	char *ret = 0;
+	int status =0 ;
 	/* libhome */
 	struct passwd *p;
-	char *ptr;
+	char *ptr = 0;
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
@@ -1049,7 +1054,18 @@ static int vhs_translate_name(request_rec *r)
 		conf->ap_document_root = apr_pstrcat(r->pool, path, NULL);
 	}
 
+	/* if directory exist */
+	if (!ap_is_directory(r->pool, path)) {
+            ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server,
+                          "vhs_translate_name: homedir '%s' is not dir at all",path);
+            return DECLINED;
+        }
+
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
+
+	/* Avoid getting two // in filename */
+	ap_no2slash(r->filename);
+
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
