@@ -1,13 +1,14 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.3 2005-11-29 22:34:45 kiwi Exp $
+# $Id: Makefile,v 1.4 2005-11-29 22:36:19 kiwi Exp $
 #
 
+NAME = mod_vhs
 APXS = apxs
-SRCS = mod_vhs.c
-OBJS = mod_vhs.o
-APACHE_MODULE = mod_vhs.so
+SRCS = $(NAME).c
+OBJS = $(NAME).o
+APACHE_MODULE = $(NAME).so
 
 RM = rm -f
 LN = ln -sf
@@ -39,7 +40,7 @@ install: $(SRCS)
 	$(APXS) -i -a -c $(LDFLAGS) $(CFLAGS) $(SRCS)
 
 clean:
-	$(RM) $(OBJS) $(APACHE_MODULE)
+	$(RM) $(OBJS) $(APACHE_MODULE) $(NAME).slo $(NAME).lo $(NAME).la
 
 indent:
 	$(INDENT) $(SRCS)
