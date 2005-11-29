@@ -1,10 +1,9 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.2 2005-11-29 22:15:24 kiwi Exp $
+# $Id: Makefile,v 1.3 2005-11-29 22:34:45 kiwi Exp $
 #
 
-NAME = vhs
 APXS = apxs
 SRCS = mod_vhs.c
 OBJS = mod_vhs.o
@@ -34,13 +33,10 @@ LDFLAGS = -L/usr/local/lib -lhome
 
 default: all
 
-all: $(APACHE_MODULE)
+all: install
 
-$(APACHE_MODULE): $(SRCS)
-	$(APXS) -c $(CFLAGS) $(LDFLAGS) $(SRCS)
-
-install: all
-	$(APXS) -i -a -n $(NAME) $(APACHE_MODULE)
+install: $(SRCS)
+	$(APXS) -i -a -c $(LDFLAGS) $(CFLAGS) $(SRCS)
 
 clean:
 	$(RM) $(OBJS) $(APACHE_MODULE)
