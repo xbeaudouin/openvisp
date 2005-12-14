@@ -1,2 +1,0 @@
-# This compiles and install the module
-apxs -i -a -c -L/usr/local/lib -DVH_DEBUG -lhome mod_vhs.c

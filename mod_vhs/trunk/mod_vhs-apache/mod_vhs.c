@@ -52,13 +52,13 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.81 2005-12-14 08:45:30 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.82 2005-12-14 13:19:20 kiwi Exp $
  */
 
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.27"
+#define VH_VERSION	"mod_vhs/1.0.28"
 
 /*
  * Set this if you'd like to have looooots of debug

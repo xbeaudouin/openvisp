@@ -1,13 +1,21 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.6 2005-12-14 08:46:40 kiwi Exp $
+# $Id: Makefile,v 1.7 2005-12-14 13:19:20 kiwi Exp $
 #
 
-NAME = mod_vhs
+##
+## Have a look in this file the compilation / configuration options.
+##
+## If you are using Debian/GNU Linux, please double check the
+## specific updates for your OS.
+##
+
 # In general you can use apxs, but on debian you should use apxs2
-#APXS = apxs
-APXS = apxs2
+APXS = apxs
+#APXS = apxs2
+
+NAME = mod_vhs
 SRCS = $(NAME).c
 OBJS = $(NAME).o
 APACHE_MODULE = $(NAME).so
@@ -17,26 +25,32 @@ LN = ln -sf
 CP = cp -f
 INDENT = /usr/bin/indent
 
-# For debian users
-CFLAGS= -DDEBIAN -I/usr/include/apr-0
-#CFLAGS= -I/usr/include/apr-0
+# For debian users, you'll have to uncomment these of you will have
+# big errors under complilation. Don't ask me why, but debian apache2
+# is redefining strangely some headers.... :/
 
-# Uncomment one of these CFLAGS according of what kind of compilation
+#CFLAGS= -DDEBIAN -I/usr/include/apr-0
+
+# Uncomment only ONE of these CFLAGS according of what kind of compilation
 # you need with mod_vhs
 
 # Flags for compilation (Full PHP + Debug)
 #CFLAGS+= -I/usr/local/include -I/usr/local/include/php -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation (Full Debug)
-CFLAGS+= -I/usr/local/include/home -DVH_DEBUG -Wc,-Wall
+#CFLAGS+= -I/usr/local/include/home -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation with PHP
-#CFLAGS+= -I/usr/local/include/home -I/usr/local/include/php -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
+CFLAGS+= -I/usr/local/include/home -I/usr/local/include/php -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
 
 # Flags for compilation with only libhome
 #CFLAGS+= -I/usr/local/include/home -Wc,-Wall
 
 LDFLAGS = -L/usr/local/lib -lhome
+
+################################################################
+### End of user configuration directives
+################################################################
 
 default: all
 

@@ -1,6 +1,7 @@
-Since mod_vhs 1.0.27
+Since mod_vhs 1.0.28
 --------------------
-o Try to fix mod_vhs compilation under Debian...
+o Added Makefile instead of using scripts
+o Now mod_vhs should compile correctly under Debian/SARGE
 
 Since mod_vhs 1.0.26
 --------------------

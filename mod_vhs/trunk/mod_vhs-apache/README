@@ -13,13 +13,8 @@ a problem :)
 You will need a installed libhome into your system. Please fetch it at
 http://pll.sourceforge.net/ before.
 
-mod_vhs can be installed and configured using Apache 2.0 apxs tool :
-
-$ apxs -i -a -c -L/usr/local/lib -lhome mod_vhs.c
-
-If you need PHP support and "open_basedir", you can use :
-$ apxs -i -a -c -I/usr/local/include/php -I/usr/local/include/php/Zend \
-  -DHAVE_MOD_PHP_SUPPORT -L/usr/local/lib -lhome mod_vhs.c
+mod_vhs can be installed and configured using provided Makefile. Please
+edit the Makefile and update it as your convience.
 
 This will, as root, install mod_vhs into Apache 2.0 module directory and 
 enable it in the configuration file. This is the prefered way to do it.
