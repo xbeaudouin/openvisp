@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.80 2005-11-29 22:16:19 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.81 2005-12-14 08:45:30 kiwi Exp $
  */
 
 /*
@@ -319,7 +319,11 @@ add_alias_internal(cmd_parms * cmd, void *dummy,
 	/* XX r can NOT be relative to DocumentRoot here... compat bug. */
 
 	if (use_regex) {
+#ifdef DEBIAN
+		new->regexp = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
+#else		
 		new->regexp = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
+#endif /* DEBIAN */
 		if (new->regexp == NULL)
 			return "Regular expression could not be compiled.";
 		new->real = r;
@@ -412,7 +416,11 @@ add_redirect_internal(cmd_parms * cmd,
 	}
 
 	if (use_regex) {
+#ifdef DEBIAN		
+		r = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
+#else
 		r = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
+#endif /* DEBIAN */
 		if (r == NULL)
 			return "Regular expression could not be compiled.";
 	}
@@ -508,7 +516,11 @@ try_alias_list(request_rec * r, apr_array_header_t * aliases,
 	       int doesc, int *status)
 {
 	alias_entry    *entries = (alias_entry *) aliases->elts;
+#ifdef DEBIAN	
+	ap_regmatch_t	regm [AP_MAX_REG_MATCH];
+#else	
 	regmatch_t	regm [AP_MAX_REG_MATCH];
+#endif  /* DEBIAN */
 	char           *found = NULL;
 	int		i;
 
