@@ -75,6 +75,10 @@ WARNING 2 : If you don't have anything in you "passwd" entry libhome
             will not return anything from DB because this can be
             a null password. So add an default string when php options are
             not used (like for example "*").
+WARNING 3 : If parameter is boolean (eg On / Off) you have to write in DB
+            using 1 / 0 instead eg :
+		On  = 1
+		Off = 0
 
 vhs_PHPopt_fromdb full example
 ------------------------------
@@ -102,7 +106,7 @@ CREATE TABLE `vhost` (
 INSERT INTO `vhost` VALUES 
 	('mrjack.oav.net', 'me@foo.tld', '/usr/local/www/mrjack',
 	 '/usr/local/www/mrjack', '/tmp/access.log', 'mrjack ftp',
-	 'memory_limit=32M;upload_max_filesize=8M;', 1, 'mrjack', 'on',
+	 'memory_limit=32M;upload_max_filesize=8M;expose_php=0;', 1, 'mrjack', 'on',
 	 'yes', '1', 'mrjack.oav.net');
 
 We have a virtual host 'mrjack.oav.net' with php values :
@@ -165,4 +169,4 @@ vhs_PHPopt_fromdb can only configure php.ini values like foo=value, but it
 cannot configure specific section of php.ini (eg [mysql] for example). So
 you'll have to keep that in mind when designing your system.
 
-$Id: README.phpopt,v 1.3 2005-10-16 10:02:53 kiwi Exp $
+$Id: README.phpopt,v 1.4 2005-12-14 13:22:52 kiwi Exp $
