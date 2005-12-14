@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.5 2005-12-14 08:45:30 kiwi Exp $
+# $Id: Makefile,v 1.6 2005-12-14 08:46:40 kiwi Exp $
 #
 
 NAME = mod_vhs
@@ -47,6 +47,7 @@ install: $(SRCS)
 
 clean:
 	$(RM) $(OBJS) $(APACHE_MODULE) $(NAME).slo $(NAME).lo $(NAME).la
+	$(RM) -r .libs
 
 indent:
 	$(INDENT) $(SRCS)
