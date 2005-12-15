@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.82 2005-12-14 13:19:20 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.83 2005-12-15 10:23:33 kiwi Exp $
  */
 
 /*
@@ -797,7 +797,7 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	/*
 	 * Set the default libhome tag
 	 */
-#if APR_HAS_THREAD
+#if APR_HAS_THREADS
 	rv = apr_thread_mutex_lock(mutex);
 #endif
 	if (vhr->libhome_tag) {
@@ -814,7 +814,7 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 
 	p = home_getpwnam(host);
 
-#if APR_HAS_THREAD
+#if APR_HAS_THREADS
 	apr_thread_mutex_unlock(mutex);
 #endif				/* APR_HAS_TREAD */
 
