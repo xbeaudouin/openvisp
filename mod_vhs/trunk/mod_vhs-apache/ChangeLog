@@ -1,3 +1,7 @@
+Since mod_vhs 1.0.30
+--------------------
+o Fixed some errors if #ifdef when using THREADS
+
 Since mod_vhs 1.0.28
 --------------------
 o Added Makefile instead of using scripts
