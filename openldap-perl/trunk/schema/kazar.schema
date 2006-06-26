@@ -1,0 +1,96 @@
+# $Id: kazar.schema,v 1.1 2006-06-26 22:28:59 kiwi Exp $
+# OpenLDAP Schema for Association KAZAR
+#
+# Please place number 17533 with your SNMP id
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.1 NAME 'mailQuota'
+                DESC 'Mail Quota'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.2 NAME 'uidNumber'
+                DESC 'User uid number'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.3 NAME 'gidNumber'
+                DESC 'User gid number'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.4 NAME 'homeDirectory'
+                DESC 'The absolute path to the home directory'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.5 NAME 'webmailQuota'
+                DESC 'WebMail Quota'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.6 NAME 'maildrop'
+                DESC 'Mailing List entry'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.7 NAME 'wwwDomain'
+                DESC 'World Wide Web Domain'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.8 NAME 'vacationText'
+                DESC 'Vacation excuse'
+		SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+                SINGLE-VALUE 
+		EQUALITY octetStringMatch)
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.9 NAME 'mailPolicy'
+                DESC 'Mail Postfix Policy'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.10 NAME 'mailhomeDirectory'
+                DESC 'The full absolute path to the home directory'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.11 NAME 'CouriermailhomeDirectory'
+                DESC 'The full absolute path to the home directory (brain damaged courier fix)'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.12 NAME 'CouriermailQuota'
+                DESC 'The mail Quota size for brain damaged courier'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.17533.2.1.13 NAME 'MXTransport'
+                DESC 'Postfix Transport Map attribute for BackupMX'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE )
+                SINGLE-VALUE )
+
+# Object kazarPerson
+
+objectclass ( 1.3.6.1.4.1.17533.2.2.1 NAME 'kazarPerson'
+                DESC 'Kazar login entry'
+                SUP inetOrgPerson
+                MUST ( uid )
+                MAY ( cn $ sn $ mail $ uidNumber $ gidNumber $ mailQuota $
+                      webmailQuota $ preferredLanguage $ description $
+                      associatedDomain $ maildrop $ homeDirectory $
+                      userPassword $ mailPolicy $ vacationText $
+                      mailhomeDirectory $ CouriermailhomeDirectory $ 
+                      CouriermailQuota $ MXTransport ) )

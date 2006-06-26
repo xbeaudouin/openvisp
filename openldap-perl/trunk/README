@@ -1,0 +1,5 @@
+$Id: README,v 1.1 2006-06-26 22:28:57 kiwi Exp $
+
+WARNING this needs OpenLDAP 2.x with perl Backend.
+
+This is not yet 100% operationnal so use with care !!!!
