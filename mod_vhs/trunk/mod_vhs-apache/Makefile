@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.7 2005-12-14 13:19:20 kiwi Exp $
+# $Id: Makefile,v 1.8 2007-03-06 21:19:27 kiwi Exp $
 #
 
 ##
@@ -30,6 +30,10 @@ INDENT = /usr/bin/indent
 # is redefining strangely some headers.... :/
 
 #CFLAGS= -DDEBIAN -I/usr/include/apr-0
+
+# If you want to enable mod_suphp support please uncomment the following
+# line :
+#CFLAGS+=	-DHAVE_MOD_SUPHP_SUPPORT
 
 # Uncomment only ONE of these CFLAGS according of what kind of compilation
 # you need with mod_vhs
