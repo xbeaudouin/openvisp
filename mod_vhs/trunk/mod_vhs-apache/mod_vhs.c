@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.85 2007-03-06 21:19:27 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.86 2007-03-07 21:00:11 kiwi Exp $
  */
 
 /*
@@ -118,6 +118,14 @@
 #include <sys/time.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+
+/* 
+ * To enable Apache 2.2 compatibility
+ */
+#if MODULE_MAGIC_NUMBER_MAJOR >= 20050217
+#warning Enabling Apache 22
+#define DEBIAN
+#endif
 
 /*
  * Libhome stuff
