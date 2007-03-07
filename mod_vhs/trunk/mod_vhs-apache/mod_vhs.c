@@ -1,35 +1,35 @@
 /*
  * ====================================================================
  * The Apache Software License, Version 1.1
- * 
+ *
  * Copyright (c) 2000 The Apache Software Foundation.  All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * 
+ *
  * 3. The end-user documentation included with the redistribution, if any, must
  * include the following acknowledgment: "This product includes software
  * developed by the Apache Software Foundation (http://www.apache.org/)."
  * Alternately, this acknowledgment may appear in the software itself, if and
  * wherever such third-party acknowledgments normally appear.
- * 
+ *
  * 4. The names "Apache" and "Apache Software Foundation" must not be used to
  * endorse or promote products derived from this software without prior
  * written permission. For written permission, please contact
  * apache@apache.org.
- * 
+ *
  * 5. Products derived from this software may not be called "Apache", nor may
  * "Apache" appear in their name, without prior written permission of the
  * Apache Software Foundation.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
  * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
@@ -42,23 +42,23 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  * ====================================================================
- * 
+ *
  * This software consists of voluntary contributions made by many individuals on
  * behalf of the Apache Software Foundation.  For more information on the
  * Apache Software Foundation, please see <http://www.apache.org/>.
- * 
+ *
  * Portions of this software are based upon public domain software originally
  * written at the National Center for Supercomputing Applications, University
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.86 2007-03-07 21:00:11 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.87 2007-03-07 21:36:03 kiwi Exp $
  */
 
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.31"
+#define VH_VERSION	"mod_vhs/1.0.32"
 
 /*
  * Set this if you'd like to have looooots of debug
@@ -119,12 +119,11 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 
-/* 
+/*
  * To enable Apache 2.2 compatibility
  */
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20050217
-#warning Enabling Apache 22
-#define DEBIAN
+# define DEBIAN
 #endif
 
 /*
@@ -193,11 +192,11 @@ typedef struct {
 	unsigned short int display_errors;	/* PHP display_error */
 	unsigned short int phpopt_fromdb;	/* Get PHP options from
 						 * libhome */
-#endif				/* HAVE_MOD_PHP_SUPPORT */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        char  *suphp_config_path;       /* suPHP_ConfigPath */
-#endif                                 /* HAVE_MOD_SUPHP_SUPPORT */
+#endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	/*
 	 * From mod_alias.c
@@ -208,7 +207,7 @@ typedef struct {
 	 * End of borrowing
 	 */
 
-}		vhs_config_rec;
+}	vhs_config_rec;
 
 /*
  * From mod_alias.c
@@ -284,11 +283,11 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	conf->append_basedir = (child->append_basedir ? child->append_basedir : parent->append_basedir);
 	conf->openbdir_path = (child->openbdir_path ? child->openbdir_path : parent->openbdir_path);
 	conf->phpopt_fromdb = (child->phpopt_fromdb ? child->phpopt_fromdb : parent->phpopt_fromdb);
-#endif				/* HAVE_MOD_PHP_SUPPORT */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
-#endif                         /* HAVE_MOD_SUPHP_SUPPORT */
+#endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	conf->aliases = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects = apr_array_append(p, child->redirects, parent->redirects);
@@ -337,7 +336,7 @@ add_alias_internal(cmd_parms * cmd, void *dummy,
 	if (use_regex) {
 #ifdef DEBIAN
 		new->regexp = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
-#else		
+#else
 		new->regexp = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
 #endif /* DEBIAN */
 		if (new->regexp == NULL)
@@ -432,7 +431,7 @@ add_redirect_internal(cmd_parms * cmd,
 	}
 
 	if (use_regex) {
-#ifdef DEBIAN		
+#ifdef DEBIAN
 		r = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
 #else
 		r = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
@@ -486,7 +485,7 @@ add_redirect_regex(cmd_parms * cmd, void *dirconf,
 	return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 1);
 }
 
-static int 
+static int
 alias_matches(const char *uri, const char *alias_fakename)
 {
 	const char     *aliasp = alias_fakename, *urip = uri;
@@ -532,9 +531,9 @@ try_alias_list(request_rec * r, apr_array_header_t * aliases,
 	       int doesc, int *status)
 {
 	alias_entry    *entries = (alias_entry *) aliases->elts;
-#ifdef DEBIAN	
+#ifdef DEBIAN
 	ap_regmatch_t	regm [AP_MAX_REG_MATCH];
-#else	
+#else
 	regmatch_t	regm [AP_MAX_REG_MATCH];
 #endif  /* DEBIAN */
 	char           *found = NULL;
@@ -613,7 +612,7 @@ try_alias_list(request_rec * r, apr_array_header_t * aliases,
 	return NULL;
 }
 
-static int 
+static int
 fixup_redir(request_rec * r)
 {
 	void           *dconf = r->per_dir_config;
@@ -684,13 +683,13 @@ set_field(cmd_parms * parms, void *mconfig, const char *arg)
 	case 3:
 		vhr->openbdir_path = apr_pstrdup(parms->pool, arg);
 		break;
-#endif				/* HAVE_MOD_PHP_SUPPORT */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        case 10:
                vhr->suphp_config_path = apr_pstrdup(parms->pool, arg);
                break;
-#endif                         /* HAVE_MOD_SUPHP_SUPPRT */
+#endif /* HAVE_MOD_SUPHP_SUPPRT */
 	}
 
 	return NULL;
@@ -773,7 +772,7 @@ set_flag(cmd_parms * parms, void *mconfig, int flag)
 }
 
 
-static int 
+static int
 vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
 {
 	ap_add_version_component(pconf, VH_VERSION);
@@ -784,7 +783,7 @@ vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, serv
 /*
  * Used for redirect subsystem when a hostname is not found
  */
-static int 
+static int
 vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 {
 
@@ -861,80 +860,80 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 typedef struct {
 	int	engine;		// Status of suPHP_Engine
 	chari	*php_config;
-	int	cmode;		// Server of directory configuration? 
-	char	*target_user; 
+	int	cmode;		// Server of directory configuration?
+	char	*target_user;
 	char	*target_group;
 	apr_table_t	*handlers;
 } suphp_conf;
-// TODO: finish ident
 
-static int vhs_suphp_handler(request_rec *r)         
-{                                                                                                                                                                                                 
-        module *suphp_module = ap_find_linked_module("mod_suphp.c");                                                                                                                              
-       if ( suphp_module == NULL ) {                                                                                                                                                              
-               ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_handler: mod_suphp.c is not loaded");                                                                                 
-               return HTTP_INTERNAL_SERVER_ERROR;                                                                                                                                                 
-       }                                                                                                                                                                                          
-                                                                                                                                                                                                  
-       suphp_conf *cfg = (suphp_conf *)ap_get_module_config(r->server->module_config, suphp_module);                                                                                              
-       suphp_conf *dircfg = (suphp_conf *)ap_get_module_config(r->per_dir_config, suphp_module);                                                                                                  
-                                                                                                                                                                                                  
-       if ( cfg == NULL )                                                                                                                                                                         
-           return HTTP_INTERNAL_SERVER_ERROR;                                                                                                                                                     
-                                                                                                                                                                                                  
-       dircfg->engine = cfg->engine;                                                                                                                                                              
-       dircfg->php_config = cfg->php_config;                                                                                                                                                      
-       dircfg->target_user = cfg->target_user;                                                                                                                                                    
-       dircfg->target_group = cfg->target_group;                                                                                                                                                  
-                                                                                                                                                                                                  
-       ap_set_module_config(r->per_dir_config, suphp_module, dircfg);                                                                                                                             
-                                                                                                                                                                                                  
-        return DECLINED;                                                                                                                                                                          
-}                                                                                                                                                                                                 
+static int vhs_suphp_handler(request_rec *r)
+{
+	module *suphp_module = ap_find_linked_module("mod_suphp.c");
 
-static void                                                                                                                                                                                       
-vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd, char *username)                                                                                                   
- {                                                                                                                                                                                                 
-       // Path to the suPHP config file per user                                                                                                                                                  
-       char *transformedPath = NULL;
+	if (suphp_module == NULL) {
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_handler: mod_suphp.c is not loaded");
+		return HTTP_INTERNAL_SERVER_ERROR;
+	}
 
-       if (vhr->suphp_config_path) { 
-               if ( (strstr(vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL) )
-                       transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, username);
-               else
-                       transformedPath = vhr->suphp_config_path;
-       } else {
-               transformedPath = path;
-       }
+	suphp_conf *cfg    = (suphp_conf *)ap_get_module_config(r->server->module_config, suphp_module);
+	suphp_conf *dircfg = (suphp_conf *)ap_get_module_config(r->per_dir_config, suphp_module);
 
-#ifdef VH_DEBUG                                                                                                                                                                                   
-       ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir set to %s", transformedPath);                                                                        
-#endif                 /* VH_DEBUG */                                                                                                                                                             
-                                                                                                                                                                                                  
-        module *suphp_module = ap_find_linked_module("mod_suphp.c");                                                                                                                              
-       if ( suphp_module == NULL ) {                                                                                                                                                              
-               ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: mod_suphp.c is not loaded");                                                                                  
-               return;                                                                                                                                                                            
-       }                                                                                                                                                                                          
-                                                                                                                                                                                                  
-       suphp_conf *cfg = (suphp_conf *)ap_get_module_config(r->server->module_config, suphp_module);                                                                                              
-       if ( cfg == NULL )                                                                                                                                                                         
-           ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir is NULL");                                                                                       
-                                                                                                                                                                                                  
-       cfg->engine = (strstr(passwd,"engine=Off") == NULL);                                                                                                
-       cfg->php_config = apr_pstrdup(r->pool,transformedPath);                                                                                                                                    
-       cfg->target_user = apr_pstrdup(r->pool,"apache");                                                                                                                                          
-       cfg->target_group = apr_pstrdup(r->pool,username);                                                                                                                                         
-                                                                                                                                                                                                  
-       ap_set_module_config(r->server->module_config, suphp_module, cfg);                                                                                                                         
-}                                                                                                                                                                                                 
-#endif                                 /* HAVE_MOD_SUPHP_SUPPORT  */
+	if (cfg == NULL)
+		return HTTP_INTERNAL_SERVER_ERROR;
+
+	dircfg->engine       = cfg->engine;
+	dircfg->php_config   = cfg->php_config;
+	dircfg->target_user  = cfg->target_user;
+	dircfg->target_group = cfg->target_group;
+
+	ap_set_module_config(r->per_dir_config, suphp_module, dircfg);
+
+	return DECLINED;
+}
+
+static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd, char *username)
+{
+	// Path to the suPHP config file per user
+	char *transformedPath = NULL;
+
+	if (vhr->suphp_config_path) {
+		if ((strstr(vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL))
+			transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, username);
+		else
+			transformedPath = vhr->suphp_config_path;
+	} else {
+		transformedPath = path;
+	}
+
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir set to %s", transformedPath);
+#endif /* VH_DEBUG */
+
+	module *suphp_module = ap_find_linked_module("mod_suphp.c");
+
+	if (suphp_module == NULL) {
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: mod_suphp.c is not loaded");
+		return;
+	}
+
+	suphp_conf *cfg = (suphp_conf *)ap_get_module_config(r->server->module_config, suphp_module);
+	if ( cfg == NULL )
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir is NULL");
+
+	cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
+	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
+	cfg->target_user  = apr_pstrdup(r->pool,"apache");
+	cfg->target_group = apr_pstrdup(r->pool,username);
+
+	ap_set_module_config(r->server->module_config, suphp_module, cfg);
+}
+#endif /* HAVE_MOD_SUPHP_SUPPORT  */
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 /*
  * This function will configure on the fly the php like php.ini will do
  */
-static void 
+static void
 vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 {
 	/*
@@ -1046,7 +1045,7 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 }
 #endif				/* HAVE_MOD_PHP_SUPPORT */
 
-static int 
+static int
 vhs_translate_name(request_rec * r)
 {
 	/* ap_conf_vector_t *sconf = r->server->module_config; */
@@ -1200,11 +1199,11 @@ vhs_translate_name(request_rec * r)
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 	vhs_php_config(r, vhr, path, (char *)p->pw_passwd);
-#endif				/* HAVE_MOD_PHP_SUPPORT */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos);
-#endif                 /* HAVE_MOD_SUPHP_SUPPORT */
+#endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	return OK;
 }
@@ -1227,11 +1226,11 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG("vhs_PHPdisplay_errors", set_flag, (void *)4, RSRC_CONF, "Enable PHP display_errors"),
 	AP_INIT_FLAG("vhs_append_open_basedir", set_flag, (void *)6, RSRC_CONF, "Append homedir path to PHP open_basedir to vhs_open_basedir_path."),
 	AP_INIT_TAKE1("vhs_open_basedir_path", set_field, (void *)3, RSRC_CONF, "The default PHP open_basedir path."),
-#endif				/* HAVE_MOD_PHP_SUPPORT */
+#endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        AP_INIT_TAKE1("vhs_suphp_config_path", set_field, (void *)10, RSRC_CONF, "The SuPHP configuration path for the user"),
-#endif                         /* HAVE_MOD_SUPHP_SUPPORT */
+#endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	AP_INIT_TAKE2("vhs_Alias", add_alias, NULL, RSRC_CONF, "a fakename and a realname"),
 	AP_INIT_TAKE2("vhs_ScriptAlias", add_alias, "cgi-script", RSRC_CONF, "a fakename and a realname"),
@@ -1250,7 +1249,7 @@ static const command_rec vhs_commands[] = {
 	{NULL}
 };
 
-static void 
+static void
 register_hooks(apr_pool_t * p)
 {
 	/* Modules that have to be loaded before mod_vhs */
@@ -1265,14 +1264,14 @@ register_hooks(apr_pool_t * p)
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
-#endif
+#endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 #if APR_HAS_THREADS
 	apr_status_t	ret;
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
 	apr_pool_cleanup_register(p, mutex, (void *)apr_thread_mutex_destroy,
 				  apr_pool_cleanup_null);
-#endif
+#endif /* APR_HAS_THREADS */
 }
 
 AP_DECLARE_DATA module vhs_module = {

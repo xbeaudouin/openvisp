@@ -1,3 +1,9 @@
+Since mod_vhs 1.0.32
+--------------------
+o Fixed some compilation errors with Apache 2.2 (and automagicaly set debian
+  compatibility)
+o Added initial support for mod_suphp from Thomas Rasch
+ 
 Since mod_vhs 1.0.30
 --------------------
 o Fixed some errors if #ifdef when using THREADS
