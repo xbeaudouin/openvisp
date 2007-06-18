@@ -1,4 +1,4 @@
-# $Id: mailboxes.pm,v 1.1 2006-06-26 22:28:58 kiwi Exp $
+# $Id: mailboxes.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
 # 
 package Kazar::mailboxes;
 
@@ -88,17 +88,17 @@ sub search
 	# We get data, then format output... :)
 	#print STDERR "We get some results...\n";
 	my $entry = 
-		"dn : uid=$mailaddr,ou=mailboxes,$cf{dn}\n\t".
-		"objectClass : top\n\t".
-		"objectClass : kazarPerson\n\t";
+		"dn : uid=$mailaddr,ou=mailboxes,$cf{dn}\n".
+		"objectClass : top\n".
+		"objectClass : kazarPerson\n";
 
 	if ( $row = $sth->fetchrow_hashref) {
-		$entry .= "uid : $mailaddr\n\t";
-		$entry .= "cn : $row->{name}\n\t";
-		$entry .= Kazar::db::latin1_to_utf8 ("description : $row->{name}\n\t");
-		$entry .= "uidNumber : $cf{defaultuid}\n\t";
-		$entry .= "gidNumber : $cf{defaultgid}\n\t";
-		$entry .= "userPassword : $row->{password}\n\t";
+		$entry .= "uid : $mailaddr\n";
+		$entry .= "cn : $row->{name}\n";
+		$entry .= Kazar::db::latin1_to_utf8 ("description : $row->{name}\n");
+		$entry .= "uidNumber : $cf{defaultuid}\n";
+		$entry .= "gidNumber : $cf{defaultgid}\n";
+		$entry .= "userPassword : $row->{password}\n";
 		if($cf{domainprepend} == "1") {
 			if($cf{dhash} == "1") {
 				$path = Kazar::hash::hashed($row->{domain});
@@ -114,12 +114,12 @@ sub search
 		else {
                 	$path .= $row->{maildir};
 		}
-		$entry .= "homeDirectory : $path\n\t";
-		$entry .= "mailhomeDirectory : $cf{mailhomeroot}/$path\n\t";
-		$entry .= "CouriermailhomeDirectory : $cf{mailhomeroot}/$path/Maildir/\n\t";
-		$entry .= "mailQuota : $row->{quota}\n\t";
-		$entry .= "CouriermailQuota : $row->{quota}S\n\t";
-		$entry .= "associatedDomain : $row->{domain}\n\t";
+		$entry .= "homeDirectory : $path\n";
+		$entry .= "mailhomeDirectory : $cf{mailhomeroot}/$path\n";
+		$entry .= "CouriermailhomeDirectory : $cf{mailhomeroot}/$path/Maildir/\n";
+		$entry .= "mailQuota : $row->{quota}\n";
+		$entry .= "CouriermailQuota : $row->{quota}S\n";
+		$entry .= "associatedDomain : $row->{domain}\n";
 	}
 
 	#print STDERR "Sending -> $entry\n";

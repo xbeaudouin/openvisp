@@ -1,4 +1,4 @@
-# $Id: pool.pm,v 1.1 2006-06-26 22:28:58 kiwi Exp $
+# $Id: pool.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
 # 
 package Kazar::pool;
 
@@ -64,15 +64,15 @@ sub search
 	# We get data, then format output... :)
 #	print STDERR "We get some results...\n";
 	my $entry = 
-		"dn : uid=$uid,ou=whosting,$cf{dn}\n\t".
-		"objectClass : top\n\t".
-		"objectClass : perditionPopmap\n\t".
+		"dn : uid=$uid,ou=whosting,$cf{dn}\n".
+		"objectClass : top\n".
+		"objectClass : perditionPopmap\n".
 		"uid: $uid\n\t";
 
 	if ( $row = $sth->fetchrow_hashref) {
-		$entry .= "mailhost : 192.168.0.4\n\t";
+		$entry .= "mailhost : 192.168.0.4\n";
 	} else {
-		$entry .= "mailhost : 192.168.0.5\n\t";
+		$entry .= "mailhost : 192.168.0.5\n";
 	}
 
 #	print STDERR "Sending -> $entry\n";

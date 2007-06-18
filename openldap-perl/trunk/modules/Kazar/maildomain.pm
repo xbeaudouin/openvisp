@@ -1,4 +1,4 @@
-# $Id: maildomain.pm,v 1.1 2006-06-26 22:28:58 kiwi Exp $
+# $Id: maildomain.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
 # 
 package Kazar::maildomain;
 
@@ -75,18 +75,18 @@ sub search
 	
 	# We get data, then format output... :)
 	$entry = 
-		"dn : associatedDomain=$domain,ou=maildomain,$cf{dn}\n\t".
-		"objectClass : top\n\t".
-		"objectClass : kazarPerson\n\t";
+		"dn : associatedDomain=$domain,ou=maildomain,$cf{dn}\n".
+		"objectClass : top\n".
+		"objectClass : kazarPerson\n";
 
 	my $i = 0;
 	@row = ();
 	while($row[$i] = $sth->fetchrow_array) {
-		$entry .= "associatedDomain : $row[$i]\n\t";
+		$entry .= "associatedDomain : $row[$i]\n";
 		$i++;
 	}
 	if ($i >= 1) {
-		$entry .= "MXTransport : $cf{mxtransport}\n\t";
+		$entry .= "MXTransport : $cf{mxtransport}\n";
 	}
 
 	push @match_entries, $entry;
