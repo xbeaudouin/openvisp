@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.87 2007-03-07 21:36:03 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.88 2007-07-11 19:38:40 kiwi Exp $
  */
 
 /*
@@ -859,7 +859,7 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
  */
 typedef struct {
 	int	engine;		// Status of suPHP_Engine
-	chari	*php_config;
+	char	*php_config;
 	int	cmode;		// Server of directory configuration?
 	char	*target_user;
 	char	*target_group;
