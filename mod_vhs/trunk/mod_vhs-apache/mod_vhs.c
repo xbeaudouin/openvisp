@@ -52,13 +52,13 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.88 2007-07-11 19:38:40 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.89 2007-08-11 16:20:58 kiwi Exp $
  */
 
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.32"
+#define VH_VERSION	"mod_vhs/1.0.33"
 
 /*
  * Set this if you'd like to have looooots of debug
@@ -160,6 +160,14 @@
  */
 #if APR_HAS_THREADS
 static apr_thread_mutex_t *mutex = NULL;
+#endif
+
+/*
+ * To avoid compatibity and segfault
+ */
+#ifdef HAVE_MOD_PHP_SUPPORT && HAVE_MOD_SUPHP_SUPPORT
+#error mod_vhs cannot support mod_php and suphp in the same time. 
+#error Please chose what support you want to have
 #endif
 
 /*

@@ -1,3 +1,8 @@
+Since mod_vhs 1.0.3x
+--------------------
+o Added some procompilators options to avoir incompatibility between MOD_SUPHP
+  and MOD_VHS 
+
 Since mod_vhs 1.0.32
 --------------------
 o Fixed some compilation errors with Apache 2.2 (and automagicaly set debian

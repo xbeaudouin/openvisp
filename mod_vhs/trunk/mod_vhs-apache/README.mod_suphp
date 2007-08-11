@@ -6,6 +6,9 @@ mod_suphp.
 To enable suPHP, you have to enable the compilation variable 
 HAVE_MOD_SUPHP_SUPPORT in the Makefile or in the apxs command line.
 
+Note that SuPHP and having mod_php support are *NOT* compatible, you 
+will have to choose what mod you will support for PHP with mod_vhs.
+
 Check that mod_suphp is compiled with SUPHP_USE_USERGROUP to get full 
 support (if there is a good way to get sure of that while loading 
 mod_vhs as module, contact me).
