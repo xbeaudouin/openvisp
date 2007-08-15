@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.89 2007-08-11 16:20:58 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.90 2007-08-15 15:46:46 kiwi Exp $
  */
 
 /*
@@ -171,6 +171,13 @@ static apr_thread_mutex_t *mutex = NULL;
 #endif
 
 /*
+ * libmemcache stuff
+ */
+#ifdef HAVE_MMC_SUPPORT
+#include <memcache.h>
+#endif
+
+/*
  * Let's start coding
  */
 module AP_MODULE_DECLARE_DATA vhs_module;
@@ -235,11 +242,11 @@ typedef struct {
 #endif				/* DEBIAN */
 #endif
 	int		redir_status;	/* 301, 302, 303, 410, etc... */
-}		alias_entry;
+}	alias_entry;
 
 typedef struct {
 	apr_array_header_t *redirects;
-}		alias_dir_conf;
+}	alias_dir_conf;
 /*
  * End of borrowin
  */
