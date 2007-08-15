@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.90 2007-08-15 15:46:46 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.91 2007-08-15 16:30:52 kiwi Exp $
  */
 
 /*
@@ -186,22 +186,22 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  * Configuration structure
  */
 typedef struct {
-	unsigned short int enable;	/* Enable the module */
-	char           *libhome_tag;	/* Tags to be used by libhome */
+	unsigned short int enable;				/* Enable the module */
+	char           *libhome_tag;			/* Tags to be used by libhome */
 
-	char           *path_prefix;	/* Prefix to add to path returned by
-					 * libhome */
-	char           *default_host;	/* Default host to redirect to */
+	char           *path_prefix;			/* Prefix to add to path returned by
+													* libhome */
+	char           *default_host;			/* Default host to redirect to */
 
-	unsigned short int lamer_mode;	/* Lamer friendly mode */
-	unsigned short int log_notfound;	/* Log request for vhost/path
-						 * is not found */
+	unsigned short int lamer_mode;		/* Lamer friendly mode */
+	unsigned short int log_notfound;		/* Log request for vhost/path
+													* is not found */
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	char           *openbdir_path;	/* PHP open_basedir default path */
+	char           *openbdir_path;		/* PHP open_basedir default path */
 
-	unsigned short int safe_mode;	/* PHP Safe mode */
-	unsigned short int open_basedir;	/* PHP open_basedir */
+	unsigned short int safe_mode;			/* PHP Safe mode */
+	unsigned short int open_basedir;		/* PHP open_basedir */
 	unsigned short int append_basedir;	/* PHP append current
 						 * directory to open_basedir */
 	unsigned short int display_errors;	/* PHP display_error */
@@ -210,7 +210,7 @@ typedef struct {
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       char  *suphp_config_path;       /* suPHP_ConfigPath */
+	char				*suphp_config_path;	/* suPHP_ConfigPath */
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	/*
@@ -221,7 +221,10 @@ typedef struct {
 	/*
 	 * End of borrowing
 	 */
-
+#ifdef HAVE_MMC_SUPPORT
+	char				*memcached_addr;	/* Addresses of memcached servers */
+	apt_time_t		memcached_expr;	/* Memcached object expiry in seconds */
+#endif /* HAVE_MMC_SUPPORT */
 }	vhs_config_rec;
 
 /*
@@ -701,10 +704,15 @@ set_field(cmd_parms * parms, void *mconfig, const char *arg)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       case 10:
-               vhr->suphp_config_path = apr_pstrdup(parms->pool, arg);
-               break;
+	case 10:
+		vhr->suphp_config_path = apr_pstrdup(parms->pool, arg);
+		break;
 #endif /* HAVE_MOD_SUPHP_SUPPRT */
+#ifdef HAVE_MMC_SUPPORT
+	case 20:
+		vhr->memcached_addr = apr_pstrdup(parms->pool, arg);
+		break;
+#endif /* HAVE_MMC_SUPPORT */		
 	}
 
 	return NULL;
@@ -1217,7 +1225,7 @@ vhs_translate_name(request_rec * r)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos);
+	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	return OK;
@@ -1227,40 +1235,44 @@ vhs_translate_name(request_rec * r)
  * Stuff for register the module
  */
 static const command_rec vhs_commands[] = {
-	AP_INIT_FLAG("EnableVHS", set_flag, (void *)5, RSRC_CONF, "Enable VHS module"),
+	AP_INIT_FLAG( "EnableVHS", set_flag, (void *)5, RSRC_CONF, "Enable VHS module"),
 	AP_INIT_TAKE1("vhs_libhome_tag", set_field, (void *)0, RSRC_CONF, "Set libhome tag."),
 	AP_INIT_TAKE1("vhs_Path_Prefix", set_field, (void *)1, RSRC_CONF, "Set path prefix."),
 	AP_INIT_TAKE1("vhs_Default_Host", set_field, (void *)2, RSRC_CONF, "Set default host if HTTP/1.1 is not used."),
-	AP_INIT_FLAG("vhs_Lamer", set_flag, (void *)0, RSRC_CONF, "Enable Lamer Friendly mode"),
-	AP_INIT_FLAG("vhs_LogNotFound", set_flag, (void *)7, RSRC_CONF, "Log on error log when host or path is not found."),
+	AP_INIT_FLAG( "vhs_Lamer", set_flag, (void *)0, RSRC_CONF, "Enable Lamer Friendly mode"),
+	AP_INIT_FLAG( "vhs_LogNotFound", set_flag, (void *)7, RSRC_CONF, "Log on error log when host or path is not found."),
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	AP_INIT_FLAG("vhs_PHPsafe_mode", set_flag, (void *)1, RSRC_CONF, "Enable PHP Safe Mode"),
-	AP_INIT_FLAG("vhs_PHPopen_basedir", set_flag, (void *)2, RSRC_CONF, "Set PHP open_basedir to path"),
-	AP_INIT_FLAG("vhs_PHPopt_fromdb", set_flag, (void *)3, RSRC_CONF, "Gets PHP options from db/libhome"),
-	AP_INIT_FLAG("vhs_PHPdisplay_errors", set_flag, (void *)4, RSRC_CONF, "Enable PHP display_errors"),
-	AP_INIT_FLAG("vhs_append_open_basedir", set_flag, (void *)6, RSRC_CONF, "Append homedir path to PHP open_basedir to vhs_open_basedir_path."),
+	AP_INIT_FLAG( "vhs_PHPsafe_mode", set_flag, (void *)1, RSRC_CONF, "Enable PHP Safe Mode"),
+	AP_INIT_FLAG( "vhs_PHPopen_basedir", set_flag, (void *)2, RSRC_CONF, "Set PHP open_basedir to path"),
+	AP_INIT_FLAG( "vhs_PHPopt_fromdb", set_flag, (void *)3, RSRC_CONF, "Gets PHP options from db/libhome"),
+	AP_INIT_FLAG( "vhs_PHPdisplay_errors", set_flag, (void *)4, RSRC_CONF, "Enable PHP display_errors"),
+	AP_INIT_FLAG( "vhs_append_open_basedir", set_flag, (void *)6, RSRC_CONF, "Append homedir path to PHP open_basedir to vhs_open_basedir_path."),
 	AP_INIT_TAKE1("vhs_open_basedir_path", set_field, (void *)3, RSRC_CONF, "The default PHP open_basedir path."),
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       AP_INIT_TAKE1("vhs_suphp_config_path", set_field, (void *)10, RSRC_CONF, "The SuPHP configuration path for the user"),
+	AP_INIT_TAKE1( "vhs_suphp_config_path", set_field, (void *)10, RSRC_CONF, "The SuPHP configuration path for the user"),
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
-	AP_INIT_TAKE2("vhs_Alias", add_alias, NULL, RSRC_CONF, "a fakename and a realname"),
-	AP_INIT_TAKE2("vhs_ScriptAlias", add_alias, "cgi-script", RSRC_CONF, "a fakename and a realname"),
+	AP_INIT_TAKE2( "vhs_Alias", add_alias, NULL, RSRC_CONF, "a fakename and a realname"),
+	AP_INIT_TAKE2( "vhs_ScriptAlias", add_alias, "cgi-script", RSRC_CONF, "a fakename and a realname"),
 	AP_INIT_TAKE23("vhs_Redirect", add_redirect, (void *)HTTP_MOVED_TEMPORARILY, OR_FILEINFO,
-		   "an optional status, then document to be redirected and "
-		       "destination URL"),
-	AP_INIT_TAKE2("vhs_AliasMatch", add_alias_regex, NULL, RSRC_CONF, "a regular expression and a filename"),
-	AP_INIT_TAKE2("vhs_ScriptAliasMatch", add_alias_regex, "cgi-script", RSRC_CONF, "a regular expression and a filename"),
+						"an optional status, then document to be redirected and "
+						"destination URL"),
+	AP_INIT_TAKE2( "vhs_AliasMatch", add_alias_regex, NULL, RSRC_CONF, "a regular expression and a filename"),
+	AP_INIT_TAKE2( "vhs_ScriptAliasMatch", add_alias_regex, "cgi-script", RSRC_CONF, "a regular expression and a filename"),
 	AP_INIT_TAKE23("vhs_RedirectMatch", add_redirect_regex, (void *)HTTP_MOVED_TEMPORARILY, OR_FILEINFO,
-		       "an optional status, then a regular expression and "
-		       "destination URL"),
-	AP_INIT_TAKE2("vhs_RedirectTemp", add_redirect2, (void *)HTTP_MOVED_TEMPORARILY, OR_FILEINFO,
-		   "a document to be redirected, then the destination URL"),
-	AP_INIT_TAKE2("vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
-		   "a document to be redirected, then the destination URL"),
+						"an optional status, then a regular expression and "
+						"destination URL"),
+	AP_INIT_TAKE2( "vhs_RedirectTemp", add_redirect2, (void *)HTTP_MOVED_TEMPORARILY, OR_FILEINFO,
+						"a document to be redirected, then the destination URL"),
+	AP_INIT_TAKE2( "vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
+						"a document to be redirected, then the destination URL"),
+#ifdef HAVE_MMC_SUPPORT
+	AP_INIT_TAKE1( "vhs_memcache_servers", set_field, (void *)0, RSRC_CONF, 
+						"Set memcache servers in the form ip:port, separated by comas"),
+#endif /* HAVE_MMC_SUPPORT */
 	{NULL}
 };
 
@@ -1278,23 +1290,23 @@ register_hooks(apr_pool_t * p)
 	ap_hook_fixups(fixup_redir, NULL, NULL, APR_HOOK_MIDDLE);
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
+	ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 #if APR_HAS_THREADS
 	apr_status_t	ret;
 	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
 	apr_pool_cleanup_register(p, mutex, (void *)apr_thread_mutex_destroy,
-				  apr_pool_cleanup_null);
+									  apr_pool_cleanup_null);
 #endif /* APR_HAS_THREADS */
 }
 
 AP_DECLARE_DATA module vhs_module = {
 	STANDARD20_MODULE_STUFF,
-	create_alias_dir_config,/* create per-directory config structure */
-	merge_alias_dir_config,	/* merge per-directory config structures */
+	create_alias_dir_config,	/* create per-directory config structure */
+	merge_alias_dir_config,		/* merge per-directory config structures */
 	vhs_create_server_config,	/* create per-server config structure */
-	vhs_merge_server_config,/* merge per-server config structures */
-	vhs_commands,		/* command apr_table_t */
-	register_hooks		/* register hooks */
+	vhs_merge_server_config,	/* merge per-server config structures */
+	vhs_commands,					/* command apr_table_t */
+	register_hooks					/* register hooks */
 };
