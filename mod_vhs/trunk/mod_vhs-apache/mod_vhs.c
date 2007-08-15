@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.91 2007-08-15 16:30:52 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.92 2007-08-15 16:49:00 kiwi Exp $
  */
 
 /*
@@ -165,9 +165,11 @@ static apr_thread_mutex_t *mutex = NULL;
 /*
  * To avoid compatibity and segfault
  */
-#ifdef HAVE_MOD_PHP_SUPPORT && HAVE_MOD_SUPHP_SUPPORT
-#error mod_vhs cannot support mod_php and suphp in the same time. 
-#error Please chose what support you want to have
+#ifdef HAVE_MOD_PHP_SUPPORT
+# ifdef HAVE_MOD_SUPHP_SUPPORT
+#  error mod_vhs cannot support mod_php and suphp in the same time. 
+#  error Please chose what support you want to have
+# endif
 #endif
 
 /*
@@ -1111,7 +1113,7 @@ vhs_translate_name(request_rec * r)
 	if (!(host = apr_table_get(r->headers_in, "Host"))) {
 		return vhs_redirect_stuff(r, vhr);
 	}
-	if (ptr = ap_strchr(host, ':')) {
+	if ((ptr = ap_strchr(host, ':'))) {
 		*ptr = '\0';
 	}
 #if 0
