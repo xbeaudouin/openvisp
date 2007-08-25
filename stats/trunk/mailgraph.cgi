@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# TODO: test if speedycgi works ?
 # mailgraph -- postfix mail traffic statistics
 # copyright (c) 2000-2007 ETH Zurich
 # copyright (c) 2000-2007 David Schweikert <david@schweikert.ch>
@@ -18,6 +19,7 @@ my $ypoints = 160;
 my $ypoints_err = 260;
 my $rrd = 'mailgraph.rrd'; # path to where the RRD database is
 my $rrd_virus = 'mailgraph_virus.rrd'; # path to where the Virus RRD database is
+my $rrd_pop = 'mailgraph_pop.rrd'; # path to where the Virus RRD database is
 my $tmp_dir = '/tmp/mailgraph'; # temporary directory where to store the images
 
 my @graphs = (
@@ -236,6 +238,58 @@ sub graph_err($$)
 	);
 }
 
+sub graph_pop($$)
+{
+	my ($range, $file) = @_;
+	my $step = $range*$points_per_sample/$xpoints;
+	rrd_graph($range, $file, $ypoints_err,
+                "DEF:pop3d_login=$rrd_pop:pop3d_login:AVERAGE",
+                "DEF:mpop3d_login=$rrd_pop:pop3d_login:MAX",
+                "DEF:pop3d_ssl_login=$rrd_pop:pop3d_ssl_login:AVERAGE",
+                "DEF:mpop3d_ssl_login=$rrd_pop:pop3d_ssl_login:MAX",
+
+                "CDEF:rpop3d_login=pop3d_login,60,*",
+                "CDEF:vpop3d_login=pop3d_login,UN,0,pop3d_login,IF,$step,*",
+                "CDEF:rmpop3d_login=mpop3d_login,60,*",
+
+                "CDEF:rpop3d_ssl_login=pop3d_ssl_login,60,*",
+                "CDEF:vpop3d_ssl_login=pop3d_ssl_login,UN,0,pop3d_ssl_login,IF,$step,*",
+                "CDEF:rmpop3d_ssl_login=mpop3d_ssl_login,60,*",
+
+                "DEF:imapd_login=$rrd_pop:imapd_login:AVERAGE",
+                "DEF:mimapd_login=$rrd_pop:imapd_login:MAX",
+                "DEF:imapd_ssl_login=$rrd_pop:imapd_ssl_login:AVERAGE",
+                "DEF:mimapd_ssl_login=$rrd_pop:imapd_ssl_login:MAX",
+
+                "CDEF:rimapd_login=imapd_login,60,*",
+                "CDEF:vimapd_login=imapd_login,UN,0,imapd_login,IF,$step,*",
+                "CDEF:rmimapd_login=mimapd_login,60,*",
+
+                "CDEF:rimapd_ssl_login=imapd_ssl_login,60,*",
+                "CDEF:rmimapd_ssl_login=mimapd_ssl_login,60,*",
+                "CDEF:vimapd_ssl_login=imapd_ssl_login,UN,0,imapd_ssl_login,IF,$step,*",
+
+                'LINE:rpop3d_login#DD0000:pop3',
+                'GPRINT:vpop3d_login:AVERAGE:total\: %.0lf logins',
+                'GPRINT:rmpop3d_login:MAX:max\: %.0lf logins/min\l',
+                'HRULE:0#000000',
+
+                'AREA:rpop3d_ssl_login#770000:pop3/ssl:STACK',
+                'GPRINT:vpop3d_ssl_login:AVERAGE:total\: %.0lf logins',
+                'GPRINT:rmpop3d_ssl_login:MAX:max\: %.0lf logins/min\l',
+                'HRULE:0#000000',
+
+                'LINE:rimapd_login#00DD00:imap',
+                'GPRINT:vimapd_login:AVERAGE:total\: %.0lf logins',
+                'GPRINT:rmimapd_login:MAX:max\: %.0lf logins/min\l',
+                'HRULE:0#000000',
+
+                'AREA:rimapd_ssl_login#007700:imap/ssl:STACK',
+                'GPRINT:vimapd_ssl_login:AVERAGE:total\: %.0lf logins',
+                'GPRINT:rmimapd_ssl_login:MAX:max\: %.0lf logins/min\l',
+	);
+}
+
 sub print_html()
 {
 	print "Content-Type: text/html\n\n";
@@ -286,7 +340,8 @@ HEADER
 	for my $n (0..$#graphs) {
 		print "<h2 id=\"G$n\">$graphs[$n]{title}</h2>\n";
 		print "<p><img src=\"$scriptname?${n}-n\" alt=\"mailgraph\"/><br/>\n";
-		print "<img src=\"$scriptname?${n}-e\" alt=\"mailgraph\"/></p>\n";
+		print "<img src=\"$scriptname?${n}-e\" alt=\"mailgraph\"/></p><br/>\n";
+		print "<img src=\"$scriptname?${n}-p\" alt=\"mailgraph\"/></p>\n";
 	}
 
 	print <<FOOTER;
@@ -339,6 +394,10 @@ sub main()
 			graph_err($graphs[$1]{seconds}, $file);
 			send_image($file);
 		}
+		elsif($img =~ /^(\d+)-p$/) {
+			my $file = "$tmp_dir/$uri/mailgraph_$1_pop.png";
+			graph_pop($graphs[$1]{seconds}, $file);
+			send_image($file);
 		else {
 			die "ERROR: invalid argument\n";
 		}
