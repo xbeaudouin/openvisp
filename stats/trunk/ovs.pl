@@ -379,9 +379,10 @@ my $daemon_rrd_dir = '/var/log';
 my $logfile;
 my $rrd = "mailgraph.rrd";
 my $rrd_virus = "mailgraph_virus.rrd";
+my $rrd_pop = "mailgraph_pop.rrd";
 my $year;
 my $this_minute;
-my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0 );
+my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0, imad_ssl_login =>0, imapd_login => 0, pop3d_ssl_login => 0, pop3d_login => 0 );
 my $rrd_inited=0;
 
 my %opt = ();
@@ -402,6 +403,10 @@ sub event_dnf($);
 sub event_policydbl($);
 sub event_vrfytmp($);
 sub event_vrfyrjt($);
+sub event_imapd_ssl_login($);
+sub event_imapd_login($);
+sub event_pop3d_ssl_login($);
+sub event_pop3d_login($);
 sub init_rrd($);
 sub update($);
 
@@ -573,6 +578,29 @@ sub init_rrd($)
 	}
 	elsif(-f $rrd_virus and ! defined $rrd_virus) {
 		$this_minute = RRDs::last($rrd_virus) + $rrdstep;
+	}
+
+	# pop/imap rrd
+	# XXX: Add option to avoid
+	if(! -f $rrd_pop ) {
+		RRDs::create($rrd_pop, '--start', $m, '--step', $rrdstep,
+				'DS:imapd_ssl_login:ABSOLUTE:'.($rrdstep*2).':0:U',
+				'DS:imapd_login:ABSOLUTE:'.($rrdstep*2).':0:U',
+				'DS:pop3d_ssl_login:ABSOLUTE:'.($rrdstep*2).':0:U',
+				'DS:pop3d_login:ABSOLUTE:'.($rrdstep*2).':0:U',
+				"RRA:AVERAGE:0.5:$day_steps:$realrows",   # day
+				"RRA:AVERAGE:0.5:$week_steps:$realrows",  # week
+				"RRA:AVERAGE:0.5:$month_steps:$realrows", # month
+				"RRA:AVERAGE:0.5:$year_steps:$realrows",  # year
+				"RRA:MAX:0.5:$day_steps:$realrows",   # day
+				"RRA:MAX:0.5:$week_steps:$realrows",  # week
+				"RRA:MAX:0.5:$month_steps:$realrows", # month
+				"RRA:MAX:0.5:$year_steps:$realrows",  # year
+				);
+		$this_minute = $m;
+	}
+	elsif(-f $rrd_pop) {
+		$this_minute = RRDs::last($rrd_pop) + $rrdstep;
 	}
 
 	$rrd_inited=1;
@@ -886,6 +914,27 @@ sub process_line($)
 			event($time, 'virus');
 		}
 	}
+	# Courrier IMAP
+	elsif ($prog eq 'pop3d') {
+		if($text =~ /LOGIN,/) {
+			event($time, 'pop3d_login');
+		}
+	}
+	elsif ($prog eq 'imapd') {
+		if($text =~ /LOGIN,/) {
+			event($time, 'imapd_login');
+		}
+	}
+	elsif ($prog eq 'pop3d-ssl') {
+		if($text =~ /LOGIN,/) {
+			event($time, 'pop3d_ssl_login');
+		}
+	}
+	elsif ($prog eq 'imapd-ssl') {
+		if($text =~ /LOGIN,/) {
+			event($time, 'imapd_ssl_login');
+		}
+	}
 }
 
 sub event($$)
@@ -906,11 +955,15 @@ sub update($)
 	print "update $this_minute:$sum{sent}:$sum{received}:$sum{bounced}:$sum{rejected}:$sum{virus}:$sum{spam}:$sum{greylist}:$sum{helo}:$sum{spf}:$sum{dnf}:$sum{policydbl}\n" if $opt{verbose};
 	RRDs::update $rrd, "$this_minute:$sum{sent}:$sum{received}:$sum{bounced}:$sum{rejected}" unless $opt{'only-virus-rrd'};
 	RRDs::update $rrd_virus, "$this_minute:$sum{virus}:$sum{spam}:$sum{greylist}:$sum{helo}:$sum{spf}:$sum{dnf}:$sum{policydbl}:$sum{vrfytmp}:$sum{vrfyrjt}" unless $opt{'only-mail-rrd'};
+	# pop / imap
+	print "update pop $this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}\n" if $opt{verbose};
+	RRDs::update $rrd_pop, "$this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}";
 	if($m > $this_minute+$rrdstep) {
 		for(my $sm=$this_minute+$rrdstep;$sm<$m;$sm+=$rrdstep) {
 			print "update $sm:0:0:0:0:0:0 (SKIP)\n" if $opt{verbose};
 			RRDs::update $rrd, "$sm:0:0:0:0" unless $opt{'only-virus-rrd'};
 			RRDs::update $rrd_virus, "$sm:0:0" unless $opt{'only-mail-rrd'};
+			RRDs::update $rrd_pop, "$sm:0:0:0:0";
 		}
 	}
 	$this_minute = $m;
@@ -927,6 +980,10 @@ sub update($)
 	$sum{policydbl}=0;
 	$sum{vrfytmp}=0;
 	$sum{vrfyrjt}=0;
+	$sum{imapd_ssl_login}=0;
+	$sum{imapd_login}=0;
+	$sum{pop3d_ssl_login}=0;
+	$sum{pop3d_login}=0;
 	return 1;
 }
 
