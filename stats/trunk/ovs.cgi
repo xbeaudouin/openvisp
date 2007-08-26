@@ -409,6 +409,7 @@ sub main()
 			my $file = "$tmp_dir/$uri/ovs_$1_pop.png";
 			graph_pop($graphs[$1]{seconds}, $file);
 			send_image($file);
+		}
 		else {
 			die "ERROR: invalid argument\n";
 		}
