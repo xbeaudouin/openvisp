@@ -592,7 +592,7 @@ sub init_rrd($)
 
 	# pop/imap rrd
 	# XXX: Add option to avoid
-	if(! -f $rrd_pop ) {
+	if(! -f $rrd_pop and ! $opt{'only-pop-rrd'} ) {
 		RRDs::create($rrd_pop, '--start', $m, '--step', $rrdstep,
 				'DS:imapd_ssl_login:ABSOLUTE:'.($rrdstep*2).':0:U',
 				'DS:imapd_login:ABSOLUTE:'.($rrdstep*2).':0:U',
@@ -967,13 +967,13 @@ sub update($)
 	RRDs::update $rrd_virus, "$this_minute:$sum{virus}:$sum{spam}:$sum{greylist}:$sum{helo}:$sum{spf}:$sum{dnf}:$sum{policydbl}:$sum{vrfytmp}:$sum{vrfyrjt}" unless $opt{'only-mail-rrd'};
 	# pop / imap
 	print "update pop $this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}\n" if $opt{verbose};
-	RRDs::update $rrd_pop, "$this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}";
+	RRDs::update $rrd_pop, "$this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}" unless $opt{'only-pop-rrd'};
 	if($m > $this_minute+$rrdstep) {
 		for(my $sm=$this_minute+$rrdstep;$sm<$m;$sm+=$rrdstep) {
 			print "update $sm:0:0:0:0:0:0 (SKIP)\n" if $opt{verbose};
 			RRDs::update $rrd, "$sm:0:0:0:0" unless $opt{'only-virus-rrd'};
 			RRDs::update $rrd_virus, "$sm:0:0" unless $opt{'only-mail-rrd'};
-			RRDs::update $rrd_pop, "$sm:0:0:0:0";
+			RRDs::update $rrd_pop, "$sm:0:0:0:0" unless $opt{'only-pop-rrd'};
 		}
 	}
 	$this_minute = $m;

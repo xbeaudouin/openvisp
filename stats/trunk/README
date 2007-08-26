@@ -1,18 +1,18 @@
 
-      -----------------------------------------------------
-      mailgraph - a RRDtool frontend for Postfix Statistics
-      by David Schweikert <david@schweikert.ch>
+      -------------------------------------------------------
+      OpenVISP Stats - a RRDtool frontend for Mail Statistics
+      by Xavier Beaudouin <kiwi@oav.net>
       -----------------------------------------------------
 
-mailgraph is a very simple mail statistics RRDtool frontend for Postfix
-that produces daily, weekly, monthly and yearly graphs of received/sent 
-and bounced/rejected mail (SMTP traffic).
+OpenVISP Stats is a very simple mail statistics RRDtool frontend for mail
+that produces daily, weekly, monthly and yearly graphs of received/sent,
+bounced/rejected mail, spam, ... and pop/imap traffic.
 
 Get it from:
 
 
-         http://mailgraph.schweikert.ch/
-	 ===============================
+         http://openvisp.fr/
+	 ===================
 
 
 Required Modules
@@ -30,17 +30,17 @@ Note that several Linux distributions will already have these modules as RPMs.
 Usage
 -----
 
-mailgraph is made of two scripts:
+OpenVISP Stats is made of two scripts:
 
-- mailgraph.pl
+- ovs.pl
 
-  This script does parse syslog and updates the RRD database (mailgraph.rrd)
+  This script does parse syslog and updates the RRD database (ovs.rrd)
   in the current directory.
 
   It is a deamon and will monitor your log-file for changes.
   DO NOT RUN IT WITH CRON!
 
-  usage: mailgraph.pl [*options*]
+  usage: ovs.pl [*options*]
   
   -h, --help         display this help and exit
   -v, --verbose      be verbose about what you do
@@ -58,7 +58,7 @@ mailgraph is made of two scripts:
   If -c is not specified, mailgraph will monitor logfile for Postfix log entries
   in logfile (/var/log/syslog unless -l is specified).
 
-- mailgraph.cgi
+- ovs.cgi
 
   This is a CGI script that does generate graphics from the RRD database.
 
@@ -71,10 +71,10 @@ mailgraph is made of two scripts:
 Installation
 ------------
 
-See the file mailgraph-init for an example init script that you can use to
-start mailgraph at system boot.
+See the file ovs-init for an example init script that you can use to
+start OpenVISP Stats at system boot.
 
-You need to put mailgraph.cgi on somewhere accessible though a web-server, it
+You need to put ovs.cgi on somewhere accessible though a web-server, it
 needs to be executeable and the web-server needs to execute it as a CGI.
 
 
