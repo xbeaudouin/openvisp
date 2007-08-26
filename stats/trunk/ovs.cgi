@@ -356,7 +356,7 @@ HEADER
 <hr/>
 <table><tr><td>
 <a href="http://openvisp.fr/">OpenVISP Stats</a> $VERSION
-by <a href="http://oav.net/">Xavier Beaudouin</a><
+by <a href="http://oav.net/">Xavier Beaudouin</a>
 <br/>
 Based on <a href="http://mailgraph.schweikert.ch/">Mailgraph</a> &amp; <a href="http://www.arschkrebs.de/postfix/couriergraph/">CourierGraph</a>
 </td>
