@@ -1,26 +1,34 @@
 #!/usr/bin/perl -w
-
 # TODO: test if speedycgi works ?
-# mailgraph -- postfix mail traffic statistics
+
+# ovs -- mail traffic statistics
+# copyright (c) 2007 Xavier Beaudouin <kiwi@oav.net>
+# released under the GNU General Public License
+#
+# Based upon mailgraph, which 
 # copyright (c) 2000-2007 ETH Zurich
 # copyright (c) 2000-2007 David Schweikert <david@schweikert.ch>
 # released under the GNU General Public License
+#
+# And Based also upon couriergraph, which is
+# copyright (c) 2002-2006 Ralf Hildebrandt <ralf.hildebrandt@charite.de>
+# relased under the GNU General Public License
 
 use RRDs;
 use POSIX qw(uname);
 
-my $VERSION = "1.13";
+my $VERSION = "1.00";
 
 my $host = (POSIX::uname())[1];
-my $scriptname = 'mailgraph.cgi';
+my $scriptname = 'ovs.cgi';
 my $xpoints = 540;
 my $points_per_sample = 3;
 my $ypoints = 160;
 my $ypoints_err = 260;
-my $rrd = 'mailgraph.rrd'; # path to where the RRD database is
-my $rrd_virus = 'mailgraph_virus.rrd'; # path to where the Virus RRD database is
-my $rrd_pop = 'mailgraph_pop.rrd'; # path to where the Virus RRD database is
-my $tmp_dir = '/tmp/mailgraph'; # temporary directory where to store the images
+my $rrd = 'ovs.rrd';		 # path to where the RRD database is
+my $rrd_virus = 'ovs_virus.rrd'; # path to where the Virus RRD database is
+my $rrd_pop = 'ovs_pop.rrd';	 # path to where the Virus RRD database is
+my $tmp_dir = '/tmp/ovs';	 # temporary directory where to store the images
 
 my @graphs = (
 	{ title => 'Last Day',   seconds => 3600*24,        },
@@ -339,16 +347,19 @@ HEADER
 
 	for my $n (0..$#graphs) {
 		print "<h2 id=\"G$n\">$graphs[$n]{title}</h2>\n";
-		print "<p><img src=\"$scriptname?${n}-n\" alt=\"mailgraph\"/><br/>\n";
-		print "<img src=\"$scriptname?${n}-e\" alt=\"mailgraph\"/></p><br/>\n";
-		print "<img src=\"$scriptname?${n}-p\" alt=\"mailgraph\"/></p>\n";
+		print "<p><img src=\"$scriptname?${n}-n\" alt=\"ovs\"/><br/>\n";
+		print "<img src=\"$scriptname?${n}-e\" alt=\"ovs\"/></p><br/>\n";
+		print "<img src=\"$scriptname?${n}-p\" alt=\"ovs\"/></p>\n";
 	}
 
 	print <<FOOTER;
 <hr/>
 <table><tr><td>
-<a href="http://mailgraph.schweikert.ch/">Mailgraph</a> $VERSION
-by <a href="http://david.schweikert.ch/">David Schweikert</a></td>
+<a href="http://openvisp.fr/">OpenVISP Stats</a> $VERSION
+by <a href="http://oav.net/">Xavier Beaudouin</a><
+<br/>
+Based on <a href="http://mailgraph.schweikert.ch/">Mailgraph</a> &amp; <a href="http://www.arschkrebs.de/postfix/couriergraph/">CourierGraph</a>
+</td>
 <td align="right">
 <a href="http://oss.oetiker.ch/rrdtool/"><img src="http://oss.oetiker.ch/rrdtool/.pics/rrdtool.gif" alt="" width="120" height="34"/></a>
 </td></tr></table>
@@ -385,17 +396,17 @@ sub main()
 	my $img = $ENV{QUERY_STRING};
 	if(defined $img and $img =~ /\S/) {
 		if($img =~ /^(\d+)-n$/) {
-			my $file = "$tmp_dir/$uri/mailgraph_$1.png";
+			my $file = "$tmp_dir/$uri/ovs_$1.png";
 			graph($graphs[$1]{seconds}, $file);
 			send_image($file);
 		}
 		elsif($img =~ /^(\d+)-e$/) {
-			my $file = "$tmp_dir/$uri/mailgraph_$1_err.png";
+			my $file = "$tmp_dir/$uri/ovs_$1_err.png";
 			graph_err($graphs[$1]{seconds}, $file);
 			send_image($file);
 		}
 		elsif($img =~ /^(\d+)-p$/) {
-			my $file = "$tmp_dir/$uri/mailgraph_$1_pop.png";
+			my $file = "$tmp_dir/$uri/ovs_$1_pop.png";
 			graph_pop($graphs[$1]{seconds}, $file);
 			send_image($file);
 		else {

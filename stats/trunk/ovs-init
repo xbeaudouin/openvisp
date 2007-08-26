@@ -1,35 +1,35 @@
 #!/bin/sh
 
-# $Id: ovs-init,v 1.1 2007-06-22 16:16:18 kiwi Exp $
-# example init script for mailgraph
+# $Id: ovs-init,v 1.2 2007-08-26 17:02:21 kiwi Exp $
+# example init script for ovs 
 #
 # chkconfig: 2345 82 28
-# description: mailgraph postfix log grapher.
+# description: ovs log grapher.
 #
-# processname: mailgraph.pl
-# pidfile: /var/run/mailgraph.pid
+# processname: ovs.pl
+# pidfile: /var/run/ovs.pid
 
 
 PATH=/bin:/usr/bin
-MAILGRAPH_PL=/usr/local/bin/mailgraph.pl
+OVS_PL=/usr/local/bin/ovs.pl
 MAIL_LOG=/var/log/syslog
-PID_FILE=/var/run/mailgraph.pid
+PID_FILE=/var/run/ovs.pid
 RRD_DIR=/var/lib
 
 case "$1" in
 'start')
-	echo "Starting mail statistics grapher: mailgraph";
-	nice -19 $MAILGRAPH_PL -l $MAIL_LOG -d \
+	echo "Starting mail statistics grapher: ovs";
+	nice -19 $OVS_PL -l $MAIL_LOG -d \
 		--daemon-pid=$PID_FILE --daemon-rrd=$RRD_DIR
 	;;
 
 'stop')
-	echo "Stopping mail statistics grapher: mailgraph";
+	echo "Stopping mail statistics grapher: ovs";
 	if [ -f $PID_FILE ]; then
 		kill `cat $PID_FILE`
 		rm $PID_FILE
 	else
-		echo "mailgraph not running";
+		echo "ovs not running";
 	fi
 	;;
 

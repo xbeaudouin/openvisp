@@ -1,9 +1,17 @@
 #!/usr/bin/perl -w
 
-# mailgraph -- an rrdtool frontend for mail statistics
+# ovs -- mail traffic statistics
+# copyright (c) 2007 Xavier Beaudouin <kiwi@oav.net>
+# released under the GNU General Public License
+#
+# Based upon mailgraph, which 
 # copyright (c) 2000-2007 ETH Zurich
 # copyright (c) 2000-2007 David Schweikert <david@schweikert.ch>
 # released under the GNU General Public License
+#
+# And Based also upon couriergraph, which is
+# copyright (c) 2002-2006 Ralf Hildebrandt <ralf.hildebrandt@charite.de>
+# relased under the GNU General Public License
 
 ######## Parse::Syslog 1.09 (automatically embedded) ########
 package Parse::Syslog;
@@ -364,25 +372,25 @@ use File::Tail;
 use Getopt::Long;
 use POSIX 'setsid';
 
-my $VERSION = "1.13";
+my $VERSION = "1.10";
 
 # config
 my $rrdstep = 60;
 my $xpoints = 540;
 my $points_per_sample = 3;
 
-my $daemon_logfile = '/var/log/mailgraph.log';
-my $daemon_pidfile = '/var/run/mailgraph.pid';
+my $daemon_logfile = '/var/log/ovs.log';
+my $daemon_pidfile = '/var/run/ovs.pid';
 my $daemon_rrd_dir = '/var/log';
 
 # global variables
 my $logfile;
-my $rrd = "mailgraph.rrd";
-my $rrd_virus = "mailgraph_virus.rrd";
-my $rrd_pop = "mailgraph_pop.rrd";
+my $rrd = "ovs.rrd";
+my $rrd_virus = "ovs_virus.rrd";
+my $rrd_pop = "ovs_pop.rrd";
 my $year;
 my $this_minute;
-my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0, imad_ssl_login =>0, imapd_login => 0, pop3d_ssl_login => 0, pop3d_login => 0 );
+my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0, greylist => 0, helo => 0, spf =>0, dnf => 0, policydbl => 0, vrfytmp => 0, vrfyrjt =>0, imad_ssl_login =>0, imapd_login => 0, pop3d_ssl_login => 0, pop3d_login => 0 );
 my $rrd_inited=0;
 
 my %opt = ();
@@ -412,7 +420,7 @@ sub update($);
 
 sub usage
 {
-	print "usage: mailgraph [*options*]\n\n";
+	print "usage: ovs [*options*]\n\n";
 	print "  -h, --help         display this help and exit\n";
 	print "  -v, --verbose      be verbose about what you do\n";
 	print "  -V, --version      output version information and exit\n";
@@ -429,7 +437,8 @@ sub usage
 	print "  --ignore-host=HOST ignore mail to/from HOST regexp (used for virus scanner)\n";
 	print "  --only-mail-rrd    update only the mail rrd\n";
 	print "  --only-virus-rrd   update only the virus rrd\n";
-	print "  --rrd-name=NAME    use NAME.rrd and NAME_virus.rrd for the rrd files\n";
+	print "  --only-pop-rrd     update only the pop/imap rrd\n";
+	print "  --rrd-name=NAME    use NAME.rrd, NAME_virus.rrd and NAME_pop.rrd for the rrd files\n";
 	print "  --rbl-is-spam      count rbl rejects as spam\n";
 	print "  --virbl-is-virus   count virbl rejects as viruses\n";
 	print "  --greylist         count greylist rejects for postgrey\n";
@@ -450,12 +459,12 @@ sub main
 		'daemon_log|daemon-log=s', 'ignore-localhost!', 'ignore-host=s',
 		'only-mail-rrd', 'only-virus-rrd', 'rrd_name|rrd-name=s',
 		'rbl-is-spam', 'virbl-is-virus', 'greylist', 'helo', 'spf', 'domain-not-found',
-		'policyd',
+		'policyd', 'only-pop-rrd',
 		) or exit(1);
 	usage if $opt{help};
 
 	if($opt{version}) {
-		print "mailgraph $VERSION by david\@schweikert.ch\n";
+		print "ovs $VERSION by Xavier Beaudouin\n";
 		exit;
 	}
 
@@ -464,10 +473,11 @@ sub main
 	$daemon_rrd_dir = $opt{daemon_rrd} if defined $opt{daemon_rrd};
 	$rrd		= $opt{rrd_name}.".rrd" if defined $opt{rrd_name};
 	$rrd_virus	= $opt{rrd_name}."_virus.rrd" if defined $opt{rrd_name};
+	$rrd_pop	= $opt{rrd_name}."_pop.rrd" if defined $opt{rrd_name};
 
 	if($opt{daemon} or $opt{daemon_rrd}) {
-		chdir $daemon_rrd_dir or die "mailgraph: can't chdir to $daemon_rrd_dir: $!";
-		-w $daemon_rrd_dir or die "mailgraph: can't write to $daemon_rrd_dir\n";
+		chdir $daemon_rrd_dir or die "ovs: can't chdir to $daemon_rrd_dir: $!";
+		-w $daemon_rrd_dir or die "ovs: can't write to $daemon_rrd_dir\n";
 	}
 
 	daemonize if $opt{daemon};
@@ -498,27 +508,27 @@ sub main
 
 sub daemonize()
 {
-	open STDIN, '/dev/null' or die "mailgraph: can't read /dev/null: $!";
+	open STDIN, '/dev/null' or die "ovs: can't read /dev/null: $!";
 	if($opt{verbose}) {
 		open STDOUT, ">>$daemon_logfile"
-			or die "mailgraph: can't write to $daemon_logfile: $!";
+			or die "ovs: can't write to $daemon_logfile: $!";
 	}
 	else {
 		open STDOUT, '>/dev/null'
-			or die "mailgraph: can't write to /dev/null: $!";
+			or die "ovs: can't write to /dev/null: $!";
 	}
-	defined(my $pid = fork) or die "mailgraph: can't fork: $!";
+	defined(my $pid = fork) or die "ovs: can't fork: $!";
 	if($pid) {
 		# parent
 		open PIDFILE, ">$daemon_pidfile"
-			or die "mailgraph: can't write to $daemon_pidfile: $!\n";
+			or die "ovs: can't write to $daemon_pidfile: $!\n";
 		print PIDFILE "$pid\n";
 		close(PIDFILE);
 		exit;
 	}
 	# child
-	setsid			or die "mailgraph: can't start a new session: $!";
-	open STDERR, '>&STDOUT' or die "mailgraph: can't dup stdout: $!";
+	setsid			or die "ovs: can't start a new session: $!";
+	open STDERR, '>&STDOUT' or die "ovs: can't dup stdout: $!";
 }
 
 sub init_rrd($)
@@ -993,7 +1003,7 @@ __END__
 
 =head1 NAME
 
-mailgraph.pl - rrdtool frontend for mail statistics
+ovs.pl - rrdtool frontend for mail statistics
 
 =head1 SYNOPSIS
 
@@ -1018,7 +1028,8 @@ B<mailgraph> [I<options>...]
  --ignore-host=HOST ignore mail to/from HOST regexp (used for virus scanner)
  --only-mail-rrd    update only the mail rrd
  --only-virus-rrd   update only the virus rrd
- --rrd-name=NAME    use NAME.rrd and NAME_virus.rrd for the rrd files
+ --only-pop-rrdii   update only the virus rrd
+ --rrd-name=NAME    use NAME.rrd, NAME_virus.rrd and NAME_pop.rrd for the rrd files
  --rbl-is-spam      count rbl rejects as spam
  --virbl-is-virus   count virbl rejects as viruses
  --greylist         count greylist rejects for postgrey
@@ -1051,6 +1062,8 @@ Metalog (see http://metalog.sourceforge.net/)
 
 =head1 COPYRIGHT
 
+Copyright (c) 2007 by Xavier Beaudouin
+Copyright (c) 2002-2006 Ralf Hildebrandt
 Copyright (c) 2000-2007 by ETH Zurich
 Copyright (c) 2000-2007 by David Schweikert
 
@@ -1072,7 +1085,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 =head1 AUTHOR
 
-S<David Schweikert E<lt>david@schweikert.chE<gt>>
+S<Xavier Beaudouin<lt>kiwi@oav.net<gt>>
 
 =cut
 
