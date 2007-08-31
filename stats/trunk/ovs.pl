@@ -372,7 +372,7 @@ use File::Tail;
 use Getopt::Long;
 use POSIX 'setsid';
 
-my $VERSION = "1.10";
+my $VERSION = "1.01";
 
 # config
 my $rrdstep = 60;
@@ -943,6 +943,25 @@ sub process_line($)
 	elsif ($prog eq 'imapd-ssl') {
 		if($text =~ /LOGIN,/) {
 			event($time, 'imapd_ssl_login');
+		}
+	}
+	# Dovecot
+	elsif($prog =~ /^dovecot: (.*)/) {
+		my $prog = $1;
+		if($prog eq 'imap-login: Login') {
+			if($text =~ /TLS/) {
+				event($time, 'imapd_ssl_login');
+			}
+			elsif($text =~ /secured/) {
+				event($time, 'imapd_ssl_login');
+			}
+			else {
+				event($time, 'imapd_login');
+			}
+		} 
+		elsif($prog eq 'pop3-login') {
+			# Don't know how to check ssl/non ssl
+			event($time, 'pop3d_login');
 		}
 	}
 }

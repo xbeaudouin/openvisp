@@ -1,4 +1,8 @@
-1.0
----
+1.10
+----
+* Initial support of Dovecot
+
+1.00
+----
 * Changed name from mailgraph to OVS (OpenVISP Stats)
 * Integrated courriergraph
