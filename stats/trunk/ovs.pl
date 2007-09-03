@@ -390,7 +390,7 @@ my $rrd_virus = "ovs_virus.rrd";
 my $rrd_pop = "ovs_pop.rrd";
 my $year;
 my $this_minute;
-my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0, greylist => 0, helo => 0, spf =>0, dnf => 0, policydbl => 0, vrfytmp => 0, vrfyrjt =>0, imad_ssl_login =>0, imapd_login => 0, pop3d_ssl_login => 0, pop3d_login => 0 );
+my %sum = ( sent => 0, received => 0, bounced => 0, rejected => 0, virus => 0, spam => 0, greylist => 0, helo => 0, spf =>0, dnf => 0, policydbl => 0, vrfytmp => 0, vrfyrjt =>0, imapd_ssl_login =>0, imapd_login => 0, pop3d_ssl_login => 0, pop3d_login => 0 );
 my $rrd_inited=0;
 
 my %opt = ();
