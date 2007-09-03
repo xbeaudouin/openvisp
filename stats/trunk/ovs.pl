@@ -456,7 +456,7 @@ sub main
 	GetOptions(\%opt, 'help|h', 'cat|c', 'logfile|l=s', 'logtype|t=s', 'version|V',
 		'year|y=i', 'host=s', 'verbose|v', 'daemon|d!',
 		'daemon_pid|daemon-pid=s', 'daemon_rrd|daemon-rrd=s',
-		'daemon_log|daemon-log=s', 'ignore-localhost!', 'ignore-host=s',
+		'daemon_log|daemon-log=s', 'ignore-localhost!', 'ignore-host=s@',
 		'only-mail-rrd', 'only-virus-rrd', 'rrd_name|rrd-name=s',
 		'rbl-is-spam', 'virbl-is-virus', 'greylist', 'helo', 'spf', 'domain-not-found',
 		'policyd', 'only-pop-rrd',
@@ -474,6 +474,13 @@ sub main
 	$rrd		= $opt{rrd_name}.".rrd" if defined $opt{rrd_name};
 	$rrd_virus	= $opt{rrd_name}."_virus.rrd" if defined $opt{rrd_name};
 	$rrd_pop	= $opt{rrd_name}."_pop.rrd" if defined $opt{rrd_name};
+
+	# compile --ignore-host regexps
+	if(defined $opt{'ignore-host'}) {
+		for my $ih (@{$opt{'ignore-host'}}) {
+			push @{$opt{'ignore-host-re'}}, qr{\brelay=[^\s,]*$ih}i;
+		}
+	}
 
 	if($opt{daemon} or $opt{daemon_rrd}) {
 		chdir $daemon_rrd_dir or die "ovs: can't chdir to $daemon_rrd_dir: $!";
@@ -629,8 +636,12 @@ sub process_line($)
 			if($text =~ /\bstatus=sent\b/) {
 				return if $opt{'ignore-localhost'} and
 					$text =~ /\brelay=[^\s\[]*\[127\.0\.0\.1\]/;
-				return if $opt{'ignore-host'} and
-					$text =~ /\brelay=[^\s,]*$opt{'ignore-host'}/oi;
+				if(defined $opt{'ignore-host-re'}) {
+					for my $ih (@{$opt{'ignore-host-re'}}) {
+						warn "MATCH! $text\n" if $text =~ $ih;
+						return if $text =~ $ih;
+					}
+				}
 				event($time, 'sent');
 			}
 			elsif($text =~ /\bstatus=bounced\b/) {
@@ -684,6 +695,14 @@ sub process_line($)
 			}
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: /) {
 				event($time, 'rejected');
+			}
+			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?milter-reject: /) {
+				if($text =~ /Blocked by SpamAssassin/) {
+					event($time, 'spam');
+				}
+				else {
+					event($time, 'rejected');
+				}
 			}
 		}
 		elsif($prog eq 'error') {
@@ -771,11 +790,34 @@ sub process_line($)
 			event($time, 'rejected');
 		}
 	}
-	elsif($prog eq 'amavis' || $prog eq 'amavisd') {
-		if(   $text =~ /^\([0-9-]+\) (Passed|Blocked) SPAM(?:MY)?\b/) {
-			event($time, 'spam'); # since amavisd-new-2004xxxx
+	elsif($prog eq 'exim') {
+		if($text =~ /^[0-9a-zA-Z]{6}-[0-9a-zA-Z]{6}-[0-9a-zA-Z]{2} <= \S+/) {
+			event($time, 'received');
 		}
-		elsif($text =~ /^\([0-9-]+\) (Passed|Not-Delivered)\b.*\bquarantine spam/) {
+		elsif($text =~ /^[0-9a-zA-Z]{6}-[0-9a-zA-Z]{6}-[0-9a-zA-Z]{2} => \S+/) {
+			event($time, 'sent');
+		}
+		elsif($text =~ / rejected because \S+ is in a black list at \S+/) {
+			if($opt{'rbl-is-spam'}) {
+				event($time, 'spam');
+			} else {
+				event($time, 'rejected');
+			}
+		}
+		elsif($text =~ / rejected RCPT \S+: Unknown user/) {
+			event($time, 'rejected');
+		}
+		elsif($text =~ / rejected RCPT \S+: Sender verify failed/) {
+			event($time, 'vrfyrjt');
+		}
+	}
+	elsif($prog eq 'amavis' || $prog eq 'amavisd') {
+		if(   $text =~ /^\([\w-]+\) (Passed|Blocked) SPAM(?:MY)?\b/) {
+			if($text !~ /\btag2=/) { # ignore new per-recipient log entry (2.2.0)
+				event($time, 'spam'); # since amavisd-new-2004xxxx
+			}
+		}
+		elsif($text =~ /^\([\w-]+\) (Passed|Not-Delivered)\b.*\bquarantine spam/) {
 			event($time, 'spam'); # amavisd-new-20030616 and earlier
 		}
 		### UNCOMMENT IF YOU USE AMAVISD-NEW <= 20030616 WITHOUT QUARANTINE: 
@@ -784,22 +826,22 @@ sub process_line($)
 		#		event($time, 'spam');
 		#	}
 		#}
-		elsif($text =~ /^\([0-9-]+\) (Passed |Blocked )?INFECTED\b/) {
-			if($text !~ /\btag2=/) { # ignore new per-recipient log entry (2.2.0)
+		elsif($text =~ /^\([\w-]+\) (Passed |Blocked )?INFECTED\b/) {
+			if($text !~ /\btag2=/) {
 				event($time, 'virus');# Passed|Blocked inserted since 2004xxxx
 			}
 		}
-		elsif($text =~ /^\([0-9-]+\) (Passed |Blocked )?BANNED\b/) {
+		elsif($text =~ /^\([\w-]+\) (Passed |Blocked )?BANNED\b/) {
 			if($text !~ /\btag2=/) {
 			       event($time, 'virus');
 			}
 		}
-#		elsif($text =~ /^\([0-9-]+\) Passed|Blocked BAD-HEADER\b/) {
-#		       event($time, 'badh');
-#		}
 		elsif($text =~ /^Virus found\b/) {
 			event($time, 'virus');# AMaViS 0.3.12 and amavisd-0.1
 		}
+#		elsif($text =~ /^\([\w-]+\) Passed|Blocked BAD-HEADER\b/) {
+#			event($time, 'badh');
+#		}
 	}
 	elsif($prog eq 'vagatefwd') {
 		# Vexira antivirus (old)
@@ -846,7 +888,7 @@ sub process_line($)
 			event($time, 'spam');
 		}
 	}
-	elsif($prog eq 'spamproxyd') {
+	elsif($prog eq 'spamproxyd' or $prog eq 'spampd') {
 		if($text =~ /^\s*SPAM/ or $text =~ /^identified spam/) {
 			event($time, 'spam');
 		}
