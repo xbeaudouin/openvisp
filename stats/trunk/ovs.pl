@@ -1077,7 +1077,7 @@ ovs.pl - rrdtool frontend for mail statistics
 
 =head1 SYNOPSIS
 
-B<mailgraph> [I<options>...]
+B<ovs> [I<options>...]
 
      --man          show man-page and exit
  -h, --help         display this help and exit
