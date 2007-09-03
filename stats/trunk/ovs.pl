@@ -430,9 +430,9 @@ sub usage
 	print "  -y, --year         starting year of the log file (default: current year)\n";
 	print "      --host=HOST    use only entries for HOST (regexp) in syslog\n";
 	print "  -d, --daemon       start in the background\n";
-	print "  --daemon-pid=FILE  write PID to FILE instead of /var/run/mailgraph.pid\n";
+	print "  --daemon-pid=FILE  write PID to FILE instead of /var/run/ovs.pid\n";
 	print "  --daemon-rrd=DIR   write RRDs to DIR instead of /var/log\n";
-	print "  --daemon-log=FILE  write verbose-log to FILE instead of /var/log/mailgraph.log\n";
+	print "  --daemon-log=FILE  write verbose-log to FILE instead of /var/log/ovs.log\n";
 	print "  --ignore-localhost ignore mail to/from localhost (used for virus scanner)\n";
 	print "  --ignore-host=HOST ignore mail to/from HOST regexp (used for virus scanner)\n";
 	print "  --only-mail-rrd    update only the mail rrd\n";
@@ -1091,9 +1091,9 @@ B<ovs> [I<options>...]
  -y, --year         starting year of the log file (default: current year)
      --host=HOST    use only entries for HOST (regexp) in syslog
  -d, --daemon       start in the background
- --daemon-pid=FILE  write PID to FILE instead of /var/run/mailgraph.pid
+ --daemon-pid=FILE  write PID to FILE instead of /var/run/ovs.pid
  --daemon-rrd=DIR   write RRDs to DIR instead of /var/log
- --daemon-log=FILE  write verbose-log to FILE instead of /var/log/mailgraph.log
+ --daemon-log=FILE  write verbose-log to FILE instead of /var/log/ovs.log
  --ignore-localhost ignore mail to/from localhost (used for virus scanner)
  --ignore-host=HOST ignore mail to/from HOST regexp (used for virus scanner)
  --only-mail-rrd    update only the mail rrd
@@ -1111,7 +1111,7 @@ B<ovs> [I<options>...]
 
 =head1 DESCRIPTION
 
-This script does parse syslog and updates the RRD database (mailgraph.rrd) in
+This script does parse syslog and updates the RRD database (ovs.rrd) in
 the current directory.
 
 =head2 Log-Types
