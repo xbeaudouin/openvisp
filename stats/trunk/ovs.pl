@@ -1077,7 +1077,7 @@ ovs.pl - rrdtool frontend for mail statistics
 
 =head1 SYNOPSIS
 
-B<ovs> [I<options>...]
+B<ovs.pl> [I<options>...]
 
      --man          show man-page and exit
  -h, --help         display this help and exit
@@ -1098,7 +1098,7 @@ B<ovs> [I<options>...]
  --ignore-host=HOST ignore mail to/from HOST regexp (used for virus scanner)
  --only-mail-rrd    update only the mail rrd
  --only-virus-rrd   update only the virus rrd
- --only-pop-rrdii   update only the virus rrd
+ --only-pop-rrd     update only the virus rrd
  --rrd-name=NAME    use NAME.rrd, NAME_virus.rrd and NAME_pop.rrd for the rrd files
  --rbl-is-spam      count rbl rejects as spam
  --virbl-is-virus   count virbl rejects as viruses
