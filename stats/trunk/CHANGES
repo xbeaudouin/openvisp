@@ -1,6 +1,6 @@
 1.10
 ----
-* Initial support of Dovecot
+* Initial support of Dovecot (dovecot >= 1.0.x only)
 
 1.00
 ----
