@@ -1,42 +1,71 @@
 #!/bin/sh
 
-# $Id: ovs-init,v 1.2 2007-08-26 17:02:21 kiwi Exp $
-# example init script for ovs 
+# $Id: ovs-init,v 1.3 2007-09-03 15:15:18 kiwi Exp $
+# example init script for mailgraph
 #
 # chkconfig: 2345 82 28
-# description: ovs log grapher.
+# description: mailgraph postfix log grapher.
 #
-# processname: ovs.pl
-# pidfile: /var/run/ovs.pid
+# processname: mailgraph.pl
+# pidfile: /var/run/mailgraph.pid
 
-
+NAME=ovs
+DESC="Mail statistics grapher"
 PATH=/bin:/usr/bin
 OVS_PL=/usr/local/bin/ovs.pl
-MAIL_LOG=/var/log/syslog
+MAIL_LOG=/var/log/maillog
 PID_FILE=/var/run/ovs.pid
-RRD_DIR=/var/lib
+RRD_DIR=/var/www/cgi-bin
+OVS_LOG=/var/log/ovs.log
+
+start() {
+        echo "Starting $DESC: $NAME";
+        nice -19 $OVS_PL -l $MAIL_LOG -d --rbl-is-spam \
+          --daemon-pid=$PID_FILE --daemon-rrd=$RRD_DIR --daemon-log=$OVS_LOG
+}
+status() {
+        if [ -s $PID_FILE ]; then
+                pid=`cat $PID_FILE`
+                kill -0 $pid >/dev/null 2>&1
+                if [ "$?" = "0" ]; then
+                        echo "$NAME (pid $pid) is running"
+                        RETVAL=0
+                else
+                        echo "$NAME is stopped"
+                        RETVAL=1
+                fi
+        else
+                echo "$NAME is stopped"
+                RETVAL=1
+        fi
+}
+stop() {
+        echo "Stopping $DESC: $NAME";
+        if [ -f $PID_FILE ]; then
+                kill `cat $PID_FILE`
+                rm $PID_FILE
+        else
+                echo "$NAME not running";
+        fi
+}
 
 case "$1" in
 'start')
-	echo "Starting mail statistics grapher: ovs";
-	nice -19 $OVS_PL -l $MAIL_LOG -d \
-		--daemon-pid=$PID_FILE --daemon-rrd=$RRD_DIR
+	start
 	;;
-
+'status')
+	status
+        ;;
 'stop')
-	echo "Stopping mail statistics grapher: ovs";
-	if [ -f $PID_FILE ]; then
-		kill `cat $PID_FILE`
-		rm $PID_FILE
-	else
-		echo "ovs not running";
-	fi
+	stop
 	;;
-
+'restart')
+	stop
+	start
+	;;
 *)
-	echo "Usage: $0 { start | stop }"
+	echo "Usage: $0 { start | status | stop | restart }"
 	exit 1
 	;;
-
 esac
 exit 0
