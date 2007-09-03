@@ -677,10 +677,7 @@ sub process_line($)
 			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
 				event($time, 'helo');
 			}
-			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 550.*Sender address rejected: Please see.*spf/) {
-				event($time, 'spf');
-			}
-			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.*Recipient address rejected: Please see.*spf/) {
+			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 55\d.*(Sender|Recipient) address rejected: Please see (www.openspf.org|.*spf)/) {
 				event($time, 'spf');
 			}
 			elsif($opt{'domain-not-found'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: Domain not found/) {

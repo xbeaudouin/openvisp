@@ -1,5 +1,7 @@
 1.02
 ----
+* Updated SPF rules to catch the SPF implementation for Postfix 
+  from openspf.org (Steeve)
 
 1.01
 ----
