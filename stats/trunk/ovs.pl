@@ -949,19 +949,28 @@ sub process_line($)
 	elsif($prog =~ /^dovecot: (.*)/) {
 		my $prog = $1;
 		if($prog eq 'imap-login: Login') {
-			if($text =~ /TLS/) {
+			if($text =~ /TLS$/) {
 				event($time, 'imapd_ssl_login');
 			}
-			elsif($text =~ /secured/) {
-				event($time, 'imapd_ssl_login');
+			elsif($text =~ /secured$/) {
+				event($time, 'imapd_login');
 			}
 			else {
+				# Fail back in case)
 				event($time, 'imapd_login');
 			}
 		} 
 		elsif($prog eq 'pop3-login') {
-			# Don't know how to check ssl/non ssl
-			event($time, 'pop3d_login');
+			if($text =~ /TLS$/) {
+				event($time, 'pop3d_ssl_login');
+			}
+			elsif($text =~ /secured$/) {
+				event($time, 'popd3d_login');
+			}
+			else {
+				# Fail back in case)
+				event($time, 'pop3d_login');
+			}
 		}
 	}
 }
