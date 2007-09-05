@@ -1,5 +1,6 @@
 1.02
 ----
+* Updated Greylisting regexp (Steeve)
 * Updated SPF rules to catch the SPF implementation for Postfix 
   from openspf.org (Steeve)
 

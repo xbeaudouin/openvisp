@@ -668,10 +668,7 @@ sub process_line($)
 			elsif($opt{'rbl-is-spam'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using/) {
 				event($time, 'spam');
 			}
-			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.* Recipient address rejected: Greylisted/) {
-				event($time, 'greylist');
-			}
-			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.* Recipient address rejected:.*Greylist/) {
+			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*Greylist(ed)?/) {
 				event($time, 'greylist');
 			}
 			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
