@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.92 2007-08-15 16:49:00 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.93 2007-09-10 21:43:55 kiwi Exp $
  */
 
 /*
@@ -177,6 +177,7 @@ static apr_thread_mutex_t *mutex = NULL;
  */
 #ifdef HAVE_MMC_SUPPORT
 #include <memcache.h>
+#define MEMCACHE_EXPIRY=3600	/* Expiry time for memcache */
 #endif
 
 /*
@@ -224,8 +225,8 @@ typedef struct {
 	 * End of borrowing
 	 */
 #ifdef HAVE_MMC_SUPPORT
-	char				*memcached_addr;	/* Addresses of memcached servers */
-	apt_time_t		memcached_expr;	/* Memcached object expiry in seconds */
+	char			*memcached_addr;	/* Addresses of memcached servers */
+	/*apt_time_t		memcached_expr;	*/ /* Memcached object expiry in seconds */
 #endif /* HAVE_MMC_SUPPORT */
 }	vhs_config_rec;
 
@@ -308,6 +309,10 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 #ifdef HAVE_MOD_SUPHP_SUPPORT
        conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
+
+#ifdef HAVE_MMC_SUPPORT
+	conf->memcached_addr = (child->memcached_addr ? child->memcached_addr : parent->memcached_addr);
+#endif /* HAVE_MMC_SUPPORT */
 
 	conf->aliases = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects = apr_array_append(p, child->redirects, parent->redirects);
@@ -837,6 +842,44 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	/* Thread stuff */
 	apr_status_t	rv;
 #endif
+#ifdef	HAVE_MMC_SUPPORT
+	/* Memcache support */
+	char *memcache_addr = vhr->memcached_addr;
+	apt_time_t memcache_expiry = MEMCACHE_EXPIRY;
+	/* Memcache objects */
+	struct memcache *mc_session=NULL;
+	char *szServer=NULL;
+	char *szTokenPos=NULL;
+	char *szSeparator=", \t";
+	int mc_err=0;
+	struct passwd *szValue;
+	size_t	nGetKeyLen=sizeof(struct passwd);
+	size_t	nGet_Len=0;
+
+	/* Init memcache lib */
+	unless(mc_session=mc_new()) {
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: memcache lib init failed");
+		return NULL;
+	}
+
+	/* Add the memcached servers from configuration who contai host:port server addresses/port */
+	/* Separated by comas */
+	szTokenPos = NULL;
+	for(szServer = strtok_r(memcache_addr, szSeparator, &szTokenPos); szServer != NULL; szServer=strtok_r(NULL," \t",&szTokenPos)) {
+		if((mc_err=mc_server_add4(mc_session, (mc_const char *) szServer)) != 0) {
+			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: mc_cache_add4 failed to add server : '%s' errcode=%d", szServer, mc_err);
+		}
+	}
+
+	/* Get the value from the memcached server */
+	unless(szValue=(struct passwd *)mg_aget2(mc_session, host, nGetKeyLen, &nGetLen)) {
+		ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r->server, "get_home_stuff: mc_aget2 failed to found key '%s'", host);
+	}
+	if (szValue != NULL) {
+		/* We have some value from cache, so return it */
+		return szValue;
+	}
+#endif	/* HAVE_MMC_SUPPORT */
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
@@ -871,10 +914,18 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 		if (p->pw_dir == NULL) {
 			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned NULL path");
 		} else {
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned \"%s\" path", p->pw_dir);
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_qhome_stuff: libhome returned \"%s\" path", p->pw_dir);
 		}
 	}
-#endif				/* VH_DEBUG */
+#endif  /* VH_DEBUG */
+
+#ifdef	HAVE_MMC_SUPPORT
+	/* Cache data before return it to mod_vhs */
+	if((mc_err=mc_set(mc_session, host, nGetKeyLen, p, nGetLen, memcache_expiry, 0))) {
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: expire time with mc_set (key: %s) failed with errcode=%d", host, mc_err);
+	}
+	mc_free(mc_session);
+#endif  /* HAVE_MMC_SUPPORT */
 	return p;
 }
 
