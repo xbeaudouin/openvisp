@@ -806,10 +806,10 @@ sub process_line($)
 		}
 	}
 	elsif($prog eq 'amavis' || $prog eq 'amavisd') {
-		if(   $text =~ /^\([\w-]+\) (Passed|Blocked) SPAM(?:MY)?\b/) {
-			if($text !~ /\btag2=/) { # ignore new per-recipient log entry (2.2.0)
+		if($text =~ /^\([\w-]+\) (Passed|Blocked) SPAM(?:MY)?\b/) {
+#			if($text !~ /\btag2=/) { # ignore new per-recipient log entry (2.2.0)
 				event($time, 'spam'); # since amavisd-new-2004xxxx
-			}
+#			}
 		}
 		elsif($text =~ /^\([\w-]+\) (Passed|Not-Delivered)\b.*\bquarantine spam/) {
 			event($time, 'spam'); # amavisd-new-20030616 and earlier
@@ -821,14 +821,14 @@ sub process_line($)
 		#	}
 		#}
 		elsif($text =~ /^\([\w-]+\) (Passed |Blocked )?INFECTED\b/) {
-			if($text !~ /\btag2=/) {
+#			if($text !~ /\btag2=/) {
 				event($time, 'virus');# Passed|Blocked inserted since 2004xxxx
-			}
+#			}
 		}
 		elsif($text =~ /^\([\w-]+\) (Passed |Blocked )?BANNED\b/) {
-			if($text !~ /\btag2=/) {
+#			if($text !~ /\btag2=/) {
 			       event($time, 'virus');
-			}
+#			}
 		}
 		elsif($text =~ /^Virus found\b/) {
 			event($time, 'virus');# AMaViS 0.3.12 and amavisd-0.1
