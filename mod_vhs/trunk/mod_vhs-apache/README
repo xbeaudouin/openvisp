@@ -83,6 +83,11 @@ vhs_RedirectPermanent :	mod_alias 100% compatible options inside mod_vhs.
 			Please see http://httpd.apache.org/docs-2.0/mod_alias.html
 			for more informations.
 
+Memcached options (enabled only if compiled with HAVE_MMC_SUPPORT) :
+vhs_memcache_servers :	Memcached servers in form host:port separated with
+			with comas
+
+
 Notes about vhs_PHP* values :
 
 	All this options *will* override the default PHP values you have
