@@ -52,13 +52,13 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.93 2007-09-10 21:43:55 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.94 2007-09-11 08:26:01 kiwi Exp $
  */
 
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.33"
+#define VH_VERSION	"mod_vhs/1.0.33-expiremental"
 
 /*
  * Set this if you'd like to have looooots of debug
@@ -177,7 +177,7 @@ static apr_thread_mutex_t *mutex = NULL;
  */
 #ifdef HAVE_MMC_SUPPORT
 #include <memcache.h>
-#define MEMCACHE_EXPIRY=3600	/* Expiry time for memcache */
+#define MEMCACHE_EXPIRY 3600	/* Expiry time for memcache */
 #endif
 
 /*
@@ -845,7 +845,7 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 #ifdef	HAVE_MMC_SUPPORT
 	/* Memcache support */
 	char *memcache_addr = vhr->memcached_addr;
-	apt_time_t memcache_expiry = MEMCACHE_EXPIRY;
+	apr_time_t memcache_expiry = MEMCACHE_EXPIRY;
 	/* Memcache objects */
 	struct memcache *mc_session=NULL;
 	char *szServer=NULL;
@@ -854,10 +854,10 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	int mc_err=0;
 	struct passwd *szValue;
 	size_t	nGetKeyLen=sizeof(struct passwd);
-	size_t	nGet_Len=0;
+	size_t	nGetLen=0;
 
 	/* Init memcache lib */
-	unless(mc_session=mc_new()) {
+	if (!(mc_session=mc_new())) {
 		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: memcache lib init failed");
 		return NULL;
 	}
@@ -872,7 +872,7 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	}
 
 	/* Get the value from the memcached server */
-	unless(szValue=(struct passwd *)mg_aget2(mc_session, host, nGetKeyLen, &nGetLen)) {
+	if(!(szValue=(struct passwd *)mc_aget2(mc_session, host, nGetKeyLen, &nGetLen))) {
 		ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r->server, "get_home_stuff: mc_aget2 failed to found key '%s'", host);
 	}
 	if (szValue != NULL) {

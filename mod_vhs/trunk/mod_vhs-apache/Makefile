@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.9 2007-08-15 16:49:00 kiwi Exp $
+# $Id: Makefile,v 1.10 2007-09-11 08:26:01 kiwi Exp $
 #
 
 ##
@@ -24,6 +24,8 @@ RM = rm -f
 LN = ln -sf
 CP = cp -f
 INDENT = /usr/bin/indent
+
+CFLAGS=-I/usr/local/include -DHAVE_MMC_SUPPORT
 
 # For debian users, you'll have to uncomment these of you will have
 # big errors under complilation. Don't ask me why, but debian apache2
