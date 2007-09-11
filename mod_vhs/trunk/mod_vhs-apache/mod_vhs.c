@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.94 2007-09-11 08:26:01 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.95 2007-09-11 15:15:53 kiwi Exp $
  */
 
 /*
@@ -123,7 +123,9 @@
  * To enable Apache 2.2 compatibility
  */
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20050217
-# define DEBIAN
+# ifndef DEBIAN
+#  define DEBIAN
+# endif
 #endif
 
 /*
