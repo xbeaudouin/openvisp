@@ -1,4 +1,4 @@
-# $Id: kazar.schema,v 1.1 2006-06-26 22:28:59 kiwi Exp $
+# $Id: kazar.schema,v 1.2 2007-09-14 14:26:55 kiwi Exp $
 # OpenLDAP Schema for Association KAZAR
 #
 # Please place number 17533 with your SNMP id
@@ -82,6 +82,12 @@ attributetype ( 1.3.6.1.4.1.17533.2.1.13 NAME 'MXTransport'
                 SINGLE-VALUE )
                 SINGLE-VALUE )
 
+attributetype ( 1.3.6.1.4.1.17533.2.1.14 NAME 'mailQuotaKB'
+                DESC 'The mail Quota size '
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+                SINGLE-VALUE )
+
 # Object kazarPerson
 
 objectclass ( 1.3.6.1.4.1.17533.2.2.1 NAME 'kazarPerson'
@@ -93,4 +99,4 @@ objectclass ( 1.3.6.1.4.1.17533.2.2.1 NAME 'kazarPerson'
                       associatedDomain $ maildrop $ homeDirectory $
                       userPassword $ mailPolicy $ vacationText $
                       mailhomeDirectory $ CouriermailhomeDirectory $ 
-                      CouriermailQuota $ MXTransport ) )
+                      CouriermailQuota $ MXTransport $ mailQuotaKB ) )

@@ -1,4 +1,4 @@
-# $Id: mailboxes.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
+# $Id: mailboxes.pm,v 1.3 2007-09-14 14:26:54 kiwi Exp $
 # 
 package Kazar::mailboxes;
 
@@ -118,6 +118,8 @@ sub search
 		$entry .= "mailhomeDirectory : $cf{mailhomeroot}/$path\n";
 		$entry .= "CouriermailhomeDirectory : $cf{mailhomeroot}/$path/Maildir/\n";
 		$entry .= "mailQuota : $row->{quota}\n";
+		my $quotaKB = $row->{quota} / 1000;
+		$entry .= "mailQuotaKB : $quotaKB\n";
 		$entry .= "CouriermailQuota : $row->{quota}S\n";
 		$entry .= "associatedDomain : $row->{domain}\n";
 	}
