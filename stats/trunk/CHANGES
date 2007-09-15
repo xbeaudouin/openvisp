@@ -1,5 +1,6 @@
 1.02
 ----
+* Added Nod32 support (Thanks to Alexandru Suchici from mailgraph ml)
 * Fixed Amavisd-new SPAM detection, the backport from mailgraph 1.14
   was more or less non working. (Xavier Beaudouin)
 * Updated Greylisting regexp (Steeve)

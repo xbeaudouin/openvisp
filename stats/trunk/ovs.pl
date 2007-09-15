@@ -837,6 +837,12 @@ sub process_line($)
 #			event($time, 'badh');
 #		}
 	}
+	elsif($prog eq 'nod32d') {
+		# Nod32 antivirus
+		if($text =~ / (action="contained infected files")/) {
+			event($time, 'virus');
+		}
+		}
 	elsif($prog eq 'vagatefwd') {
 		# Vexira antivirus (old)
 		if($text =~ /^VIRUS/) {
