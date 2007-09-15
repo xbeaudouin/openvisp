@@ -1,0 +1,27 @@
+1.02
+----
+* Added Nod32 support (Thanks to Alexandru Suchici from mailgraph ml)
+* Fixed Amavisd-new SPAM detection, the backport from mailgraph 1.14
+  was more or less non working. (Xavier Beaudouin)
+* Updated Greylisting regexp (Steeve)
+* Updated SPF rules to catch the SPF implementation for Postfix 
+  from openspf.org (Steeve)
+
+1.01
+----
+* Updated init script (William de Sausmarez)
+* Backported Mailgraph 1.14 updates
+  * add external css file: mailgraph.css (Patrick Nagel)
+    -> you will need to add this file to where mailgraph.cgi is
+  * add support for exim (Nicola Worthington)
+  * add support for SpamAssassin milter (Todd A. Green)
+  * update support for amavis-milter (Joachim de Groot)
+  * update support for amavisd-new (Pawel Madej)
+  * update support for spamproxyd (Thomas Vander Stichele)
+  * --ignore-host can now be specified multiple times
+* Initial support of Dovecot (dovecot >= 1.0.x only)
+
+1.00
+----
+* Changed name from mailgraph to OVS (OpenVISP Stats)
+* Integrated courriergraph
