@@ -372,7 +372,7 @@ use File::Tail;
 use Getopt::Long;
 use POSIX 'setsid';
 
-my $VERSION = "1.01";
+my $VERSION = "1.03";
 
 # config
 my $rrdstep = 60;
