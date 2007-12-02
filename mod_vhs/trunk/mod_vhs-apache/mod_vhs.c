@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.95 2007-09-11 15:15:53 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.96 2007-12-02 13:21:12 kiwi Exp $
  */
 
 /*
@@ -105,6 +105,10 @@
 #include "util_script.h"
 
 #include "ap_config_auto.h"
+
+/* XXX: Do we need that ? */
+#include "ap_mpm.h" /* XXX */
+#include "apr_thread_mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -174,13 +178,9 @@ static apr_thread_mutex_t *mutex = NULL;
 # endif
 #endif
 
-/*
- * libmemcache stuff
- */
-#ifdef HAVE_MMC_SUPPORT
-#include <memcache.h>
-#define MEMCACHE_EXPIRY 3600	/* Expiry time for memcache */
-#endif
+#ifdef USE_MEM_CACHE
+#include <ght_hash_table.h>
+#endif /* USE_MEM_CACHE */
 
 /*
  * Let's start coding
@@ -844,44 +844,6 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	/* Thread stuff */
 	apr_status_t	rv;
 #endif
-#ifdef	HAVE_MMC_SUPPORT
-	/* Memcache support */
-	char *memcache_addr = vhr->memcached_addr;
-	apr_time_t memcache_expiry = MEMCACHE_EXPIRY;
-	/* Memcache objects */
-	struct memcache *mc_session=NULL;
-	char *szServer=NULL;
-	char *szTokenPos=NULL;
-	char *szSeparator=", \t";
-	int mc_err=0;
-	struct passwd *szValue;
-	size_t	nGetKeyLen=sizeof(struct passwd);
-	size_t	nGetLen=0;
-
-	/* Init memcache lib */
-	if (!(mc_session=mc_new())) {
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: memcache lib init failed");
-		return NULL;
-	}
-
-	/* Add the memcached servers from configuration who contai host:port server addresses/port */
-	/* Separated by comas */
-	szTokenPos = NULL;
-	for(szServer = strtok_r(memcache_addr, szSeparator, &szTokenPos); szServer != NULL; szServer=strtok_r(NULL," \t",&szTokenPos)) {
-		if((mc_err=mc_server_add4(mc_session, (mc_const char *) szServer)) != 0) {
-			ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: mc_cache_add4 failed to add server : '%s' errcode=%d", szServer, mc_err);
-		}
-	}
-
-	/* Get the value from the memcached server */
-	if(!(szValue=(struct passwd *)mc_aget2(mc_session, host, nGetKeyLen, &nGetLen))) {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r->server, "get_home_stuff: mc_aget2 failed to found key '%s'", host);
-	}
-	if (szValue != NULL) {
-		/* We have some value from cache, so return it */
-		return szValue;
-	}
-#endif	/* HAVE_MMC_SUPPORT */
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
@@ -921,13 +883,8 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	}
 #endif  /* VH_DEBUG */
 
-#ifdef	HAVE_MMC_SUPPORT
-	/* Cache data before return it to mod_vhs */
-	if((mc_err=mc_set(mc_session, host, nGetKeyLen, p, nGetLen, memcache_expiry, 0))) {
-		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, r->server, "get_home_stuff: expire time with mc_set (key: %s) failed with errcode=%d", host, mc_err);
-	}
-	mc_free(mc_session);
-#endif  /* HAVE_MMC_SUPPORT */
+
+/* TODO: MEM cache */
 	return p;
 }
 
