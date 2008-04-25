@@ -446,6 +446,7 @@ sub usage
 	print "  --domain-not-found count domain not found rejects\n";
 	print "  --spf              count spf rejects\n";
 	print "  --policyd          count policyd helo rejects and autoblacklist\n";
+	print "  --teaser           Specific configuration for teaser\n";
 
 	exit;
 }
@@ -459,7 +460,7 @@ sub main
 		'daemon_log|daemon-log=s', 'ignore-localhost!', 'ignore-host=s@',
 		'only-mail-rrd', 'only-virus-rrd', 'rrd_name|rrd-name=s',
 		'rbl-is-spam', 'virbl-is-virus', 'greylist', 'helo', 'spf', 'domain-not-found',
-		'policyd', 'only-pop-rrd',
+		'policyd', 'only-pop-rrd', 'teaser',
 		) or exit(1);
 	usage if $opt{help};
 
@@ -630,7 +631,7 @@ sub process_line($)
 	my $prog = $sl->[2];
 	my $text = $sl->[4];
 
-	if($prog =~ /^postfix\/(.*)/) {
+        if($prog =~ /^postfix\/(.*)/ ) {
 		my $prog = $1;
 		if($prog eq 'smtp') {
 			if($text =~ /\bstatus=sent\b/) {
@@ -668,7 +669,7 @@ sub process_line($)
 			elsif($opt{'rbl-is-spam'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using/) {
 				event($time, 'spam');
 			}
-			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*Greylist(ed)?/) {
+			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*[Gg]reylist(ed|ing)?/) {
 				event($time, 'greylist');
 			}
 			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
@@ -686,6 +687,9 @@ sub process_line($)
 			}
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 550.*Sender address rejected: undeliverable address: /) {
 				event($time, 'vrfyrjt');
+			}
+			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Recipient address rejected: Policy Rejection/) {
+				event($time, 'policydbl');
 			}
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: /) {
 				event($time, 'rejected');
@@ -932,11 +936,11 @@ sub process_line($)
 		}
 	}
 	# uncommment for clamassassin:
-	#elsif($prog eq 'clamd') {
-	#	if($text =~ /^stream: .* FOUND$/) {
-	#		event($time, 'virus');
-	#	}
-	#}
+	elsif($prog eq 'clamd') {
+		if($text =~ /stream .* FOUND/) {
+			event($time, 'virus');
+		}
+	}
 	elsif ($prog eq 'smtp-vilter') {
 		if ($text =~ /clamd: found/) {
 			event($time, 'virus');
@@ -988,9 +992,9 @@ sub process_line($)
 		}
 	}
 	# Dovecot
-	elsif($prog =~ /^dovecot: (.*)/) {
+	elsif($prog =~ /^dovecot\:\ (.*)\:/) {
 		my $prog = $1;
-		if($prog eq 'imap-login: Login') {
+		if($prog eq 'imap-login') {
 			if($text =~ /TLS$/) {
 				event($time, 'imapd_ssl_login');
 			}

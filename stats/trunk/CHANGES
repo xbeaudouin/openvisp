@@ -1,3 +1,8 @@
+1.03
+----
+* Added Bagolu's patches
+* Fix dovecot detection
+
 1.02
 ----
 * Added Nod32 support (Thanks to Alexandru Suchici from mailgraph ml)
