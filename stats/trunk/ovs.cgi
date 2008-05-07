@@ -326,7 +326,7 @@ HEADER
 	for my $n (0..$#graphs) {
 		print "<h2 id=\"G$n\">$graphs[$n]{title}</h2>\n";
 		print "<p><img src=\"$scriptname?${n}-n\" alt=\"ovs\"/><br/>\n";
-		print "<img src=\"$scriptname?${n}-e\" alt=\"ovs\"/></p><br/>\n";
+		print "<img src=\"$scriptname?${n}-e\" alt=\"ovs\"/><br/>\n";
 		print "<img src=\"$scriptname?${n}-p\" alt=\"ovs\"/></p>\n";
 	}
 
