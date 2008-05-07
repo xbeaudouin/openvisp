@@ -631,6 +631,8 @@ sub process_line($)
 	my $prog = $sl->[2];
 	my $text = $sl->[4];
 
+	#print $prog."\n";
+
         if($prog =~ /^postfix\/(.*)/ ) {
 		my $prog = $1;
 		if($prog eq 'smtp') {
@@ -992,9 +994,10 @@ sub process_line($)
 		}
 	}
 	# Dovecot
-	elsif($prog =~ /^dovecot\:\ (.*)\:/) {
-		my $prog = $1;
-		if($prog eq 'imap-login') {
+	elsif($prog eq 'dovecot') {
+		#print "Dovecot detected ";
+		if($text =~ /imap-login/) {
+			print "imap\n";
 			if($text =~ /TLS$/) {
 				event($time, 'imapd_ssl_login');
 			}
@@ -1006,7 +1009,8 @@ sub process_line($)
 				event($time, 'imapd_login');
 			}
 		} 
-		elsif($prog eq 'pop3-login') {
+		elsif($text =~ /pop3-login/) {
+			#print "pop\n";
 			if($text =~ /TLS$/) {
 				event($time, 'pop3d_ssl_login');
 			}
