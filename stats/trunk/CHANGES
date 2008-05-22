@@ -1,5 +1,7 @@
 1.03
 ----
+* Fixed update of rrd_virus when nobody logs in (Bug and fix 
+  reported by Claudius Herder)
 * Added Bagolu's patches
 * Fix dovecot detection
 

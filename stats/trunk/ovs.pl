@@ -446,7 +446,7 @@ sub usage
 	print "  --domain-not-found count domain not found rejects\n";
 	print "  --spf              count spf rejects\n";
 	print "  --policyd          count policyd helo rejects and autoblacklist\n";
-	print "  --teaser           Specific configuration for teaser\n";
+#	print "  --teaser           Specific configuration for teaser\n";
 
 	exit;
 }
@@ -1042,15 +1042,18 @@ sub update($)
 
 	print "update $this_minute:$sum{sent}:$sum{received}:$sum{bounced}:$sum{rejected}:$sum{virus}:$sum{spam}:$sum{greylist}:$sum{helo}:$sum{spf}:$sum{dnf}:$sum{policydbl}\n" if $opt{verbose};
 	RRDs::update $rrd, "$this_minute:$sum{sent}:$sum{received}:$sum{bounced}:$sum{rejected}" unless $opt{'only-virus-rrd'};
+	# Virus / Spam / Greylist / ....
 	RRDs::update $rrd_virus, "$this_minute:$sum{virus}:$sum{spam}:$sum{greylist}:$sum{helo}:$sum{spf}:$sum{dnf}:$sum{policydbl}:$sum{vrfytmp}:$sum{vrfyrjt}" unless $opt{'only-mail-rrd'};
 	# pop / imap
 	print "update pop $this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}\n" if $opt{verbose};
 	RRDs::update $rrd_pop, "$this_minute:$sum{imapd_ssl_login}:$sum{imapd_login}:$sum{pop3d_ssl_login}:$sum{pop3d_login}" unless $opt{'only-pop-rrd'};
 	if($m > $this_minute+$rrdstep) {
 		for(my $sm=$this_minute+$rrdstep;$sm<$m;$sm+=$rrdstep) {
-			print "update $sm:0:0:0:0:0:0 (SKIP)\n" if $opt{verbose};
+			print "update rrd $sm:0:0:0:0:0:0 (SKIP)\n" if $opt{verbose};
 			RRDs::update $rrd, "$sm:0:0:0:0" unless $opt{'only-virus-rrd'};
-			RRDs::update $rrd_virus, "$sm:0:0" unless $opt{'only-mail-rrd'};
+			print "update rrd_virus $sm:0:0:0:0:0:0:0:0:0 (SKIP)\n" if $opt{verbose};
+			RRDs::update $rrd_virus, "$sm:0:0:0:0:0:0:0:0:0" unless $opt{'only-mail-rrd'};
+			print "update rrd_pop $sm:0:0:0:0 (SKIP)\n" if $opt{verbose};
 			RRDs::update $rrd_pop, "$sm:0:0:0:0" unless $opt{'only-pop-rrd'};
 		}
 	}
