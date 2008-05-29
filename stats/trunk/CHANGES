@@ -1,5 +1,6 @@
 1.03
 ----
+* Fixed imprecises totals like in mailgraph
 * Fixed update of rrd_virus when nobody logs in (Bug and fix 
   reported by Claudius Herder)
 * Added Bagolu's patches

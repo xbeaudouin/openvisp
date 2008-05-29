@@ -33,8 +33,10 @@ my $tmp_dir = '/tmp/ovs';	 # temporary directory where to store the images
 my @graphs = (
 	{ title => 'Last Day',   seconds => 3600*24,        },
 	{ title => 'Last Week',  seconds => 3600*24*7,      },
-	{ title => 'Last Month', seconds => 3600*24*31,     },
-	{ title => 'Last Year',  seconds => 3600*24*365, },
+#	{ title => 'Last Month', seconds => 3600*24*31,     },
+#	{ title => 'Last Year',  seconds => 3600*24*365, 	},
+	{ title => 'Last Month', seconds => 3600*24*7*5,    },
+	{ title => 'Last Year',  seconds => 3600*24*7*5*12,	},
 );
 
 my %color = (
