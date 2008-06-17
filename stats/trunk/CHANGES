@@ -1,5 +1,7 @@
 1.03
 ----
+* Rejected mail now are updated in totality (eg vrfy rejection IS a rejection).
+* Support for Policyd-weigth added by Bagolu
 * Fixed imprecises totals like in mailgraph
 * Fixed update of rrd_virus when nobody logs in (Bug and fix 
   reported by Claudius Herder)

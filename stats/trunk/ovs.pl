@@ -667,33 +667,55 @@ sub process_line($)
 			}
 			elsif($opt{'virbl-is-virus'} and $text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using virbl.dnsbl.bit.nl/) {
 				event($time, 'virus');
+				event($time, 'rejected');
 			}
 			elsif($opt{'rbl-is-spam'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using/) {
 				event($time, 'spam');
+				event($time, 'rejected');
 			}
 			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*[Gg]reylist(ed|ing)?/) {
 				event($time, 'greylist');
 			}
 			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
 				event($time, 'helo');
+				event($time, 'rejected');
 			}
 			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 55\d.*(Sender|Recipient) address rejected: Please see (www.openspf.org|.*spf)/) {
 				event($time, 'spf');
+				event($time, 'rejected');
 			}
 			elsif($opt{'domain-not-found'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: Domain not found/) {
 				event($time, 'dnf');
+				event($time, 'rejected');
 			}
 			# Verify stuff
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: unverified address: /) {
 				event($time, 'vrfytmp');
+				event($time, 'rejected');
 			}
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 550.*Sender address rejected: undeliverable address: /) {
 				event($time, 'vrfyrjt');
+				event($time, 'rejected');
 			}
 			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Recipient address rejected: Policy Rejection/) {
 				event($time, 'policydbl');
+				event($time, 'rejected');
 			}
-			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: /) {
+			# Policyd-weight
+			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Mail appeared to be SPAM or forged. Ask your Mail\/DNS-Administrator to correct HELO and DNS MX settings or to get removed from DNSBLs/) {
+				event($time, 'policydbl');
+				event($time, 'rejected');
+			}
+			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Your MTA is listed in too many DNSBLs/) {
+				event($time, 'policydbl');
+				event($time, 'rejected');
+			}
+			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: temporarily blocked because of previous errors - retrying too fast/) {
+				event($time, 'policydbl');
+				event($time, 'rejected');
+			}
+			# default reject
+			 elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: /) {
 				event($time, 'rejected');
 			}
 			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?milter-reject: /) {
@@ -937,7 +959,6 @@ sub process_line($)
 			event($time, 'virus');
 		}
 	}
-	# uncommment for clamassassin:
 	elsif($prog eq 'clamd') {
 		if($text =~ /stream .* FOUND/) {
 			event($time, 'virus');
