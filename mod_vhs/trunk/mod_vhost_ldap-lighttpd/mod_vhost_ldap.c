@@ -1,0 +1,317 @@
+/*
+ * mod_vhost_ldap
+ *
+ * $Id: mod_vhost_ldap.c,v 1.1 2008-06-17 22:01:32 kiwi Exp $
+ */
+
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+/* config.h should have LDAP stuff */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include "base.h"
+#include "log.h"
+#include "buffer.h"
+#include "stat_cache.h"
+
+#include "plugin.h"
+
+#include "sys-files.h"
+
+#ifdef HAVE_LDAP
+#include <ldap.h>
+
+/*
+ * Struct where we gatter data and stuff
+ */
+typedef struct {
+	buffer *ldap_server;
+	buffer *ldap_basedn;
+	buffer *ldap_home_attr;
+	unsigned short ldap_port;
+
+	buffer *default_host;
+	buffer *document_root;
+
+	buffer *docroot_cache_key;
+	buffer *docroot_cache_value;
+	buffer *docroot_cache_servername;
+
+	unsigned short debug;
+} plugin_config;
+
+typedef struct {
+	PLUGIN_DATA;
+
+	buffer *doc_root;
+
+	plugin_config **config_storage;
+	plugin_config conf;
+} plugin_data;
+
+INIT_FUNC(mod_vhost_ldap_init) {
+	plugin_data *p;
+
+	UNUSED(srv);
+
+	p = calloc(1, sizeof(*p));
+
+	p->doc_root = buffer_init();
+
+	return p;
+}
+
+FREE_FUNC(mod_vhost_ldap_free) {
+	plugin_data *p = p_d;
+
+	UNUSED(srv);
+
+	if (!p) return HANDLER_GO_ON;
+
+	if (p->config_storage) {
+		size_t i;
+		for (i = 0; i < srv->config_context->used; i++) {
+			plugin_config *s = p->config_storage[i];
+
+			buffer_free(s->document_root);
+			buffer_free(s->default_host);
+			buffer_free(s->server_root);
+
+			buffer_free(s->docroot_cache_key);
+			buffer_free(s->docroot_cache_value);
+			buffer_free(s->docroot_cache_servername);
+
+			free(s);
+		}
+
+		free(p->config_storage);
+	}
+
+	buffer_free(p->doc_root);
+
+	free(p);
+
+	return HANDLER_GO_ON;
+}
+
+SETDEFAULTS_FUNC(mod_vhost_ldap_set_defaults) {
+	plugin_data *p = p_d;
+	size_t i;
+
+	config_values_t cv[] = {
+		{ "vhost-ldap.ldap-server",	NULL, T_CONFIG_STRING, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.ldap-basedn",	NULL, T_CONFIG_STRING, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.ldap-home-attr",	NULL, T_CONFIG_STRING, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.ldap-port",	NULL, T_CONFIG_SHORT, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.default-host",	NULL, T_CONFIG_STRING, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.document-root",	NULL, T_CONFIG_STRING, T_CONFIG_SCOPE_CONNECTION },
+		{ "vhost-ldap.debug",		NULL, T_CONFIG_SHORT, T_CONFIG_SCOPE_CONNECTION },
+		{ NULL,				NULL, T_CONFIG_UNSET, T_CONFIG_SCOPE_UNSET }
+	};
+
+	if (!p) return HANDLER_ERROR;
+
+	p->config_storage = calloc(1, srv->config_context->used * sizeof(specific_config *));
+
+	for (i = 0; i < srv->config_context->used; i++) {
+		plugin_config *s;
+
+		s = calloc(1, sizeof(plugin_config));
+
+		s->ldap_server = buffer_init();
+		s->ldap_basedn = buffer_init();
+		s->ldap_home_attr = buffer_init();
+		s->ldap_port = 389;	/* Default LDAP port */
+
+		s->default_host = buffer_init();
+		s->document_root = buffer_init();
+
+		s->docroot_cache_key = buffer_init();
+		s->docroot_cache_value = buffer_init();
+		s->docroot_cache_servername = buffer_init();
+
+		s->debug = 0;		/* Default there is no debug */
+
+		cv[0].destination = s->ldap_server;
+		cv[0].destination = s->ldap_basedn;
+		cv[0].destination = s->ldap_home_attr;
+		cv[0].destination = &(s->ldap_port);
+		cv[1].destination = s->default_host;
+		cv[2].destination = s->document_root;
+		cv[3].destination = &(s->debug);
+
+
+		p->config_storage[i] = s;
+
+		if (0 != config_insert_values_global(srv, ((data_config *)srv->config_context->data[i])->value, cv)) {
+			return HANDLER_ERROR;
+		}
+	}
+
+	return HANDLER_GO_ON;
+}
+
+static int build_doc_root(server *srv, connection *con, plugin_data *p, buffer *out, buffer *host) {
+	stat_cache_entry *sce = NULL;
+
+	buffer_prepare_copy(out, 128);
+
+	if (p->conf.server_root->used) {
+		buffer_copy_string_buffer(out, p->conf.server_root);
+
+		if (host->used) {
+			/* a hostname has to start with a alpha-numerical character
+			 * and must not contain a slash "/"
+			 */
+			char *dp;
+
+			PATHNAME_APPEND_SLASH(out);
+
+			if (NULL == (dp = strchr(host->ptr, ':'))) {
+				buffer_append_string_buffer(out, host);
+			} else {
+				buffer_append_string_len(out, host->ptr, dp - host->ptr);
+			}
+		}
+		PATHNAME_APPEND_SLASH(out);
+
+		if (p->conf.document_root->used > 2 && p->conf.document_root->ptr[0] == '/') {
+			buffer_append_string_len(out, p->conf.document_root->ptr + 1, p->conf.document_root->used - 2);
+		} else {
+			buffer_append_string_buffer(out, p->conf.document_root);
+			PATHNAME_APPEND_SLASH(out);
+		}
+	} else {
+		buffer_copy_string_buffer(out, con->conf.document_root);
+		PATHNAME_APPEND_SLASH(out);
+	}
+
+	if (HANDLER_ERROR == stat_cache_get_entry(srv, con, out, &sce)) {
+		if (p->conf.debug) {
+			log_error_write(srv, __FILE__, __LINE__, "sb",
+					strerror(errno), out);
+		}
+		return -1;
+	} else if (!S_ISDIR(sce->st.st_mode)) {
+		return -1;
+	}
+
+	return 0;
+}
+
+static int mod_vhost_ldap_patch_connection(server *srv, connection *con, plugin_data *p) {
+	size_t i, j;
+	plugin_config *s = p->config_storage[0];
+A
+
+	PATCH_OPTION(default_host);
+	PATCH_OPTION(document_root);
+
+	PATCH_OPTION(docroot_cache_key);
+	PATCH_OPTION(docroot_cache_value);
+	PATCH_OPTION(docroot_cache_servername);
+
+	PATCH_OPTION(debug);
+
+	/* skip the first, the global context */
+	for (i = 1; i < srv->config_context->used; i++) {
+		data_config *dc = (data_config *)srv->config_context->data[i];
+		s = p->config_storage[i];
+
+		/* condition didn't match */
+		if (!config_check_cond(srv, con, dc)) continue;
+
+		/* merge config */
+		for (j = 0; j < dc->value->used; j++) {
+			data_unset *du = dc->value->data[j];
+
+			if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.server-root"))) {
+				PATCH_OPTION(server_root);
+				PATCH_OPTION(docroot_cache_key);
+				PATCH_OPTION(docroot_cache_value);
+				PATCH_OPTION(docroot_cache_servername);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.default-host"))) {
+				PATCH_OPTION(default_host);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.document-root"))) {
+				PATCH_OPTION(document_root);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.debug"))) {
+				PATCH_OPTION(debug);
+			}
+		}
+	}
+
+	return 0;
+}
+
+static handler_t mod_vhost_ldap_docroot(server *srv, connection *con, void *p_data) {
+	plugin_data *p = p_data;
+
+	/*
+	 * cache the last successfull translation from hostname (authority) to docroot
+	 * - this saves us a stat() call
+	 *
+	 */
+
+	mod_vhost_ldap_patch_connection(srv, con, p);
+
+	if (p->conf.docroot_cache_key->used &&
+	    con->uri.authority->used &&
+	    buffer_is_equal(p->conf.docroot_cache_key, con->uri.authority)) {
+		/* cache hit */
+		buffer_copy_string_buffer(con->physical.doc_root, p->conf.docroot_cache_value);
+		buffer_copy_string_buffer(con->server_name,       p->conf.docroot_cache_servername);
+	} else {
+		/* build document-root */
+		if ((con->uri.authority->used == 0) ||
+		    build_doc_root(srv, con, p, p->doc_root, con->uri.authority)) {
+			/* not found, fallback the default-host */
+			if (build_doc_root(srv, con, p,
+					   p->doc_root,
+					   p->conf.default_host)) {
+				return HANDLER_GO_ON;
+			} else {
+				buffer_copy_string_buffer(con->server_name, p->conf.default_host);
+			}
+		} else {
+			buffer_copy_string_buffer(con->server_name, con->uri.authority);
+		}
+
+		/* copy to cache */
+		buffer_copy_string_buffer(p->conf.docroot_cache_key,        con->uri.authority);
+		buffer_copy_string_buffer(p->conf.docroot_cache_value,      p->doc_root);
+		buffer_copy_string_buffer(p->conf.docroot_cache_servername, con->server_name);
+
+		buffer_copy_string_buffer(con->physical.doc_root, p->doc_root);
+	}
+
+	return HANDLER_GO_ON;
+}
+
+
+LI_EXPORT int mod_vhost_ldap_plugin_init(plugin *p) {
+	p->version     = LIGHTTPD_VERSION_ID;
+	p->name        = buffer_init_string("vhost_ldap");
+
+	p->init        = mod_vhost_ldap_init;
+	p->set_defaults = mod_vhost_ldap_set_defaults;
+	p->handle_docroot  = mod_vhost_ldap_docroot;
+	p->cleanup     = mod_vhost_ldap_free;
+
+	p->data        = NULL;
+
+	return 0;
+}
+
+#else /* HAVE_LDAP */
+/* we don't have mysql support, this plugin does nothing */
+LI_EXPORT int mod_vhost_ldap_plugin_init(plugin *p) {
+        p->version	= LIGHTTPD_VERSION_ID;
+        p->name		= buffer_init_string("vhost_ldap");
+
+        return 0;
+}
+#endif /* HAVE_LDAP */
