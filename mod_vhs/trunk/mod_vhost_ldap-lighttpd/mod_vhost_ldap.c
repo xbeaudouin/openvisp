@@ -1,7 +1,7 @@
 /*
  * mod_vhost_ldap
  *
- * $Id: mod_vhost_ldap.c,v 1.1 2008-06-17 22:01:32 kiwi Exp $
+ * $Id: mod_vhost_ldap.c,v 1.2 2008-06-19 16:26:28 kiwi Exp $
  */
 
 #include <ctype.h>
@@ -24,6 +24,14 @@
 
 #ifdef HAVE_LDAP
 #include <ldap.h>
+
+/*
+ * Design consideration :
+ *
+ * - do we have to make persistant LDAP connections ? for now
+ *   we do create a connection every ldapsearch
+ * - we cache access. how to invalidate them ?
+ */
 
 /*
  * Struct where we gatter data and stuff
@@ -206,7 +214,11 @@ static int build_doc_root(server *srv, connection *con, plugin_data *p, buffer *
 static int mod_vhost_ldap_patch_connection(server *srv, connection *con, plugin_data *p) {
 	size_t i, j;
 	plugin_config *s = p->config_storage[0];
-A
+
+	PATCH_OPTION(ldap_server);
+	PATCH_OPTION(ldap_basedn);
+	PATCH_OPTION(ldap_home_attr);
+	PATCH_OPTION(ldap_port);
 
 	PATCH_OPTION(default_host);
 	PATCH_OPTION(document_root);
@@ -229,11 +241,17 @@ A
 		for (j = 0; j < dc->value->used; j++) {
 			data_unset *du = dc->value->data[j];
 
-			if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.server-root"))) {
-				PATCH_OPTION(server_root);
+			if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.ldap_server"))) {
+				PATCH_OPTION(ldap_server);
 				PATCH_OPTION(docroot_cache_key);
 				PATCH_OPTION(docroot_cache_value);
 				PATCH_OPTION(docroot_cache_servername);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.ldap_basedn"))) {
+				PATCH_OPTION(ldap_basedn);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.ldap_home_attr"))) {
+				PATCH_OPTION(ldap_home_attr);
+			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.ldap_port"))) {
+				PATCH_OPTION(ldap_port);
 			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.default-host"))) {
 				PATCH_OPTION(default_host);
 			} else if (buffer_is_equal_string(du->key, CONST_STR_LEN("vhost-ldap.document-root"))) {
