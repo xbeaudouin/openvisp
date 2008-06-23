@@ -1,0 +1,12 @@
+TODO list
+---------
+
+ * Amavisd-new
+   Add graph with passed mails :
+	Passed BAD-HEADER,
+	Passed CLEAN,
+	Passed SPAM,
+	Passed SPAMMY,
+	Passed UNCHECKED,
+	Passed,
+
