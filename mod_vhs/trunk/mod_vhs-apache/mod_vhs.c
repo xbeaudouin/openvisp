@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.96 2007-12-02 13:21:12 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.97 2008-10-19 09:53:05 kiwi Exp $
  */
 
 /*
@@ -177,10 +177,6 @@ static apr_thread_mutex_t *mutex = NULL;
 #  error Please chose what support you want to have
 # endif
 #endif
-
-#ifdef USE_MEM_CACHE
-#include <ght_hash_table.h>
-#endif /* USE_MEM_CACHE */
 
 /*
  * Let's start coding
@@ -930,7 +926,9 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 {
 	// Path to the suPHP config file per user
 	char *transformedPath = NULL;
-
+	char *transformedUid = NULL;
+	char *transformedGid = NULL;
+	
 	if (vhr->suphp_config_path) {
 		if ((strstr(vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL))
 			transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, username);
@@ -957,8 +955,12 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 
 	cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
-	cfg->target_user  = apr_pstrdup(r->pool,"apache");
-	cfg->target_group = apr_pstrdup(r->pool,username);
+	
+	transformedUid = apr_psprintf(r->pool, "#%d", uid);
+	cfg->target_user  = apr_pstrdup(r->pool,transformedUid);
+
+	transformedGid = apr_psprintf(r->pool, "#%d", gid);
+	cfg->target_group  = apr_pstrdup(r->pool,transformedGid);
 
 	ap_set_module_config(r->server->module_config, suphp_module, cfg);
 }
@@ -1237,7 +1239,7 @@ vhs_translate_name(request_rec * r)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos);
+	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos, p->pw_uid, p->pw_gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	return OK;
@@ -1281,10 +1283,6 @@ static const command_rec vhs_commands[] = {
 						"a document to be redirected, then the destination URL"),
 	AP_INIT_TAKE2( "vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
 						"a document to be redirected, then the destination URL"),
-#ifdef HAVE_MMC_SUPPORT
-	AP_INIT_TAKE1( "vhs_memcache_servers", set_field, (void *)0, RSRC_CONF, 
-						"Set memcache servers in the form ip:port, separated by comas"),
-#endif /* HAVE_MMC_SUPPORT */
 	{NULL}
 };
 

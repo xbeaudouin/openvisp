@@ -1,6 +1,8 @@
 Since mod_vhs 1.0.3x
 --------------------
-o Added initial memcached support
+o Added support for suphp for non-systems users (Stephane Locatelli)
+  This allow suphp support when it is compiled with "force" mode and
+  don't break compatibility with "owner" mode.
 o Added some procompilators options to avoir incompatibility between MOD_SUPHP
   and MOD_VHS 
 
