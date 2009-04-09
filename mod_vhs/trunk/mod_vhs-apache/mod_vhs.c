@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.97 2008-10-19 09:53:05 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.98 2009-04-09 21:31:31 kiwi Exp $
  */
 
 /*
@@ -155,6 +155,14 @@
 #include <zend_alloc.h>
 #include <zend_operators.h>
 #endif
+
+/* 
+ * For libmemcached support
+ */
+/* #define LIBMEMCACHED_SUPPORT 1 */
+#ifdef LIBMEMCACHED_SUPPORT
+# include <memcached.h>
+#endif /* LIBMEMCACHED_SUPPORT */
 
 /*
  * For mod_alias like operations
