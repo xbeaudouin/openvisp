@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.98 2009-04-09 21:31:31 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.99 2009-04-09 21:45:24 kiwi Exp $
  */
 
 /*
@@ -156,7 +156,7 @@
 #include <zend_operators.h>
 #endif
 
-/* 
+/*
  * For libmemcached support
  */
 /* #define LIBMEMCACHED_SUPPORT 1 */
@@ -181,7 +181,7 @@ static apr_thread_mutex_t *mutex = NULL;
  */
 #ifdef HAVE_MOD_PHP_SUPPORT
 # ifdef HAVE_MOD_SUPHP_SUPPORT
-#  error mod_vhs cannot support mod_php and suphp in the same time. 
+#  error mod_vhs cannot support mod_php and suphp in the same time.
 #  error Please chose what support you want to have
 # endif
 #endif
@@ -725,7 +725,7 @@ set_field(cmd_parms * parms, void *mconfig, const char *arg)
 	case 20:
 		vhr->memcached_addr = apr_pstrdup(parms->pool, arg);
 		break;
-#endif /* HAVE_MMC_SUPPORT */		
+#endif /* HAVE_MMC_SUPPORT */
 	}
 
 	return NULL;
@@ -848,6 +848,21 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	/* Thread stuff */
 	apr_status_t	rv;
 #endif
+#if LIBMEMCACHED_SUPPORT
+	/*
+	 * TODO: Check if memcache has already data ?
+	 */
+	/* Matter le manpage libmemcached_examples */
+	memcached_st *memc;
+	memcached_return rc;
+	memcached_server_st *servers;
+
+	memcached=memcached_create(NULL);
+
+	char servername[]="127.0.0.1";
+
+	servers=memcached_server_list(NULL, servername, 400, &rc);
+#endif
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
@@ -887,8 +902,11 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	}
 #endif  /* VH_DEBUG */
 
+#if LIBMEMCACHED_SUPPORT
+	/* TODO: MEM cache */
+	memcached_free(memc);
+#endif
 
-/* TODO: MEM cache */
 	return p;
 }
 
@@ -936,7 +954,7 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	char *transformedPath = NULL;
 	char *transformedUid = NULL;
 	char *transformedGid = NULL;
-	
+
 	if (vhr->suphp_config_path) {
 		if ((strstr(vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL))
 			transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, username);
@@ -963,7 +981,7 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 
 	cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
-	
+
 	transformedUid = apr_psprintf(r->pool, "#%d", uid);
 	cfg->target_user  = apr_pstrdup(r->pool,transformedUid);
 
