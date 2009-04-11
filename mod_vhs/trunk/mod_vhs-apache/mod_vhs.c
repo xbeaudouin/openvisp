@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.99 2009-04-09 21:45:24 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.100 2009-04-11 11:25:12 kiwi Exp $
  */
 
 /*
@@ -848,21 +848,6 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 	/* Thread stuff */
 	apr_status_t	rv;
 #endif
-#if LIBMEMCACHED_SUPPORT
-	/*
-	 * TODO: Check if memcache has already data ?
-	 */
-	/* Matter le manpage libmemcached_examples */
-	memcached_st *memc;
-	memcached_return rc;
-	memcached_server_st *servers;
-
-	memcached=memcached_create(NULL);
-
-	char servername[]="127.0.0.1";
-
-	servers=memcached_server_list(NULL, servername, 400, &rc);
-#endif
 	/*
 	 * libhome stuff is not thread safe so be nice and add a mutex
 	 */
@@ -901,11 +886,6 @@ vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 		}
 	}
 #endif  /* VH_DEBUG */
-
-#if LIBMEMCACHED_SUPPORT
-	/* TODO: MEM cache */
-	memcached_free(memc);
-#endif
 
 	return p;
 }
@@ -1108,11 +1088,21 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 }
 #endif				/* HAVE_MOD_PHP_SUPPORT */
 
+/* Libmemcached free stuff */
+/* I don't like too mutch such stuff but it keep code clean and easy to understand */
+#ifdef LIBMEMCACHED_SUPPORT		
+#define LIBMEMCACHEFREE 		\
+	memcached_server_free(servers); \
+	memcached_free(memc);		
+#else
+#define LIBMEMCACHEFREE 		
+#endif					
+
 static int
 vhs_translate_name(request_rec * r)
 {
 	/* ap_conf_vector_t *sconf = r->server->module_config; */
-	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(r->server->module_config, &vhs_module);
+	vhs_config_rec     *vhr  = (vhs_config_rec *)     ap_get_module_config(r->server->module_config, &vhs_module);
 	core_server_config *conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
 	const char     *host = 0;
@@ -1123,6 +1113,13 @@ vhs_translate_name(request_rec * r)
 	/* libhome */
 	struct passwd  *p;
 	char           *ptr = 0;
+	/* libmemcached */
+#ifdef LIBMEMCACHED_SUPPORT
+	/* Matter le manpage libmemcached_examples */
+	memcached_st		*memc;
+	memcached_return	rc;
+	memcached_server_st	*servers;
+#endif /* LIBMEMCACHED_SUPPORT */
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
@@ -1154,18 +1151,13 @@ vhs_translate_name(request_rec * r)
 	if ((ptr = ap_strchr(host, ':'))) {
 		*ptr = '\0';
 	}
-#if 0
-	/* If there is no Host: header given */
-	if (r->hostname == NULL) {
-		return vhs_redirect_stuff(r, vhr);
-	} else {
-		host = r->hostname;
-	}
-#endif
-
 #ifdef VH_DEBUG
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
+#ifdef LIBMEMCACHED_SUPPORT
+	memcached=memcached_create(NULL);
+	servers  = memcached_servers_parse ("localhost");	/* TODO: make this dynamic */
+#endif /* LIBMEMCACHED_SUPPORT */
 
 	p = vhs_get_home_stuff(r, vhr, (char *)host);
 
@@ -1200,6 +1192,7 @@ vhs_translate_name(request_rec * r)
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
 					}
+					LIBMEMCACHEFREE;
 					return vhs_redirect_stuff(r, vhr);
 				}
 			}
@@ -1207,6 +1200,7 @@ vhs_translate_name(request_rec * r)
 			if (vhr->log_notfound) {
 				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", host);
 			}
+			LIBMEMCACHEFREE;
 			return vhs_redirect_stuff(r, vhr);
 		}
 	}
@@ -1215,6 +1209,7 @@ vhs_translate_name(request_rec * r)
 		if (vhr->log_notfound) {
 			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", host);
 		}
+		LIBMEMCACHEFREE;
 		return vhs_redirect_stuff(r, vhr);
 	}
 #ifdef WANT_VH_HOST
@@ -1251,6 +1246,7 @@ vhs_translate_name(request_rec * r)
 	if (!ap_is_directory(r->pool, path)) {
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server,
 		"vhs_translate_name: homedir '%s' is not dir at all", path);
+		LIBMEMCACHEFREE;
 		return DECLINED;
 	}
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
@@ -1268,6 +1264,7 @@ vhs_translate_name(request_rec * r)
 	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos, p->pw_uid, p->pw_gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
+	LIBMEMCACHEFREE;
 	return OK;
 }
 
