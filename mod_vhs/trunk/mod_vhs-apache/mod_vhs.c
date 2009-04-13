@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.102 2009-04-13 20:15:44 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.103 2009-04-13 21:37:04 kiwi Exp $
  */
 
 /*
@@ -137,14 +137,6 @@
 #endif
 
 /*
- * Libhome stuff
- */
-#define	HOME_DONT_SUBSTITUTE_SYSTEM 1
-/* libhome compatibility */
-#define	DONT_SUBSTITUTE_SYSTEM 1
-#include <home/hpwd.h>
-
-/*
  * Include php support
  */
 /*
@@ -166,13 +158,6 @@
 #define AP_MAX_REG_MATCH 10
 
 /*
- * Threads stuff
- */
-#if APR_HAS_THREADS
-static apr_thread_mutex_t *mutex = NULL;
-#endif
-
-/*
  * To avoid compatibity and segfault
  */
 #ifdef HAVE_MOD_PHP_SUPPORT
@@ -192,7 +177,6 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  */
 typedef struct {
 	unsigned short int	enable;				/* Enable the module */
-	char           		*libhome_tag;		/* Tags to be used by libhome */
 	char           		*path_prefix;		/* Prefix to add to path returned by database/ldap */
 	char           		*default_host;		/* Default host to redirect to */
 
@@ -241,19 +225,19 @@ typedef struct {
 } vhs_config_rec;
 
 #ifdef APU_HAS_LDAP
-/* TODO: clean this */
 typedef struct mod_vhs_ldap_request_t {
     char *dn;				/* The saved dn from a successful search */
-    char *name;				/* ServerName */
-    char *admin;			/* ServerAdmin */
+    char *name;				/* ServerName or host accessed uppon request */
+    char *associateddomain;	/* The real server name */
+    char *admin;			/* ServerAdmin or email for admin */
     char *docroot;			/* DocumentRoot */
-    char *cgiroot;			/* ScriptAlias */
+    char *phpoptions;		/* PHP Options */
     char *uid;				/* Suexec Uid */
     char *gid;				/* Suexec Gid */
 } mod_vhost_ldap_request_t;
 
 /* TODO: make KazarPerson stuff */
-char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin", 0 };
+char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
 #endif /* APU_HAS_LDAP */
 
 /*
@@ -324,7 +308,6 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	vhs_config_rec *conf = (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 
 	conf->enable = (child->enable ? child->enable : parent->enable);
-	conf->libhome_tag = (child->libhome_tag ? child->libhome_tag : parent->libhome_tag);
 	conf->path_prefix = (child->path_prefix ? child->path_prefix : parent->path_prefix);
 	conf->default_host = (child->default_host ? child->default_host : parent->default_host);
 	conf->lamer_mode = (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
@@ -756,9 +739,8 @@ set_field(cmd_parms * parms, void *mconfig, const char *arg)
 	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
 
 	switch (pos) {
-	case 0:
-		vhr->libhome_tag = apr_pstrdup(parms->pool, arg);
-		break;
+	/* case 0: break; not used anymore */
+
 	case 1:
 		vhr->path_prefix = apr_pstrdup(parms->pool, arg);
 		break;
@@ -1000,8 +982,17 @@ set_flag(cmd_parms * parms, void *mconfig, int flag)
 static int
 vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
 {
-	ap_add_version_component(pconf, VH_VERSION);
+#ifdef APU_HAS_LDAP
+    /* make sure that mod_ldap (util_ldap) is loaded */
+    if (ap_find_linked_module("util_ldap.c") == NULL) {
+        ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, s,
+                     "Module mod_ldap missing. Mod_ldap (aka. util_ldap) "
+                     "must be loaded in order for mod_vhs to function properly");
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
+#endif /* APU_HAS_LDAP */
 
+	ap_add_version_component(pconf, VH_VERSION);
 	return OK;
 }
 
@@ -1024,60 +1015,6 @@ vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "redirect_stuff: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
 #endif				/* VH_DEBUG */
 	return DECLINED;
-}
-
-/*
- * Get libhome the entries for hostname
- */
-/* TODO: kill this */
-struct passwd  *
-vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
-{
-	struct passwd  *p;
-#if	APR_HAS_THREADS
-	/* Thread stuff */
-	apr_status_t	rv;
-#endif
-	/*
-	 * libhome stuff is not thread safe so be nice and add a mutex
-	 */
-	/*
-	 * Set the default libhome tag
-	 */
-#if APR_HAS_THREADS
-	rv = apr_thread_mutex_lock(mutex);
-#endif
-	if (vhr->libhome_tag) {
-		setpwtag(vhr->libhome_tag);
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set %s", vhr->libhome_tag);
-#endif				/* VH_DEBUG */
-	} else {
-		setpwtag("mod_vhs");
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: setpwtag set default mod_vhs");
-#endif				/* VH_DEBUG */
-	}
-
-	p = home_getpwnam(host);
-
-#if APR_HAS_THREADS
-	apr_thread_mutex_unlock(mutex);
-#endif				/* APR_HAS_TREAD */
-
-#ifdef VH_DEBUG
-	if (p == NULL) {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned nothing");
-	} else {
-		if (p->pw_dir == NULL) {
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_home_stuff: libhome returned NULL path");
-		} else {
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "get_qhome_stuff: libhome returned \"%s\" path", p->pw_dir);
-		}
-	}
-#endif  /* VH_DEBUG */
-
-	return p;
 }
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
@@ -1278,24 +1215,94 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 }
 #endif				/* HAVE_MOD_PHP_SUPPORT */
 
+#ifdef APU_HAS_LDAP
+#define FILTER_LENGTH MAX_STRING_LEN
+
+char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
+{
+	/* LDAP associated variable and stuff */
+	mod_vhs_ldap_request_t		*reqc;
+	const char 					**vals = NULL;
+	char 						filtbuf[FILTER_LENGTH];
+    int 						result = 0;
+    const char 					*dn = NULL;
+
+start_over:
+
+    if (conf->host) {
+    	ldc = util_ldap_connection_find(r, vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn,
+										vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
+    } else {
+        ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
+                      "[mod_vhs] translate: no vhr->host - weird...?");
+        return DECLINED;
+    }
+
+fallback:
+
+	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "[mod_vhs]: translating %s", r->uri);
+
+    apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
+    result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, attributes, filtbuf, &dn, &vals);
+    util_ldap_connection_close(ldc);
+
+    /* sanity check - if server is down, retry it up to 5 times */
+    if (result == LDAP_SERVER_DOWN) {
+    	if (failures++ <= 5) {
+    		goto start_over;
+        }
+    }
+    // TODO: fix that.
+    if ((result == LDAP_NO_SUCH_OBJECT)) {
+    	if (conf->fallback && (is_fallback++ <= 0)) {
+			ap_log_rerror(APLOG_MARK, APLOG_NOTICE|APLOG_NOERRNO, 0, r,
+						  "[mod_vhs] translate: virtual host %s not found, trying fallback %s",
+						  hostname, vhr->fallback);
+    	    hostname = conf->fallback;
+    	    goto fallback;
+    	}
+
+    	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
+    		          "[mod_vhs] translate: virtual host %s not found",
+    		          hostname);
+
+    	return DECLINED;
+    }
+
+    /* handle bind failure */
+    if (result != LDAP_SUCCESS) {
+       ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
+                     "[mod_vhs] translate: translate failed; virtual host %s; URI %s [%s]",
+    		         hostname, r->uri, ldap_err2string(result));
+       return DECLINED;
+    }
+
+	return vals;
+}
+#endif /* APU_HAS_LDAP */
+
 /*
  * Send the right path to the end user uppon a request.
  */
 static int
 vhs_translate_name(request_rec * r)
 {
-	/* ap_conf_vector_t *sconf = r->server->module_config; */
-	vhs_config_rec     *vhr  = (vhs_config_rec *)     ap_get_module_config(r->server->module_config, &vhs_module);
-	core_server_config *conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
+	vhs_config_rec     	*vhr  = (vhs_config_rec *)     ap_get_module_config(r->server->module_config, &vhs_module);
+	core_server_config 	*conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
-	const char     *host = 0;
-	char           *path = NULL;
+	const char     		*host = 0;
+	char           		*path = NULL;
 	/* mod_alias like functions */
-	char           *ret = 0;
-	int			   status = 0;
+	char           		*ret = 0;
+	int			   		status = 0;
 	/* libhome */
 	struct passwd  *p;
 	char           *ptr = 0;
+
+#ifdef APU_HAS_LDAP
+    reqc = (mod_vhs_ldap_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_ldap_request_t));
+    ap_set_module_config(r->request_config, &vhs_module, reqc);
+#endif /* APU_HAS_LDAP */
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
@@ -1337,7 +1344,7 @@ vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
 
-	p = vhs_get_home_stuff(r, vhr, (char *)host);
+	p = vhs_get_home_stuff(r, vhr, (char *)host); /* XXX */
 
 	if (p != NULL) {
 		/* Ok we have a path so we are sure we have a VHS host */
@@ -1360,7 +1367,7 @@ vhs_translate_name(request_rec * r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
 #endif
-				p = vhs_get_home_stuff(r, vhr, lhost);
+				p = vhs_get_home_stuff(r, vhr, lhost); /* XXX */
 				if (p != NULL) {
 					path = p->pw_dir;
 #ifdef VH_DEBUG
@@ -1389,7 +1396,7 @@ vhs_translate_name(request_rec * r)
 	}
 #ifdef WANT_VH_HOST
 	apr_table_set(r->subprocess_env, "VH_HOST", host);
-#endif				/* WANT_VH_HOST */
+#endif /* WANT_VH_HOST */
 	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
 	/* Do we have handle vhr_Path_Prefix here ? */
 	if (vhr->path_prefix) {
@@ -1446,8 +1453,6 @@ vhs_translate_name(request_rec * r)
  */
 static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG( "EnableVHS", set_flag, (void *)5, RSRC_CONF, "Enable VHS module"),
-	/* TODO: Remove that */
-	AP_INIT_TAKE1("vhs_libhome_tag", set_field, (void *)0, RSRC_CONF, "Set libhome tag."),
 
 	AP_INIT_TAKE1("vhs_Path_Prefix", set_field, (void *)1, RSRC_CONF, "Set path prefix."),
 	AP_INIT_TAKE1("vhs_Default_Host", set_field, (void *)2, RSRC_CONF, "Set default host if HTTP/1.1 is not used."),
@@ -1513,20 +1518,14 @@ register_hooks(apr_pool_t * p)
 	ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
-#if APR_HAS_THREADS
-	apr_status_t	ret;
-	ret = apr_thread_mutex_create(&mutex, APR_THREAD_MUTEX_DEFAULT, p);
-	apr_pool_cleanup_register(p, mutex, (void *)apr_thread_mutex_destroy,
-									  apr_pool_cleanup_null);
-#endif /* APR_HAS_THREADS */
 }
 
 AP_DECLARE_DATA module vhs_module = {
 	STANDARD20_MODULE_STUFF,
-	create_alias_dir_config,	/* create per-directory config structure */
-	merge_alias_dir_config,		/* merge per-directory config structures */
-	vhs_create_server_config,	/* create per-server config structure */
-	vhs_merge_server_config,	/* merge per-server config structures */
+	create_alias_dir_config,		/* create per-directory config structure */
+	merge_alias_dir_config,			/* merge per-directory config structures */
+	vhs_create_server_config,		/* create per-server config structure */
+	vhs_merge_server_config,		/* merge per-server config structures */
 	vhs_commands,					/* command apr_table_t */
 	register_hooks					/* register hooks */
 };
