@@ -1,2 +1,7 @@
-- Make PHP entries more complete and configurable.
-  Add : allow_url_fopen configuration directive
+
+  Remove libhome dependency
+
+  Use mod_dbd as SQL provider : see http://mysolo.org/w/index.php/Vhost_dbd
+  Add Itk support instead of suexec
+  Use mod_ldap as LDAP provider : http://modvhostldap.alioth.debian.org/
+  Add mod_memcache support : see http://code.google.com/p/modmemcache/

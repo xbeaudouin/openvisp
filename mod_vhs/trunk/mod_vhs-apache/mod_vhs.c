@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.100 2009-04-11 11:25:12 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.101 2009-04-13 16:40:45 kiwi Exp $
  */
 
 /*
@@ -103,6 +103,10 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "util_script.h"
+#include "apr_ldap.h"
+#include "apr_strings.h"
+#include "apr_reslist.h"
+#include "util_ldap.h"
 
 #include "ap_config_auto.h"
 
@@ -155,14 +159,6 @@
 #include <zend_alloc.h>
 #include <zend_operators.h>
 #endif
-
-/*
- * For libmemcached support
- */
-/* #define LIBMEMCACHED_SUPPORT 1 */
-#ifdef LIBMEMCACHED_SUPPORT
-# include <memcached.h>
-#endif /* LIBMEMCACHED_SUPPORT */
 
 /*
  * For mod_alias like operations
@@ -222,6 +218,23 @@ typedef struct {
 	char				*suphp_config_path;	/* suPHP_ConfigPath */
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
+#ifdef APU_HAS_LDAP
+	char			*ldap_url;			/* String representation of LDAP URL */
+	char			*ldap_host;			/* Name of the ldap server or space separated list */
+	int				ldap_port;			/* Port of the LDAP server */
+	char			*ldap_basedn;		/* Base DN */
+	int				ldap_scope;			/* Scope of search */
+	char			*ldap_filter;		/* LDAP Filter */
+	deref_options	ldap_deref;			/* How to handle alias dereferening */
+
+	char			*ldap_binddn;		/* DN to bind to server (can be NULL) */
+	char			*ldap_bindpw;		/* Password to bind to server (can be NULL) */
+
+	int				ldap_have_deref;	/* Set if we have found an Deref option */
+	int 			ldap_have_url;		/* Set if we have found an LDAP url */
+
+	int				ldap_secure;		/* True if SSL connections are requested */
+#endif /* APU_HAS_LDAP */
 	/*
 	 * From mod_alias.c
 	 */
@@ -230,11 +243,23 @@ typedef struct {
 	/*
 	 * End of borrowing
 	 */
-#ifdef HAVE_MMC_SUPPORT
-	char			*memcached_addr;	/* Addresses of memcached servers */
-	/*apt_time_t		memcached_expr;	*/ /* Memcached object expiry in seconds */
-#endif /* HAVE_MMC_SUPPORT */
 }	vhs_config_rec;
+
+#ifdef APU_HAS_LDAP
+/* TODO: clean this */
+typedef struct mod_vhs_ldap_request_t {
+    char *dn;				/* The saved dn from a successful search */
+    char *name;				/* ServerName */
+    char *admin;			/* ServerAdmin */
+    char *docroot;			/* DocumentRoot */
+    char *cgiroot;			/* ScriptAlias */
+    char *uid;				/* Suexec Uid */
+    char *gid;				/* Suexec Gid */
+} mod_vhost_ldap_request_t;
+
+/* TODO: make KazarPerson stuff */
+char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin", 0 };
+#endif /* APU_HAS_LDAP */
 
 /*
  * From mod_alias.c
@@ -274,7 +299,14 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	/*
 	 * Pre default the module is not enabled
 	 */
-	vhr->enable = 0;
+	vhr->enable 		= 0;
+#ifdef APU_HAS_LDAP
+	vhr->ldap_binddn	= NULL;
+	vhr->ldap_bindpw	= NULL;
+	vhr->ldap_have_url	= 0;
+	vhr->ldap_have_deref= 0;
+	vhr->ldap_deref		= always;
+#endif /* APU_HAS_LDAP */
 	/*
 	 * From mod_alias.c
 	 */
@@ -313,14 +345,42 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-       conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
+    conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
-#ifdef HAVE_MMC_SUPPORT
-	conf->memcached_addr = (child->memcached_addr ? child->memcached_addr : parent->memcached_addr);
-#endif /* HAVE_MMC_SUPPORT */
+#ifdef APU_HAS_LDAP
+    if (child->ldap_have_url) {
+    	conf->ldap_have_url = child->ldap_have_url;
+    	conf->ldap_url      = child->ldap_url;
+    	conf->ldap_host     = child->ldap_host;
+    	conf->ldap_port     = child->ldap_port;
+    	conf->ldap_basedn   = child->ldap_basedn;
+    	conf->ldap_scope    = child->ldap_scope;
+    	conf->ldap_filter   = child->ldap_filter;
+    	conf->ldap_secure   = child->ldap_secure;
+    } else {
+		conf->ldap_have_url = parent->ldap_have_url;
+		conf->ldap_url      = parent->ldap_url;
+		conf->ldap_host     = parent->ldap_host;
+		conf->ldap_port     = parent->ldap_port;
+		conf->ldap_basedn   = parent->ldap_basedn;
+		conf->ldap_scope    = parent->ldap_scope;
+		conf->ldap_filter   = parent->ldap_filter;
+		conf->ldap_secure   = parent->ldap_secure;
+    }
+    if (child->ldap_have_deref) {
+    	conf->ldap_have_deref = child->ldap_have_deref;
+    	conf->ldap_deref      = child->ldap_deref;
+    } else {
+    	conf->ldap_have_deref = parent->ldap_have_deref;
+    	conf->ldap_deref           = parent->ldap_deref;
+    }
 
-	conf->aliases = apr_array_append(p, child->aliases, parent->aliases);
+    conf->ldap_binddn = (child->ldap_binddn ? child->ldap_binddn : parent->ldap_binddn);
+    conf->ldap_bindpw = (child->ldap_bindpw ? child->ldap_bindpw : parent->ldap_bindpw);
+#endif /* APU_HAS_LDAP */
+
+	conf->aliases   = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects = apr_array_append(p, child->redirects, parent->redirects);
 
 	return conf;
@@ -716,20 +776,154 @@ set_field(cmd_parms * parms, void *mconfig, const char *arg)
 		break;
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
+#ifdef APU_HAS_LDAP
+	case 4:
+		vhr->ldap_binddn = apr_pstrdup(parms->pool, arg);
+		break;
+
+	case 5:
+		vhr->ldap_bindpw = apr_pstrdup(parms->pool, arg);
+		break;
+
+	case 6:
+	    if (strcmp(arg, "never") == 0 || strcasecmp(arg, "off") == 0) {
+	        conf->ldap_deref = never;
+	        conf->ldap_have_deref = 1;
+	    }
+	    else if (strcmp(arg, "searching") == 0) {
+	        conf->ldap_deref = searching;
+	        conf->ldap_have_deref = 1;
+	    }
+	    else if (strcmp(arg, "finding") == 0) {
+	        conf->ldap_deref = finding;
+	        conf->ldap_have_deref = 1;
+	    }
+	    else if (strcmp(arg, "always") == 0 || strcasecmp(arg, "on") == 0) {
+	        conf->ldap_deref = always;
+	        conf->ldap_have_deref = 1;
+	    }
+	    else {
+	        return "Unrecognized value for vhs_DAPAliasDereference directive";
+	    }
+		break;
+#endif /* APU_HAS_LDAP */
+
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	case 10:
 		vhr->suphp_config_path = apr_pstrdup(parms->pool, arg);
 		break;
 #endif /* HAVE_MOD_SUPHP_SUPPRT */
-#ifdef HAVE_MMC_SUPPORT
-	case 20:
-		vhr->memcached_addr = apr_pstrdup(parms->pool, arg);
-		break;
-#endif /* HAVE_MMC_SUPPORT */
 	}
 
 	return NULL;
 }
+
+/*
+ * LDAP Parse URL :
+ * Use the ldap url parsing routines to break up the LDAP  URL into
+ * host and port.
+ * Is out of set_field because it is very big stuff
+ */
+#ifdef APU_HAS_LDAP
+static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const char *url)
+{
+    int result;
+    apr_ldap_url_desc_t *urld;
+
+    vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
+
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: `%s'",
+	         url);
+
+    result = apr_ldap_url_parse(url, &(urld));
+    if (result != LDAP_SUCCESS) {
+        switch (result) {
+        case LDAP_URL_ERR_NOTLDAP:
+            return "LDAP URL does not begin with ldap://";
+        case LDAP_URL_ERR_NODN:
+            return "LDAP URL does not have a DN";
+        case LDAP_URL_ERR_BADSCOPE:
+            return "LDAP URL has an invalid scope";
+        case LDAP_URL_ERR_MEM:
+            return "Out of memory parsing LDAP URL";
+        default:
+            return "Could not parse LDAP URL";
+        }
+    }
+    vhr->ldap_url = apr_pstrdup(cmd->pool, url);
+
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: Host: %s", urld->lud_host);
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: Port: %d", urld->lud_port);
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: DN: %s", urld->lud_dn);
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: attrib: %s", urld->lud_attrs? urld->lud_attrs[0] : "(null)");
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: scope: %s",
+	         (urld->lud_scope == LDAP_SCOPE_SUBTREE? "subtree" :
+		 urld->lud_scope == LDAP_SCOPE_BASE? "base" :
+		 urld->lud_scope == LDAP_SCOPE_ONELEVEL? "onelevel" : "unknown"));
+    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+	         cmd->server, "[mod_vhs] ldap url parse: filter: %s", urld->lud_filter);
+
+    /* Set all the values, or at least some sane defaults */
+    if (vhr->ldap_host) {
+        char *p = apr_palloc(cmd->pool, strlen(vhr->ldap_host) + strlen(urld->lud_host) + 2);
+        strcpy(p, urld->lud_host);
+        strcat(p, " ");
+        strcat(p, vhr->ldap_host);
+        vhr->ldap_host = p;
+    }
+    else {
+        vhr->ldap_host = urld->lud_host? apr_pstrdup(cmd->pool, urld->lud_host) : "localhost";
+    }
+    vhr->ldap_basedn = urld->lud_dn? apr_pstrdup(cmd->pool, urld->lud_dn) : "";
+
+    vhr->ldap_scope = urld->lud_scope == LDAP_SCOPE_ONELEVEL ? LDAP_SCOPE_ONELEVEL : LDAP_SCOPE_SUBTREE;
+
+    if (urld->lud_filter) {
+        if (urld->lud_filter[0] == '(') {
+            /*
+             * Get rid of the surrounding parens; later on when generating the
+             * filter, they'll be put back.
+             */
+            vhr->ldap_filter = apr_pstrdup(cmd->pool, urld->lud_filter+1);
+            vhr->ldap_filter[strlen(vhr->ldap_filter)-1] = '\0';
+        }
+        else {
+            vhr->ldap_filter = apr_pstrdup(cmd->pool, urld->lud_filter);
+        }
+    }
+    else {
+        vhr->ldap_filter = "objectClass=apacheConfig";
+    }
+
+    /*
+     *  "ldaps" indicates secure ldap connections desired
+     */
+    if (strncasecmp(url, "ldaps", 5) == 0)
+    {
+        vhr->ldap_secure = 1;
+        vhr->ldap_port = urld->lud_port? urld->lud_port : LDAPS_PORT;
+        ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
+                     "LDAP: mod_vhs using SSL connections");
+    }
+    else
+    {
+        vhr->ldap_secure = 0;
+        vhr->ldap_port = urld->lud_port? urld->lud_port : LDAP_PORT;
+        ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
+                     "LDAP: mod_vhs not using SSL connections");
+    }
+
+    vhr->ldap_have_url = 1;
+    apr_ldap_free_urldesc(urld);
+    return NULL;
+}
+#endif /* APU_HAS_LDAP */
 
 /*
  * To setting flags
@@ -840,6 +1034,7 @@ vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 /*
  * Get libhome the entries for hostname
  */
+/* TODO: kill this */
 struct passwd  *
 vhs_get_home_stuff(request_rec * r, vhs_config_rec * vhr, char *host)
 {
@@ -1088,16 +1283,9 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 }
 #endif				/* HAVE_MOD_PHP_SUPPORT */
 
-/* Libmemcached free stuff */
-/* I don't like too mutch such stuff but it keep code clean and easy to understand */
-#ifdef LIBMEMCACHED_SUPPORT		
-#define LIBMEMCACHEFREE 		\
-	memcached_server_free(servers); \
-	memcached_free(memc);		
-#else
-#define LIBMEMCACHEFREE 		
-#endif					
-
+/*
+ * Send the right path to the end user uppon a request.
+ */
 static int
 vhs_translate_name(request_rec * r)
 {
@@ -1109,22 +1297,21 @@ vhs_translate_name(request_rec * r)
 	char           *path = NULL;
 	/* mod_alias like functions */
 	char           *ret = 0;
-	int		status = 0;
+	int			   status = 0;
 	/* libhome */
 	struct passwd  *p;
 	char           *ptr = 0;
-	/* libmemcached */
-#ifdef LIBMEMCACHED_SUPPORT
-	/* Matter le manpage libmemcached_examples */
-	memcached_st		*memc;
-	memcached_return	rc;
-	memcached_server_st	*servers;
-#endif /* LIBMEMCACHED_SUPPORT */
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
 		return DECLINED;
 	}
+#ifdef APU_HAS_LDAP
+	/* If we don't have LDAP Url module is disabled */
+	if (!vhr->ldap_have_url) {
+		return DECLINED;
+	}
+#endif /* APU_HAS_LDAP */
 	/* Handle alias stuff */
 	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
 		if (ap_is_HTTP_REDIRECT(status)) {
@@ -1154,10 +1341,6 @@ vhs_translate_name(request_rec * r)
 #ifdef VH_DEBUG
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
-#ifdef LIBMEMCACHED_SUPPORT
-	memcached=memcached_create(NULL);
-	servers  = memcached_servers_parse ("localhost");	/* TODO: make this dynamic */
-#endif /* LIBMEMCACHED_SUPPORT */
 
 	p = vhs_get_home_stuff(r, vhr, (char *)host);
 
@@ -1192,7 +1375,6 @@ vhs_translate_name(request_rec * r)
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
 					}
-					LIBMEMCACHEFREE;
 					return vhs_redirect_stuff(r, vhr);
 				}
 			}
@@ -1200,7 +1382,6 @@ vhs_translate_name(request_rec * r)
 			if (vhr->log_notfound) {
 				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", host);
 			}
-			LIBMEMCACHEFREE;
 			return vhs_redirect_stuff(r, vhr);
 		}
 	}
@@ -1209,7 +1390,6 @@ vhs_translate_name(request_rec * r)
 		if (vhr->log_notfound) {
 			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", host);
 		}
-		LIBMEMCACHEFREE;
 		return vhs_redirect_stuff(r, vhr);
 	}
 #ifdef WANT_VH_HOST
@@ -1246,7 +1426,6 @@ vhs_translate_name(request_rec * r)
 	if (!ap_is_directory(r->pool, path)) {
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server,
 		"vhs_translate_name: homedir '%s' is not dir at all", path);
-		LIBMEMCACHEFREE;
 		return DECLINED;
 	}
 	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
@@ -1264,7 +1443,6 @@ vhs_translate_name(request_rec * r)
 	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos, p->pw_uid, p->pw_gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
-	LIBMEMCACHEFREE;
 	return OK;
 }
 
@@ -1273,7 +1451,9 @@ vhs_translate_name(request_rec * r)
  */
 static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG( "EnableVHS", set_flag, (void *)5, RSRC_CONF, "Enable VHS module"),
+	/* TODO: Remove that */
 	AP_INIT_TAKE1("vhs_libhome_tag", set_field, (void *)0, RSRC_CONF, "Set libhome tag."),
+
 	AP_INIT_TAKE1("vhs_Path_Prefix", set_field, (void *)1, RSRC_CONF, "Set path prefix."),
 	AP_INIT_TAKE1("vhs_Default_Host", set_field, (void *)2, RSRC_CONF, "Set default host if HTTP/1.1 is not used."),
 	AP_INIT_FLAG( "vhs_Lamer", set_flag, (void *)0, RSRC_CONF, "Enable Lamer Friendly mode"),
@@ -1306,6 +1486,18 @@ static const command_rec vhs_commands[] = {
 						"a document to be redirected, then the destination URL"),
 	AP_INIT_TAKE2( "vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
 						"a document to be redirected, then the destination URL"),
+#ifdef APU_HAS_LDAP
+	AP_INIT_TAKE1("vhs_LDAPBindDN",set_field, (void *)4, RSRC_CONF,
+						"DN to use to bind to LDAP server. If not provided, will do an anonymous bind."),
+	AP_INIT_TAKE1("vhs_LDAPBindPassword",set_field, (void *)5, RSRC_CONF,
+						"Password to use to bind LDAP server. If not provider, will do an anonymous bind."),
+	AP_INIT_TAKE1("vhs_LDAPDereferenceAliases",set_field, (void *)6, RSRC_CONF,
+						"Determines how aliases are handled during a search. Can be one of the"
+			            "values \"never\", \"searching\", \"finding\", or \"always\"."
+						"Defaults to always."),
+	AP_INIT_TAKE1("vhs_LDAPURL",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
+						"URL to define LDAP connection in form ldap://host[:port]/basedn[?attrib[?scope[?filter]]]."),
+#endif /* APU_HAS_LDAP */
 	{NULL}
 };
 
