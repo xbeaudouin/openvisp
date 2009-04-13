@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.101 2009-04-13 16:40:45 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.102 2009-04-13 20:15:44 kiwi Exp $
  */
 
 /*
@@ -191,27 +191,22 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  * Configuration structure
  */
 typedef struct {
-	unsigned short int enable;				/* Enable the module */
-	char           *libhome_tag;			/* Tags to be used by libhome */
+	unsigned short int	enable;				/* Enable the module */
+	char           		*libhome_tag;		/* Tags to be used by libhome */
+	char           		*path_prefix;		/* Prefix to add to path returned by database/ldap */
+	char           		*default_host;		/* Default host to redirect to */
 
-	char           *path_prefix;			/* Prefix to add to path returned by
-													* libhome */
-	char           *default_host;			/* Default host to redirect to */
-
-	unsigned short int lamer_mode;		/* Lamer friendly mode */
-	unsigned short int log_notfound;		/* Log request for vhost/path
-													* is not found */
+	unsigned short int 	lamer_mode;			/* Lamer friendly mode */
+	unsigned short int 	log_notfound;		/* Log request for vhost/path is not found */
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	char           *openbdir_path;		/* PHP open_basedir default path */
+	char           		*openbdir_path;		/* PHP open_basedir default path */
 
-	unsigned short int safe_mode;			/* PHP Safe mode */
-	unsigned short int open_basedir;		/* PHP open_basedir */
-	unsigned short int append_basedir;	/* PHP append current
-						 * directory to open_basedir */
-	unsigned short int display_errors;	/* PHP display_error */
-	unsigned short int phpopt_fromdb;	/* Get PHP options from
-						 * libhome */
+	unsigned short int 	safe_mode;			/* PHP Safe mode */
+	unsigned short int 	open_basedir;		/* PHP open_basedir */
+	unsigned short int 	append_basedir;		/* PHP append current directory to open_basedir */
+	unsigned short int 	display_errors;		/* PHP display_error */
+	unsigned short int 	phpopt_fromdb;		/* Get PHP options from database/ldap */
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
@@ -219,31 +214,31 @@ typedef struct {
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 #ifdef APU_HAS_LDAP
-	char			*ldap_url;			/* String representation of LDAP URL */
-	char			*ldap_host;			/* Name of the ldap server or space separated list */
-	int				ldap_port;			/* Port of the LDAP server */
-	char			*ldap_basedn;		/* Base DN */
-	int				ldap_scope;			/* Scope of search */
-	char			*ldap_filter;		/* LDAP Filter */
-	deref_options	ldap_deref;			/* How to handle alias dereferening */
+	char				*ldap_url;			/* String representation of LDAP URL */
+	char				*ldap_host;			/* Name of the ldap server or space separated list */
+	int					ldap_port;			/* Port of the LDAP server */
+	char				*ldap_basedn;		/* Base DN */
+	int					ldap_scope;			/* Scope of search */
+	char				*ldap_filter;		/* LDAP Filter */
+	deref_options		ldap_deref;			/* How to handle alias dereferening */
 
-	char			*ldap_binddn;		/* DN to bind to server (can be NULL) */
-	char			*ldap_bindpw;		/* Password to bind to server (can be NULL) */
+	char				*ldap_binddn;		/* DN to bind to server (can be NULL) */
+	char				*ldap_bindpw;		/* Password to bind to server (can be NULL) */
 
-	int				ldap_have_deref;	/* Set if we have found an Deref option */
-	int 			ldap_have_url;		/* Set if we have found an LDAP url */
+	int					ldap_have_deref;	/* Set if we have found an Deref option */
+	int 				ldap_have_url;		/* Set if we have found an LDAP url */
 
-	int				ldap_secure;		/* True if SSL connections are requested */
+	int					ldap_secure;		/* True if SSL connections are requested */
 #endif /* APU_HAS_LDAP */
 	/*
 	 * From mod_alias.c
 	 */
-	apr_array_header_t *aliases;
-	apr_array_header_t *redirects;
+	apr_array_header_t	*aliases;
+	apr_array_header_t	*redirects;
 	/*
 	 * End of borrowing
 	 */
-}	vhs_config_rec;
+} vhs_config_rec;
 
 #ifdef APU_HAS_LDAP
 /* TODO: clean this */
