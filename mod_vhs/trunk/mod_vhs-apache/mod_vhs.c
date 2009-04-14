@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.103 2009-04-13 21:37:04 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.104 2009-04-14 17:07:38 kiwi Exp $
  */
 
 /*
@@ -255,8 +255,8 @@ typedef struct {
 	ap_regex_t     *regexp;
 #else
 	regex_t        *regexp;
-#endif				/* DEBIAN */
-#endif
+#endif /* DEBIAN */
+#endif /* APR_MAJOR_VERSION */
 	int		redir_status;	/* 301, 302, 303, 410, etc... */
 }	alias_entry;
 
@@ -264,7 +264,7 @@ typedef struct {
 	apr_array_header_t *redirects;
 }	alias_dir_conf;
 /*
- * End of borrowin
+ * End of borrowing
  */
 
 /*
@@ -289,8 +289,8 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	/*
 	 * From mod_alias.c
 	 */
-	vhr->aliases = apr_array_make(p, 20, sizeof(alias_entry));
-	vhr->redirects = apr_array_make(p, 20, sizeof(alias_entry));
+	vhr->aliases	= apr_array_make(p, 20, sizeof(alias_entry));
+	vhr->redirects	= apr_array_make(p, 20, sizeof(alias_entry));
 	/*
 	 * End of borrowing
 	 */
@@ -303,23 +303,23 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 static void    *
 vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 {
-	vhs_config_rec *parent = (vhs_config_rec *) parentv;
-	vhs_config_rec *child = (vhs_config_rec *) childv;
-	vhs_config_rec *conf = (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
+	vhs_config_rec *parent	= (vhs_config_rec *) parentv;
+	vhs_config_rec *child	= (vhs_config_rec *) childv;
+	vhs_config_rec *conf	= (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 
-	conf->enable = (child->enable ? child->enable : parent->enable);
-	conf->path_prefix = (child->path_prefix ? child->path_prefix : parent->path_prefix);
-	conf->default_host = (child->default_host ? child->default_host : parent->default_host);
-	conf->lamer_mode = (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
-	conf->log_notfound = (child->log_notfound ? child->log_notfound : parent->log_notfound);
+	conf->enable 			= (child->enable ? child->enable : parent->enable);
+	conf->path_prefix 		= (child->path_prefix ? child->path_prefix : parent->path_prefix);
+	conf->default_host 		= (child->default_host ? child->default_host : parent->default_host);
+	conf->lamer_mode 		= (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
+	conf->log_notfound 		= (child->log_notfound ? child->log_notfound : parent->log_notfound);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	conf->safe_mode = (child->safe_mode ? child->safe_mode : parent->safe_mode);
-	conf->open_basedir = (child->open_basedir ? child->open_basedir : parent->open_basedir);
-	conf->display_errors = (child->display_errors ? child->display_errors : parent->display_errors);
-	conf->append_basedir = (child->append_basedir ? child->append_basedir : parent->append_basedir);
-	conf->openbdir_path = (child->openbdir_path ? child->openbdir_path : parent->openbdir_path);
-	conf->phpopt_fromdb = (child->phpopt_fromdb ? child->phpopt_fromdb : parent->phpopt_fromdb);
+	conf->safe_mode 		= (child->safe_mode ? child->safe_mode : parent->safe_mode);
+	conf->open_basedir 		= (child->open_basedir ? child->open_basedir : parent->open_basedir);
+	conf->display_errors 	= (child->display_errors ? child->display_errors : parent->display_errors);
+	conf->append_basedir 	= (child->append_basedir ? child->append_basedir : parent->append_basedir);
+	conf->openbdir_path 	= (child->openbdir_path ? child->openbdir_path : parent->openbdir_path);
+	conf->phpopt_fromdb 	= (child->phpopt_fromdb ? child->phpopt_fromdb : parent->phpopt_fromdb);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
@@ -367,16 +367,14 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 /*
  * From mod_alias.c
  */
-static void    *
-create_alias_dir_config(apr_pool_t * p, char *d)
+static void * create_alias_dir_config(apr_pool_t * p, char *d)
 {
 	alias_dir_conf *a = (alias_dir_conf *) apr_pcalloc(p, sizeof(alias_dir_conf));
 	a->redirects = apr_array_make(p, 2, sizeof(alias_entry));
 	return a;
 }
 
-static void    *
-merge_alias_dir_config(apr_pool_t * p, void *basev, void *overridesv)
+static void * merge_alias_dir_config(apr_pool_t * p, void *basev, void *overridesv)
 {
 	alias_dir_conf *a = (alias_dir_conf *) apr_pcalloc(p, sizeof(alias_dir_conf));
 	alias_dir_conf *base = (alias_dir_conf *) basev;
@@ -386,12 +384,9 @@ merge_alias_dir_config(apr_pool_t * p, void *basev, void *overridesv)
 }
 
 /* need prototype for overlap check */
-static int	alias_matches(const char *uri, const char *alias_fakename);
+static int alias_matches(const char *uri, const char *alias_fakename);
 
-static const char *
-add_alias_internal(cmd_parms * cmd, void *dummy,
-		   const char *f, const char *r,
-		   int use_regex)
+static const char * add_alias_internal(cmd_parms * cmd, void *dummy, const char *f, const char *r, int use_regex)
 {
 	server_rec     *s = cmd->server;
 	vhs_config_rec *conf = ap_get_module_config(s->module_config,
@@ -449,23 +444,19 @@ add_alias_internal(cmd_parms * cmd, void *dummy,
 	return NULL;
 }
 
-static const char *
-add_alias(cmd_parms * cmd, void *dummy, const char *f, const char *r)
+static const char * add_alias(cmd_parms * cmd, void *dummy, const char *f, const char *r)
 {
 	return add_alias_internal(cmd, dummy, f, r, 0);
 }
 
-static const char *
-add_alias_regex(cmd_parms * cmd, void *dummy, const char *f, const char *r)
+static const char * add_alias_regex(cmd_parms * cmd, void *dummy, const char *f, const char *r)
 {
 	return add_alias_internal(cmd, dummy, f, r, 1);
 }
 
-static const char *
-add_redirect_internal(cmd_parms * cmd,
-		      alias_dir_conf * dirconf,
-		      const char *arg1, const char *arg2,
-		      const char *arg3, int use_regex)
+static const char * add_redirect_internal(cmd_parms * cmd, alias_dir_conf * dirconf,
+		                                  const char *arg1, const char *arg2,
+		                                  const char *arg3, int use_regex)
 {
 	alias_entry    *new;
 	server_rec     *s = cmd->server;
@@ -531,31 +522,27 @@ add_redirect_internal(cmd_parms * cmd,
 }
 
 
-static const char *
-add_redirect(cmd_parms * cmd, void *dirconf,
-	     const char *arg1, const char *arg2,
-	     const char *arg3)
+static const char * add_redirect(cmd_parms * cmd, void *dirconf,
+	                             const char *arg1, const char *arg2,
+	                             const char *arg3)
 {
 	return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 0);
 }
 
-static const char *
-add_redirect2(cmd_parms * cmd, void *dirconf,
-	      const char *arg1, const char *arg2)
+static const char * add_redirect2(cmd_parms * cmd, void *dirconf,
+	                              const char *arg1, const char *arg2)
 {
 	return add_redirect_internal(cmd, dirconf, arg1, arg2, NULL, 0);
 }
 
-static const char *
-add_redirect_regex(cmd_parms * cmd, void *dirconf,
-		   const char *arg1, const char *arg2,
-		   const char *arg3)
+static const char * add_redirect_regex(cmd_parms * cmd, void *dirconf,
+		                               const char *arg1, const char *arg2,
+		                               const char *arg3)
 {
 	return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 1);
 }
 
-static int
-alias_matches(const char *uri, const char *alias_fakename)
+static int alias_matches(const char *uri, const char *alias_fakename)
 {
 	const char     *aliasp = alias_fakename, *urip = uri;
 
@@ -595,9 +582,8 @@ alias_matches(const char *uri, const char *alias_fakename)
 	return urip - uri;
 }
 
-static char    *
-try_alias_list(request_rec * r, apr_array_header_t * aliases,
-	       int doesc, int *status)
+static char * try_alias_list(request_rec * r, apr_array_header_t * aliases,
+	                         int doesc, int *status)
 {
 	alias_entry    *entries = (alias_entry *) aliases->elts;
 #ifdef DEBIAN
@@ -681,8 +667,7 @@ try_alias_list(request_rec * r, apr_array_header_t * aliases,
 	return NULL;
 }
 
-static int
-fixup_redir(request_rec * r)
+static int fixup_redir(request_rec * r)
 {
 	void           *dconf = r->per_dir_config;
 	alias_dir_conf *dirconf =
@@ -732,8 +717,7 @@ fixup_redir(request_rec * r)
 /*
  * Set the fields inside the conf struct
  */
-static const char *
-set_field(cmd_parms * parms, void *mconfig, const char *arg)
+static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 {
 	int		pos = (int)parms->info;
 	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
@@ -905,8 +889,7 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 /*
  * To setting flags
  */
-static const char *
-set_flag(cmd_parms * parms, void *mconfig, int flag)
+static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 {
 	int		pos = (int)parms->info;
 	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
@@ -979,8 +962,7 @@ set_flag(cmd_parms * parms, void *mconfig, int flag)
 }
 
 
-static int
-vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
+static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
 {
 #ifdef APU_HAS_LDAP
     /* make sure that mod_ldap (util_ldap) is loaded */
@@ -999,8 +981,7 @@ vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, serv
 /*
  * Used for redirect subsystem when a hostname is not found
  */
-static int
-vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
+static int vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 {
 
 	if (vhr->default_host) {
@@ -1022,11 +1003,11 @@ vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
  * This function will configure suPHP
  */
 typedef struct {
-	int	engine;		// Status of suPHP_Engine
-	char	*php_config;
-	int	cmode;		// Server of directory configuration?
-	char	*target_user;
-	char	*target_group;
+	int			engine;			/* Status of suPHP_Engine */
+	char		*php_config;
+	int			cmode;			/* Server of directory configuration? */
+	char		*target_user;
+	char		*target_group;
 	apr_table_t	*handlers;
 } suphp_conf;
 
@@ -1103,8 +1084,7 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 /*
  * This function will configure on the fly the php like php.ini will do
  */
-static void
-vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
+static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 {
 	/*
 	 * Some Basic PHP stuff, thank to Igor Popov module
@@ -1135,7 +1115,7 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 			 * There is a default open_basedir path and
 			 * configuration allow appending them
 			 */
-			char           *obasedir_path;
+			char *obasedir_path;
 
 			if (vhr->path_prefix) {
 				obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", vhr->path_prefix, path, NULL);
@@ -1218,6 +1198,9 @@ vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, char *passwd)
 #ifdef APU_HAS_LDAP
 #define FILTER_LENGTH MAX_STRING_LEN
 
+/*
+ *  Get the stuff from LDAP
+ */
 char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
 {
 	/* LDAP associated variable and stuff */
@@ -1252,21 +1235,12 @@ fallback:
     		goto start_over;
         }
     }
-    // TODO: fix that.
-    if ((result == LDAP_NO_SUCH_OBJECT)) {
-    	if (conf->fallback && (is_fallback++ <= 0)) {
-			ap_log_rerror(APLOG_MARK, APLOG_NOTICE|APLOG_NOERRNO, 0, r,
-						  "[mod_vhs] translate: virtual host %s not found, trying fallback %s",
-						  hostname, vhr->fallback);
-    	    hostname = conf->fallback;
-    	    goto fallback;
-    	}
 
-    	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
+    if ((result == LDAP_NO_SUCH_OBJECT)) {
+     	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
     		          "[mod_vhs] translate: virtual host %s not found",
     		          hostname);
-
-    	return DECLINED;
+    	return NULL;
     }
 
     /* handle bind failure */
@@ -1274,7 +1248,7 @@ fallback:
        ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
                      "[mod_vhs] translate: translate failed; virtual host %s; URI %s [%s]",
     		         hostname, r->uri, ldap_err2string(result));
-       return DECLINED;
+       return NULL;
     }
 
 	return vals;
@@ -1284,8 +1258,7 @@ fallback:
 /*
  * Send the right path to the end user uppon a request.
  */
-static int
-vhs_translate_name(request_rec * r)
+static int vhs_translate_name(request_rec * r)
 {
 	vhs_config_rec     	*vhr  = (vhs_config_rec *)     ap_get_module_config(r->server->module_config, &vhs_module);
 	core_server_config 	*conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
@@ -1295,6 +1268,8 @@ vhs_translate_name(request_rec * r)
 	/* mod_alias like functions */
 	char           		*ret = 0;
 	int			   		status = 0;
+	/* Stuff */
+	const char 			**vals = NULL;
 	/* libhome */
 	struct passwd  *p;
 	char           *ptr = 0;
@@ -1344,16 +1319,10 @@ vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
 
-	p = vhs_get_home_stuff(r, vhr, (char *)host); /* XXX */
+	//p = vhs_get_home_stuff(r, vhr, (char *)host); /* XXX */
+	vals = getldaphome(r, vhr, (char *) host);
 
-	if (p != NULL) {
-		/* Ok we have a path so we are sure we have a VHS host */
-		path = p->pw_dir;
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
-#endif				/* VH_DEBUG */
-
-	} else {
+	if (!vals) {
 		/*
 		 * Trying to get lamer mode or not
 		 */
@@ -1367,13 +1336,8 @@ vhs_translate_name(request_rec * r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
 #endif
-				p = vhs_get_home_stuff(r, vhr, lhost); /* XXX */
-				if (p != NULL) {
-					path = p->pw_dir;
-#ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: lamer for %s -> %s => %s", host, lhost, path);
-#endif
-				} else {
+				vals = getldaphome(r, vhr, lhost);
+				if (!vals) {
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
 					}
@@ -1388,49 +1352,83 @@ vhs_translate_name(request_rec * r)
 		}
 	}
 
-	if (path == NULL) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
+#endif				/* VH_DEBUG */
+
+	if (vals == NULL) {
 		if (vhr->log_notfound) {
 			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", host);
 		}
 		return vhs_redirect_stuff(r, vhr);
+	} else {
+		/* We have values so work with them */
+		reqc->dn = apr_pstrdup(r->pool, dn);
+
+		int i = 0;
+		while (attributes[i]) {
+		    if (strcasecmp (attributes[i], "apacheServerName") == 0) {
+		    	reqc->name = apr_pstrdup (r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "apacheServerAdmin") == 0) {
+		    	reqc->admin = apr_pstrdup (r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "apacheDocumentRoot") == 0) {
+		    	reqc->docroot = apr_pstrdup (r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "apachePhpopts") == 0) {
+		    	reqc->phpoptions = apr_pstrdup (r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "apacheSuexecUid") == 0) {
+		    	reqc->uid = apr_pstrdup(r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "apacheSuexecGid") == 0) {
+		    	reqc->gid = apr_pstrdup(r->pool, vals[i]);
+		    }
+		    else if (strcasecmp (attributes[i], "associatedDomain") == 0) {
+		    	reqc->associateddomain = apr_pstrdup(r->pool, vals[i]);
+		    }
+		    i++;
+		}
 	}
+
 #ifdef WANT_VH_HOST
 	apr_table_set(r->subprocess_env, "VH_HOST", host);
 #endif /* WANT_VH_HOST */
-	apr_table_set(r->subprocess_env, "VH_GECOS", p->pw_gecos ? p->pw_gecos : "");
+	apr_table_set(r->subprocess_env, "VH_GECOS", reqc->associateddomain ? reqc->associateddomain : "");
 	/* Do we have handle vhr_Path_Prefix here ? */
 	if (vhr->path_prefix) {
-		apr_table_set(r->subprocess_env, "VH_PATH", apr_pstrcat(r->pool, vhr->path_prefix, path, NULL));
-		apr_table_set(r->subprocess_env, "SERVER_ROOT", apr_pstrcat(r->pool, vhr->path_prefix, path, NULL));
+		apr_table_set(r->subprocess_env, "VH_PATH", apr_pstrcat(r->pool, vhr->path_prefix, reqc->docroot, NULL));
+		apr_table_set(r->subprocess_env, "SERVER_ROOT", apr_pstrcat(r->pool, vhr->path_prefix, reqc->docroot, NULL));
 	} else {
-		apr_table_set(r->subprocess_env, "VH_PATH", path);
-		apr_table_set(r->subprocess_env, "SERVER_ROOT", path);
+		apr_table_set(r->subprocess_env, "VH_PATH", reqc->docroot);
+		apr_table_set(r->subprocess_env, "SERVER_ROOT", reqc->docroot);
 	}
 
-	if (p->pw_class) {
-		r->server->server_admin = apr_pstrcat(r->pool, p->pw_class, NULL);
+	if (reqc->admin) {
+		r->server->server_admin = apr_pstrcat(r->pool, reqc->admin, NULL);
 	} else {
 		r->server->server_admin = apr_pstrcat(r->pool, "webmaster@", r->hostname, NULL);
 	}
 	r->server->server_hostname = apr_pstrcat(r->pool, host, NULL);
-	r->parsed_uri.path = apr_pstrcat(r->pool, vhr->path_prefix ? vhr->path_prefix : "", path, r->parsed_uri.path, NULL);
+	r->parsed_uri.path = apr_pstrcat(r->pool, vhr->path_prefix ? vhr->path_prefix : "", reqc->docroot, r->parsed_uri.path, NULL);
 	r->parsed_uri.hostname = r->server->server_hostname;
 	r->parsed_uri.hostinfo = r->server->server_hostname;
 
 	/* document_root */
 	if (vhr->path_prefix) {
-		conf->ap_document_root = apr_pstrcat(r->pool, vhr->path_prefix, path, NULL);
+		conf->ap_document_root = apr_pstrcat(r->pool, vhr->path_prefix, reqc->docroot, NULL);
 	} else {
-		conf->ap_document_root = apr_pstrcat(r->pool, path, NULL);
+		conf->ap_document_root = apr_pstrcat(r->pool, reqc->docroot, NULL);
 	}
 
 	/* if directory exist */
-	if (!ap_is_directory(r->pool, path)) {
+	if (!ap_is_directory(r->pool, reqc->docroot)) {
 		ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server,
-		"vhs_translate_name: homedir '%s' is not dir at all", path);
+		"vhs_translate_name: homedir '%s' is not dir at all", reqc->docroot);
 		return DECLINED;
 	}
-	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", path, r->uri);
+	r->filename = apr_psprintf(r->pool, "%s%s%s", vhr->path_prefix ? vhr->path_prefix : "", reqc->docroot, r->uri);
 
 	/* Avoid getting two // in filename */
 	ap_no2slash(r->filename);
@@ -1438,11 +1436,12 @@ vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	vhs_php_config(r, vhr, path, (char *)p->pw_passwd);
+	vhs_php_config(r, vhr, reqc->docroot, reqc->apachePhpopts);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
+	// TODO: Fix
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-	vhs_suphp_config(r, vhr, path, (char *)p->pw_passwd, (char *)p->pw_gecos, p->pw_uid, p->pw_gid);
+	vhs_suphp_config(r, vhr, reqc->docroot, reqc->apachePhpopts, (char *)p->pw_gecos, reqc->uid, reqc->gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	return OK;
@@ -1487,22 +1486,21 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_TAKE2( "vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
 						"a document to be redirected, then the destination URL"),
 #ifdef APU_HAS_LDAP
-	AP_INIT_TAKE1("vhs_LDAPBindDN",set_field, (void *)4, RSRC_CONF,
+	AP_INIT_TAKE1( "vhs_LDAPBindDN",set_field, (void *)4, RSRC_CONF,
 						"DN to use to bind to LDAP server. If not provided, will do an anonymous bind."),
-	AP_INIT_TAKE1("vhs_LDAPBindPassword",set_field, (void *)5, RSRC_CONF,
+	AP_INIT_TAKE1( "vhs_LDAPBindPassword",set_field, (void *)5, RSRC_CONF,
 						"Password to use to bind LDAP server. If not provider, will do an anonymous bind."),
-	AP_INIT_TAKE1("vhs_LDAPDereferenceAliases",set_field, (void *)6, RSRC_CONF,
+	AP_INIT_TAKE1( "vhs_LDAPDereferenceAliases",set_field, (void *)6, RSRC_CONF,
 						"Determines how aliases are handled during a search. Can be one of the"
 			            "values \"never\", \"searching\", \"finding\", or \"always\"."
 						"Defaults to always."),
-	AP_INIT_TAKE1("vhs_LDAPURL",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
+	AP_INIT_TAKE1( "vhs_LDAPURL",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
 						"URL to define LDAP connection in form ldap://host[:port]/basedn[?attrib[?scope[?filter]]]."),
 #endif /* APU_HAS_LDAP */
 	{NULL}
 };
 
-static void
-register_hooks(apr_pool_t * p)
+static void register_hooks(apr_pool_t * p)
 {
 	/* Modules that have to be loaded before mod_vhs */
 	static const char *const aszPre[] =
