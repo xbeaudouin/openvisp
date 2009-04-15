@@ -36,9 +36,6 @@ EnableVHS:		Enable or Disable mod_vhs. Per default VHS is NOT
 vhs_LogNotFound:	Enable or Disable logging into error log when
 			mod_vhs cannot find the hostname in database.
 			Per default this option is disabled.
-vhs_libhome_tag :	Set Libhome tag. See home.conf(5) man page for usage.
-			This option is not required, if not set the libhome
-			tage will be set to "mod_vhs".
 vhs_Path_Prefix :	Sets an optional location to prefix translations by.
 			This option is not required.
 vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
@@ -99,7 +96,7 @@ vhs_source	: LDAP / DBD (default LDAP)
 vhs_LDAPBindDN
 			An optional DN used to bind to the server when searching for
 			entries. If not provied, mod_vhs will use an anonymous bind.
-vhs_LDAPBindPassword
+ 
 			An bind password to use in conjonction with the bind DN. Note
 			that the bind password is probably sensitive data, and should be
 			properly protected. You should only use the vhs_LDAPBindDN and

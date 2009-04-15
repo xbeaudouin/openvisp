@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.11 2007-09-11 15:15:53 kiwi Exp $
+# $Id: Makefile,v 1.12 2009-04-15 16:30:53 kiwi Exp $
 #
 
 ##
@@ -25,9 +25,6 @@ LN = ln -sf
 CP = cp -f
 INDENT = /usr/bin/indent
 
-# Memcache support
-CFLAGS=-I/usr/local/include -DHAVE_MMC_SUPPORT -lmemcache
-
 # For debian users, you'll have to uncomment these of you will have
 # big errors under complilation. Don't ask me why, but debian apache2
 # is redefining strangely some headers.... :/
@@ -45,15 +42,12 @@ CFLAGS=-I/usr/local/include -DHAVE_MMC_SUPPORT -lmemcache
 #CFLAGS+= -I/usr/local/include -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation (Full Debug)
-#CFLAGS+= -I/usr/local/include/home -DVH_DEBUG -Wc,-Wall
+#CFLAGS+= -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation with PHP
-CFLAGS+= -I/usr/local/include/home -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
+CFLAGS+= -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
 
-# Flags for compilation with only libhome
-#CFLAGS+= -I/usr/local/include/home -Wc,-Wall
-
-LDFLAGS = -L/usr/local/lib -lhome
+#LDFLAGS = 
 
 ################################################################
 ### End of user configuration directives
