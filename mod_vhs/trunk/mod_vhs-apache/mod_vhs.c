@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.105 2009-04-15 16:30:53 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.106 2009-04-16 15:47:40 kiwi Exp $
  */
 
 /*
@@ -111,8 +111,7 @@
 #include "ap_config_auto.h"
 
 /* XXX: Do we need that ? */
-#include "ap_mpm.h" /* XXX */
-#include "apr_thread_mutex.h"
+//#include "ap_mpm.h" /* XXX */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -234,7 +233,7 @@ typedef struct mod_vhs_ldap_request_t {
     char *phpoptions;		/* PHP Options */
     char *uid;				/* Suexec Uid */
     char *gid;				/* Suexec Gid */
-} mod_vhost_ldap_request_t;
+} mod_vhs_ldap_request_t;
 
 /* TODO: make KazarPerson stuff */
 char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
@@ -790,6 +789,7 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 {
     int result;
     apr_ldap_url_desc_t *urld;
+    apr_ldap_err_t		*ldap_result;
 
     vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(cmd->server->module_config, &vhs_module);
 
@@ -797,20 +797,9 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 	         cmd->server, "[mod_vhs] ldap url parse: `%s'",
 	         url);
 
-    result = apr_ldap_url_parse(url, &(urld));
-    if (result != LDAP_SUCCESS) {
-        switch (result) {
-        case LDAP_URL_ERR_NOTLDAP:
-            return "LDAP URL does not begin with ldap://";
-        case LDAP_URL_ERR_NODN:
-            return "LDAP URL does not have a DN";
-        case LDAP_URL_ERR_BADSCOPE:
-            return "LDAP URL has an invalid scope";
-        case LDAP_URL_ERR_MEM:
-            return "Out of memory parsing LDAP URL";
-        default:
-            return "Could not parse LDAP URL";
-        }
+    result = apr_ldap_url_parse(cmd->pool, url, &(urld), &(ldap_result));
+    if (ldap_result != APR_SUCCESS) {
+    	return ldap_result->reason;
     }
     vhr->ldap_url = apr_pstrdup(cmd->pool, url);
 
@@ -1204,15 +1193,18 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
 {
 	/* LDAP associated variable and stuff */
-	mod_vhs_ldap_request_t		*reqc;
+//	mod_vhs_ldap_request_t		*reqc;
 	const char 					**vals = NULL;
 	char 						filtbuf[FILTER_LENGTH];
     int 						result = 0;
     const char 					*dn = NULL;
+    util_ldap_connection_t 		*ldc = NULL;
+    int 						failures = 0;
+
 
 start_over:
 
-    if (vhr->host) {
+    if (vhr->ldap_host) {
     	ldc = util_ldap_connection_find(r, vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn,
 										vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
     } else {
@@ -1221,12 +1213,10 @@ start_over:
         return DECLINED;
     }
 
-fallback:
-
 	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "[mod_vhs]: translating %s", r->uri);
 
     apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
-    result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, attributes, filtbuf, &dn, &vals);
+    result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
     util_ldap_connection_close(ldc);
 
     /* sanity check - if server is down, retry it up to 5 times */
@@ -1264,17 +1254,16 @@ static int vhs_translate_name(request_rec * r)
 	core_server_config 	*conf = (core_server_config *) ap_get_module_config(r->server->module_config, &core_module);
 
 	const char     		*host = 0;
-	char           		*path = NULL;
 	/* mod_alias like functions */
 	char           		*ret = 0;
 	int			   		status = 0;
 	/* Stuff */
 	const char 			**vals = NULL;
 	/* libhome */
-	struct passwd  *p;
 	char           *ptr = 0;
 
 #ifdef APR_HAS_LDAP
+	mod_vhs_ldap_request_t *reqc;
     reqc = (mod_vhs_ldap_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_ldap_request_t));
     ap_set_module_config(r->request_config, &vhs_module, reqc);
 #endif /* APR_HAS_LDAP */
@@ -1363,29 +1352,29 @@ static int vhs_translate_name(request_rec * r)
 		return vhs_redirect_stuff(r, vhr);
 	} else {
 		/* We have values so work with them */
-		reqc->dn = apr_pstrdup(r->pool, dn);
+		//reqc->dn = apr_pstrdup(r->pool, dn);
 
 		int i = 0;
-		while (attributes[i]) {
-		    if (strcasecmp (attributes[i], "apacheServerName") == 0) {
+		while (ldap_attributes[i]) {
+		    if (strcasecmp (ldap_attributes[i], "apacheServerName") == 0) {
 		    	reqc->name = apr_pstrdup (r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "apacheServerAdmin") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "apacheServerAdmin") == 0) {
 		    	reqc->admin = apr_pstrdup (r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "apacheDocumentRoot") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "apacheDocumentRoot") == 0) {
 		    	reqc->docroot = apr_pstrdup (r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "apachePhpopts") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "apachePhpopts") == 0) {
 		    	reqc->phpoptions = apr_pstrdup (r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "apacheSuexecUid") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "apacheSuexecUid") == 0) {
 		    	reqc->uid = apr_pstrdup(r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "apacheSuexecGid") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "apacheSuexecGid") == 0) {
 		    	reqc->gid = apr_pstrdup(r->pool, vals[i]);
 		    }
-		    else if (strcasecmp (attributes[i], "associatedDomain") == 0) {
+		    else if (strcasecmp (ldap_attributes[i], "associatedDomain") == 0) {
 		    	reqc->associateddomain = apr_pstrdup(r->pool, vals[i]);
 		    }
 		    i++;
@@ -1436,7 +1425,7 @@ static int vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	vhs_php_config(r, vhr, reqc->docroot, reqc->apachePhpopts);
+	vhs_php_config(r, vhr, reqc->docroot, reqc->phpoptions);
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
