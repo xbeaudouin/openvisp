@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.106 2009-04-16 15:47:40 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.107 2009-05-21 17:50:30 kiwi Exp $
  */
 
 /*
@@ -103,12 +103,16 @@
 #include "http_protocol.h"
 #include "http_request.h"
 #include "util_script.h"
+#include "util_ldap.h"
 #include "apr_ldap.h"
 #include "apr_strings.h"
 #include "apr_reslist.h"
-#include "util_ldap.h"
 
 #include "ap_config_auto.h"
+
+#if !defined(APU_HAS_LDAP) && !defined(APR_HAS_LDAP)
+# error mod_vhs requires APR-utils to have LDAP support built in
+#endif
 
 /* XXX: Do we need that ? */
 //#include "ap_mpm.h" /* XXX */
@@ -237,6 +241,26 @@ typedef struct mod_vhs_ldap_request_t {
 
 /* TODO: make KazarPerson stuff */
 char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
+
+/* TODO: cca marche ? */
+static APR_OPTIONAL_FN_TYPE(uldap_connection_close) *util_ldap_connection_close;
+static APR_OPTIONAL_FN_TYPE(uldap_connection_find) *util_ldap_connection_find;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn) *util_ldap_cache_comparedn;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_compare) *util_ldap_cache_compare;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_checkuserid) *util_ldap_cache_checkuserid;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn) *util_ldap_cache_getuserdn;
+static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported) *util_ldap_ssl_supported;
+
+static void ImportULDAPOptFn(void)
+{
+    util_ldap_connection_close  = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_close);
+    util_ldap_connection_find   = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_find);
+    util_ldap_cache_comparedn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_comparedn);
+    util_ldap_cache_compare     = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_compare);
+    util_ldap_cache_checkuserid = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_checkuserid);
+    util_ldap_cache_getuserdn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_getuserdn);
+    util_ldap_ssl_supported     = APR_RETRIEVE_OPTIONAL_FN(uldap_ssl_supported);
+}
 #endif /* APR_HAS_LDAP */
 
 /*
@@ -870,7 +894,6 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
     }
 
     vhr->ldap_have_url = 1;
-    apr_ldap_free_urldesc(urld);
     return NULL;
 }
 #endif /* APR_HAS_LDAP */
@@ -963,6 +986,9 @@ static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * 
     }
 #endif /* APR_HAS_LDAP */
 
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, "mod_vhs: loading version %s.", VH_VERSION);
+#endif				/* VH_DEBUG */
 	ap_add_version_component(pconf, VH_VERSION);
 	return OK;
 }
@@ -1264,20 +1290,32 @@ static int vhs_translate_name(request_rec * r)
 
 #ifdef APR_HAS_LDAP
 	mod_vhs_ldap_request_t *reqc;
-    reqc = (mod_vhs_ldap_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_ldap_request_t));
-    ap_set_module_config(r->request_config, &vhs_module, reqc);
+    	reqc = (mod_vhs_ldap_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_ldap_request_t));
+    	ap_set_module_config(r->request_config, &vhs_module, reqc);
 #endif /* APR_HAS_LDAP */
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled ");
+#endif	/* VH_DEBUG */
 		return DECLINED;
 	}
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled ");
+#endif	/* VH_DEBUG */
 #ifdef APR_HAS_LDAP
 	/* If we don't have LDAP Url module is disabled */
 	if (!vhr->ldap_have_url) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled - No LDAP URL ");
+#endif	/* VH_DEBUG */
 		return DECLINED;
 	}
 #endif /* APR_HAS_LDAP */
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled (LDAP) ");
+#endif	/* VH_DEBUG */
 	/* Handle alias stuff */
 	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
 		if (ap_is_HTTP_REDIRECT(status)) {
@@ -1342,7 +1380,8 @@ static int vhs_translate_name(request_rec * r)
 	}
 
 #ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path);
+		/* ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path); */
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is ..", host);
 #endif				/* VH_DEBUG */
 
 	if (vals == NULL) {
@@ -1480,9 +1519,9 @@ static const command_rec vhs_commands[] = {
 						"Password to use to bind LDAP server. If not provider, will do an anonymous bind."),
 	AP_INIT_TAKE1( "vhs_LDAPDereferenceAliases",set_field, (void *)6, RSRC_CONF,
 						"Determines how aliases are handled during a search. Can be one of the"
-			            "values \"never\", \"searching\", \"finding\", or \"always\"."
+			            		"values \"never\", \"searching\", \"finding\", or \"always\"."
 						"Defaults to always."),
-	AP_INIT_TAKE1( "vhs_LDAPURL",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
+	AP_INIT_TAKE1( "vhs_LDAPUrl",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
 						"URL to define LDAP connection in form ldap://host[:port]/basedn[?attrib[?scope[?filter]]]."),
 #endif /* APR_HAS_LDAP */
 	{NULL}
@@ -1512,6 +1551,6 @@ AP_DECLARE_DATA module vhs_module = {
 	merge_alias_dir_config,			/* merge per-directory config structures */
 	vhs_create_server_config,		/* create per-server config structure */
 	vhs_merge_server_config,		/* merge per-server config structures */
-	vhs_commands,					/* command apr_table_t */
-	register_hooks					/* register hooks */
+	vhs_commands,				/* command apr_table_t */
+	register_hooks				/* register hooks */
 };
