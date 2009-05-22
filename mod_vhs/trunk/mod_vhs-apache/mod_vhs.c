@@ -52,7 +52,7 @@
  * of Illinois, Urbana-Champaign.
  */
 /*
- * $Id: mod_vhs.c,v 1.107 2009-05-21 17:50:30 kiwi Exp $
+ * $Id: mod_vhs.c,v 1.108 2009-05-22 20:27:29 kiwi Exp $
  */
 
 /*
@@ -201,21 +201,21 @@ typedef struct {
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 #ifdef APR_HAS_LDAP
-	char				*ldap_url;			/* String representation of LDAP URL */
-	char				*ldap_host;			/* Name of the ldap server or space separated list */
-	int					ldap_port;			/* Port of the LDAP server */
+	char				*ldap_url;		/* String representation of LDAP URL */
+	char				*ldap_host;		/* Name of the ldap server or space separated list */
+	int				ldap_port;		/* Port of the LDAP server */
 	char				*ldap_basedn;		/* Base DN */
-	int					ldap_scope;			/* Scope of search */
+	int				ldap_scope;		/* Scope of search */
 	char				*ldap_filter;		/* LDAP Filter */
-	deref_options		ldap_deref;			/* How to handle alias dereferening */
+	deref_options			ldap_deref;		/* How to handle alias dereferening */
 
 	char				*ldap_binddn;		/* DN to bind to server (can be NULL) */
 	char				*ldap_bindpw;		/* Password to bind to server (can be NULL) */
 
-	int					ldap_have_deref;	/* Set if we have found an Deref option */
+	int				ldap_have_deref;	/* Set if we have found an Deref option */
 	int 				ldap_have_url;		/* Set if we have found an LDAP url */
 
-	int					ldap_secure;		/* True if SSL connections are requested */
+	int				ldap_secure;		/* True if SSL connections are requested */
 #endif /* APR_HAS_LDAP */
 	/*
 	 * From mod_alias.c
@@ -813,35 +813,42 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 {
     int result;
     apr_ldap_url_desc_t *urld;
-    apr_ldap_err_t		*ldap_result;
+    apr_ldap_err_t	*ldap_result;
 
     vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(cmd->server->module_config, &vhs_module);
 
+#ifdef VH_DEBUG
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: `%s'",
+	         cmd->server, "ldap url parse: `%s'",
 	         url);
+#endif	/* VH_DEBUG */
 
     result = apr_ldap_url_parse(cmd->pool, url, &(urld), &(ldap_result));
-    if (ldap_result != APR_SUCCESS) {
+    if (result != APR_SUCCESS) {
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, cmd->server, "ldap url not parsed : %s.", ldap_result->reason);
+#endif	/* VH_DEBUG */
     	return ldap_result->reason;
     }
     vhr->ldap_url = apr_pstrdup(cmd->pool, url);
 
+#ifdef VH_DEBUG
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: Host: %s", urld->lud_host);
+	         cmd->server, "ldap url parse: Host: %s", urld->lud_host);
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: Port: %d", urld->lud_port);
+	         cmd->server, "ldap url parse: Port: %d", urld->lud_port);
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: DN: %s", urld->lud_dn);
+	         cmd->server, "ldap url parse: DN: %s", urld->lud_dn);
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: attrib: %s", urld->lud_attrs? urld->lud_attrs[0] : "(null)");
+	         cmd->server, "ldap url parse: attrib: %s", urld->lud_attrs? urld->lud_attrs[0] : "(null)");
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: scope: %s",
+	         cmd->server, "ldap url parse: scope: %s",
 	         (urld->lud_scope == LDAP_SCOPE_SUBTREE? "subtree" :
 		 urld->lud_scope == LDAP_SCOPE_BASE? "base" :
 		 urld->lud_scope == LDAP_SCOPE_ONELEVEL? "onelevel" : "unknown"));
     ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
-	         cmd->server, "[mod_vhs] ldap url parse: filter: %s", urld->lud_filter);
+	         cmd->server, "ldap url parse: filter: %s", urld->lud_filter);
+#endif	/* VH_DEBUG */
 
     /* Set all the values, or at least some sane defaults */
     if (vhr->ldap_host) {
@@ -882,15 +889,19 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
     {
         vhr->ldap_secure = 1;
         vhr->ldap_port = urld->lud_port? urld->lud_port : LDAPS_PORT;
+#ifdef VH_DEBUG
         ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
-                     "LDAP: mod_vhs using SSL connections");
+                     "LDAP: using SSL connections");
+#endif	/* VH_DEBUG */
     }
     else
     {
         vhr->ldap_secure = 0;
         vhr->ldap_port = urld->lud_port? urld->lud_port : LDAP_PORT;
+#ifdef VH_DEBUG
         ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
-                     "LDAP: mod_vhs not using SSL connections");
+                     "LDAP: not using SSL connections");
+#endif	/* VH_DEBUG */
     }
 
     vhr->ldap_have_url = 1;
@@ -987,7 +998,7 @@ static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * 
 #endif /* APR_HAS_LDAP */
 
 #ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, "mod_vhs: loading version %s.", VH_VERSION);
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, "loading version %s.", VH_VERSION);
 #endif				/* VH_DEBUG */
 	ap_add_version_component(pconf, VH_VERSION);
 	return OK;
@@ -1219,31 +1230,42 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
 {
 	/* LDAP associated variable and stuff */
-//	mod_vhs_ldap_request_t		*reqc;
-	const char 					**vals = NULL;
-	char 						filtbuf[FILTER_LENGTH];
-    int 						result = 0;
-    const char 					*dn = NULL;
-    util_ldap_connection_t 		*ldc = NULL;
-    int 						failures = 0;
-
+	const char 		**vals = NULL;
+	char 			filtbuf[FILTER_LENGTH];
+    	int 			result = 0;
+    	const char 		*dn = NULL;
+    	util_ldap_connection_t 	*ldc = NULL;
+    	int 			failures = 0;
+	
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "getldaphome() called.");
+#endif	/* VH_DEBUG */
 
 start_over:
 
-    if (vhr->ldap_host) {
-    	ldc = util_ldap_connection_find(r, vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn,
-										vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
-    } else {
-        ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
-                      "[mod_vhs] translate: no vhr->host - weird...?");
-        return DECLINED;
-    }
+	if (vhr->ldap_host) {
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find(r,%s,%d,%s,%s,%d,%d);",vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn, vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
+#endif	/* VH_DEBUG */
+    		ldc = util_ldap_connection_find(r, vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn,
+						vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
+#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find();");
+#endif	/* VH_DEBUG */
+    	} else {
+        	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
+                      		"translate: no vhr->host - weird...?");
+        	return DECLINED;
+    	}
 
-	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "[mod_vhs]: translating %s", r->uri);
+	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "translating %s", r->uri);
 
-    apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
-    result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
-    util_ldap_connection_close(ldc);
+    	apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
+#ifdef VH_DEBUG
+	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
+#endif	/* VH_DEBUG */
+    	result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
+    	util_ldap_connection_close(ldc);
 
     /* sanity check - if server is down, retry it up to 5 times */
     if (result == LDAP_SERVER_DOWN) {
@@ -1254,7 +1276,7 @@ start_over:
 
     if ((result == LDAP_NO_SUCH_OBJECT)) {
      	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
-    		          "[mod_vhs] translate: virtual host %s not found",
+    		          "virtual host %s not found",
     		          hostname);
     	return NULL;
     }
@@ -1262,7 +1284,7 @@ start_over:
     /* handle bind failure */
     if (result != LDAP_SUCCESS) {
        ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
-                     "[mod_vhs] translate: translate failed; virtual host %s; URI %s [%s]",
+                     "translate failed; virtual host %s; URI %s [%s]",
     		         hostname, r->uri, ldap_err2string(result));
        return NULL;
     }
@@ -1346,7 +1368,6 @@ static int vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
 
-	//p = vhs_get_home_stuff(r, vhr, (char *)host); /* XXX */
 	vals = getldaphome(r, vhr, (char *) host);
 
 	if (!vals) {
@@ -1542,7 +1563,9 @@ static void register_hooks(apr_pool_t * p)
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
-
+#ifdef APR_HAS_LDAP
+	ap_hook_optional_fn_retrieve(ImportULDAPOptFn,NULL,NULL,APR_HOOK_MIDDLE);
+#endif /* APR_HAS_LDAP */
 }
 
 AP_DECLARE_DATA module vhs_module = {
