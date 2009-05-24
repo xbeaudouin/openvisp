@@ -1,4 +1,4 @@
-# $Id: dalias.pm,v 1.1 2006-06-26 22:28:58 kiwi Exp $
+# $Id: dalias.pm,v 1.2 2009-05-24 11:20:22 kiwi Exp $
 # 
 # Function to get the real email / domain to lookup 
 # case of domains aliases

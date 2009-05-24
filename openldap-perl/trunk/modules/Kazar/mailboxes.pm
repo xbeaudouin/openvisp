@@ -1,4 +1,4 @@
-# $Id: mailboxes.pm,v 1.3 2007-09-14 14:26:54 kiwi Exp $
+# $Id: mailboxes.pm,v 1.4 2009-05-24 11:20:22 kiwi Exp $
 # 
 package Kazar::mailboxes;
 
@@ -88,17 +88,17 @@ sub search
 	# We get data, then format output... :)
 	#print STDERR "We get some results...\n";
 	my $entry = 
-		"dn : uid=$mailaddr,ou=mailboxes,$cf{dn}\n".
-		"objectClass : top\n".
-		"objectClass : kazarPerson\n";
+		"dn: uid=$mailaddr,ou=mailboxes,$cf{dn}\n".
+		"objectClass: top\n".
+		"objectClass: kazarPerson\n";
 
 	if ( $row = $sth->fetchrow_hashref) {
-		$entry .= "uid : $mailaddr\n";
-		$entry .= "cn : $row->{name}\n";
-		$entry .= Kazar::db::latin1_to_utf8 ("description : $row->{name}\n");
-		$entry .= "uidNumber : $cf{defaultuid}\n";
-		$entry .= "gidNumber : $cf{defaultgid}\n";
-		$entry .= "userPassword : $row->{password}\n";
+		$entry .= "uid: $mailaddr\n";
+		$entry .= "cn: $row->{name}\n";
+		$entry .= Kazar::db::latin1_to_utf8 ("description: $row->{name}\n");
+		$entry .= "uidNumber: $cf{defaultuid}\n";
+		$entry .= "gidNumber: $cf{defaultgid}\n";
+		$entry .= "userPassword: $row->{password}\n";
 		if($cf{domainprepend} == "1") {
 			if($cf{dhash} == "1") {
 				$path = Kazar::hash::hashed($row->{domain});
@@ -114,14 +114,15 @@ sub search
 		else {
                 	$path .= $row->{maildir};
 		}
-		$entry .= "homeDirectory : $path\n";
-		$entry .= "mailhomeDirectory : $cf{mailhomeroot}/$path\n";
-		$entry .= "CouriermailhomeDirectory : $cf{mailhomeroot}/$path/Maildir/\n";
-		$entry .= "mailQuota : $row->{quota}\n";
+		$entry .= "homeDirectory: $path\n";
+		$entry .= "mailhomeDirectory: $cf{mailhomeroot}/$path\n";
+		$entry .= "CouriermailhomeDirectory: $cf{mailhomeroot}/$path/Maildir/\n";
+		$entry .= "mailQuota: $row->{quota}\n";
+		# This not accurate but disk constructor does...
 		my $quotaKB = $row->{quota} / 1000;
-		$entry .= "mailQuotaKB : $quotaKB\n";
-		$entry .= "CouriermailQuota : $row->{quota}S\n";
-		$entry .= "associatedDomain : $row->{domain}\n";
+		$entry .= "mailQuotaKB: $quotaKB\n";
+		$entry .= "CouriermailQuota: $row->{quota}S\n";
+		$entry .= "associatedDomain: $row->{domain}\n";
 	}
 
 	#print STDERR "Sending -> $entry\n";

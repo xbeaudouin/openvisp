@@ -1,4 +1,4 @@
-# $Id: whosting.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
+# $Id: whosting.pm,v 1.3 2009-05-24 11:20:23 kiwi Exp $
 # 
 package Kazar::whosting;
 
@@ -37,12 +37,35 @@ sub search
 
 	$wwwaddr = $filter;
 
-#        print STDERR "Looking for : $wwwaddr \n";
-	
-	if (not ($wwwaddr =~ s/^\(wwwDomain=(.*)\)$/\1/g)) {
-		return(0, ());	# Filtre non authorise.
+        #print STDERR "Looking for : $wwwaddr \n";
+
+	if ($wwwaddr =~ "wwwDomain") {
+                #print STDERR "wwwDomain : $wwwaddr \n";
+		if (not ($wwwaddr =~ s/^\(wwwDomain=(.*)\)$/\1/g)) {
+			return(0, ());	# Filtre non authorise.
+		}
+	} else {
+                #print STDERR "is $wwwaddr a mod_vhs2 stuff ? \n";
+		my $re1 ='.*?';			# Non-greedy match on filler
+		my $re2 ='(?:[a-z][a-z]+)';	# Uninteresting: word
+		my $re3 ='.*?';			# Non-greedy match on filler
+		my $re4 ='(?:[a-z][a-z]+)';	# Uninteresting: word
+		my $re5 ='.*?';			# Non-greedy match on filler
+		my $re6 ='(?:[a-z][a-z]+)';	# Uninteresting: word
+		my $re7 ='.*?';			# Non-greedy match on filler
+		my $re8 ='\=((?:[a-z][a-z].+))\)\(';	# Word 1
+
+		my $re  = $re1.$re2.$re3.$re4.$re5.$re6.$re7.$re8;
+
+		if ($wwwaddr =~ m/$re/is) {
+			$wwwaddr = $1;
+			#print STDERR "mod_vhs2 specific : $wwwaddr\n";
+		} else {
+			return(0, ());	# Filtre non authorise.
+		}
 	}
 
+	
 	# Checking if we have a normal www domain
 	# eg. that gets only 7bits char : [0-9], [A-Z], [a-z], '-', '.'
 	if($wwwaddr =~ /[^[:alnum:]%.-]/) {
@@ -67,10 +90,11 @@ sub search
 	# We get data, then format output... :)
 #	print STDERR "We get some results...\n";
 	my $entry = 
-		"dn : wwwDomain=$quotedwww,ou=whosting,$cf{dn}\n".
-		"objectClass : top\n".
-		"objectClass : kazarPerson\n".
-		"objectClass : PureFTPdUser\n";
+		"dn: wwwDomain=$quotedwww,ou=whosting,$cf{dn}\n".
+		"objectClass: top\n".
+		"objectClass: kazarPerson\n".
+		"objectClass: PureFTPdUser\n".
+		"objectClass: apacheConfig\n";
 
   	$row = $sth->fetchrow_hashref;
 
@@ -90,42 +114,44 @@ sub search
 		$sth->execute or die "Unable to execute query\n";
 		my $mynewrow = $sth->fetchrow_hashref;
 		if($mynewrow) {
-			print STDERR "Getting a wilcard result";
+			#print STDERR "Getting a wilcard result";
 			$row = $mynewrow;
 		}
 	}
 
 	if ($row ) {
-		$entry .= "uid : $row->{User}\n";
-		$entry .= Kazar::db::latin1_to_utf8 ("description : $row->{comment}\n");
-		$entry .= "uidNumber : $row->{Uid}\n";
-		$entry .= "gidNumber : $row->{Gid}\n";
-		$entry .= "FTPuid : $row->{Uid}\n";
-		$entry .= "FTPgid : $row->{Gid}\n";
-		$entry .= "FTPstatus : enabled\n";
-		$entry .= "userPassword : $row->{Password}\n";
+		$entry .= "uid: $row->{User}\n";
+		$entry .= Kazar::db::latin1_to_utf8 ("description: $row->{comment}\n");
+		$entry .= "uidNumber: $row->{Uid}\n";
+		$entry .= "gidNumber: $row->{Gid}\n";
+		$entry .= "FTPuid: $row->{Uid}\n";
+		$entry .= "FTPgid: $row->{Gid}\n";
+		$entry .= "FTPstatus: enabled\n";
+		$entry .= "userPassword: $row->{Password}\n";
 		if($cf{hdhash} == "1") {
                 	$path .= Kazar::hash::hashed($row->{Dir});
 		}
 		else {
                 	$path .= $row->{Dir};
 		}
-		$entry .= "homeDirectory : $cf{ftphomeroot}/$row->{FType}/$path/\n";
+		$entry .= "homeDirectory: $cf{ftphomeroot}/$row->{FType}/$path/\n";
+		$entry .= "apacheDocumentRoot: $cf{ftphomeroot}/$row->{FType}/$path/\n";
 		if ($row->{QuotaFiles} != "0") {
-			$entry .= "FTPQuotaFiles : $row->{QuotaFiles}\n";
+			$entry .= "FTPQuotaFiles: $row->{QuotaFiles}\n";
 		}
 		if ($row->{QuotaSize} != "0") {
-			$entry .= "FTPQuotaMBytes : $row->{QuotaSize}\n";
+			$entry .= "FTPQuotaMBytes: $row->{QuotaSize}\n";
 		}
 		if ($row->{ULBandwith} != "0") {
-			$entry .= "FTPUploadBandwidth : $row->{ULBandwidth}\n";
+			$entry .= "FTPUploadBandwidth: $row->{ULBandwidth}\n";
 		}
 		if ($row->{DLBandwith} != "0") {
-			$entry .= "FTPDownloadBandwidth : $row->{DLBandwidth}\n";
+			$entry .= "FTPDownloadBandwidth: $row->{DLBandwidth}\n";
 		}
 		if ($row->{FType} == "http") {
-			$entry .= "associatedDomain : $row->{FQDN}\n";
-			$entry .= "wwwDomain : $row->{FQDN}\n";
+			$entry .= "associatedDomain: $row->{FQDN}\n";
+			$entry .= "wwwDomain: $row->{FQDN}\n";
+			$entry .= "apacheServerName: $row->{FQDN}\n";
 		}
 	}
 

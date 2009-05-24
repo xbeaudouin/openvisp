@@ -1,4 +1,4 @@
-# $Id: virt.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
+# $Id: virt.pm,v 1.3 2009-05-24 11:20:22 kiwi Exp $
 # 
 package Kazar::virt;
 
@@ -68,17 +68,17 @@ sub search
 	
 	# We get data, then format output... :)
 	my $entry = 
-		"dn : uid=$mailaddr,ou=virt,$cf{dn}\n".
-		"objectClass : top\n".
-		"objectClass : kazarPerson\n".
-		"uid : $mailaddr\n";
+		"dn: uid=$mailaddr,ou=virt,$cf{dn}\n".
+		"objectClass: top\n".
+		"objectClass: kazarPerson\n".
+		"uid: $mailaddr\n";
 
 	my $i = 0;
 	@row = ();
 	while($row[$i] = $sth->fetchrow_array) {
 		my $key;
 		foreach $key (split(',',$row[$i])) {
-			$entry .= "mail : $key\n";
+			$entry .= "mail: $key\n";
 		}
 		$i++;
 	}

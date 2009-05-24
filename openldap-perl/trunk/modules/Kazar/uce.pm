@@ -1,4 +1,4 @@
-# $Id: uce.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
+# $Id: uce.pm,v 1.3 2009-05-24 11:20:22 kiwi Exp $
 # 
 package Kazar::uce;
 
@@ -74,13 +74,13 @@ sub search
 	
 	# We get data, then format output... :)
 	my $entry = 
-		"dn : uid=$mailaddr,ou=uce,$cf{dn}\n".
-		"objectClass : top\n".
-		"objectClass : kazarPerson\n";
+		"dn: uid=$mailaddr,ou=uce,$cf{dn}\n".
+		"objectClass: top\n".
+		"objectClass: kazarPerson\n";
 
 	if ( $row = $sth->fetchrow_hashref) {
-		$entry .= "uid : $mailaddr\n";
-		$entry .= "mailPolicy : $row->{policy}_restriction\n";
+		$entry .= "uid: $mailaddr\n";
+		$entry .= "mailPolicy: $row->{policy}_restriction\n";
 	} else {
 	# We didn't get any restriction, so trying to get default value
 		my $domain;
@@ -103,8 +103,8 @@ sub search
 		$sth->execute or die "Unable to execute query\n";
 
 		if ($row = $sth->fetchrow_hashref) {
-			$entry .= "uid : $mailaddr\n";
-			$entry .= "mailPolicy : $row->{policy}_restriction\n";
+			$entry .= "uid: $mailaddr\n";
+			$entry .= "mailPolicy: $row->{policy}_restriction\n";
 		}
 	}
 

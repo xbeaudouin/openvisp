@@ -1,4 +1,4 @@
-# $Id: vacation.pm,v 1.2 2007-06-18 16:13:08 kiwi Exp $
+# $Id: vacation.pm,v 1.3 2009-05-24 11:20:22 kiwi Exp $
 # 
 package Kazar::vacation;
 
@@ -65,17 +65,17 @@ sub search
 	# We get data, then format output... :)
 #	print STDERR "We get some results...\n";
 	my $entry = 
-		"dn : mail=$mailaddr,ou=vacation,$cf{dn}\n".
-		"objectClass : top\n".
-		"objectClass : kazarPerson\n";
+		"dn: mail=$mailaddr,ou=vacation,$cf{dn}\n".
+		"objectClass: top\n".
+		"objectClass: kazarPerson\n";
 
 	if ( $row = $sth->fetchrow_hashref) {
 		my $message = $row->{body};
 		$message =~ s/\n//g;
-		$entry .= "uid : $mailaddr\n";
-		$entry .= "cn : $row->{name}\n";
-		$entry .= Kazar::db::latin1_to_utf8 ("description : $row->{subject}\n");
-		$entry .= Kazar::db::latin1_to_utf8 ("vacationText : $message\n");
+		$entry .= "uid: $mailaddr\n";
+		$entry .= "cn: $row->{name}\n";
+		$entry .= Kazar::db::latin1_to_utf8 ("description: $row->{subject}\n");
+		$entry .= Kazar::db::latin1_to_utf8 ("vacationText: $message\n");
 	}
 
 #	print STDERR "Sending -> $entry\n";
