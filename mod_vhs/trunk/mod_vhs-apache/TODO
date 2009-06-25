@@ -1,7 +1,13 @@
 
-  Remove libhome dependency
+  Remove libhome dependency -> done
 
   Use mod_dbd as SQL provider : see http://mysolo.org/w/index.php/Vhost_dbd
   Add Itk support instead of suexec
   Use mod_ldap as LDAP provider : http://modvhostldap.alioth.debian.org/
+	-> done
   Add mod_memcache support : see http://code.google.com/p/modmemcache/
+
+  Fix PHP zend_alter_ini to use symbolic stuff instead of hardcoded
+  values.
+   See : zend_alter_ini_entry(..., PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME); 
+	http://markmail.org/message/bv7a4p5vflncxe4l#query:zend_alter_ini_entry+page:1+mid:bv7a4p5vflncxe4l+state:results
