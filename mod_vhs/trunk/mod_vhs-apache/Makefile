@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2005 Xavier Beaudouin <kiwi@oav.net>
 #
-# $Id: Makefile,v 1.12 2009-04-15 16:30:53 kiwi Exp $
+# $Id: Makefile,v 1.13 2009-06-25 14:32:52 kiwi Exp $
 #
 
 ##
@@ -30,6 +30,7 @@ INDENT = /usr/bin/indent
 # is redefining strangely some headers.... :/
 
 #CFLAGS= -DDEBIAN -I/usr/include/apr-0
+CFLAGS= -DVH_DEBUG  -I/usr/include
 
 # If you want to enable mod_suphp support please uncomment the following
 # line :
