@@ -1,7 +1,0 @@
-$Id: README,v 1.2 2008-06-17 22:01:32 kiwi Exp $
-
-This is my port of mod_vhs from apache to mod_vhost_ldap on Lighttpd.
-
-
-NOTICE: this is work in progress and designed to work on SVN version of
-        lighttpd
