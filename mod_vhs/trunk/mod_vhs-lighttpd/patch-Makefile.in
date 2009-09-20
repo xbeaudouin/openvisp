@@ -1,0 +1,21 @@
+--- src/Makefile.in.orig	2009-09-14 23:02:49.000000000 +0200
++++ src/Makefile.in	2009-09-14 23:06:33.000000000 +0200
+@@ -719,6 +719,9 @@
+ mod_accesslog_la_SOURCES = mod_accesslog.c
+ mod_accesslog_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
+ mod_accesslog_la_LIBADD = $(common_libadd)
++mod_lvhost_la_SOURCES = mod_lvhost.c
++mod_lvhost_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
++mod_lvhost_la_LIBADD = $(CRYPT_LIB) $(LDAP_LIB) $(LBER_LIB) $(common_libadd)
+ hdr = server.h buffer.h network.h log.h keyvalue.h \
+       response.h request.h fastcgi.h chunk.h \
+       settings.h http_chunk.h http_auth_digest.h \
+@@ -882,6 +885,8 @@
+ 	$(mod_usertrack_la_LINK) -rpath $(libdir) $(mod_usertrack_la_OBJECTS) $(mod_usertrack_la_LIBADD) $(LIBS)
+ mod_webdav.la: $(mod_webdav_la_OBJECTS) $(mod_webdav_la_DEPENDENCIES) 
+ 	$(mod_webdav_la_LINK) -rpath $(libdir) $(mod_webdav_la_OBJECTS) $(mod_webdav_la_LIBADD) $(LIBS)
++mod_lvhost.la: $(mod_lvhost_la_OBJECTS) $(mod_lvhost_la_DEPENDENCIES) 
++	$(mod_lvhost_la_LINK) -rpath $(libdir) $(mod_lvhost_la_OBJECTS) $(mod_lvhost_la_LIBADD) $(LIBS)
+ 
+ clean-noinstPROGRAMS:
+ 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \

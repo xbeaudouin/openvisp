@@ -1,0 +1,13 @@
+--- src/Makefile.am.orig	2009-06-16 15:45:42.000000000 +0200
++++ src/Makefile.am	2009-09-15 16:22:05.000000000 +0200
+@@ -264,6 +264,10 @@
+ mod_accesslog_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
+ mod_accesslog_la_LIBADD = $(common_libadd)
+ 
++lib_LTLIBRARIES += mod_lvhost.la
++mod_lvhost_la_SOURCES = mod_lvhost.c
++mod_lvhost_la_LDFLAGS = -module -export-dynamic -avoid-version -no-undefined
++mod_lvhost_la_LIBADD = $(CRYPT_LIB) $(LDAP_LIB) $(LBER_LIB) $(common_libadd)
+ 
+ hdr = server.h buffer.h network.h log.h keyvalue.h \
+       response.h request.h fastcgi.h chunk.h \
