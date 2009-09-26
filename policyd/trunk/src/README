@@ -1,0 +1,516 @@
+####
+# Policy Daemon v1.82
+#######################
+
+  Policyd is an anti-spam plugin for Postfix (written in C) that
+  does Greylisting, Sender-(envelope,  SASL or  host / ip)-based
+  throttling (on messages and/or volume per  defined time unit),
+  Spamtrap monitoring / blacklisting, helo auto blacklisting and
+  helo randomization prevention (HRP).
+
+
+
+###
+# Greylisting
+###############
+
+  Greylisting   is a  concept that originated  from  Evan Harris
+  which is described in  better detail at http://greylisting.org
+  Greylisting is a new method of blocking significant amounts of
+  spam at  the mail server level, but without resorting to heavy
+  weight statistical  analysis  or  other  heuristic (and  error 
+  prone)  approaches.  Consequently,  implementations are fairly
+  lightweight,   and  may  even   decrease  network  traffic and
+  processor load on your mail server.
+
+  Greylisting  relies on the fact that most  spam sources do not
+  behave  in the same way as "normal"  mail systems. Although it
+  is currently very effective by itself,  it will  perform  best
+  when  it  is  used  in  conjunction  with  other forms of spam
+  prevention. 
+
+
+
+###
+# Sender Throttling 
+#####################
+
+  Sender throttling module allows quota enforcement.  Currently
+  you may throttle based on amount of mails and total mail size
+  sent over a given period of time which you define.
+
+  Eg: You  can enforce that camis@mweb.co.za does not send more
+  than 1000 mails or 1gig of mail (whichever limit is hit first)
+  in say a 5 minute  period.
+  
+  There are 3 possible sender throttling methods:
+
+-> 1) Throttle by (envelope) From address
+
+INSERT INTO throttle \
+ (_from,_count_max,_quota_max,_time_limit,_mail_size,_date,_priority)
+ VALUES ('user@domain.com',  # from address                             
+          50,                # maximum messages per time unit
+          250000000,         # size in bytes (250 megs) (maximum is 2gig)
+          86400,             # time unit in seconds (1 day)
+          10240000,          # maximum message size (10 meg)
+          UNIX_TIMESTAMP(),  # current time
+          10);               # priority of record
+
+  OR domain:
+
+INSERT INTO throttle \
+ (_from,_count_max,_quota_max,_time_limit,_mail_size,_date,_priority)
+ VALUES ('@domain.com',      # domain                                   
+          50,                # maximum messages per time unit
+          250000000,         # size in bytes (250 megs) (maximum is 2gig)
+          86400,             # time unit in seconds (1 day)
+          10240000,          # maximum message size (10 meg)
+          UNIX_TIMESTAMP(),  # current time
+          5);                # priority of record
+
+  Do take note of the "priority" record as this allows you to have
+  global limits for a specific domain, but if there are specific
+  accounts that need their own dedicated/specific/unique limit then
+  you can add their records but with a higher priority.
+
+-> 2) Throttle by SASL user name
+
+INSERT INTO throttle
+(_from,_count_max,_quota_max,_time_limit,_mail_size,_date)
+ VALUES ('SASL_username',    # from address, SASL username or ip address
+          50,                # maximum messages per time unit
+          250000000,         # size in bytes (250 megs)
+          86400,             # time unit in seconds (1 day)
+          10240000,          # maximum message size (10 meg)
+          UNIX_TIMESTAMP()); # current time
+
+-> 3) Throttle by IP address
+
+INSERT INTO throttle \
+ (_from,_count_max,_quota_max,_time_limit,_mail_size,_date,_priority)
+ VALUES ('192.168.0.1',      # from address                             
+          50,                # maximum messages per time unit
+          250000000,         # size in bytes (250 megs) (maximum is 2gig)
+          86400,             # time unit in seconds (1 day)
+          10240000,          # maximum message size (10 meg)
+          UNIX_TIMESTAMP(),  # current time
+          10);               # priority of record
+
+  OR netblock:
+
+INSERT INTO throttle \
+ (_from,_count_max,_quota_max,_time_limit,_mail_size,_date,_priority)
+ VALUES ('192.168.0.%',      # domain                                   
+          50,                # maximum messages per time unit
+          250000000,         # size in bytes (250 megs) (maximum is 2gig)
+          86400,             # time unit in seconds (1 day)
+          10240000,          # maximum message size (10 meg)
+          UNIX_TIMESTAMP(),  # current time
+          5);                # priority of record
+
+  Upon the first time a sender sends a mail through the sender
+  throttling module, if they do not exist in the database, the
+  module will grab the configuration defaults from policyd.conf
+  and those values will be inserted into the database. You can
+  at a later stage (if you wish) increase those limits by changing
+  the values in MySQL. If you wish to create users immediately
+  with higher values, you can do the following:
+
+  If you enable throttling by SASL and a client connects to
+  Postfix without SASL info, by default Policyd will automatically
+  use the MAIL FROM: address so nothing breaks.
+
+  To keep the database compact and remove inactive entries, you can
+  set a time limit for automatic cleanup.
+
+
+  
+###
+#  Recipient Throttling 
+#########################
+
+  Recipient Throttling module allows quota enforcement. An example
+  of where this module is useful are if people maintain SMS gateways
+  and have requirements that SMS abuse does not occur. Also this is
+  useful on outgoing smtp/relays during virus outbreaks. Recent
+  virus outbreaks had a few infected machines flooding the same
+  recipients over and over. 
+ 
+  You can enforce that no user receives more than 1000 mails in a
+  given time period.
+
+  Upon the first delivery a recipient receives, if they do not exist
+  in the database, the module will grab the configuration defaults
+  from policyd.conf and those values will be inserted into the 
+  database. You can at a later stage (if you wish) increase those
+  limits by changing the values in MySQL. If you want to create
+  users immediately with high values, you can do the following:
+
+INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
+ VALUES ('camis@mweb.co.za', # recipient address
+          100,               # maximum messages per time unit
+          86400,             # time unit in seconds (1 day)
+          UNIX_TIMESTAMP()); # current time
+
+
+  To keep the database compact and remove inactive entries, you can
+  set a time limit for automatic cleanup.
+
+
+
+##
+# Spamtrap
+############
+
+  The spamtrap module should be very effective, especially in
+  really large environments. Previously baited spamtraps would
+  require that the mail actually enters the network and gets
+  delivered into a mailbox. Any attempted deliveries to any of
+  the spamtrap addresses will cause that host/net block to be
+  blacklisted for N amount of hours. Using the spamtrap module
+  the host gets blacklisted without having to accept or transfer
+  any mail so resources are kept to a minimum.
+
+  Spamtrap format:
+  
+    INSERT INTO spamtrap (_rcpt,_active) VALUES ('spam@trap.com', 1);
+  
+  1=active
+  0=inactive (strictly for production purposes/testing) 
+
+
+
+##
+# Blacklist Helo
+#################
+
+  The blacklist helo module allows you to blacklist hosts or
+  net blocks (c-class) who use HELO and attempt to identify
+  themselves using your own hostname/ip address. This will allow
+  you to quickly build up a list of known spammer networks.
+  This module is effective because its completely automated
+  and can be used to permanently ban networks even if they
+  stop identifying themselves with your hostnames at a later
+  stage.
+
+  INSERT INTO blacklist_helo (_helo) VALUES ('192.168.0.2');
+  INSERT INTO blacklist_helo (_helo) VALUES ('[192.168.0.2]');
+  INSERT INTO blacklist_helo (_helo) VALUES ('localhost.machine.com');
+  INSERT INTO blacklist_helo (_helo) VALUES ('localhost');
+  
+  In order for this to work properly. You want to INSERT the
+  hostname of your machine, your MX hostname, your MX ip address
+  and the IP address of your machine (this includes virtual ips
+  that reside on your switch)
+
+  NO REMOTE HOST SHOULD IDENTIFY THEMSELVES WITH YOUR MACHINES
+  INFORMATION!
+
+
+
+##
+# HELO Randomization Prevention (HRP)
+########################################
+
+  The HRP module allows you to catch spammers which randomize
+  their HELO identities. This can be used in combination with
+  greylisting to provide an effective way of cutting spammers
+  down before accepting any part of the message.  There are a
+  handful of legit  companies which do this,  mainly because
+  floating  queues/mtas on different  ip addresses. This  has
+  been tested and has been found to be very effective even if
+  this module is  used  on its own. (Look at the 'HELO_CHECK'
+  portion of policyd.conf)
+
+
+##
+# Policyd Security Notice
+###########################
+
+  Policyd  tries to be as strict as possible from a  security
+  point of  view. The  maximum  length of  any string  passed
+  internally  is limited to 64 characters.  Policyd will also
+  ignore any  characters  except "[A-Z][a-z][0-9]/@" and ".".
+  Please ensure that any passwords used (in MySQL etc) adhere
+  to this  strict rule  and do not exceed  64 characters. All
+  strings/ memory are preallocated when Policyd starts up and
+  will not use more anymore memory. No memory is free()'d.
+
+
+###
+# Compile / Install
+#####################
+
+  # cd policy-VERSION
+  # gmake build
+  # gmake install
+
+  Create a crontab entry to run the cleanup script:
+
+  # crontab -e
+
+  0 * * * * /usr/local/policyd/cleanup -c /usr/local/policyd/policyd.conf
+
+  questions / comments / ideas etc can goto:
+  cami@mweb.co.za
+
+
+
+###
+# Usage
+#########
+
+
+  Usage: /usr/local/policyd/policyd -c /usr/local/policyd/policyd.conf
+
+  Thats pretty much it, all configuration options are read out
+  of the configuration file. A standard/demo configuration file
+  is included, simply edit as is needed.
+
+
+         
+         
+###
+# Postfix 2.1
+###############
+
+  You need Postfix 2.1 or higher in order to use the
+  policy service..
+
+  The changes below must be made to main.cf
+  
+  smtpd_recipient_restrictions =
+  ..
+    reject_unauth_destination
+    reject_unlisted_recipient
+    check_policy_service inet:127.0.0.1:10031
+  ..
+
+  127.0.0.1 -> host policyd is on
+  10031     -> port policyd is listening on
+
+  Please ensure that it matches your policyd.conf settings
+  for BINDHOST and BINDPORT.
+
+
+
+###
+# MySQL v4/v3
+############
+
+  This code has only been tested on MySQL v4.xx (recommended) and v3.xx
+  Included is a file called 'DATABASE.mysql' which you can use to create
+  all the necessary tables.
+
+  # mysql -p < DATABASE.mysql
+  
+
+  Permissions for policyd:
+  
+  NB!! The information provided below should match that of your Configuration
+
+  Example for 1 host:
+  
+    GRANT ALL ON policyd.* TO postfix@127.0.0.1 IDENTIFIED by 'p0stf1x';
+
+  Example for a netblock:
+ 
+    GRANT ALL ON policyd.* TO postfix@"192.168.0.0/255.255.255.0" \
+    IDENTIFIED by 'p0stf1x';
+
+
+
+##
+# Whitelist
+#############
+
+  Included is a file called 'docs/WHITELIST.sql'. It contains several whitelisted
+  hosts to cut down on false positives.
+
+  Import it into mysql by doing:
+
+    mysql policyd < docs/WHITELIST.sql -p 
+    
+
+  IP Whitelisting format: 
+
+    INSERT INTO whitelist (_whitelist,_description) \
+      VALUES ('127.%.%.%','# localhost');
+    INSERT INTO whitelist (_whitelist,_description) \
+      VALUES ('192.168.2.10','# lan server');
+
+
+  Sender Whitelisting format:
+
+    INSERT INTO whitelist_sender (_whitelist,_description) \
+      VALUES ('camis@mweb.co.za','# whitelist single address');
+    INSERT INTO whitelist_sender (_whitelist,_description) \
+      VALUES ('@mweb.co.za','# whitelist entire domain');
+
+    Please note that address whitelist will be matched only against
+    the  sender address. For recipient  whitelisting,  please refer
+    to the opt-in/opt-out section below.
+
+
+  DNS name whitelisting
+
+    INSERT INTO whitelist_dnsname (_whitelist,_description) \
+      VALUES ('%.mweb.co.za','# whitelist *.mweb.co.za');
+    INSERT INTO whitelist_dnsname (_whitelist,_description) \
+      VALUES ('%.mail.mud.yahoo.com','# whitelist all yahoo mud mailservers');
+    INSERT INTO whitelist_dnsname (_whitelist,_description) \
+      VALUES ('n10.bulk.dcn.yahoo.com','# whitelist only this mailserver');
+
+  DNS name whitelisting works as follows:
+
+    [logwall01][/]# host web32804.mail.mud.yahoo.com
+      web32804.mail.mud.yahoo.com has address 68.142.206.34
+    [logwall01][/]# host 68.142.206.34
+      34.206.142.68.in-addr.arpa domain name pointer web32804.mail.mud.yahoo.com.
+
+    The forward and reverse DNS *must* match otherwise it will not work.
+    If forward and reverse dns match, then the whitelisting can work.
+
+
+
+##
+#  Blacklist
+##############
+    
+  Blacklisting format:
+    
+    INSERT INTO blacklist (_blacklist,_description) \
+       VALUES ('222.76.50.%','# spam');
+  
+  As you can see in the above example, if you want to white or blacklist a
+  subnet (whether it is an A B or C class), simply fill % in the other octet(s).
+
+
+-> Sender Blacklisting format:
+
+    INSERT INTO blacklist_sender (_blacklist,_description) \
+      VALUES ('camis@mweb.co.za','# blacklist single address');
+    INSERT INTO blacklist_sender (_blacklist,_description) \
+      VALUES ('@mweb.co.za','# blacklist entire domain');
+
+  Note: blacklisting @mweb.co.za will *not* blocklist subdomains
+        like @subdomain.mweb.co.za.
+
+
+-> DNS name blacklisting
+
+
+    INSERT INTO blacklist_dnsname (_blacklist,_description) \
+      VALUES ('adsl-%.thisisp.com','# blacklist ADSL users of thisisp.com');
+    INSERT INTO blacklist_dnsname (_blacklist,_description) \
+      VALUES ('mail.spamtargeting.com','# blacklist only this mailserver');
+
+    The forward and reverse DNS *must* match otherwise it will not work.
+    If forward and reverse dns match, then the blacklisting can work.
+
+
+
+##
+# Greylist Opt-in / Opt-out
+########################################
+
+  Certain accounts / spamtraps / users do not want greylisting.
+  Opt-in/out can be enabled in policyd.conf
+
+  _priority is an indication of which entry has the highest preference.
+
+  So for example, if you want only ONE user to be subjected to greylisting
+  for the domain mweb.co.za:
+
+  1 == Opt-in
+  0 == Opt-out
+
+  INSERT INTO policy (_rcpt,_optin,_priority) VALUES ('@mweb.co.za', 0, 10);
+  ^^ above mweb.co.za is by default opted out.
+
+  INSERT INTO policy (_rcpt,_optin,_priority) VALUES ('cami@mweb.co.za', 1, 50);
+  ^^ above camis@mweb.co.za has a higher priority therefore will override the
+     first rule
+
+  This allows for mixed and matched configurations. So another example, if
+  you want everyone for the domain to be subjected to greylisting EXCEPT
+  for camis@mweb.co.za:
+  
+  INSERT INTO policy (_rcpt,_optin,_priority) VALUES ('@mweb.co.za', 1, 10);
+  ^^ above mweb.co.za is by default opted in.
+
+  INSERT INTO policy (_rcpt,_optin,_priority) VALUES ('cami@mweb.co.za', 0, 50);
+  ^^ above camis@mweb.co.za has a higher priority therefore will override the
+     first rule (and thus be opted out)
+
+
+###
+# Greylist training
+##################
+
+  When you need to train only specific/new domains for greylisting,
+  you can use/enable policy training.
+
+  _rcpt   = email address or domain
+  _expire = seconds since epoch
+
+  example:
+
+   INSERT INTO policy_training (_rcpt,_expire) VALUES \
+   ('cami@mweb.co.za', UNIX_TIMESTAMP() ); 
+   INSERT INTO policy_training (_rcpt,_expire) VALUES \
+   ('@mweb.co.za', UNIX_TIMESTAMP() ); 
+
+  Then in policyd.conf, you set TRAINING_POLICY_TIMEOUT to 7d.
+  This means that that policy_training entry will expire and
+  get cleaned up automatically after 7 days. 
+
+
+
+###
+# Logging format
+##################
+  
+  # rcpt
+  Dec  2 20:40:05 localhost policyd: rcpt=8712, greylist=update, host=192.168.0.2
+    (localhost), from=cami@mweb.co.za, to=camis@mweb.co.za
+
+  rcpt is the number of times that Postfix has connected to policyd and issued
+  a valid Policy Daemon service request.
+
+  # throttling
+  throttle=new          <- first mail from a sender
+  throttle=update       <- update mail quota
+  throttle=abuse        <- user limit has been reached
+  throttle=clear        <- user time has expired
+
+  # greylisting
+  greylist=new          <- 1st attempt to delivery mail to a user
+  greylist=new_train    <- 1st attempt to delivery mail to a user (training mode)
+  greylist=update       <- 2nd or more mail delivery attempts
+  greylist=update_train <- 2nd or more mail delivery attempts (training mode)
+  greylist=awl          <- autowhitelist enabled & triggered
+  greylist=abl          <- autoblacklist enabled & triggered
+  greylist=pass         <- mysql has failed, but failover mode is enabled
+  greylist=fail         <- mysql has failed, failover mode is disabled
+  greylist=abuse        <- 2 or more mail delivery attempts within defined
+                           TRIPLET_TIME (policyd.conf) 5 minutes of first attempt
+  Example:
+   Dec  2 20:40:05 localhost policyd: greylist=update, host=192.168.0.2
+     (localhost), from=cami@mweb.co.za, to=camis@mweb.co.za 
+
+  # spamtrap / other
+  spamtrap=new          <- delivery attempt to a spamtrap address
+  whitelist=update      <- whitelisted host/netblock
+  blacklist=block       <- blacklisted host/netblock
+  blacklist_helo=block  <- host caught using forged HELO
+  helo=abuse		<- host caught randomizing HELO
+
+  # failures  
+  module=bypass		<- mysql failed inside module
+                           (module can be whitelist,blacklist,helo,etc..)
+
+#######
+# EOF #
+#######

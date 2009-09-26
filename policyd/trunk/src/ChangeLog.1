@@ -1,0 +1,825 @@
+
+[10 Jul 2006]
+Changes from v1.79 -> v1.80 (bug fixes & new functionality)
+
+ *    policyd.h: fix *bsd MSG_NOSIGNAL compiling issue. Patch by John Beaver.
+
+
+[04 Jul 2006]
+Changes from v1.78 -> v1.79 (bug fixes & new functionality)
+
+ *      mysql.c: fix strncpy boundary issue. Patch by Stanislav Sinyagin.
+ *    policyd.h: fix array boundary issue. Patch by Stanislav Sinyagin.
+ *  throttle*.c: autoblacklist throttle abusers. Patch by Stanislav Sinyagin.
+ *  redhat.init: redhat policyd spec file written by Tony Earnshaw.
+ *          *.c: logging has changed and is more consistant when reporting.
+ *    sockets.c: read()/write() is now non-blocking. Patch by Nigel Kukard.
+ *      mysql.c: remove the use of alarm blocking when in bypass mode.
+ *    generic.c: module failures now increment mysql failure counters.
+ *    policyd.c: whitelisting modules requires WHITELISTING=1 to work.
+ *    policyd.c: blacklisting modules requires BLACKLISTING=1 to work.
+ *    policyd.c: CONN_ACL is hashed out untill i've resolved a bug thats causing
+                 Policyd to fail calls to select() under heavy loads.
+
+
+[25 Jun 2006]
+Changes from v1.77 -> v1.78 (bug fixes & performance enchancements)
+
+ *    generic.c: malloc() related fixes. patch by Ralf Ebeling.
+ *      mysql.c: fix greylisting OPTIN/OUT bug. patch by John Beaver.
+ *      mysql.c: connections are closed before reopening/reconnecting.
+ *     Makefile: added OS X mysql library path. requested by Jim Wright.
+ *          *.c: delay all mysql inserts. Patch by Dan D Niles.
+ *    policyd.h: slight change in Policyd logging so that pflogsumm can be
+                 used to pull reports. Patch by John Beaver.
+ *  blacklist.c: initilize function variable earlier. Patch by John Beaver.
+
+
+[07 Jun 2006]
+Changes from v1.76 -> v1.77 (bug fixes)
+
+ *    generic.c: mysql info extraction fixed. reported by Peter Kiem.
+
+
+[07 Jun 2006]
+Changes from v1.75 -> v1.76 (bug fixes)
+
+ *    generic.c: fixed rejection message extraction. reported by Ralf Ebeling.
+
+
+[06 Jun 2006]
+Changes from v1.74 -> v1.75 (bug fixes)
+
+ *      mysql.c: fixed automated bypass-mode logic flaw.
+ *   throttle.c: fixed gcc warning. reported by K. C. Li.
+
+
+[06 Jun 2006]
+Changes from v1.73 -> v1.74 (new functionality+bug fixes)
+
+ *     Makefile: fixed compilation on Gentoo. patch by Benny Pedersen.
+ * polic*ebuild: ebuild added, submitted by Benny Pedersen.
+ *     Makefile: "make upgrade" was not displayed. Patch by Dietmar Braun.
+ *   throttle.c: throttle_check() max % value raised. report by Tavis Gustafson.
+ * throt*rcpt.c: incorrect use of _from spotted by M.A Forquesato.
+ *    generic.c: fixed incorrect extraction parameters. Patch by Alexey Tsvetnov.
+ *    generic.c: quota rejections can be 5xx or 4xx now. Patch by Alexey Tsvetnov.
+ *    generic.c: seperation of newlines after config display. Patch by Martin Pala
+ *  throttle*.c: _time_limit was not used properly. Patch by Alexey Tsvetnov.
+ *    policyd.h: removed duplication header include. Spotted by Jack Bailey.
+
+
+[08 Mar 2006]
+Changes from v1.72 -> v1.73 (new functionality+bug fixes)
+
+ *      mysql.c: preliminary MySQL v5 support. patch by Nigel Kukard.
+ *      mysql.c: the database probing now works properly.
+ *    generic.c: most cfg options now allows for all character usage.
+ *   README.txt: fixed throttle example. Spotted by Patrick Ben Koetter.
+ *    generic.c: CONN_ACL is now checked for when starting up.
+ *    generic.c: GREYLIST_HOSTADDR=4 now works, bug reported by Peter Kiem.
+ 
+
+[09 Jan 2006]
+Changes from v1.71 -> v1.72 (bug fixes)
+
+ * throttle_s.c: left out sasl variable. bug report by suneel cumar.
+ *     Makefile: added 'make upgrade' option (doesn't touch policyd.conf).
+
+ 
+[23 Dec 2005]
+Changes from v1.70 -> v1.71 (new functionality+bug fixes)
+
+ *      mysql.c: you can now compress or encrypt policyd->mysql connections.
+ *      mysql.c: removed mysql_ping(). connections are now restablished.
+ *    policyd.c: added -v option to Policyd to show version information.
+ * throttle_*.c: fix throttle inconsistancy. spotted by John Beaver.
+ * throttle_*.c: fix throttle inconsistancy. spotted by SanthuBhai.
+ * throttle_*.c: add thresholds/percentage display for throttle modules.
+ * throttle_r.c: rcpt_total did not increment. 
+ *       cidr.c: added cidr network acls. patch supplied by dan.
+ *  blacklist.c: new module that allows dns based blacklists (you can now
+                 blacklist, eg: %dsl%.rr.com to just block the RR.com
+		 adsl range, but you can still whitelist smtp.rr.com
+		 so they have to use their isp relay.) patch by Alain Fauconnet.
+		 
+  (NB!!) if you are upgrading from <= v1.70 then please add to policyd.conf:
+
+    # ip addresses/networks of hosts connecting to Policyd
+    CONN_ACL="127.0.0.1 192.168.0.0/24"
+    BLACKLISTDNSNAME=0
+    MYSQLOPT=""
+      or if you want to compress the connection from policyd -> mysql:
+    MYSQLOPT="CLIENT_COMPRESS"
+
+ And in MySQL>
+
+   CREATE TABLE blacklist_dnsname (
+     _blacklist   char(60) NOT NULL default '',
+     _description char(60) NOT NULL default '',
+     _expire      int(10) unsigned NOT NULL default '0',
+     UNIQUE KEY _blacklist (_blacklist),
+     KEY _expire (_expire)
+   ) TYPE=MyISAM;
+
+
+[07 Nov 2005]
+Changes from v1.69 -> v1.70 (new functionality+bug fixes)
+
+ *    generic.c: display correct helo_max_count value. patch by Benny Pedersen.
+ *    policyd.c: remove incorrect DEBUG label. spotted by Dietmar Braun.
+ *    cleanup.c: move as many expire variables out of cleanup into each module.
+ *    cleanup.c: remove unused spamtrap expire. patch by Benny Pedersen.
+ * policyd.conf: fix a few grammatical errors. patch by Felipe Franciosi.
+ * throttle_*.c: fix cosmetic throttle inconsistancies. spotted by John Beaver.
+ *   throttle.c: you can now throttle by domain, or netblock.
+ *   throttle.c: you can now add priorities to throttling records.
+ *   README.txt: documented new throttling functionality.
+ *      mysql.c: db_charquery() now displays correct value in DEBUG mode.
+ * throttle_*.c: fix incorrect _date updating. Spotted by Jaco Lesch. 
+
+  (NB!!) if you are upgrading from <= v1.69 then please add to MySQL:
+
+     ALTER TABLE throttle ADD _priority smallint(4) unsigned NOT NULL default '0';
+
+
+[27 Oct 2005]
+Changes from v1.68 -> v1.69 (bug fixes)
+
+ *       helo.c: remove hardcoded display of 10 HELO abuses. patch by John Beaver.
+ *    cleanup.c: clean up spamtrap table. patch by John Beaver.
+ *    cleanup.c: cosmetic fix, throttlesender showed hour instead of day.
+ *    cleanup.c: clean up blacklist_helo table. patch by John Beaver.
+
+ 
+[23 Oct 2005]
+Changes from v1.67 -> v1.68 (new functionality+bugfixes)
+
+ *  whitelist.c: save sql lookup on whitelist_dnsname if there is no reverse
+                 record. Requested by Leonardo Rodrigues Magalhaes.
+ *      stats.c: stats wasn't working, GREYLISTING is now set to 1 and not 2.
+ *      stats.c: extended the stats. by Leonardo Rodrigues Magalhaes.
+ *    cleanup.c: policy_training wasn't getting cleaned. noticed by Ed Walker.
+ * policyd.conf: fixed some grammatical errors. patch by Dudi Goldenberg.
+ *   README.txt: fixed a boatload of bad spelling mistakes.
+ * policyd.conf: changed default triplet timeout to 4 minutes.
+ *    generic.c: fixed WHITELISTNULL extract(), spotted by dan.
+ *      mysql.c: db_charquery() kept stale data. spotted by Aaron Lambers.
+ *   greylist.c: you can now choose how many octets you wish to record in
+                 the triplet database. the default will stay as "192.168.0"
+                 and not "192.168.0.1" for example.
+ *    cleanup.c: clean up sender throttling instance records every hour.
+ *  throttle*.c: insert fallback config defaults into database.
+ *  throttle*.c: implemented sender throttle on mails per time unit.
+ *  throttle*.c: new variables _abuse_(cur|tot) so policyd can keep track
+                 on how many times a user/host has reached/abuse their limit.
+ *  blacklist.c: cosmetic fix, debug was showing the wrong variable.
+ *  blacklist.c: blacklist_sender was not working. spotted by Micha Holzmann.
+ * policyd.spec: fix license. patch by Nigel Kukard.
+ *     Makefile: raise MAXFDS limit at compile time. patch by Catalin Muresan.
+ *    policyd.c: raise softlimit to match MAXFDS. patch by Catalin Muresan.
+ *  throttle*.c: speed increase by cutting down on unnecessary MySQL data.
+ *   README.txt: updated throttling docs for pre-populating the database. if
+                 unset, _date got whacked by cleanup. noted by John Beaver.
+
+  (NB!!) if you are upgrading from <= v1.67 then please add to policyd.conf:
+
+    GREYLIST_HOSTADDR=3
+    SENDERRCPTLIMIT=5000
+
+  And in MySQL>
+
+   CREATE TABLE throttle_from_instance (
+     _instance    char(60) NOT NULL default '',
+     _from        char(60) NOT NULL default '',
+     _expire      int(10) unsigned NOT NULL default '0',
+     UNIQUE KEY _instance (_instance),
+     KEY _expire (_expire)
+   ) TYPE=MyISAM;
+
+   ALTER TABLE throttle ADD _rcpt_max mediumint(8) unsigned NOT NULL default '0';
+   ALTER TABLE throttle ADD _rcpt_cur mediumint(8) unsigned NOT NULL default '1';
+   ALTER TABLE throttle ADD _rcpt_tot mediumint(8) unsigned NOT NULL default '1';
+   ALTER TABLE throttle ADD _abuse_cur int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle ADD _abuse_tot int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle ADD _log_warn  int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle ADD _log_panic int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle_rcpt ADD _abuse_cur int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle_rcpt ADD _abuse_tot int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle_rcpt ADD _log_warn  int(10) unsigned NOT NULL default '0';
+   ALTER TABLE throttle_rcpt ADD _log_panic int(10) unsigned NOT NULL default '0';
+
+
+[07 Sep 2005]
+Changes from v1.66 -> v1.67 (minor bugfixes)
+
+ *    generic.c: AUTO_BLACK_LISTING was not being initialized which means
+                 it couldn't of been working. patch by Benny Pedersen.
+ *          *.c: records were taking twice as long to expire as what they
+                 should be. Thanks to Sune Foldager for spotting this.
+ *     contrib/: added debian startup/init file by Dietmar Braun.
+ *       helo.c: used wrong variable for _expire. patch by Benny Pedersen.
+ * policyd.spec: new rpm spec file. submitted by Catalin Muresan
+
+
+
+[25 Aug 2005]
+Changes from v1.65 -> v1.66 (new functionality)
+
+ *      mysql.c: connections to the database are now automatically reestablished
+                 after 120 seconds and will continue to do so until the
+                 database becomes live. this now also takes care of policyd
+                 being started up without a connection to the database.
+ *  blacklist.c: new module that allows blacklisting domains or mail addresses.
+ *      stats.c: new module to pull stats from the greylist database.
+ *    policyd.c: sender throttling now works when/if recipient throttling
+                 is disabled. reported by Jaco Lesch.
+
+   (NB!!) if you are upgrading from <= v1.65 then please add to policyd.conf:
+
+     BLACKLISTSENDER=0
+
+   And in MySQL>
+
+     CREATE TABLE blacklist_sender (
+       _blacklist char(60) NOT NULL default '',
+       _description char(60) NOT NULL default '',
+       _expire int(10) unsigned NOT NULL default '0',
+       UNIQUE KEY _blacklist (_blacklist),
+       KEY _expire (_expire)
+     ) TYPE=MyISAM;
+
+
+
+
+[18 Aug 2005]
+Changes from v1.64 -> v1.65 (minor bug fixes)
+
+ *  whitelist.c: MySQL query on wrong table name when performing lookups
+                 for the white_dnsname module. reported by Chris Covington.
+                 
+   (NB!!) if you are upgrading from <= v1.64 then please run inside MySQL>
+
+     ALTER TABLE whitelist_dns_sender RENAME TO whitelist_dnsname;
+
+
+
+[16 Aug  2005]
+Changes from v1.63 -> v1.64 (minor bugfixes)
+
+ *    policyd.c: fix for older compilers. reported by Dietmar Braun.
+ *    policyd.c: recipient throttling module can now be used with other
+                 modules at the same time. requested by Jussi Silvennoinen.
+ *  whitelist.c: add in missing mysql 'WHERE' clause for the new whitelist
+                 dnsname module. reported by Jussi Silvennoinen.
+ *   README.txt: fixed whitelist dnsname examples. noted by Jussi Silvennoinen.
+
+
+
+[15 Aug 2005]
+Changes from v1.62 -> v1.63 (minor bug fixes, big speedups and new modules)
+
+ *  whitelist.c: new module that allows dns based whitelists (you can now
+                 whitelist, Eg: yahoo.com so that no matter if they keep changing
+                 ips, all the MTAs on yahoo.com will stay whitelisted)
+ *    cleanup.c: fix cleanup dates for new modules. reported by lordlee.
+ *    generic.c: if module requirements fails, defer and let the sender know.
+ *    policyd.c: module requirement failure now dumps more/correct information.
+ *          *.c: work around mysql problem that caused the database to repeadily
+                 lockup when things got busy. table scans are not performed any
+                 more. big thanks to Dietmar Braun for reporting the problem.
+ *      mysql.c: implement mysql timeout variable for queries.
+ *    policyd.c: set default mysql timeout to 5 seconds.
+ *    cleanup.c: set default mysql timeout to 600 seconds.
+ *   greylist.c: you can now enable greylist training for specific domains and/or
+                 email addresses and have the created expire automatically. 
+                 patch submitted by Joao Gouveia.
+ *  whitelist.c: new module to allow sender mailaddress / domain based whitelists.
+                 patch submitted by Leonardo Rodrigues Magalhaes. use at this
+                 module with the risk of knowing that spammers always forge big
+                 domains.
+ *       helo.c: hosts that get blacklisted when randomizing their helo (HRP)
+                 information are now cleaned up immediately when blacklisted.
+ *          *.c: mysql INSERTs now happen in real time (except for greylisting)
+
+   (NB!!) if you are upgrading from <= v1.62 then please add to policyd.conf:
+
+     WHITELISTSENDER=0
+     WHITELISTDNSNAME=0
+     TRAINING_POLICY_TIMEOUT=0d
+
+   And to MySQL>
+
+     CREATE TABLE policy_training (
+       _rcpt char(60) NOT NULL default '',
+       _expire int(10) unsigned NOT NULL default '0',
+       UNIQUE KEY _rcpt (_rcpt),
+       KEY _expire (_expire)
+     ) TYPE=MyISAM;
+
+     CREATE TABLE whitelist_sender (
+       _whitelist char(60) NOT NULL default '',
+       _description char(60) NOT NULL default '',
+       _expire int(10) unsigned NOT NULL default '0',
+       UNIQUE KEY _whitelist (_whitelist),
+       KEY _expire (_expire)
+     ) TYPE=MyISAM;
+
+     CREATE TABLE whitelist_dns_sender (
+       _whitelist char(60) NOT NULL default '',
+       _description char(60) NOT NULL default '',
+       _expire int(10) unsigned NOT NULL default '0',
+       UNIQUE KEY _whitelist (_whitelist),
+       KEY _expire (_expire)
+     ) TYPE=MyISAM;
+
+
+
+[08 Aug 2005]
+Changes from v1.61 -> v1.62 (new functionality)
+
+ *    generic.c: non-daemon debug mode now works. reported by Richard Mayhew.
+ *    cleanup.c: (sender|recipient)throttling records can now be expired
+                 after a configured timelimit. patch submitted by Martin Pala.
+ *          *.c: fix gcc v4 compile warnings
+ *    generic.c: fix whitelisting non-daemon segfault. reported by Allan Gomes.
+
+   (NB!!) if you are upgrading from <= v1.61 then please add to policyd.conf:
+
+     SENDER_INACTIVE_EXPIRE=31d
+     RECIPIENT_INACTIVE_EXPIRE=31d
+
+
+
+[05 Aug 2005]
+Changes from v1.60 -> v1.61 (major bugfixes)
+
+ *   spamtrap.c: fix blacklisting bug. due to the new HELO module, addresses
+                 NOT in spamtraps got blacklisted. reported by Chris Covington.
+
+
+
+[04 Aug 2005]
+Changes from v1.59 -> v1.60 (new functionality)
+
+ * throttle-rcpt.c: new recipient throttling module. submitted by Martin Pala.
+ *    policyd.conf: added configs needed for recipient throttling module.
+ *      README.txt: added description/example for recipient throttling module.
+ *    policyd.conf: fix HELO_AUTO_EXPIRE description. spotted by Chris Covington.
+
+   (NB!!) if you are upgrading from <= v1.59 then please add to policyd.conf:
+   
+     RECIPIENTTHROTTLE=0
+     RECIPIENTMSGLIMIT=5000
+     RECIPIENTTIMELIMIT=24h
+     RECIPIENT_QUOTA_REJECTION="Quota Exceeded."
+
+   And in MySQL>
+
+     CREATE TABLE throttle_rcpt (
+       _rcpt char(60) NOT NULL default '',
+       _count_max mediumint(8) unsigned NOT NULL default '0',
+       _count_cur mediumint(8) unsigned NOT NULL default '1',
+       _date int(10) unsigned NOT NULL default '0',
+       _time_limit int(10) unsigned NOT NULL default '0',
+       _count_tot mediumint(8) unsigned NOT NULL default '1',
+       UNIQUE KEY _rcpt (_rcpt)
+     ) TYPE=MyISAM; 
+
+
+
+[03 Aug 2005]
+Changes from v1.58 -> v1.59 (new functionality)
+
+ *       helo.c: implemented new anti-spam module which
+                 blacklists hosts that randomize their
+                 helo information (idea from Wietse Venema)
+ *    cleanup.c: if helo module is enabled, cleanup expired entries.
+ *    policyd.c: reject messages can be 512 chars long. requested by Eric Toll.
+
+   (NB!!) if you are upgrading from <= v1.58 then please add to policyd.conf:
+
+     HELO_CHECK=0
+     HELO_MAX_COUNT=10
+     HELO_BLACKLIST_AUTO_EXPIRE=14d
+     HELO_AUTO_EXPIRE=7d
+
+   And in MySQL:
+
+     CREATE TABLE helo (
+       _host char(15) NOT NULL default '',
+       _helo char(60) NOT NULL default '',
+       _expire int(10) unsigned NOT NULL default '0',
+       UNIQUE KEY _host (_host,_helo),
+       KEY _expire (_expire)
+     ) TYPE=MyISAM;
+
+     ALTER TABLE whitelist ADD KEY _expire (_expire);
+     ALTER TABLE blacklist ADD KEY _expire (_expire);
+
+
+
+[26 Jul 2005]
+Changes from v1.57 -> v1.58 (portability fixes and bug fixes)
+
+ *          *.c: more signed to unsigned.
+ *    policyd.c: call gettime() once.
+ *          *.c: remove multiple calls to gettime().
+ *   throttle.c: split sasl/from/host throttling into own files.
+ *   greylist.c: autoblacklisting was forcefully enabled. reported by lordlee.
+
+
+
+[22 Jul 2005]
+Changes from v1.56 -> v1.57 (portability fixes and new functionality)
+
+ *          *.c: changed from signed to unsigned chars.
+ *   greylist.c: AUTOWHITELISTING is now fully functional.
+ *   greylist.c: AUTOBLACKLISTING is now fully functional.
+ *   README.txt: optin/optout typo. reported by Dietmar Braun.
+
+
+
+[21 Jul 2005]
+Changes from v1.55 -> v1.56 (portability fixes)
+
+ *          *.c: fix solaris compiling. reported by Jaco Lesch
+
+
+
+[14 Jul 2005]
+Changes from v1.54 -> v1.55 (major fixes and portability fixes)
+
+ *   README.txt: fix blacklist typo. noted by Henk Bokhoven.
+ *        .init: added policyd.freebsd.sh startup script by Eric Toll.
+ *     Makefile: remove duplication of Solaris/Linux compile
+                 options, include freebsd/netbsd mysql library
+                 and header paths. patch by ???? (please mail me)
+ *    Changelog: add dates to all the build releases
+ *  blacklist.c: cosmetic fix.
+ *  whitelist.c: cosmetic fix.
+ *   throttle.c: SASL throttling bug fixed. problem reported by Micha Holzmann.
+ *    sockets.c: display more information if accept() fails.
+
+
+ 
+[06 Jul 2005]
+Changes from v1.53 -> v1.54 (speed increases and new feature)
+
+ *    policyd.c: 25% speed up by passing less data between functions.
+ *   greylist.c: opt in/out fallback is now configurable. all previous
+                 releases had opt-out as default. requested by K. C. Li.
+ *     Makefile: added netbsd compile options. requested by mouss.
+ *     Makefile: default for 'make' is linux. requested by mouss.
+ *     Makefile: removed tab-only lines (emacs moans). requested by mouss.
+
+
+
+[23 Jun 2005]
+Changes from v1.52 -> v1.53 (major fixes and new features)
+
+ *   throttle.c: add in missing `,` sign. patch by JL Penman-Smithson.
+ *   throttle.c: you can now perform throttling based on ip/hosts.
+ *   README.txt: seperated all mysql queries into 'DATABASE.mysql'.
+ * policyd.conf: SENDER_SIZE_REJECTION typo noted by Christiano Anderson.
+ *    policyd.h: increased max descriptors. can handle double the connections.
+ *    policyd.c: fixed silent exit that was caused by hitting MAXFDS.
+
+
+
+[22 Apr 2005]
+Changes from v1.51 -> v1.52 (minor fixes and new features)
+
+ *     syslog.c: include local[0-7] facilities. patch by JL Penman-Smithson
+ *      mysql.c: define MYSQL pointer as volatile. patch by Leandro Santi
+ *    sockets.c: define fd for read/write as volatile. patch by Leandro Santi
+ *      mysql.c: database connections can now be kept alive.
+ *   greylist.c: rewrote how opt-in and opt-out works. READ the README.txt!!
+ *     Makefile: cosmetic update to the make process.
+ *      mysql.c: if 3 or more queries to the database times out, policyd
+                 will force itself to switch into pass-through mode in order
+                 to keep high concurrency and low latency.
+
+   (NB!!) if you are upgrading from <= v1.51 then please add to policyd.conf:
+
+     DATABASE_KEEPALIVE=0
+
+   And in MySQL:
+
+     ALTER TABLE policy ADD _priority smallint(4) unsigned NOT NULL default '0';
+
+
+
+[16 Apr 2005]
+Changes from v1.50 -> v1.51 (minor fixes and new features)
+
+ *     Makefile: add in missing character for building on Solaris.
+                 reported by Thomas H. Jones II.
+ *  blacklist.c: fix blacklist bug when whitelist null sender is enabled. 
+ *    sockets.c: fix w_close() bug when unable to close file descriptor.
+ *    sockets.c: added read() timeout.
+ *    sockets.c: added write() timeout.
+ *    policyd.c: you can now see the connecting ip and assigned file descriptor.
+
+
+
+[13 Apr 2005]
+Changes from v1.49 -> v1.50 (minor fixes and new features)
+
+ *  blacklist.c: save an sql lookup if there is no HELO information.
+ *    policyd.c: allow greylisting and sender throttling to run together.
+                 requested by Robin Lynn Frank.
+ *      mysql.c: connection & query timeouts implemented by dan. thanks! ;)
+ *    generic.c: you can now configure the syslog facility and priority.
+                 requested by Jamie L. Penman-Smithson. implemented by dan.
+
+
+
+[10 Apr 2005]
+Changes from v1.48 -> v1.49 (documentation cleanup and major bugfixes)
+
+ *   README.txt: restructured documentation and included more examples.
+ *   README.txt: document throttle module behaviour.
+ *    cleanup.c: cleanup now works with gettime().
+ *    policyd.c: ripped everything apart and made it more modular.
+ *    policyd.c: clear_var(): scrub all fd variables before use.
+ *    policyd.c: parse_buf(): sort all Postfix requests into arrays.
+ *    policyd.c: module_info_check(): check needed data for enabled modules.
+ *    generic.c: db_failure(): return -20 regardless of failure type.
+ *    generic.c: policy_reply(): centralize all policyd server replies.
+ *    generic.c: extract_seconds(): now supports M=month and Y=year.
+ *  whitelist.c: whitelist_check(): whitelisting is now its module.
+ *  blacklist.c: blacklist_check(): blacklisting is now its module.
+ *          *.c: all functions are now documented.
+ *     Makefile: compiling with debugging symbols is now the default.
+ *   greylist.c: fix autowhitelisting segfault. reported by Robin Lynn Frank.
+ *   throttle.c: fix throttle segfault.
+ *    policyd.c: if all modules are disabled, accept & work in passthrough mode.
+ *    generic.c: big speed increase. keep connections to postfix open.
+
+
+
+[08 Apr 2005]
+Changes from v1.47 -> v1.48 (new functionality)
+
+ *      mysql.c: counter is incremented for every query (display in DEBUG mode)
+ *    policyd.c: counter is incremented for every query from postfix.
+ *          *.c: all modules display rcpt=<number>, at start of log line.
+ *    generic.c: extract_seconds() now allows timeunits of 0 (infinity)
+ *    generic.c: BLACKLIST_HELO_AUTO_EXPIRE now uses extract_seconds().
+
+   (NB!!) if you are upgrading from <= v1.47 then please note:
+   this release BREAKS/restructures the old logging format.
+
+
+
+[06 Apr 2005]
+Changes from v1.46 -> v1.47 (minor fixes and new blacklisting module)
+
+ *    policyd.h: variables that dont need to be global were removed.
+ *    policyd.c: variables are now all unique to the current file descriptor.
+ *   README.txt: updated the sender throttling docs to be more clear.
+ *  blacklist.c: you now have the ability blacklist hosts that identify
+                 their HELO's with your servers ip addresses.
+                 Feature requested by Mark J. Nernberg.
+
+   (NB!!) if you are upgrading from <= v1.46 then at the mysql prompt:
+   CREATE TABLE blacklist_helo (
+     _helo char(60) NOT NULL default '',
+     UNIQUE KEY _helo (_helo)
+   ) TYPE=MyISAM;
+   
+   and in your policyd.conf, add:
+   BLACKLIST_HELO=0
+   BLACKLIST_HELO_AUTO_EXPIRE=0
+
+
+
+[31 Mar 2005]
+Changes from v1.45 -> v1.46 (speed increase and bugfixes)
+
+ *          *.c: dont pass mysql pointer between functions (already static)
+ *          *.c: dont pass mysql queries between functions (already static)
+ *          *.c: database failsafe now works across all modules/queries.
+ *         init: added suse started script by Corey Huinker.
+ *    generic.c: add an extra byte for malloc so strings are null terminated.
+                 spotted by dan
+ *    generic.c: fix strncpy() segfault on old compilers (debian stable+rh6.2)
+                 (reported by Christiano Anderson)
+ *    policyd.c: generate policyd pidfile as required by fbsd's ports system.
+                 (requested by Rong-En Fan)
+ *    cleanup.c: cosmetic fix. displayed seconds instead of days.
+                 Patch by Trever Miller.
+
+   (NB!!) if you are upgrading from <= v1.45 then add to your policyd.conf:
+   PIDFILE=/var/run/policyd.pid
+                 
+
+
+[23 Mar 2005]
+Changes from v1.44 -> v1.45 (major bugfixes)
+
+ *    generic.c: daemonize() after configs are read. Patch by Trever Miller.
+ *    generic.c: new function gettime() to replace gettimeofday() duplication.
+ *    generic.c: extract_seconds() has been rewritten by dan.
+ *    policyd.c: fix bug if host and/or is found more than once in the
+                 whitelist or blacklist. bug found by Andriy Yanko
+
+
+
+[16 Mar 2005]
+Changes from v1.43 -> v1.44 (speed increase, new features and bugfixes)
+
+ *    generic.c: move daemonize() into sockets.c
+ *    sockets.c: add w_fork() function to do backgrounding
+ * policyd.conf: fix up the 'defaults' so they match the default
+ *          *.c: prevent mysql INSERTS from escaping integers
+ *    policyd.c: display policyd version when starting
+ *   greylist.c: apply patch to fix autowhitelist bug from +
+ *   spamtrap.c: apply patch to fix spamtrap autoblacklisting by
+                 "Andriy T. Yanko"  <wireless@wireless.org.ua>
+
+
+
+[13 Mar 2005]
+Changes from v1.42 -> v1.43 (portability cleanups, new features and bugfixes)
+
+ *    generic.c: replace daemon() with daemonize() implementation
+                 so that code can compile/run on Solaris.
+ *     Makefile: policyd now works on solaris
+                 Many thanks to Trever Miller <trever@cyberdex.ca> for Solaris
+                 socket compile options and testing.
+ *   greylist.c: autowhitelisting is now implemented (idea from Wietse Venema)
+ *   greylist.c: backport greylist patch from v1.40
+ * policyd.conf: enable debugging by default
+
+
+
+[11 Mar 2005]
+Changes from v1.41 -> v1.42 (major bugfixes and portability cleanups)
+
+ *     Makefile: compile cleanly on freebsd.
+ *   throttle.c: fix (sasl) segfault.
+                 reported by Michael Nguyen (michaeln@twentyten.org)
+ *   throttle.c: add counter to keep a history of sent mail
+ *      mysql.c: changing DEBUG to 2 (or higher) shows mysql queries+results
+ *    sockets.c: changing DEBUG to 3 (or higher) now shows more network debugging
+ *    policyd.c: policyd now works with MySQL v3.xx and MySQL v4.xx
+                 (idea blantently stolen from Victor Duchovni's MySQL patch)
+
+   (NB!!) if you are upgrading from <= v1.41 then:
+   ALTER TABLE throttle ADD _count_tot mediumint(8) unsigned NOT NULL default '0';
+
+
+
+[26 Feb 2005]
+Changes from v1.40 -> v1.41 (major speed increase and new functionality)
+
+   * greylist.c: _count is inserted to 0 (cosmetic database fix)
+   *  cleanup.c: DELETE no long requires a tablescan, use _count INDEX. fast!
+   * throttle.c: fix SASL bug found by Michael Nguyen (michaeln@twentyten.org)
+   *  generic.c: you now have the ability to specify time units for settings,
+                 EG: 1s = 1 second, 5m = 5 minutes, 2d = 2 days, 4h = 4 hours
+                 requested by Michael Nguyen (michaeln@twentyten.org)
+   * throttle.c: you can now throttle incoming mail based on IP address.
+
+   (NB!!) if you are upgrading from <= v1.40 then:
+   ALTER TABLE triplet DROP INDEX _datenew;
+   ALTER TABLE triplet MODIFY _count smallint(5) unsigned NOT NULL default '0';
+   UPDATE triplet SET _count=0 WHERE _count=1;
+   ALTER TABLE triplet ADD KEY (_datenew,_count);
+
+
+
+[24 Feb 2005]
+Changes from v1.39 -> v1.40 (new features and speed increase)
+
+ *   throttle.c: you can use SASL_USERNAME instead of envelope sender address
+ *     Makefile: added 'install-strip' option to strip binaries
+ *    generic.c: cleanup no longer goes into the background
+ *   greylist.c: INSERTS are now extremely fast
+ *      mysql.c: database cleanups now show the correct deleted integer
+
+   (NB!!) if you are upgrading from <= v1.39 then:
+   ALTER TABLE triplet ADD KEY (_datenew,_count);
+
+
+
+[20 Feb 2005]
+Changes from v1.38 -> v1.39 (speed increase, major bugfixes and new features)
+
+
+ *    policyd.c: avoid blacklisting lookup if host is found in whitelist
+ *    sockets.c: functions now give proper error message when fatal actions occur
+ *        DEBUG: now generates a lot of logs (dont use in production!)
+ *      mysql.c: starting policyd when MySQL is down now works
+ *    sockets.c: read() errors no longer kill the daemon, connection will be closed.
+ *    policyd.c: if MAXFDS is reached, do not accept anymore connections
+ *    cleanup.c: no longer expires permanent blacklisted ranges
+ *    generic.c: malloc() return errors are checked everywhere now
+ *   throttle.c: DATABASE queries are now done before log notifications.
+ * policyd.conf: completely rewritten with descriptions
+ *    cleanup.c: you can now configure when to expire (un)authenticated triplets.
+ *    policyd.c: fix greylist header bug found by Peter Santiago
+ *   greylist.c: provide msg count & mail size in xheader information
+ *    cleanup.c: prepare for auto-whitelisting/auto-blacklisting
+
+
+
+[11 Dec 2004]
+Changes from v1.37 -> v1.38 (cosmetic changes)
+
+ *   spamtrap.c: table to allow automatic host blacklisting (check README)
+ *    policyd.c: all rejections can now be customized
+
+ (NB!!) if you are upgrading from <= v1.37 then:
+  CREATE TABLE spamtrap (
+    _rcpt char(60) NOT NULL default '',
+    UNIQUE KEY _rcpt (_rcpt)
+  ) TYPE=MyISAM;
+
+
+
+[6 Dec 2004]
+Changes from v1.36 -> v1.37 (memory improvements, bugfixes)
+
+ *    generic.c: extract() now copies data into static arrays
+ *    generic.c: changed from fopen() to freopen() to handle hup signal properly
+ *    policyd.h: memory size is now very static, it does not grow
+ *   greylist.c: logging now includes mail size for stats analysis
+ *   greylist.c: added ability to add mail:
+                 with "X-Greylist: Passed count=%d size=%d"
+
+
+[6 Dec 2004]
+Changes from v1.34 -> v1.36 (speed enhancements)
+
+ *     DATABASE: structure change, major speedups (code will work with old database)
+ *       README: fixed up documentation, and corrected cleanup method
+ *   greylist.c: training mode now works properly
+ *    policyd.c: whitelisting no longer matches random hosts (LIKE to REGEXP)
+ *    policyd.c: whitelisting format has changed, please read the README
+ *    policyd.c: all records are now lowercased
+
+
+
+[2 Dec 2004]
+Changes from v1.33 -> v1.34 (new features+bugfixes)
+
+ *    policyd.c: pass-through mode is now clearly visible
+ *   greylist.c: fixes for training mode
+ *    policyd.c: fixed logic bug
+ *    generic.c: null terminate all extracted strings
+ *    generic.c: add _ character to be extracted (requested by Patrick <nawtyness@gmail.com>)
+ *    policyd.c: ripped out isgraph()
+ *    policyd.c: ripped out sizeof()
+ *    policyd.c: add checks to make sure we got all sender throttle required data
+ *    policyd.c: compile fixes for gcc 3.3.4
+ *    generic.c: moved duplicated functions (for policyd/cleanup) to generic file
+
+ (NB!!) if you are upgrading from <= v1.33 then:
+ ALTER TABLE whitelist ADD _expire int NOT NULL default '0';
+ ALTER TABLE whitelist ADD KEY (_expire);
+ ALTER TABLE blacklist ADD _expire int NOT NULL default '0';
+ ALTER TABLE blacklist ADD KEY (_expire);  
+
+
+
+[8 Nov 2004]
+Changes from v1.32 -> v1.33 (new features+bugfixes)
+
+ *    policyd.c: added chroot()
+ *    policyd.c: added priv dropping to whatever you uid/gid you want
+ *    policyd.c: fixed up setuid()/setgid()/chroot() ordering
+ *     Makefile: trailing garbage in files removed
+ *   greylist.c: fix duplicate update by found by Piotr Gnyp
+ *    policyd.c: fix array parsing bug found by Piotr Gnyp
+ *    genetic.c: optimized extract()
+ *    policyd.h: optimized memory usage (1/4th used now)
+ *    policyd.h: standardise on 64 char arrays (for speed+sanity)
+ *    policyd.c: rip out strlen() and use isgraph() for sanity checks (speed up)
+ *   greylist.c: added index in triplet table for _datelast to speed up cleanups
+ *    policyd.c: whitelisting now works properly
+ *    policyd.c: added blacklisting functionality
+ *       README: documented whitelisting and blacklisting
+ *       README: documented opt-in / opt-out
+ *     Makefile: removed whitelist.txt from Makefile
+ *     Makefile: added copying policyd.conf to Makefile
+ *    policyd.c: fixed logging so greylisting and throttling are different
+ *       README: documented logging format
+ *   throttle.c: added per-sender maximum mail size restriction
+ *       README: cleaned up docs a bit
+ *          *.c: cleaned up unused variables in all files
+ *    policyd.c: fixed up some return values
+ *      mysql.c: mysql query fix ups
+ *    policyd.c: fixed up compile warnings
+ *   throttle.c: mail size update fix
+ 
+   (NB!!) if you are upgrading from <= v1.31 then:   
+   ALTER TABLE triplet ADD KEY (_datelast);
+   ALTER TABLE throttle ADD _mail_size int NOT NULL default '0';  
+
+
+#######
+# EOF #
+#######

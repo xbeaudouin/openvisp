@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# Debian start script for policyd.
+
+# Last change: 2005/30/26, Dietmar Braun
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+DAEMON=/usr/local/policyd/policyd
+CONFIG=/usr/local/policyd/policyd.conf
+NAME=policyd
+DESC="Greylisting Policy Daemon"
+
+test -x $DAEMON || exit 0
+
+set -e
+
+PIDFILE=`grep "PIDFILE" $CONFIG | awk -F "=" '{print $2}' | awk '{print $1}'`
+
+case "$1" in
+  start)
+        echo -n "Starting $DESC: $NAME... "
+        start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- -c $CONFIG
+        if [ $? -ne 0 ]; then
+          echo "Error!"
+        else
+          echo "Ok."
+        fi
+        ;;
+        
+  stop)
+        echo -n "Stopping $DESC: $NAME... "
+        start-stop-daemon --stop --quiet --pidfile $PIDFILE --exec $DAEMON
+        if [ $? -ne 0 ]; then
+          echo "Error!"
+        else
+          echo "Ok."
+        fi
+        ;;
+        
+  reload)
+        echo -n "Reloading $DESC configuration... "
+        start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --exec $DAEMON
+        if [ $? -ne 0 ]; then
+          echo "Error!"
+        else
+          echo "Ok."
+        fi
+        ;;
+        
+  restart)
+        echo "Restarting $DESC: $NAME:"
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+        
+  *)
+        echo "Usage: $0 {start|stop|restart|reload}" >&2
+        exit 1
+        ;;
+esac

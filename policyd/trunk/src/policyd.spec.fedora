@@ -1,0 +1,107 @@
+
+%define ver v1.82
+%define rel 1
+%{!?key: %define fedora 0}
+
+%define install_path /usr/local/%{name}
+
+Summary: Postfix Policyd Daemon
+Name: policyd
+Version: %{ver}
+Release: %{rel}
+URL: http://policyd.sourceforge.net/
+Source0: http://policyd.sourceforge.net/%{name}-%{ver}.tar.gz
+License: GNU GPL v2
+Group: System/Daemons
+BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
+BuildRequires: gcc
+Requires: postfix => 2.1
+
+%description
+Policyd is an anti-spam plugin for Postfix (written in C) that does
+Greylisting, Sender-(envelope, SASL or host / ip)-based throttling (on
+messages and/or volume per defined time unit), Recipient rate limiting,
+Spamtrap monitoring / blacklisting, HELO auto blacklisting and HELO
+randomization preventation.
+
+%prep
+
+%setup
+
+%build
+make build
+
+%install
+rm -rf $RPM_BUILD_ROOT
+
+# Misc stuff
+%if %{fedora}
+install -d $RPM_BUILD_ROOT/usr/sbin
+install -d $RPM_BUILD_ROOT/etc/postfix
+install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
+install -d $RPM_BUILD_ROOT/etc/cron.d
+install -m755 contrib/%{name}.init.fedora $RPM_BUILD_ROOT/etc/rc.d/init.d/%{name}
+install -m644 contrib/%{name}.cron $RPM_BUILD_ROOT/etc/cron.d/%{name}
+install -m755 %{name} $RPM_BUILD_ROOT/usr/sbin/%{name}
+install -m755 cleanup $RPM_BUILD_ROOT/usr/sbin/cleanup
+install -m755 stats $RPM_BUILD_ROOT/usr/sbin/stats
+install -m600 %{name}.conf $RPM_BUILD_ROOT/etc/postfix/%{name}.conf
+%else
+install -d $RPM_BUILD_ROOT%{install_path}
+install -d $RPM_BUILD_ROOT/etc/cron.d
+#install -m755 contrib/%{name}.init $RPM_BUILD_ROOT%{install_path}
+install -m644 contrib/%{name}.cron $RPM_BUILD_ROOT/etc/cron.d/%{name}
+install -m755 %{name} $RPM_BUILD_ROOT%{install_path}/%{name}
+install -m755 cleanup $RPM_BUILD_ROOT%{install_path}/cleanup
+install -m755 stats $RPM_BUILD_ROOT%{install_path}/stats
+install -m600 %{name}.conf $RPM_BUILD_ROOT%{install_path}/%{name}.conf
+%endif
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post
+%if %{fedora}
+/sbin/chkconfig --add %{name}
+%endif
+
+%postun
+%if %{fedora}
+/sbin/service %{name} condrestart > /dev/null 2>&1 || :
+%endif
+
+%preun
+%if %{fedora}
+if [ "$1" = 0 ]
+then
+	/sbin/service %{name} stop > /dev/null 2>&1 || :
+	/sbin/chkconfig --del %{name}
+fi
+%endif
+
+%files
+%defattr(-,root,root)
+#%doc Changelog.txt DATABASE.mysql License.txt README.txt SUPPORT.txt TODO.txt WHITELIST.sql
+%if %{fedora}
+%attr(0600,root,root) %config(noreplace) %{_sysconfdir}/postfix/%{name}.conf
+%attr(0755,root,root) %config /etc/rc.d/init.d/%{name}
+%attr(0644,root,root) %config /etc/cron.d/%{name}
+%attr(0755,root,root) %{_sbindir}/%{name}
+%attr(0755,root,root) %{_sbindir}/cleanup
+%attr(0755,root,root) %{_sbindir}/stats
+%else
+%attr(0600,root,root) %config(noreplace) %{install_path}/%{name}.conf
+#%attr(0755,root,root) %config %{install_path}/%{name}.init
+%attr(0644,root,root) %config /etc/cron.d/%{name}
+%attr(0755,root,root) %{install_path}/%{name}
+%attr(0755,root,root) %{install_path}/cleanup
+%attr(0755,root,root) %{install_path}/stats
+%endif
+
+%changelog
+* Fri Aug 26 2005 Catalin Muresan <cata@astral.ro>
+- added fedora, install_path
+
+* Fri Aug 26 2005 Catalin Muresan <cata@astral.ro>
+- First spec version
+
