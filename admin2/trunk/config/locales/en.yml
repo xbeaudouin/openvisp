@@ -3,3 +3,9 @@
 
 en:
   hello: "Hello world"
+  welcome: "Welcome to OpenVISP Admin"
+
+  login_username: "Username (email)"
+  login_password: "Password"
+  login_submit: "Enter"
+	
