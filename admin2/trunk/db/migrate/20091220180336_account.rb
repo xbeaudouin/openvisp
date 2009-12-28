@@ -1,11 +1,11 @@
 class Account < ActiveRecord::Migration
   def self.up
-	  create_table :accounts,   :force => true do |t|
+	  change_table :accounts do |t|
       t.column :username,     :string
       t.column :password,     :string
       t.column :datetime,     :string
       t.column :modified,     :timestamp
-      t.column :disabled,     :integer, :limit => 1
+      t.column :enabled,     :integer, :limit => 1
       t.column :tech,         :integer, :limit => 1
       t.column :company,      :string
       t.column :address,      :string
@@ -31,7 +31,7 @@ class Account < ActiveRecord::Migration
     remove_column :accounts, :password
     remove_column :accounts, :datetime
     remove_column :accounts, :modified
-    remove_column :accounts, :disabled
+    remove_column :accounts, :enabled
     remove_column :accounts, :tech
     remove_column :accounts, :company
     remove_column :accounts, :address
