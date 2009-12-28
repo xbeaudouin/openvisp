@@ -9,14 +9,16 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20091220180336) do
+ActiveRecord::Schema.define(:version => 20091227191736) do
 
   create_table "accounts", :force => true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.string   "username"
     t.string   "password"
     t.string   "datetime"
     t.datetime "modified"
-    t.integer  "disabled",     :limit => 1
+    t.integer  "enabled",      :limit => 1
     t.integer  "tech",         :limit => 1
     t.string   "company"
     t.string   "address"
@@ -32,6 +34,13 @@ ActiveRecord::Schema.define(:version => 20091220180336) do
     t.string   "websupport"
     t.string   "webfaq"
     t.integer  "paid",         :limit => 1
+    t.string   "firstname"
+    t.string   "lastname"
   end
+
+  add_index "accounts", ["company"], :name => "index_accounts_on_company"
+  add_index "accounts", ["enabled"], :name => "index_accounts_on_enabled"
+  add_index "accounts", ["paid"], :name => "index_accounts_on_paid"
+  add_index "accounts", ["username"], :name => "index_accounts_on_username"
 
 end
