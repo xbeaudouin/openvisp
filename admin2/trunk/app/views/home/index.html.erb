@@ -1,0 +1,57 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>OpenVISP Admin</title>
+        <%= stylesheet_link_tag "style" %>
+    </head>
+    <body>
+
+        <center>
+            <div id="toppage">
+                <div class="menu">
+                    :: <%=t :welcome %>::
+                </div>
+                <% form_tag :action => 'validate' do %>
+                <table class="login">
+                    <tr>
+                        <td rowspan="3">
+                            <img src="../images/ico-password.png" width="64" height="64" class="png" alt="key icon">
+                        </td>
+                        <td class="cell">
+                            <%=t :login_username %><%= text_field 'account', 'username' %>
+                            <br/>
+                        </td>
+                        <td class="cell">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="cell">
+                            <%=t :login_password %><%= password_field 'account', 'password' %>
+                            <br/>
+                        </td>
+                        <td rowspan="2" class="cell">
+                            &nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="cell">
+                            <%= submit_tag :login_submit, :class => "button" %>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                </table>
+                <% end %>
+                <br/>
+                <br/>
+            </div>
+
+            <div class="submenu">
+                <a target="_top" href="<%= "my_page_name" %>"><%= "time stamp" %></a>&middot;<a target="_blank" href="http://www.oav.net/projects/openvisp-admin/">OpenVISP Admin 
+                    <?php print $version; ?>
+                </a>
+            </div>
+        </center>
+    </body>
+</html>
