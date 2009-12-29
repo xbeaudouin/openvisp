@@ -2,10 +2,18 @@
 # See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  hello: "Hello world"
-  welcome: "Welcome to OpenVISP Admin"
 
+  welcome: "Welcome to OpenVISP Admin"
   login_username: "Username (email)"
   login_password: "Password"
   login_submit: "Enter"
+
+# Global Part
+  logout: "Logout"
+
+# Control Board Part
+  control_board_mail: "Manage your emails, mailboxes, aliases..."
+  control_board_manage_domain: "Manage your domains"
+  control_board_user_info: "Informations about your account"
+  control_board_user_management: "Account Management"
 	
