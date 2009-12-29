@@ -7,6 +7,10 @@ body {
 	font-weight: normal;
 }
 
+.translation_missing {
+    background: yellow
+}
+
 fieldset {
 	padding: 1em;
 	width: 70%
