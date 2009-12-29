@@ -3,8 +3,6 @@ class Account < ActiveRecord::Migration
 	  change_table :accounts do |t|
       t.column :username,     :string
       t.column :password,     :string
-      t.column :datetime,     :string
-      t.column :modified,     :timestamp
       t.column :enabled,     :integer, :limit => 1
       t.column :tech,         :integer, :limit => 1
       t.column :company,      :string
@@ -27,10 +25,7 @@ class Account < ActiveRecord::Migration
 
   def self.down
     remove_column :accounts, :username
-    remove_column :accounts, :username
     remove_column :accounts, :password
-    remove_column :accounts, :datetime
-    remove_column :accounts, :modified
     remove_column :accounts, :enabled
     remove_column :accounts, :tech
     remove_column :accounts, :company
