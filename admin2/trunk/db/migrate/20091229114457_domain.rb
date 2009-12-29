@@ -29,7 +29,16 @@ class Domain < ActiveRecord::Migration
       t.column :pop3_enabled,   :integer,   :limit => 1, :null => false, :default => '0'
       t.column :imap_enabled,   :integer,   :limit => 1, :null => false, :default => '0'
       t.column :smtp_enabled,   :integer,   :limit => 1, :null => false, :default => '0'
-      t.index  :domain_name
+      t.index  :domain_name, :name => "idx_domain_name", :unique => true
+      t.index  :paid, :name => "idx_paid"
+      t.index  :transport, :name => "idx_transport"
+      t.index  :pdf_pop, :name => "idx_pdf_pop"
+      t.index  :pdf_imap, :name => "idx_pdf_imap"
+      t.index  :pdf_smtp, :name => "idx_pdf_smtp"
+      t.index  :pdf_webmail, :name => "idx_webmail"
+      t.index  :pop3_enabled, :name => "idx_pop3_enabled"
+      t.index  :imap_enabled, :name => "idx_imap_enabled"
+      t.index  :smtp_enabled, :name => "idx_smtp_enabled"
     end
   end
 
