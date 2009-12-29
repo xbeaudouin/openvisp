@@ -10,6 +10,9 @@ Account.create(:username => 'admin@ova.local', :password => 'admin', :tech => '1
                :enabled => '1', :paid => "1", :firstname => "Admin", :lastname => "OVA"
                )
                
-Domain.create(:domain_name => 'ova.local', :description => 'Domain for managing OVA',
-              :created => Time.now, :modified => Time.now
-              )
+Domain.create(:domain_name => 'ova.local', :description => 'Domain for managing OVA' )
+
+@accounts = Account.find(:all, :conditions => { :username => 'admin@ova.local' })
+@domains = Domain.find(:all, :conditions => { :domain_name => 'ova.local' })
+
+Accounts_domain.create(:account_id => @accounts[0].id, :domain_id => @domains[0].id)
