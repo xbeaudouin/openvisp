@@ -6,4 +6,10 @@
 #   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
 #   Major.create(:name => 'Daley', :city => cities.first)
 
-Account.create(:username => 'admin@local', :password => 'admin', :tech => '1', :enabled => '1', :paid => "1" )
+Account.create(:username => 'admin@ova.local', :password => 'admin', :tech => '1',
+               :enabled => '1', :paid => "1", :firstname => "Admin", :lastname => "OVA"
+               )
+               
+Domain.create(:domain_name => 'ova.local', :description => 'Domain for managing OVA',
+              :created => Time.now, :modified => Time.now
+              )
