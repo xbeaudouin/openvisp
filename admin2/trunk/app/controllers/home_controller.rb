@@ -30,7 +30,7 @@ class HomeController < ApplicationController
   
   def controlboard
     @welcome_info = "(#{session[:firstname]} #{session[:lastname]})"
-    @logout = t(:logout)
+    @logout = t(:global_logout)
   end
   
   def logout
