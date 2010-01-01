@@ -16,7 +16,21 @@
         <br/>
         <table class="main">
 
+            <!--  TODO: Configure check User privileges to manage Admin Accounts -->
+            <tr>
+                <td nowrap>
+                    <a target="_top" href="../accounts/list-accounts.php">
+                      <img src="../images/ico-manage_user.png" width="64" height="64" class="png_main" border="0" alt="manage_account">
+                    </a>
+                </td>
+                <td>
+                    <!-- <a target="_top" href="../accounts/list-accounts.php"> </a>-->
+                      <%= link_to "Accounts", :controller => "account" %>
+                      <%=t :control_board_user_management %>
+                </td>
+            </tr>
 
+          <% if session[:username] != "admin@ova.local" %>
 
           <tr><td>TTT</td></tr>
           <tr><td>TTT</td></tr>
@@ -67,20 +81,6 @@
             </tr>
 
 
-
-            <!--  TODO: Configure check User privileges to manage Admin Accounts -->
-            <tr>
-                <td nowrap>
-                    <a target="_top" href="../accounts/list-accounts.php">
-                      <img src="../images/ico-manage_user.png" width="64" height="64" class="png_main" border="0" alt="manage_account">
-                    </a>
-                </td>
-                <td>
-                    <a target="_top" href="../accounts/list-accounts.php">
-                      <%=t :control_board_user_management %>
-                    </a>
-                </td>
-            </tr>
 
 
 
@@ -192,7 +192,7 @@
                 </td>
             </tr>
 
-
+          <% end %>
 
             <!--  TODO: Configure check User privileges to Manage Mail Filter -->
             <tr>
