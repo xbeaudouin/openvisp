@@ -16,3 +16,6 @@ Domain.create(:domain_name => 'ova.local', :description => 'Domain for managing 
 @domains = Domain.find(:all, :conditions => { :domain_name => 'ova.local' })
 
 Accounts_domain.create(:account_id => @accounts[0].id, :domain_id => @domains[0].id)
+
+Right.create(:account_id => @accounts[0].id, :manage => '1')
+
