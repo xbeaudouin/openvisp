@@ -1,0 +1,46 @@
+      <table>
+        <tr class="header">
+          <td><%=t :account_manager_username %></td>
+          <td><%=t :account_manager_company %></td>
+          <td><%=t :account_manager_mail %></td>
+          <td><%=t :account_manager_datacenter %></td>
+          <td><%=t :account_manager_ftp %></td>
+          <td><%=t :account_manager_http %></td>
+          <td><%=t :account_manager_sadmin %></td>
+          <td><%=t :account_manager_domain %></td>
+          <td><%=t :account_manager_mysql %></td>
+          <td><%=t :account_manager_postgresql %></td>
+          <td><%=t :account_manager_modified %></td>
+          <td><%=t :account_manager_enabled %></td>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+      
+        <% @accounts.each do |account| %>
+          <% right = account.right %>
+          <tr class="hilightoff" onMouseOver="className='hilighton';" onMouseOut="className='hilightoff';">
+            <td><%= account.username %></td>
+            <td><%= account.company %></td>
+            <td><%= right.mail %></td>
+            <td><%= right.datacenter %></td>
+            <td><%= right.ftp %></td>
+            <td><%= right.http %></td>
+            <td><%= right.manage %></td>
+            <td><%= right.domain %></td>
+            <td><%= right.mysql %></td>
+            <td><%= right.postgresql %></td>
+            <td><%= account.updated_at %></td>
+            <td><%= account.enabled %></td>
+            <td>
+              <%= link_to @translation_modify, :action => "modify", :id => account %>
+              <%= link_to @translation_disable, :action => "disable", :id => account %>
+              <%= 
+                  link_to_if( account.enabled == 0, @translation_enable, { :controller => "account", :action => "enable", :id => account }  ) do
+                    link_to @translation_disable, :action => "disable", :id => account
+                  end
+              %>
+              <%= link_to @translation_delete, :action => "delete", :id => account %>
+            </td>
+          </tr>
+        <% end %>
+      
+      </table>

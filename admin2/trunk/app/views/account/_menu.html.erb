@@ -1,0 +1,10 @@
+      <div id="menu">
+        <%= link_to @translation_list_account, :controller => "account", :action => "list" %>
+        &middot;
+        <%= link_to @translation_add_account, :controller => "account", :action => "add" %>
+        <p>
+          <%= link_to @translation_viewlogs, :controller => "logs" %>
+          &middot;
+          <%= link_to @translation_back_menu, :controller => "home" %>
+        </p>
+      </div>
