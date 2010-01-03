@@ -26,7 +26,9 @@ class AccountController < ApplicationController
 
         
   end
+
   def list
+    control_admin_privileges
     # Call function with all the translation definition
     translate
 
@@ -36,6 +38,7 @@ class AccountController < ApplicationController
   end
 
   def disable
+    control_admin_privileges
     @account = Account.find(params[:id])
     @account[:enabled] = 0
     @account.save
@@ -43,6 +46,7 @@ class AccountController < ApplicationController
   end
 
   def enable
+    control_admin_privileges
     @account = Account.find(params[:id])
     @account[:enabled] = 1
     @account.save
@@ -54,6 +58,7 @@ class AccountController < ApplicationController
 	end
 
   def add
+    control_admin_privileges
     # Call function with all the translation definition
     translate
     
@@ -84,9 +89,31 @@ class AccountController < ApplicationController
   end
 
   def modify
+    control_admin_privileges
+    # Call function with all the translation definition
+    translate
+    @account = Account.find(params[:id])
+
+    @quota_form = Quota.find(:first, :conditions => { :account_id => params[:id] })
+    @right_form = Right.find(:first, :conditions => { :account_id => params[:id] })
+
+    
+    if params.has_key?( :account ) and @account.update_attributes(params[:account]) and @right_form.update_attributes(params[:right]) and @quota_form.update_attributes(params[:quota])
+      redirect_to :action => 'list'
+    end
   end
 
+  def control_admin_privileges
+    @account_info = fetch_account_info
+    @right = @account_info.right
+    if @right.manage != 1
+      reset_session
+      redirect_to :controller => "home", :action => "index"
+    end
+  end
+  
   def delete
+    control_admin_privileges
   end
 
 end
