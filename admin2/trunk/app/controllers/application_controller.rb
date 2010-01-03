@@ -7,4 +7,10 @@ class ApplicationController < ActionController::Base
 
   # Scrub sensitive parameters from your log
   # filter_parameter_logging :password
+  
+  def fetch_account_info
+    info = Account.find(:first, :conditions => { :username => session[:username], :enabled => "1"})
+    return info
+  end
+  
 end
