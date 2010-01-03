@@ -1,6 +1,6 @@
 class Quota < ActiveRecord::Migration
   def self.up
-    create_table :quotas, :id => false, :force => true do |t|
+    change_table :quotas do |t|
       t.column :account_id,       :integer,    :null => false
       t.column :diskspace,        :integer,    :null => false
       t.column :ftp,              :integer,    :null => false
@@ -10,14 +10,21 @@ class Quota < ActiveRecord::Migration
       t.column :emails,           :integer,    :null => false
       t.column :emails_alias,     :integer,    :null => false
       t.column :http,             :integer,    :null => false
-      t.column :http_alias,       :integer,    :null => false
-      t.column :created_at,       :datetime
-      t.column :updated_at,       :datetime      
+      t.column :http_alias,       :integer,    :null => false 
     end
 
   end
 
   def self.down
-    drop_table :quotas
+    remove_column :quotas,  :account_id
+    remove_column :quotas,  :diskspace
+    remove_column :quotas,  :ftp
+    remove_column :quotas,  :dbcount
+    remove_column :quotas,  :dbuser
+    remove_column :quotas,  :domains
+    remove_column :quotas,  :emails
+    remove_column :quotas,  :emails_alias
+    remove_column :quotas,  :http
+    remove_column :quotas,  :http_alias
   end
 end

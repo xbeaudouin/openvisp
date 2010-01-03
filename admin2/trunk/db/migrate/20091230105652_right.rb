@@ -1,6 +1,6 @@
 class Right < ActiveRecord::Migration
   def self.up
-    create_table :rights, :id => false, :force => true do |t|
+    change_table :rights do |t|
       t.column :account_id,         :integer,    :null => false
       t.column :mail,               :integer,    :limit => 1,  :null => false, :default => '0'
       t.column :datacenter,         :integer,    :limit => 1,  :null => false, :default => '0'
@@ -11,8 +11,6 @@ class Right < ActiveRecord::Migration
       t.column :postgresql,         :integer,    :limit => 1,  :null => false, :default => '0'
       t.column :mysql,              :integer,    :limit => 1,  :null => false, :default => '0'
       t.column :manage,             :integer,    :limit => 1,  :null => false, :default => '0'
-      t.column :created_at,         :datetime
-      t.column :updated_at,         :datetime
     end
   end
 
@@ -27,7 +25,5 @@ class Right < ActiveRecord::Migration
     remove_column :rights,  :postgresql
     remove_column :rights,  :mysql
     remove_column :rights,  :manage
-    remove_column :rights,  :created_at
-    remove_column :rights,  :updated_at
   end
 end
