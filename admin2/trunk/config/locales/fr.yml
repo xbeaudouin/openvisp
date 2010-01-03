@@ -23,6 +23,14 @@ fr:
   control_board_manage_domain: "G&eacute;rez vos domaines"
   control_board_user_info: "Informations de votre compte"
   control_board_user_management: "Gestion des comptes utilisateur"
+  control_board_server_management: "Gestion des Serveurs"
+  control_board_mailbox_password_change: "Modifier votre mot de passe de mail"
+  control_board_webhosting_management: "G&eacute;rez vos sites web et comptes FTP"
+  control_board_sqldatabase_management: "Gestion de vos bases de donn&eacute;es"
+  control_board_mailbox_vacation_status: "Status du R&eacute;pondeur : "
+  control_board_mailbox_vacation_config: "Configurer votre r&eacute;ponse automatique(auto-reply)"
+  control_board_mailbox_forward: "Modifier votre transfert"
+  control_board_mailbox_filter: "Editer vos filtres de mails"
 
 # Account Manager
   account_manager_username: "Compte"

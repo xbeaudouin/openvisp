@@ -23,7 +23,15 @@ en:
   control_board_manage_domain: "Manage your domains"
   control_board_user_info: "Informations about your account"
   control_board_user_management: "Account Management"
-
+  control_board_server_management: "Server Management"
+  control_board_mailbox_password_change: "Change your Mailbox password"
+  control_board_webhosting_management: "Manage your Website and FTP account"
+  control_board_sqldatabase_management: "Manage your Databases"
+  control_board_mailbox_vacation_status: "AutoResponder status : "
+  control_board_mailbox_vacation_config: "Set an 'out of office' message or auto responder for your mail."
+  control_board_mailbox_forward: "Change your forward"
+  control_board_mailbox_filter: "Edit your mail filters"
+  
 # Account Manager
   account_manager_username: "Account"
   account_manager_mail: "Mail"
@@ -55,3 +63,4 @@ en:
   account_manager_quota_emailalias: "Email alias"
   account_manager_add_user: "Add account"
   account_manager_diskspace: "Total Diskspace"
+  
