@@ -15,11 +15,12 @@ class HomeController < ApplicationController
   end
 
   def validate
-    @accounts = Account.find(:all, :conditions => { :username => params[:account][:username], :password => params[:account][:password], :enabled => "1"})
-    if @accounts.count == 1
-      session[:username] = @accounts[0].username
-      session[:lastname] = @accounts[0].lastname
-      session[:firstname] = @accounts[0].firstname
+    @accounts = Account.find(:first, :conditions => { :username => params[:account][:username], :password => params[:account][:password], :enabled => "1"})
+    if !@accounts.nil?
+#      @account = @accounts[0]
+      session[:username] = @accounts.username
+      session[:lastname] = @accounts.lastname
+      session[:firstname] = @accounts.firstname
       flash[:notice] = 'Successfully logged in'  
       redirect_to :action => "index"
     else
@@ -29,7 +30,12 @@ class HomeController < ApplicationController
   end
   
   def controlboard
+    
+    @account_info = fetch_account_info
+    
     @welcome_info = "(#{session[:firstname]} #{session[:lastname]})"
+    @translation_change_forward = t(:control_board_mailbox_forward)
+    @translation_edit_filter = t(:control_board_mailbox_filter)
     @logout = t(:global_logout)
   end
   
@@ -38,5 +44,6 @@ class HomeController < ApplicationController
     flash[:notice] = 'Successfully logged out'  
     redirect_to :action => "index"
   end
+
   
 end
