@@ -1,0 +1,9 @@
+<%= flash[:notice] %>
+
+<% form_tag :action => 'modify', :name => 'add_account', :method => 'post', :id => @account do %>
+<% @quota = @account.quota %>
+<% @right = @account.right %>
+
+  <%= render :partial => 'form' %>
+
+<% end%>
