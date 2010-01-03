@@ -14,9 +14,12 @@
             <%=t :welcome %><%= @welcome_info %>
         </div>
         <br/>
+        <% quota = @account_info.quota %>
+        <% right = @account_info.right %>
         <table class="main">
 
             <!--  TODO: Configure check User privileges to manage Admin Accounts -->
+            <% if right.manage == 1 %> 
             <tr>
                 <td nowrap>
                     <a target="_top" href="../accounts/list-accounts.php">
@@ -29,13 +32,12 @@
                       <%=t :control_board_user_management %>
                 </td>
             </tr>
+            <% end %>
 
           <% if session[:username] != "admin@ova.local" %>
 
-          <tr><td>TTT</td></tr>
-          <tr><td>TTT</td></tr>
-
             <!--  TODO: Configure check User privileges to manage Mail -->
+            <% if right.mail == 1 %>
             <tr>
                 <td>
                     <a target="_top" href="../mail/overview.php">
@@ -48,10 +50,11 @@
                     </a>
                 </td>
             </tr>
-
+            <% end %>
 
 
             <!--  TODO: Configure check User privileges to manage Domain -->
+            <% if right.domain == 1 %>
             <tr>
                 <td nowrap>
                     <a target="_top" href="../users/list-domain.php">
@@ -64,7 +67,7 @@
                     </a>
                 </td>
             </tr>
-
+            <% end %>
 
 
             <tr>
@@ -83,6 +86,7 @@
 
 
 
+            <% if right.manage == 1 %>
 
             <!--  TODO: Configure check User privileges to manage Server -->
             <tr>
@@ -93,10 +97,11 @@
                 </td>
                 <td>
                     <a target="_top" href="../server/manage.php">
-                      <%=t :control_board_server_management %>Gestion des Serveurs
+                      <%=t :control_board_server_management %>
                     </a>
                 </td>
             </tr>
+            <% end %>
 
 
 
@@ -109,12 +114,13 @@
                 </td>
                 <td>
                     <a target="_top" href="../mailbox-password.php">
-                      <%=t :control_board_mailbox_password_change%>Modifier votre mot de passe
+                      <%=t :control_board_mailbox_password_change%>
                     </a>
                 </td>
             </tr>
 
 
+            <% if right.http == 1 %>
 
             <!--  TODO: Configure check User privileges to Manage WebVirtual -->
             <tr>
@@ -125,12 +131,14 @@
                 </td>
                 <td>
                     <a target="_top" href="../hosting/list-webvirtual.php?username=nicolas.goralski@fox-informatique.com">
-                      <%=t :control_board_webhosting_management %>G&eacute;rez vos sites web et comptes FTP
+                      <%=t :control_board_webhosting_management %>
                     </a>
                 </td>
             </tr>
+            <% end %>
 
 
+            <% if ( right.mysql == 1 || right.postgresql == 1 )  %>
 
             <!--  TODO: Configure check User privileges to Manage SQL Database-->
             <tr>
@@ -141,10 +149,11 @@
                 </td>
                 <td>
                     <a target="_top" href="../databases/list-databases.php?username=nicolas.goralski@fox-informatique.com">
-                      <%=t :control_board_sqldatabase_management %>Gestion de vos bases de donn&eacute;es
+                      <%=t :control_board_sqldatabase_management %>
                     </a>
                 </td>
             </tr>
+            <% end %>
 
 
 
@@ -155,10 +164,10 @@
                       <img src="../images/ico-responder.png" width="64" height="64" class="png_main" border="0" alt="manage_vacation">
                     </a>
                     <br/>
-                    <%=t :control_board_mailbox_vacation_status %>Status du R&eacute;pondeur : Inactif
+                    <%=t :control_board_mailbox_vacation_status %>: Inactif
                 </td>
                 <td>
-                    <%=t :control_board_mailbox_vacation_config %>Configurer votre r&eacute;ponse automatique(auto-reply).
+                  <%= link_to @control_board_mailbox_vacation_config, :controller => "vacation", :action => "edit", :id => @account_info %>
                 </td>
             </tr>
 
@@ -172,7 +181,7 @@
                     </a>
                 </td>
                 <td>
-                    <a target="_top" href="edit-alias.php">Modifier votre transfert</a>
+                  <%= link_to @translation_change_forward, :controller => "alias", :action => "edit", :id => @account_info %>
                 </td>
             </tr>
 
@@ -186,15 +195,12 @@
                     </a>
                 </td>
                 <td>
-                    <a target="_top" href="list-filter.php">
-                      Editer vos filtres de mails
-                    </a>
+                  <%= link_to @translation_edit_filter, :controller => "filter", :action => "list" %>
                 </td>
             </tr>
 
           <% end %>
 
-            <!--  TODO: Configure check User privileges to Manage Mail Filter -->
             <tr>
                 <td nowrap>
                     <a target="_top" href="../logout.php">
