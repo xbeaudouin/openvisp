@@ -1,0 +1,12 @@
+<div id="menu">
+  <%= link_to @translation_list_domain, :controller => "domain", :action => "list" %>
+  &middot;
+  <%= link_to @translation_add_domain, :controller => "domain", :action => "add" %>
+  &middot;
+  <%= link_to @translation_add_domain_alias, :controller => "domain", :action => "add_alias" %>
+  <p>
+    <%= link_to @translation_view_logs, :controller => "logs" %>
+    &middot;
+    <%= link_to @translation_back_menu, :controller => "home" %>
+  </p>
+</div>
