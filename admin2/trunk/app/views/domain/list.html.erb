@@ -1,0 +1,112 @@
+<% quota = @account_info.quota %>
+<% right = @account_info.right %>
+<% domains = @account_info.domains %>
+<%= flash[:notice] %>
+    
+
+
+<form name="overview" method="post">
+  <select name="fUsername" onChange="this.form.submit()";>
+    <option value="1" selected>1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+  <input type="submit" name="go" value="Aller" />
+</form>
+
+<p />
+
+<table>
+  <tr class="header">
+    <td></td>
+    <td><%=t :domain_manager_legend %></td>
+  </tr>
+  <tr>
+    <td><b><%=t :domain_manager_antivirus %></b></td>
+    <td><%=t :domain_manager_antivirus_legend %></td>
+  </tr>
+  <tr>
+    <td><b><%=t :domain_manager_greylisting %></b></td>
+    <td><%=t :domain_manager_greylisting_legend %></td>
+  </tr>
+  <tr>
+    <td><b><%=t :domain_manager_verify_mail %></b></td>
+    <td><%=t :domain_manager_verify_mail_legend %></td>
+  </tr>
+  <tr>
+    <td><b><%=t :domain_manager_verify_domain %></b></td>
+    <td><%=t :domain_manager_verify_domain_legend %></td>
+  </tr>
+  <tr>
+    <td><b><%=t :domain_manager_verify_spf %></b></td>
+    <td><%=t :domain_manager_verify_spf_legend %></td>
+  </tr>
+</table>
+
+<table>
+
+  <tr class="header">
+    <td><%=t :domain_manager_domain %></td>
+    <td><%=t :domain_manager_description %></td>
+    <td><%=t :domain_manager_aliases %></td>
+    <td><%=t :domain_manager_mailboxes %></td>
+    <td><%=t :domain_manager_backup_mx %></td>
+
+    <td><%=t :domain_manager_ftp %></td>
+    <td><%=t :domain_manager_http %></td>
+    <td><%=t :domain_manager_sql %></td>
+    <td><%=t :domain_manager_status %></td>
+    <td><%=t :domain_manager_alias_modified %></td>
+
+    <td><%=t :domain_manager_alias_active %></td>
+    <td colspan="3">&nbsp;</td>
+  </tr>
+
+
+
+  <tr class="hilightoff" onMouseOver="className='hilighton';" onMouseOut="className='hilightoff';">
+    <td><%= "domain.domain_name " %><%= domains.count %></td>
+    <td><%= "domain.description" %></td>
+    <td>4 / 10</td>
+    <td>1 / 10</td>
+    <td>Non</td>
+    <td>1 / 10</td>
+    <td>1</td>
+    <td>0 / 0</td>
+    <td class="domain_ok">0</td>
+    <td><%= "domain.updated_at" %></td>
+    <td><a href="edit-active-domain.php?domain=bou">Oui</a></td><td><a href="edit-domain.php?domain=bou">Modifier</a></td>
+    <td><a href="../domain/delete.php?domain=bou" onclick="return confirm ('Etes-vous sur d'effacer tous les enregistrements dans le domaine?')">Effacer</a></td>
+    <td><a href="../mail/overview.php?domain=bou">G&eacute;rer</a></td>
+  </tr>
+
+
+
+</table>
+<p />
+
+<table>
+
+  <tr class="header">
+    <td>Domaine</td>
+    <td>Alias&eacute; vers</td>
+    <td>Derni&egrave;re modification</td>
+    <td>Actif</td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr class="hilightoff" onMouseOver="className='hilighton';" onMouseOut="className='hilightoff';">
+    <td>to.com</td>
+    <td>to.info</td>
+    <td>2005-09-04 19:37:40</td>
+    <td><a href="edit-active-domain-alias.php?domain=to.com">Oui</a></td>
+    <td><a href="../domain/delete.php?domain_alias=to.com" onclick="return confirm ('Etes-vous sur d effacer tous les enregistrements dans le domaine?')">Effacer</a></td>
+  </tr>
+
+</table>
+
+<p />
+<div id="submenu"><a target="_top" href="/admin/users/list-domain.php">2010/01/04 - 14:43</a>&middot;
+<a target="_top" href="http://www.oav.net/projects/openvisp-admin/">Return to OpenVISP Admin</a>&middot;
+<a target="_blank" href="http://www.oav.net/projects/openvisp-admin/">OpenVISP Admin 0.97-dev</a>
+</div>
