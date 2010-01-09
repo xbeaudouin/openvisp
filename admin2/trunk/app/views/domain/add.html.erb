@@ -1,0 +1,7 @@
+
+<%= flash[:notice] %>
+<% form_tag :action => 'add', :name => 'add_domain', :method => 'post' do %>
+
+  <%= render :partial => 'form' %>
+
+<% end %>
