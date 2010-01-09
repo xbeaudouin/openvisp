@@ -23,10 +23,11 @@ class AccountController < ApplicationController
     @translation_backup = t(:account_manager_backup)
     @translation_import_accounts = t(:account_manager_import_accounts)
     @translation_add_user = t(:account_manager_add_user)
+    @translation_save = t(:global_save)
 
         
   end
-
+  
   def list
     control_admin_privileges
     # Call function with all the translation definition
@@ -103,14 +104,6 @@ class AccountController < ApplicationController
     end
   end
 
-  def control_admin_privileges
-    @account_info = fetch_account_info
-    @right = @account_info.right
-    if @right.manage != 1
-      reset_session
-      redirect_to :controller => "home", :action => "index"
-    end
-  end
   
   def delete
     control_admin_privileges
