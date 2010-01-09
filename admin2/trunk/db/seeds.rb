@@ -18,4 +18,7 @@ Domain.create(:domain_name => 'ova.local', :description => 'Domain for managing 
 Accounts_domain.create(:account_id => @accounts[0].id, :domain_id => @domains[0].id)
 
 Right.create(:account_id => @accounts[0].id, :manage => '1')
+Quota.create(:account_id => @accounts[0].id)
 
+require 'active_record/fixtures'
+Fixtures.create_fixtures("#{Rails.root}/test/fixtures", "ovaconfigs")  
