@@ -1,0 +1,314 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+# one:
+#   column: value
+#
+# two:
+#   column: value
+
+default_language:
+ item: default_language
+ value: en
+ values: en
+ comment: default language to use in OVA
+
+admin_email:
+ item: admin_email
+ value: postmaster@domain.tld
+ values: 
+ comment: email adress to contact postmaster  
+
+smtp_server:
+ item: smtp_server
+ value: localhost
+ values: localhost
+ comment: smtp server to use
+
+smtp_port:
+ item: smtp_port
+ value: 25
+ values: 25
+ comment: smtp port to use
+
+encrypt:
+ item: encrypt
+ value: md5crypt
+ values: md5crypt,cleartext
+ comment: encryption method, be carefull some imap/pop/smtp server does not support some encryption
+
+cryptograph:
+ item: cryptograph
+ value: no
+ values: yes,no
+ comment: ask ova to add a captcha at the login page
+
+password_generator:
+ item: password_generator
+ value: /usr/local/bin/mkpwd -t 6 -l -n 10 -m 10
+ values: /usr/local/bin/mkpwd -t 6 -l -n 10 -m 10
+ comment: define the tool to generate password
+
+force_password:
+ item: force_password
+ value: no
+ values: yes,no
+ comment: force OVA to attribute password.
+ 
+page_size:
+ item: page_size
+ value: 10
+ values: 10
+ comment: how much items are displayed per page
+
+mailhosting:
+ item: mailhosting
+ value: yes
+ values: yes,no
+ comment: Active mailhosting
+
+greylisting:
+ item: greylisting
+ value: yes
+ values: yes,no
+ comment: Activate greylisting
+
+forbidden_helo:
+ item: forbidden_helo
+ value: yes
+ values: yes,no
+ comment: If set then all added domain will be added as forbidden helo to policyd, avoiding some brain damaged spammers to spam using your domain your users
+
+default_aliases:
+ item: default_aliases
+ value: abuse,hostmaster,postmaster,webmaster
+ values: abuse,hostmaster,postmaster,webmaster
+ comment: The default aliases that need to be created for all domains.
+
+domain_path:
+ item: domain_path
+ value: no
+ values: yes,no
+ comment: "If you want to have the domain in the mailboxes name set this to 'YES'.<br/>Example: /usr/local/virtual/domain.tld/username@domain.tld"
+
+domain_in_mailbox:
+ item: domain_in_mailbox
+ value: no
+ values: yes,no
+ comment: "If you don't want to have the domain in your mailbox set this to 'NO'.<br/>Example: /usr/local/virtual/domain.tld/username"
+
+quota_mailbox:
+ item: quota_mailbox
+ value: 10
+ values: 10
+ comment: Specify your default mailbox quota in number
+
+quota_alias:
+ item: quota_alias
+ value: 10
+ values: 10
+ comment: Specify your default alias quota in numbers
+
+quota_mailbox_size:
+ item: quota_mailbox_size
+ value: no
+ values: yes,no
+ comment: Specify your default mailbox quota in MB
+
+spamass_tag_level:
+ item: spamass_tag_level
+ value: -999
+ values: 
+ comment: Here the level required to put spam header information
+
+spamass_tag2_level:
+ item: spamass_tag2_level
+ value: no
+ values: yes,no
+ comment: Here the 2nd level required to modify the subject
+
+spamass_subject_tag:
+ item: domain_in_mailbox
+ value: no
+ values: yes,no
+ comment: Here the Subject added when the sa_tag_level is reached
+ 
+spamass_subject_tag2:
+ item: domain_in_mailbox
+ value: no
+ values: yes,no
+ comment: Here the Subject added when the sa_tag_level2 is reached
+
+spamass_kill_level:
+ item: domain_in_mailbox
+ value: no
+ values: yes,no
+ comment: Here the level required to put the mail in quarantine
+
+spamreport:
+ item: spamreport
+ value: no
+ values: yes,no
+ comment: send a link to user to consult spam quarantine
+
+virus_quarantine_to:
+ item: virus_quarantine_to
+ value: virus-quarantine
+ values: virus-quarantine
+ comment: where amavis store the mail with virus
+
+spam_quarantine_to:
+ item: spam_quarantine_to
+ value: spam-quarantine
+ values: virusspam-quarantine
+ comment: where amavis store the spam
+
+banned_quarantine_to:
+ item: banned_quarantine_to
+ value: banned-quarantine
+ values: banned-quarantine
+ comment: where amavis store the mail with banned content
+
+amavisd-release_path:
+ item: amavisd-release_path
+ value: path to amavisd-release
+ values: path to amavisd-release
+ comment: path to amavisd-relase binary to release mail
+
+quota:
+ item: quota
+ value: yes
+ values: yes,no
+ comment: do we use quota inside OVA ?
+
+quota_multiplier:
+ item: quota_multiplier
+ value: 1024000
+ values: 1024000,1000000
+ comment: what is the quota multiplier to use
+
+vacation:
+ item: vacation
+ value: yes
+ values: yes,no
+ comment: do we use vacation plugin ?
+
+filter:
+ item: filter
+ value: yes
+ values: yes,no
+ comment: do we use filtering with the mda ?
+
+alias_control:
+ item: alias_control
+ value: no
+ values: yes,no
+ comment: OpenVISP Admin inserts an alias in the alias table for every mailbox it creates. The reason for this is that when you want catch-all and normal mailboxes to work you need to have the mailbox replicated in the alias table. If you want to take control of these aliases as well set this to 'YES'.
+
+uploaddir:
+ item: uploaddir
+ value: /tmp
+ values: /tmp
+ comment: Directory where to store the temporary file uploaded
+
+showpassword:
+ item: showpassword
+ value: no
+ values: yes,no
+ comment: Shall we display the user password inside the user's details ?
+
+logging:
+ item: logging
+ value: yes
+ values: yes,no
+ comment: If you don't want logging set this to 'NO'
+ 
+smtpauth:
+ item: smtpauth
+ value: yes
+ values: yes,no
+ comment: Allow smtpauth ?
+
+usermanagepwd:
+ item: usermanagepwd
+ value: no
+ values: yes,no
+ comment: Default value for new user to allow him to manage is password 
+
+usermanagefwd:
+ item: usermanagefwd
+ value: no
+ values: yes,no
+ comment: Default value for new user to allow him to manage is password 
+
+logo:
+ item: logo
+ value: no
+ values: yes,no
+ comment: If you don't want the OpenVISP Admin logo to appear set this to 'NO'
+
+header_text:
+ item: header_text
+ value: Welcome to OpenVISP Admin
+ values: Welcome to OpenVISP Admin,
+ comment: Default welcome text
+
+show_footer_text:
+ item: show_footer_text
+ value: no
+ values: yes,no
+ comment: If you don't want the footer information to appear set this to 'NO'.
+
+footer_text:
+ item: footer_text
+ value: Return to OpenVISP Admin
+ values: Return to OpenVISP Admin,
+ comment: Default footer text
+
+footer_link:
+ item: footer_link
+ value: http://openvisp.fr/
+ values: http://openvisp.fr/,
+
+webhosting:
+ item: webhosting
+ value: no
+ values: yes,no
+ comment: Does OVA manage webhosting ?
+
+webhosting_display:
+ item: webhosting_display
+ value: CNAME
+ values: CNAME,IP
+ comment: Does OVA manage hosting with CNAME or IP adress ?
+
+database_hosting:
+ item: database_hosting
+ value: no
+ values: yes,no
+ comment: Does OVA manage database hosting ?
+
+ftp_storage:
+ item: ftp_storage
+ value: /somewhere/storage
+ values: /somewhere/storage,
+ comment: Path to the storage for data of the ftp accounts
+
+ftp_ratio:
+ item: ftp_ratio
+ value: no
+ values: yes,no
+ comment: Do we manage ftp ratio ?
+
+ftp_login_method:
+ item: ftp_login_method
+ value: host.domain
+ values: host.domain,domain_host
+ comment: how do we manage ftp login creation
+
+datacenter:
+ item: datacenter
+ value: no
+ values: yes,no
+ comment: Do we manage datacenter items ?
+
+ 
