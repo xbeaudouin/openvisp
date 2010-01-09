@@ -1,6 +1,8 @@
       <table>
         <tr class="header">
           <td><%=t :account_manager_username %></td>
+          <td><%=t :account_manager_firstname %></td>
+          <td><%=t :account_manager_lastname %></td>
           <td><%=t :account_manager_company %></td>
           <td><%=t :account_manager_mail %></td>
           <td><%=t :account_manager_datacenter %></td>
@@ -19,6 +21,8 @@
           <% right = account.right %>
           <tr class="hilightoff" onMouseOver="className='hilighton';" onMouseOut="className='hilightoff';">
             <td><%= account.username %></td>
+            <td><%= account.firstname %></td>
+            <td><%= account.lastname %></td>
             <td><%= account.company %></td>
             <td><%= right.mail %></td>
             <td><%= right.datacenter %></td>
@@ -32,7 +36,6 @@
             <td><%= account.enabled %></td>
             <td>
               <%= link_to @translation_modify, :action => "modify", :id => account %>
-              <%= link_to @translation_disable, :action => "disable", :id => account %>
               <%= 
                   link_to_if( account.enabled == 0, @translation_enable, { :controller => "account", :action => "enable", :id => account }  ) do
                     link_to @translation_disable, :action => "disable", :id => account
