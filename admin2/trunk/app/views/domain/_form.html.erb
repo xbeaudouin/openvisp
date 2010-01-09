@@ -1,0 +1,128 @@
+<table class="auto">
+  <tr>
+    <td align="center" colspan="3">
+      <%=t :domain_manager_welcome %>
+      <br/>
+      <br/>
+      <br/>
+    </td>
+  </tr>
+
+  <tr>
+    <td><%=t :domain_manager_domain_name %></td>
+    <td colspan="2"><%= text_field 'domain', 'domain_name' %></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td><%=t :domain_manager_description %></td>
+    <td colspan="2"><%= text_field 'domain', 'description' %></td>
+    <td>&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td colspan="3">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_services %></td>
+    <td align="center">Max</td>
+    <td align="right">&nbsp;</td>
+  </tr>
+
+  <tr>
+    <td><%=t :domain_manager_mailboxes %></td>
+    <td align="center"><%= text_field 'domain', 'mailboxes', :size => 7 %></td>
+    <td align="right"><%=t :domain_manager_mailboxes_text %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :domain_manager_aliases %></td>
+    <td align="center"><%= text_field 'domain', 'aliases', :size => 7 %></td>
+    <td align="right"><%=t :domain_manager_aliases_text %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :domain_manager_mailbox_maxsize %></td>
+    <td align="center"><%= text_field 'domain', 'aliases', :size => 7 %></td>
+    <td align="right"><%=t :domain_manager_aliases_text %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_diskspace %></td>
+    <td align="center"></td>
+    <td align="right"><%= text_field 'quota', 'diskspace', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_mail %></td>
+    <td align="center"><%= check_box 'right', 'mail' %></td>
+    <td align="right"><%= text_field 'quota', 'emails', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_quota_emailalias %></td>
+    <td align="center"></td>
+    <td align="right"><%= text_field 'quota', 'emails_alias', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_datacenter %></td>
+    <td align="center"><%= check_box 'right', 'datacenter' %></td>
+    <td align="right"></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_ftp %></td>
+    <td align="center"><%= check_box 'right', 'ftp' %></td>
+    <td align="right"><%= text_field 'quota', 'ftp', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_http %></td>
+    <td align="center"><%= check_box 'right', 'http' %></td>
+    <td align="right"><%= text_field 'quota', 'http', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_http_alias %></td>
+    <td align="center"></td>
+    <td align="right"><%= text_field 'quota', 'http_alias', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_domain %></td>
+    <td align="center"><%= check_box 'right', 'domain' %></td>
+    <td align="right"><%= text_field 'quota', 'domains', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_database %></td>
+    <td align="center"></td>
+    <td align="right"><%= text_field 'quota', 'dbcount', :size => 7 %></td>
+  </tr>
+
+  <tr>
+    <td><%=t :account_manager_dbuser %></td>
+    <td align="center"></td>
+    <td align="right"><%= text_field 'quota', 'dbuser', :size => 7 %></td>
+  </tr>
+
+
+  <tr>
+    <td><%=t :account_manager_mysql %></td>
+    <td align="center"><%= check_box 'right', 'mysql' %></td>
+    <td align="right"></td>
+  </tr>
+  
+  <tr>
+    <td><%=t :account_manager_postgresql %></td>
+    <td align="center"><%= check_box 'right', 'postgresql' %></td>
+    <td align="right"></td>
+  </tr>
+  
+
+  <tr>
+    <td align="center" colspan="3"><br/><br/><%= submit_tag @translation_save, :class => "button" %><br/><br/></td>
+  </tr>
+</table>
