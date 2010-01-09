@@ -14,6 +14,12 @@ class HomeController < ApplicationController
     # .empty?        #=> true
   end
 
+  def translate
+    @translation_change_forward = t(:control_board_mailbox_forward)
+    @translation_edit_filter = t(:control_board_mailbox_filter)
+    @translation_manage_domain = t(:control_board_manage_domain)
+  end
+  
   def validate
     @accounts = Account.find(:first, :conditions => { :username => params[:account][:username], :password => params[:account][:password], :enabled => "1"})
     if !@accounts.nil?
@@ -30,12 +36,11 @@ class HomeController < ApplicationController
   end
   
   def controlboard
-    
+    translate
     @account_info = fetch_account_info
     
     @welcome_info = "(#{session[:firstname]} #{session[:lastname]})"
-    @translation_change_forward = t(:control_board_mailbox_forward)
-    @translation_edit_filter = t(:control_board_mailbox_filter)
+
     @logout = t(:global_logout)
   end
   
@@ -45,5 +50,24 @@ class HomeController < ApplicationController
     redirect_to :action => "index"
   end
 
+  def ovaconfig
+    control_admin_privileges
+    @configs = Ovaconfig.find(:all)
+    
+    translate
+  end
+
+  def confup
+    config = Ovaconfig.find(params[:id])
+    config.value = params[:value]
+    config.save
+#    ovaconfig.reason_to_kill = params[:value]
+#    ovaconfig.save
+    config.reload
+    
+    #render(:layout => false)
+    #render_text config
+    render(:text => config.value)
+  end
   
 end
