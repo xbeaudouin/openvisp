@@ -1,15 +1,11 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <title>OpenVISP Admin</title>
-        <%= stylesheet_link_tag "style" %>
-    </head>
-    <body>
 
         <center>
+          <%= flash[:notice] %>
             <div id="toppage">
                 <div class="menu">
                     :: <%=t :welcome %>::
                 </div>
+                
                 <% form_tag :action => 'validate' do %>
                 <table class="login">
                     <tr>
@@ -53,5 +49,3 @@
                 </a>
             </div>
         </center>
-    </body>
-</html>
