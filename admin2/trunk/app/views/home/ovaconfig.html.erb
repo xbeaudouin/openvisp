@@ -1,0 +1,39 @@
+
+<table>
+  
+  <tr>
+    <td>Item</td>
+    <td>Value</td>
+    <td>Possible Values</td>
+    <td>Comment</td>
+  </tr>
+  
+<% @configs.each do |config| %>
+  <tr>
+    <td><%= config.item %></td>
+    <td><%= editable_content(
+      :content => {
+        :element => 'p',
+        :text => config.value,
+        :options => {
+          :id => "ovaconfig_confup_#{config.id}",
+          :class => 'editable-content'
+        }
+       },
+      :url => {
+        :controller => 'home',
+        :action => 'confup',
+        :id => config.id
+       },
+      :ajax => {
+        :okText => "'is why I want to kill them'",
+        :cancelText => "'Nevermind'"
+       }
+    ) %>
+</td>
+    <td><%= config.values %></td>
+    <td><%= config.comment %></td>
+  </tr>
+<% end %>
+
+</table>
