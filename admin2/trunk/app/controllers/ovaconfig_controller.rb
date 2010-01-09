@@ -1,0 +1,3 @@
+class OvaconfigController < ApplicationController
+
+end
