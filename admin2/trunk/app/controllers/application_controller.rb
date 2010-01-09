@@ -13,4 +13,13 @@ class ApplicationController < ActionController::Base
     return info
   end
   
+  def control_admin_privileges
+    @account_info = fetch_account_info
+    @right = @account_info.right
+    if @right.manage != 1
+      reset_session
+      redirect_to :controller => "home", :action => "index"
+    end
+  end
+
 end
