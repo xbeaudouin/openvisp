@@ -27,8 +27,18 @@
                     </a>
                 </td>
                 <td>
-                    <!-- <a target="_top" href="../accounts/list-accounts.php"> </a>-->
                       <%= link_to "Accounts", :controller => "account" %>
+                      <%=t :control_board_user_management %>
+                </td>
+            </tr>
+            <tr>
+                <td nowrap>
+                    <a target="_top" href="../accounts/list-accounts.php">
+                      <img src="../images/ico-manage_user.png" width="64" height="64" class="png_main" border="0" alt="manage_account">
+                    </a>
+                </td>
+                <td>
+                      <%= link_to "Ovaconfig", :controller => "home", :action => "ovaconfig" %>
                       <%=t :control_board_user_management %>
                 </td>
             </tr>
@@ -62,9 +72,8 @@
                     </a>
                 </td>
                 <td>
-                    <a target="_top" href="../users/list-domain.php?username=nicolas.goralski@fox-informatique.com">
-                      <%=t :control_board_manage_domain %>
-                    </a>
+                  <%= link_to @translation_manage_domain, :controller => "domain" %>
+
                 </td>
             </tr>
             <% end %>
