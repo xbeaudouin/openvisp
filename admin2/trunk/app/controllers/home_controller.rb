@@ -59,7 +59,7 @@ class HomeController < ApplicationController
 
   def confup
     config = Ovaconfig.find(params[:id])
-    config.value = params[:value]
+    config.sel_value = params[:value]
     config.save
 #    ovaconfig.reason_to_kill = params[:value]
 #    ovaconfig.save
@@ -67,7 +67,7 @@ class HomeController < ApplicationController
     
     #render(:layout => false)
     #render_text config
-    render(:text => config.value)
+    render(:text => config.sel_value)
   end
   
 end
