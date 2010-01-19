@@ -17,7 +17,8 @@ fr:
   global_delete: "delete"
   global_modify: "modify"
   global_back_home_menu: "Retour au menu principal"
-
+  global_save: "sauvegarde"
+  
 # Control Board Part
   control_board_mail: "G&eacute;rez vos emails, boites mails, aliases, ..."
   control_board_manage_domain: "G&eacute;rez vos domaines"
@@ -41,7 +42,7 @@ fr:
   account_manager_modified: "Derni&egrave;re modification"
   account_manager_enabled: "Actif"
   account_manager_sadmin: "Super Admin"
-  account_manager_domain: "Domaine"
+  account_manager_domain: "G&eacute;rer les domaines"
   account_manager_mysql: "Mysql"
   account_manager_postgresql: "Postgresql"
   account_manager_company: "Soci&eacute;t&eacute;"
@@ -59,3 +60,73 @@ fr:
   account_manager_button: "Ajouter l'utilisateur"
   account_manager_result_error: "Erreur lors de la cr&eacute;ation de l'utilisateur "
   account_manager_result_success: "Le compte a &eacute;t&eacute; cr&eacute;&eacute; avec succ&egrave;s"
+  account_manager_manager: "Super Admin"
+  account_manager_firstname: "Pr&eacute;nom"
+  account_manager_lastname: "Nom"
+  
+# Domain Manager
+  domain_manager_list: "Liste des domaines"
+  domain_manager_domain: "Domaine"
+  domain_manager_add_domain: "Ajouter un domaine"
+  domain_manager_add_alias: "Ajouter un alias de domaine"
+  domain_manager_legend: "Traduction des abr&eacute;viations"
+  domain_manager_description: "Description"
+  domain_manager_backup_mx: "Backup MX"
+  domain_manager_aliases: "Aliases"
+  domain_manager_mailboxes: "Comptes mails"
+  domain_manager_antivirus: "AV"
+  domain_manager_greylisting: "LG"
+  domain_manager_verify_mail: "VM"
+  domain_manager_verify_domain: "VD"
+  domain_manager_verify_spf: "SPF"
+  domain_manager_antivirus_legend: "Support Antivirus"
+  domain_manager_greylisting_legend: "Liste Grise (=GreyListing)"
+  domain_manager_verify_mail_legend: "V&eacute;rification de l\'adresse mail &eacute;mettrice"
+  domain_manager_verify_domain_legend: "V&eacute;rification du domaine emetteur (DNS, NS, MX, ...)"
+  domain_manager_verify_spf_legend: "V&eacute;rification du domaine en utilisant SPF (Sender Policy Framework)"
+  domain_manager_spamass: "Antispam"
+  domain_manager_maxquota: "Limite maximum (MB)"
+  domain_manager_modified: "Derni&egrave;re modification"
+  domain_manager_active: "Actif"
+  domain_manager_alias_domain: "Domaine"
+  domain_manager_alias_aliasto: "Alias&eacute; vers"
+  domain_manager_alias_modified: "Derni&egrave;re modification"
+  domain_manager_alias_active: "Actif"
+  domain_manager_sql: "Bases de Donn&eacute;es"
+  domain_manager_status: "Etats"
+  domain_manager_ftp: "Comptes Ftp"
+  domain_manager_http: "Sites Web"
+  domain_manager_overquota: "D&eacute;sol&eacute; vous n'avez plus la possibilit&eacute; d'ajouter un nouveau domaine, merci de prendre contacte avec l'administrateur afin d'augmenter votre quota."
+
+  domain_manager_welcome: "Ajouter un nouveau domaine"
+  domain_manager_domain_text_error: "<div class='standout'>Le domaine existe deja!</div>"
+  domain_manager_domain_name: "Nom du domaine"
+  domain_manager_aliases: "Aliases"
+  domain_manager_aliases_text: "0 = d&eacute;sactiver | -1 = infini"
+  domain_manager_mailboxes: "Comptes mails"
+  domain_manager_mailboxes_text: "0 = d&eacute;sactiver | -1 = infini"
+  domain_manager_mailbox_maxsize: "Taille Maximal d'une boite aux lettres"
+  domain_manager_maxquota: "Limite maximum"
+  domain_manager_maxquota_text: "MB<br /> 0 = d&eacute;sactiver | -1 = infini"
+  domain_manager_defaultaliases: "Ajouter les aliases par defaut"
+  domain_manager_vrfysender: "V&eacute;rification de l'adresse exp&eacute;ditrice"
+  domain_manager_vrfydomain: "V&eacute;rification de la validit&eacute; du domaine exp&eacute;diteur"
+  domain_manager_spf: "V&eacute;rification SPF du domaine exp&eacute;diteur"
+  domain_manager_greylisting: "Utilisation du syst&egrave;me de 'liste grise' (=greylisting)"
+  domain_manager_heloforbidden: "Liste des commandes HELO interdits (SMTP)"
+  domain_manager_backupmx: "Le serveur est un MX Backup"
+  domain_manager_button: "Ajouter un domaine"
+  domain_manager_result_error: "<div class='standout'>Impossible d'ajouter le domaine!</div>"
+  domain_manager_result_error2: "<div class='standout'>Impossible d'ajouter le domaine(2)!</div>"
+  domain_manager_result_error3: "<div class='standout'>Impossible d'ajouter le domaine(3)!</div>"
+  domain_manager_result_succes: "Le domaine a &eacute;t&eacute; ajout&eacute;!"
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
