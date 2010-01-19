@@ -11,27 +11,52 @@
 <% @configs.each do |config| %>
   <tr>
     <td><%= config.item %></td>
-    <td><%= editable_content(
-      :content => {
-        :element => 'p',
-        :text => config.value,
-        :options => {
-          :id => "ovaconfig_confup_#{config.id}",
-          :class => 'editable-content'
-        }
-       },
-      :url => {
-        :controller => 'home',
-        :action => 'confup',
-        :id => config.id
-       },
-      :ajax => {
-        :okText => "'is why I want to kill them'",
-        :cancelText => "'Nevermind'"
-       }
-    ) %>
+    <td>
+      <% if config.default_values =~ (/[a-z0-9]\|\|[a-z0-9]/i) %>
+
+      <%= choice_content(
+        :content => {
+          :element => 'p',
+          :text => config.sel_value,
+          :options => {
+            :id => "ovaconfig_confup_#{config.id}",
+            :class => 'choice-content'
+          }
+         },
+        :url => {
+          :controller => 'home',
+          :action => 'confup',
+          :id => config.id
+         },
+        :data => "#{config.default_values}"
+      ) %>
+
+
+      
+
+      <% else %>
+        <%= editable_content(
+        :content => {
+          :element => 'p',
+          :text => config.sel_value,
+          :options => {
+            :id => "ovaconfig_confup_#{config.id}",
+            :class => 'editable-content'
+          }
+         },
+        :url => {
+          :controller => 'home',
+          :action => 'confup',
+          :id => config.id
+         },
+        :ajax => {
+          :okText => "'Save configuration'",
+          :cancelText => "'Cancel'"
+         }
+      ) %>
+    <% end %>
 </td>
-    <td><%= config.values %></td>
+    <td><%= config.default_values %></td>
     <td><%= config.comment %></td>
   </tr>
 <% end %>
