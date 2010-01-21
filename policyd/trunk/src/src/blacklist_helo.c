@@ -48,7 +48,7 @@ blacklist_helo_check(unsigned int fd)
   
   /* build up query & execute*/
   snprintf(mysqlquery_array[fd], 512,
-    "SELECT COUNT(_helo) FROM blacklist_helo WHERE _helo='%s'", triplet_array[fd][5]);
+    "SELECT COUNT(_helo) FROM blacklist_helo WHERE '%s' LIKE _helo", triplet_array[fd][5]);
   if(db_optquery(fd) == -1) return(db_failure(fd, "blacklist_helo"));
 
   /* we have forged helo attempt */
