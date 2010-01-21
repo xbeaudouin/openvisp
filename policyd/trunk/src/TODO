@@ -1,3 +1,0 @@
- * pgsql support
- * database restructuring so that database is portable
- * load conn ACL into multi-dimensional arrays

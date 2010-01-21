@@ -1,2 +1,0 @@
-# clean up policyd database
-0 * * * * /usr/local/policyd/cleanup -c /usr/local/policyd/policyd.conf
