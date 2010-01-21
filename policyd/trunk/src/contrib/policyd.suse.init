@@ -1,0 +1,48 @@
+#! /bin/sh
+#
+# policyd init script for SuSE
+#
+#
+### BEGIN INIT INFO
+# Provides:       policyd
+# Required-Start: mysql
+# Required-Stop:
+# Default-Start:  2 3 5
+# Default-Stop:
+# Description:    Start the policyd server
+### END INIT INFO
+
+PROG="/usr/local/policyd/policyd"
+CONF="/usr/local/policyd/policyd.conf"
+
+test -x $PROG || exit 5  
+test -e $CONF || exit 5
+
+# First reset status of this service
+. /etc/rc.status
+ 
+rc_reset        
+
+case "$1" in
+    start)
+	echo -n "Starting policyd:"
+	startproc $PROG -c $CONF
+	rc_status -v
+	;;
+    stop)
+	echo -n "Shutting down policyd:"
+	killproc $PROG
+
+	rc_status -v
+	;;
+    restart)
+	$0 stop
+        $0 start  
+        rc_status
+	;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+rc_exit

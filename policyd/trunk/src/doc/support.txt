@@ -1,0 +1,4 @@
+#
+# to get a list of the top 20 hosts which have used different helo
+#
+mysql> SELECT _host, count(_host) AS scnt FROM helo GROUP BY _host ORDER BY scnt DESC limit 10;

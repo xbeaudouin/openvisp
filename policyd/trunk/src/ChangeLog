@@ -1,0 +1,21 @@
+Changes from v1.80 -> v1.9x
+
+1. If you are upgrading from <= v1.80 then please add to policyd.conf:
+RCPT_ACL=0
+
+Also, add the following table to your database...
+CREATE TABLE rcpt_acl (
+	_sender      char(60) NOT NULL default '',
+	_rcpt        char(60) NOT NULL default '',
+	_wblist      char(60) NOT NULL default '',
+	_priority    int(10) unsigned NOT NULL default '0',
+	UNIQUE KEY _rcpt (_rcpt,_sender)
+) TYPE=MyISAM;
+
+2. To update the relevan't tables to support IPv6, run the following SQL
+commands...
+alter table triplet modify _host char(46) not null default '';
+alter table whitelist modify _whitelist char(46) not null default '';
+alter table blacklist modify _blacklist char(46) not null default '';
+alter table helo modify _host char(46) not null default '';
+
