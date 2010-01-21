@@ -77,6 +77,12 @@ throttle_sasl (unsigned int fd)
       atol(mysqlchar_array[fd][1]),
       atol(mysqlchar_array[fd][6]));
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=new(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_new_a"));
+    };
     
     /* sender does not exist in the database, insert and allow */
     return (0);
@@ -108,6 +114,12 @@ abuse:
       trcpt[fd],                        /* rcpt  percentage     */
       triplet_array[fd][4]              /* sasl_username        */
     );
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
       
     return (-3);
   }
@@ -150,6 +162,12 @@ abuse:
       instance_inc[fd],
       triplet_array[fd][4]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=clear(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_clear_a"));
+    };
 
     /* counter reset because of expiry, allow mail */
     return (0);
@@ -194,6 +212,12 @@ abuse:
       " WHERE _from='%s'",
       triplet_array[fd][1]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
 
     return (-5);
   }
@@ -240,6 +264,12 @@ update:
     instance_inc[fd],
     triplet_array[fd][4]);
   if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+  if(STATISTICS == 1)
+  {
+    sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=update");
+    if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_update"));
+  };
 
   return (0); /* never reached */
 }

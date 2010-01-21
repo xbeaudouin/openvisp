@@ -67,6 +67,12 @@ greylist_check(unsigned int fd)
         triplet_array[fd][2],             /* recipient            */
         triplet_array[fd][3]);            /* size                 */
 
+      if(STATISTICS == 1)
+      {
+        sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=optout");
+        if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_optout"));
+      };
+
       return (0);
     }
   }
@@ -158,6 +164,12 @@ greylist_check(unsigned int fd)
           "DELETE QUICK from triplet WHERE _host='%s'", triplet_array[fd][0]);
         if(db_doquery(fd) == -1) return(db_failure(fd, "greylist"));
 
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=abl");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_abl"));
+        };
+
         /* reject */
         return (-1);
       }
@@ -175,6 +187,12 @@ greylist_check(unsigned int fd)
         triplet_array[fd][2],             /* recipient            */
         triplet_array[fd][3]);            /* size                 */
       
+      if(STATISTICS == 1)
+      {
+        sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=new");
+        if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_new"));
+      };
+
       /* reject */
       return (-1);
     }
@@ -190,6 +208,12 @@ greylist_check(unsigned int fd)
         triplet_array[fd][2],   /* rcpt */
         triplet_array[fd][3]    /* size */
       );
+
+      if(STATISTICS == 1)
+      {
+        sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=new_train");
+        if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_new_train"));
+      };
 
       /* accept */
       return (0);
@@ -210,6 +234,12 @@ greylist_check(unsigned int fd)
           triplet_array[fd][1],             /* sender               */
           triplet_array[fd][2],             /* recipient            */
           triplet_array[fd][3]);            /* size                 */
+
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=abuse");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_abuse"));
+        };
 
         return (-1);
       }
@@ -273,6 +303,12 @@ awl:
         triplet_array[fd][3],             /* size                 */
         expire);                          /* expiry date          */
 
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=awl");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_awl"));
+        }
+
       return(0);
     }
     
@@ -295,6 +331,12 @@ nawl:
         triplet_array[fd][1],             /* sender               */
         triplet_array[fd][2],             /* recipient            */
         triplet_array[fd][3]);            /* size                 */
+
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=update");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_update"));
+        };
     }
     
     /* training mode */
@@ -308,6 +350,12 @@ nawl:
         triplet_array[fd][1],             /* sender               */
         triplet_array[fd][2],             /* recipient            */
         triplet_array[fd][3]);            /* size                 */
+
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "greylist=update_train");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "greylist_update_train"));
+        };
     }
 
     return (0);

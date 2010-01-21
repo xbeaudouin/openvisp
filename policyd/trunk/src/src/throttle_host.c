@@ -77,6 +77,12 @@ throttle_host (unsigned int fd)
       atol(mysqlchar_array[fd][6]));
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=new(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_new_a"));
+    };
+
     /* sender does not exist in the database, insert and allow */
     return (0);
   }
@@ -106,6 +112,12 @@ abuse:
       tcount[fd],                       /* count percentage     */
       trcpt[fd]                         /* rcpt  percentage     */
     );
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
 
     return (-3);
   }
@@ -147,6 +159,12 @@ abuse:
       instance_inc[fd],
       mysqlchar_array[fd][0]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=clear(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_clear_a"));
+    };
 
     /* counter reset because of expiry, allow mail */
     return (0);
@@ -192,6 +210,12 @@ abuse:
       mysqlchar_array[fd][0]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
+
     if(SENDER_THROTTLE_AUTOBLACKLIST == 1)
     {
       if(atol(mysqlchar_array[fd][14]) >= SENDER_THROTTLE_AUTOBLACKLIST_NUMBER-1) /* _abuse_tot */
@@ -232,6 +256,12 @@ abuse:
                    tcount[fd],                       /* count percentage     */
                    trcpt[fd]                         /* rcpt  percentage     */
             );
+
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=blacklisted(f)");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_blacklisted_f"));
+        };
       }
     }
     return (-5);
@@ -278,6 +308,12 @@ update:
     instance_inc[fd],
     mysqlchar_array[fd][0]);
   if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+  if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=update");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_update"));
+    };
 
   return (0); /* never reached */
 }

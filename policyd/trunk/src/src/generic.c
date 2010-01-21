@@ -686,6 +686,13 @@ read_conf(unsigned int prog)
       QUOTA_EXCEEDED_TEMP_REJECT=atol(extract_array[0]);
     }
 
+    /* STATISTICS MAINTENANCE */
+    if(strncmp(confbuf, "STATISTICS=", 11) == 0)
+    {
+      extract(0, confbuf, 10);
+      STATISTICS=atol(extract_array[0]);
+    }
+
     memset(confbuf, 0x00, 256);
   }
 
@@ -730,6 +737,7 @@ read_conf(unsigned int prog)
     logmessage("config: uid> %d\n", UID);
     logmessage("config: gid> %d\n", GID);
     logmessage("config: conn acl> %s\n", CONN_ACL);
+    logmessage("config: statistics maintenance> %d\n", STATISTICS);
     logmessage("\n");
     
     logmessage(" ---- DATABASE CONFIG ----\n");

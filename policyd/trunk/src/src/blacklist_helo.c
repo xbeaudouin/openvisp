@@ -92,6 +92,12 @@ blacklist_helo_check(unsigned int fd)
       expire                            /* expiry date          */
     );
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "blacklist_helo=new");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "blacklist_helo_statistics"));
+    };
+
     return (1);
   }
 

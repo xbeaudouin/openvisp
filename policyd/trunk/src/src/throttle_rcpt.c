@@ -91,6 +91,12 @@ throttle_rcpt (unsigned int fd)
       triplet_array[fd][2],             /* to                   */
       atol(mysqlchar_array[fd][1])      /* count_max            */
     );
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle_rcpt=new(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_rcpt_new_a"));
+    };
       
     /* build up & execute query */
     snprintf(mysqlquery_array[fd], 512,
@@ -131,6 +137,12 @@ throttle_rcpt (unsigned int fd)
       " WHERE _rcpt='%s'",
       timenow, triplet_array[fd][2]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle_rcpt"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle_rcpt=clear(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_rcpt_clear_a"));
+    };
 
     /* counter reset because of expiry, allow mail */
     return (0);
@@ -187,6 +199,12 @@ throttle_rcpt (unsigned int fd)
     " WHERE _rcpt='%s'",
     triplet_array[fd][2]);
   if(db_doquery(fd) == -1) return(db_failure(fd, "throttle_rcpt"));
+
+  if(STATISTICS == 1)
+  {
+    sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle_rcpt=update");
+    if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_rcpt_update"));
+  };
 
   return (0); /* never reached */
 }

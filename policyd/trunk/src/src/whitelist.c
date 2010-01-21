@@ -73,6 +73,12 @@ whitelist_check (unsigned int fd)
       triplet_array[fd][2],     /* recipient address    */
       triplet_array[fd][3]);    /* mail size            */
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "whitelist=update");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "whitelist_update"));
+    };
+
     return (1); /* found */
   }
 
@@ -119,6 +125,12 @@ whitelist_sender_check (unsigned int fd)
       triplet_array[fd][1],     /* from address         */
       triplet_array[fd][2],     /* recipient address    */
       triplet_array[fd][3]);    /* mail size            */
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "whitelist_sender=update");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "whitelist_sender_update"));
+    };
 
     return (1); /* found */
   }
@@ -170,6 +182,12 @@ whitelist_dnsname_check (unsigned int fd)
       triplet_array[fd][1],     /* from address         */
       triplet_array[fd][2],     /* recipient address    */
       triplet_array[fd][3]);    /* mail size            */
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "whitelist_dnsname=update");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "whitelist_dnsname_update"));
+    };
 
     return (1); /* found */
   }

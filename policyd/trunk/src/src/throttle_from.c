@@ -76,6 +76,12 @@ throttle_from (unsigned int fd)
       atol(mysqlchar_array[fd][1]),
       atol(mysqlchar_array[fd][6]));
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=new(a)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_new_a"));
+    };
     
     /* sender does not exist in the database, insert and allow */
     return (0);
@@ -106,6 +112,12 @@ abuse:
       tcount[fd],                       /* count percentage     */
       trcpt[fd]                         /* rcpt  percentage     */
     );
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
     
     return (-3);
   }
@@ -147,6 +159,12 @@ abuse:
       instance_inc[fd],
       mysqlchar_array[fd][0]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=abuse(f)");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_abuse_f"));
+    };
 
     /* counter reset because of expiry, allow mail */
     return (0);
@@ -232,6 +250,11 @@ abuse:
                    tcount[fd],                       /* count percentage     */
                    trcpt[fd]                         /* rcpt  percentage     */
             );
+        if(STATISTICS == 1)
+        {
+          sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle=blacklisted(f)");
+          if(db_optquery(fd) == -1) return(db_failure(fd, "throttle_blacklisted_f"));
+        };
       }
     }
     
@@ -279,6 +302,12 @@ update:
     instance_inc[fd],
     mysqlchar_array[fd][0]);
   if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+
+  if(STATISTICS == 1)
+  {
+    sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "throttle_update");
+    if(db_optquery(fd) == -1) return(db_failure(fd, "blacklist_dnsname_statistics"));
+  };
 
   return (0); /* never reached */
 }

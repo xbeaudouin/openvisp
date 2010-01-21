@@ -146,3 +146,44 @@ CREATE TABLE helo (
   KEY _expire (_expire)
 ) TYPE=MyISAM;
 
+CREATE TABLE statistics (
+  _action      char(60) NOT NULL default '',
+  _count       bigint(20) unsigned NOT NULL default '0',
+  PRIMARY KEY  (_action)
+) TYPE=MyISAM;
+
+--
+-- lets initialize action entries on statistics table
+--
+
+INSERT INTO statistics (_action) VALUES ('blacklist=block');
+INSERT INTO statistics (_action) VALUES ('blacklist_dnsname=block');
+INSERT INTO statistics (_action) VALUES ('blacklist_helo=new');
+
+INSERT INTO statistics (_action) VALUES ('greylist=abl');
+INSERT INTO statistics (_action) VALUES ('greylist=abuse');
+INSERT INTO statistics (_action) VALUES ('greylist=awl');
+INSERT INTO statistics (_action) VALUES ('greylist=new');
+INSERT INTO statistics (_action) VALUES ('greylist=new_train');
+INSERT INTO statistics (_action) VALUES ('greylist=optout');
+INSERT INTO statistics (_action) VALUES ('greylist=update');
+INSERT INTO statistics (_action) VALUES ('greylist=update_train');
+
+INSERT INTO statistics (_action) VALUES ('helo=abuse');
+
+INSERT INTO statistics (_action) VALUES ('spamtrap=new');
+
+INSERT INTO statistics (_action) VALUES ('throttle=abuse(f)');
+INSERT INTO statistics (_action) VALUES ('throttle=blacklisted(f)');
+INSERT INTO statistics (_action) VALUES ('throttle=clear(a)');
+INSERT INTO statistics (_action) VALUES ('throttle=new(a)');
+INSERT INTO statistics (_action) VALUES ('throttle_update');
+
+INSERT INTO statistics (_action) VALUES ('throttle_rcpt=abuse(f)');
+INSERT INTO statistics (_action) VALUES ('throttle_rcpt=clear(a)');
+INSERT INTO statistics (_action) VALUES ('throttle_rcpt=new(a)');
+INSERT INTO statistics (_action) VALUES ('throttle_rcpt=update');
+
+INSERT INTO statistics (_action) VALUES ('whitelist_dnsname=update');
+INSERT INTO statistics (_action) VALUES ('whitelist_sender=update');
+INSERT INTO statistics (_action) VALUES ('whitelist=update');

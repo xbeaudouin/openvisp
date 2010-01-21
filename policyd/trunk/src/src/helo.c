@@ -91,6 +91,12 @@ helo_check(unsigned int fd)
       "DELETE QUICK FROM helo WHERE _host='%s'", host_array[fd][2]);
     if(db_doquery(fd) == -1) return(db_failure(fd, "helo"));
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "helo=abuse");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "helo_abuse"));
+    };
+
     return (1);
   }
 

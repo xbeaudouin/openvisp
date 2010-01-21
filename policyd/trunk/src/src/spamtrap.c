@@ -89,6 +89,12 @@ spamtrap_check(unsigned int fd)
       expire                            /* expiry               */
     );
 
+    if(STATISTICS == 1)
+    {
+     sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "spamtrap=new");
+     if(db_optquery(fd) == -1) return(db_failure(fd, "spamtrap_new"));
+    };
+
     return (1);
   }
 

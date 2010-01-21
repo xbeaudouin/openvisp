@@ -68,6 +68,12 @@ blacklist_check(unsigned int fd)
       triplet_array[fd][2],             /* recipient            */
       triplet_array[fd][3]);            /* size                 */
 
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "blacklist=block");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "blacklist_statistics"));
+    };
+
     return (1); /* found */
   }
 
@@ -171,6 +177,12 @@ blacklist_dnsname_check (unsigned int fd)
       triplet_array[fd][1],     /* from address         */
       triplet_array[fd][2],     /* recipient address    */
       triplet_array[fd][3]);    /* mail size            */
+
+    if(STATISTICS == 1)
+    {
+      sprintf(mysqlquery_array[fd], "UPDATE statistics set _count=_count+1 where _action='%s'", "blacklist_dnsname=block");
+      if(db_optquery(fd) == -1) return(db_failure(fd, "blacklist_dnsname_statistics"));
+    };
   
     return (1); /* found */
   }
