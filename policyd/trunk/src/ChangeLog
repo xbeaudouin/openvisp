@@ -19,3 +19,5 @@ alter table whitelist modify _whitelist char(46) not null default '';
 alter table blacklist modify _blacklist char(46) not null default '';
 alter table helo modify _host char(46) not null default '';
 
+3. You can use also wildcard in helo blacklisting. Thanks to Hugo Monteiro
+   for this patch

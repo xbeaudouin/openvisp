@@ -204,6 +204,16 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
   and the IP address of your machine (this includes virtual ips
   that reside on your switch)
 
+  Also if you want to doing wildcard helo blacklisting, you can 
+  use the following syntax :
+
+  INSERT INTO blacklist_helo (_helo) VALUES ('192.168.0.%');
+  INSERT INTO blacklist_helo (_helo) VALUES ('[192.168.0.%]');
+  INSERT INTO blacklist_helo (_helo) VALUES ('localhost.%');
+
+  This can be very usefull for providing several way to helo 
+  blacklist without any pain.
+
   NO REMOTE HOST SHOULD IDENTIFY THEMSELVES WITH YOUR MACHINES
   INFORMATION!
 
