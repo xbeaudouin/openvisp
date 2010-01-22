@@ -1,0 +1,5 @@
+user = openvisp-user
+password = openvisp-password
+hosts = localhost
+dbname = openvisp-database
+query = SELECT CONCAT('REJECT') FROM domain WHERE domain = '%s'

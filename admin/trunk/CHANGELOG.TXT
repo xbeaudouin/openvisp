@@ -1,0 +1,339 @@
+##############################
+# OpenVISP Admin Release 1.x #
+##############################
+#
+# Copyright (c) 2005, Xavier Beaudouin & Association Kazar
+# See CHANGELOG.ORIG.TXT for original Copyright and Credits.
+#
+# NOTE to developpers : please add your name when you update something.
+#                       usefull to give credit.. otherwise all credits
+#                       will be per defaut given to me... :p
+Version 0.97-dev
+----------------
+  - Change SQL schema for APC and missing migration to InnoDB table for
+    APCs
+    (Xavier Beaudouin)
+  - Fixed bug #59 when session is expired and not handled by OVA.
+    (Xavier Beaudouin)
+  - Changed welcome message.
+    (Xavier Beaudouin)
+  - Added the Yahoo User Library to manage ajax and data display more easily
+    (Nicolas GORALSKI)
+  - Fixing a lot of php code and SQL Queries to match new DATABASE Schema.
+    (Nicolas GORALSKI)
+  - Now all the database use Foreign KEY at last but not least !!
+    DROP Cascade are used, this will be easyer to manage data when dropping !!.
+    ( Nicolas GORALSKI )
+  - Now we *REQUIRE* a MySQL 5.0+ or later
+  - Added server management part. Server are machine with software for special job (smtp, imap, http)
+    Job are attached with Applications, like policyd or Mysql.
+    With correct login and pass, we can manage policyd and Mysql without
+    configuration in the config.inc.php
+     (Nicolas GORALSKI)
+  - Added a perl script to extract DB config for lighttpd virtual host config.
+     (Nicolas GORALSKI)
+  - Added part to add mysql database and user associated ( But no delete, modify or pdf part).
+     (Nicolas GORALSKI)
+  - Added a color on table item for locked domain, mailbox, ftp account, web hosting  with unpaied bill
+     (Nicolas GORALSKI)
+  - Added the link to get the whole email domain account in a single pdf file
+     (Nicolas GORALSKI)
+  - Deleted old useless files
+     (Nicolas GORALSKI)
+  - Added the function to cut down bad admin customer that didn't paid their bills.
+    mailbox account can't login but mails are still received, ftp are locked
+     (Nicolas GORALSKI)
+  - Added Littl ajax funtion to get virtual host from a selected domain.
+     (Nicolas GORALSKI)
+  - Added new option to deactivate policyd in config file.
+     (Nicolas GORALSKI)
+  - Fixed bug when deleting mail, alias were not well clean.
+     (Nicolas GORALSKI)
+  - Added new icons for respondeur, mail filter,
+     (Nicolas GORALSKI)
+  - Added the option to activate, deactivate greylisting for all users of a domain.
+     (Nicolas GORALSKI)
+  - Removed old menu format with print_menu
+     (Nicolas GORALSKI)
+  - Added the paid item in database for futur use of blocking bad customer
+     (Nicolas GORALSKI)
+  - Added the config item to allow only OVA to put password and not user
+	  $CONF['force_password']
+     (Nicolas GORALSKI)
+  - Added new function to get all emails aliases of a domain.
+  - Added the possiblity to desactivate cryptograph uppon login when 
+    administrators doesn't needs it.
+     (Xavier Beaudouin)
+  - Added absolute URI code that allow the system to find automatically
+    where on a virtual server it is located.
+     (Xavier Beaudouin)
+  - Added Domain tools in section mail to allow admin to search mail 
+    that have analysed by amavisd (if it logs in sql).
+     (Nicolas GORALSKI)
+  - Added form tools to reset user quarantine storage.
+     (Nicolas GORALSKI)		
+  - Added form to tag all mail in quarantine as to delete.
+     (Nicolas GORALSKI)		
+  - If policyd is used and helo blacklisted option is actived, when a domain is added
+	  the mail smtp pop imap hostname are added to helo blacklist database record
+  - Fixed dead links in several pages
+     (Peter Veerman & Xavier Beaudouin)
+  - Fixed update of password that is not added in Crypted form
+     (Peter Veerman & Xavier Beaudouin)
+  - Fix some mysqli errors thanks to Peter Veerman
+     (Xavier Beaudouin)
+  - Login now install Cryptograph system to avoid brute force login.
+    Thanks to http://www.cryptographp.com/ library (note PHP > 4.3.0 is now
+    mandatory).
+     (Xavier Beaudouin)
+  - Now we can rename the hostname of APC.
+     (Xavier Beaudouin)
+  - Now we support APC Masterswitches with more than 8 ports.
+     (Xavier Beaudouin)
+  - Added info.php to allow administrators to see infos about the PHP used.
+    Notice that you may remove this file in case of security.
+     (Xavier Beaudouin)
+  - Fixed APC updates that was not working.
+     (Xavier Beaudouin)
+  - Supported AP7900 model that have being manufactured in 2007 (changed
+    SNMP API...).
+     (Xavier Beaudouin)
+  - Changed structure of APC tables to handle changing names of APC 
+    MasterSwitches. WARNING: upgrading will force you to re enter all 
+    your APC data.
+     (Xavier Beaudouin)
+  - Added current load of APC Masterswitch that support it.
+     (Xavier Beaudouin)
+  - APC Masterswitch detection was buggy, this is now fixed.
+     (Xavier Beaudouin)
+  - Fixed User password change
+     (Jordi Espasa Clofent & Jordi Berenguer)
+  - Fixed missing French / English language.
+     (Xavier Beaudouin)
+  - Updated Spanish Language.
+     (Jordi Espasa Clofent)
+  - Fixed English language some missing sentence.
+     (Pier)
+  - For more visibility, a scripts/ directory has being added to help
+    administrator to setup the necessary scripts to maintain OVA.
+     (Xavier Beaudouin)
+  - Updated Catalan Language.
+     (Jordi Espasa Clofent)
+  - Added support to APC MasterSwitch AP7921 and compatibles
+     (Xavier Beaudouin)
+  - Added the transport for postfix.
+     (Nicolas GORALSKI)
+  - Locale can now be static.
+     (Benny Pedersen)
+  - Added the greylisting opt-in / opt-out for mailbox or domain
+     (Nicolas GORALSKI)
+  - Remove all check_session, replaced by check_user_session
+     (Nicolas GORALSKI)
+  - Added the policyd support in OVA ( IP Blacklisting / Whitelisting,
+     Sender Blacklisting, Helo Blacklisting).
+     (Nicolas GORALSKI)
+  - Basic update system works.
+     (Xavier Beaudouin)
+  - Added version check, installation of new version uppon setup.php and
+    some checks about version of OpenVISP Admin. (Not finished yet)
+     (Xavier Beaudouin)
+  - Added a new spam reporting php program with a associated key to identify
+    end user
+     (Nicolas GORALSKI)
+  - Added a web page to consult with the associated key the quarantine content.
+     (Nicolas GORALSKI)
+  - Fix a bug when a new domain is created.
+     (Nicolas GORALSKI)
+  - Fix the insert of first admin into accounts table instead of admin table.
+     (Nicolas GORALSKI)
+  - Add the choice of 2 different storage method for ftpaccount.
+     (Nicolas GORALSKI)
+  - Add a link for a generated pdf with ftp account information.
+     (Nicolas GORALSKI)
+  - Modify gen-pdf.php to make different pdf paper for mailbox and ftpaccount.
+     (Nicolas GORALSKI)
+  - Fix a bug in http virtual host display.
+     (Nicolas GORALSKI)
+  - Add a link to change a ftp account password by a new random one.
+     (Nicolas GORALSKI)
+  - Fix some bug into ftp account creation page.
+     (Nicolas GORALSKI)
+  - Add a new CONF option to allow OVA admin to choose ftp login between
+    domain.tld_www and www.domain.tld.
+     (Nicolas GORALSKI)
+  - New Directories
+      New directory /mail
+      New directory /templates/mail
+     (Nicolas GORALSKI)
+  - Copy files
+      /mail_main.php -> /mail/main.php
+      /templates/mail_menu.tpl -> /templates/mail/menu.tpl
+      /templates/mail_main.tpl -> /templates/mail/main.tpl 
+     (Nicolas GORALSKI)
+  - Fix bad links for moved file
+     (Nicolas GORALSKI)
+  - Fix listing of website information for ftp account.
+     (Nicolas GORALSKI)
+  - Added a imap call to fetch user directories for lmtp filter (only works
+    if imap server in domain description is written.
+     (Nicolas GORALSKI)
+  - Add some new function to know if an admin can manage everything,
+    ftp, http, mysql, postgresql, mail
+     (Nicolas GORALSKI)
+  - Fix a missing value insert into ftpaccount with whost_id.
+     (Nicolas GORALSKI)
+  - Added the $CONF['mailhosting'] value to know if OVA is use for mail or not
+     (Nicolas GORALSKI)
+  - Suppress some escape_string by get_get or get_post.
+     (Nicolas GORALSKI)
+  - Added admin users to manage their personnal information for pdf later use.
+     (Nicolas GORALSKI)
+  - Added the function to associate account to domain.
+     (Nicolas GORALSKI)
+  - Added some configuration file for lmtpd.
+     (Nicolas GORALSKI)
+
+Version 0.96
+------------
+  - Added filter support for LMTPd
+     (Nicolas GORALSKI)
+  - Added a link to change a mailbox password with a new random one.
+     (Nicolas GORALSKI)
+  - Changing the way of getting POST or GET variables from PHP to avoid
+    XSS or security problems and minimize the PHP code to be maintained.
+     (Xavier Beaudouin)
+  - Added QUERY display when SQL error is shown to help debug and allow
+    developpers to find fast where is the bug.
+     (Xavier Beaudouin)
+  - Directories has being changed to clarify the contribution, docs and
+    other files that are not completly parts of OpenVISP Admin.
+     (Xavier Beaudouin)
+  - Add CSRF checks in all Forms like in this example, principaly on login
+    page : http://www.gnucitizen.org/blog/preventing-csrf
+     (Xavier Beaudouin)
+  - Fixes domain name size in all the tables
+  - Fixes form Pier into the domain list. (Commited by Xavier Beaudouin)
+  - Don't show PDF link when password are not in 'cleartext'. (Vincent Barbier)
+  - Modify setup to integrate new hosting module. (Vincent Barbier)
+  - Correct IE bug with PNG images. (Vincent Barbier)
+  - Modify login system to check if a user is a mailbox user or a hosting user or a 'god'. (Vincent Barbier)
+  - Add new module to manage accounts to allow Web/FTP hosting. (Vincent Barbier)
+
+Version 0.93
+------------
+- Patch by Jussi Petteri Mummikko <jpn at doom dot fi> to allow
+  pure MD5 password in database.
+
+Version 0.91
+------------
+  - Codes enhancements and interface updates from Michael Slavin (Thanks !)
+  - Templates of datacenter/* is now in templates/datacenter/
+  - Templates of users/* is now in templates/users/
+  - Change DB name from postfix admin to openvispadmin.
+  - Move MySQL rights / privs in separate file
+  - Add the missing input in the edit domain php file to change, pop, imap, smtp, webmail server and address.
+  - Add the global parameter for SA Value in config.inc.php
+
+  - Add the final possibility to choose to allow or not to change password and forward  in the global config or by domains or by users.
+  - Add the basics program to generate pdf for parameter to give to the end users
+	- Add the possibility to import a list of user from a csv file into a domain.
+  - Add a declaration to allow or disallow a user to change his forward or password
+    This declaration can be for a domain or for an user.
+    Add this to a SQL in production : 
+ALTER TABLE `domain` ADD `allowchangefwd` tinyint(1) NOT NULL DEFAULT "0"  AFTER `savalue`
+ALTER TABLE `domain` ADD `allowchangepwd` tinyint(1) NOT NULL DEFAULT "0"  AFTER `allowchangefwd`
+ALTER TABLE `mailbox` ADD `allowchangefwd` tinyint(1) NOT NULL DEFAULT "0"  AFTER `smtpauth`
+ALTER TABLE `mailbox` ADD `allowchangepwd` tinyint(1) NOT NULL DEFAULT "0"  AFTER `allowchangefwd`
+	  In the config file, the administrator can disallow this function by using 
+		$CONF['usermanagepwd'] = 'NO';
+		$CONF['usermanagefwd'] = 'NO';
+		(Nicolas GORALSKI)
+  - Add the possibility to choose if we order the listing of mail/aliases by name or username
+		(Nicolas GORALSKI)
+  - Add the possiblity to search for an email or an alias in the list
+		(Nicolas GORALSKI)
+  - Add the possibility import multiple domains by uploading a csv file into openvisp. (import-domain.php)
+		(Nicolas GORALSKI)
+  - Add the new default value in config.inc.php.sample (smtpauth, quotamultiplier, display order mail )
+		(Nicolas GORALSKI)
+  - Add the possibility to manage the alias by checking the email
+    of the domain users
+  - Add a declaration for a different password generator with option.
+    (Nicolas GORALSKI)
+  - Add the possibility to deny the access to smtpauth for users.
+    (Nicolas Goralski)
+  - Fix the way that admin is handled.
+     (Xavier Beaudouin)
+  - Add amavisd support for domains which are defined as backupmx.
+     (Vincent Barbier)
+  - New backup script, no more need to list all tables in backup.php
+    Add pseudo-random number in the output filename.
+     (Vincent Barbier)
+  - Add amavisd support per address wich allow a user enable or
+    disable antivirus/antispam follow a policy defined in administration
+    panel. Administrators can choose which options are enable for
+    antispam and/or antivirus.
+     (Vincent Barbier)
+  - Update table names to be backuped. Thanks to Vincent Barbier :)
+     (Xavier Beaudouin / Vincent Barbier)
+  - Fix create-mail.php that was still using old smtp_mail instead of
+    send_mail()/library system.
+     (Xavier Beaudouin)
+  - Fix DataCenter / Apc view to show error message when there is no 
+    APC authorized for a user.
+  - Fix a rare bug that avoid language selection on some case that
+    HTTP_ACCEPT_LANGUAGE is not set.
+  - Mail admin part is only shown when administrator have access to a 
+    domain to administrate.
+  - Password change for admins is shown on main menu. More usefull since
+    we share same database password for ALL users.
+  - Now we have a setup.php that install a default username and password
+    according to the values from config.inc.php.
+  - SNMP Set is now working also with php-snmp support.
+  - APC Masterswitch for big admin is now working 100%. Outlet control and
+    label names are now 100% functionnal. Still need to work on hosting user
+    part.
+  - Add new routine to check validy of ip addresses
+  - APC MasterSwitch can now be added using DataCenter Interface. With
+    SNMP import of Outlet names.
+  - Foolproof : avoid negative quotas.
+  - smtp_mail is gone, we use a better mail classe than the old one and
+    installed in a séparate file (less memory overhead).
+  - DataCenter users can now send message to datacenter team and access to
+    datacenter requests.
+  - DataCenter section is started with new right schemes
+  - SNMP library can now work with or without php-snmp
+  - Site admin can now create domains with GreyListing and SPF support.
+    Modify domain by site admin can also change such values.
+  - Add configuration options to show / use the work in progress
+    Webhosting and Datacenter panels.
+  - Show mailbox quota values when modify a mailbox account.
+
+Version 0.90 
+------------
+  - Unique login and password acces to *all* users. Now get unified access
+    for all users.
+  - Postmaster can now edit domains default about SA tags and values.
+  - Removed the awfull motd system. Unusable and awfull.
+  - Since a super user does have access to normal postmaster interface,
+    the "add alias" and "add mailboxe" menu has been removed.
+  - The interface can now handle super users and postmaster user : eg one
+    login to get access to limited postmaster interface and full power 
+    interface (eg /admin/ part).
+  - Antispam / Antivirus / GreyListing / Domains & Sender checks checkboxes
+    on creating domain.
+  - Backup MX nows works
+  - Default SA tags and values can be changed on site administrator pages.
+  - New name OpenVISP Admin
+  - On postmaster menu create mail and aliases can be seen only 
+    on Overview when select a domain to view
+  - Be more paranoid when creating a mail or a aliase
+  - When creating a mailbox the current maximum quota is shown
+  - On Create mail and alias, gets only the domain you are currently
+    selected.
+  - Avoid Create Mailboxes and Aliases when user has overdrawn his
+    alias and mailboxes quotas.
+  - French translation was French Canadian, renamed it and created 
+    French translation for France country.
+  - All langs inherits en.lang per default. More easy to maintain.
+    

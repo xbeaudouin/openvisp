@@ -1,0 +1,7 @@
+user = ##DB_USER##
+password = ##DB_PASS##
+hosts = ##DB_HOST##
+dbname = ##DB_NAME##
+table = DOMAIN_ALIAS
+query = SELECT domain FROM domain_alias WHERE dalias='%s' and active='1'
+

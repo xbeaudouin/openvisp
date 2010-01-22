@@ -1,0 +1,5 @@
+
+#### WARNING ! WARNING ! 
+
+#### => This file is DEPRECATED. Use /htdocs/updates files
+

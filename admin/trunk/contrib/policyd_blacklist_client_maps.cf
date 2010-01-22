@@ -1,0 +1,16 @@
+user = policyd-username
+password = policyd-password
+hosts = localhost
+dbname = policyd-database
+#
+# query = SELECT CONCAT('DISCARD') FROM blacklist WHERE _blacklist = '%s'
+# query = SELECT CONCAT('REJECT') FROM blacklist WHERE _blacklist = '%s'
+# use on of them :-)
+#
+query = SELECT CONCAT('REJECT') FROM blacklist WHERE _blacklist = '%s'
+#
+# what happends here is that if the client is blacklisted make postfix reject it early in a client_access map
+# test with 'postmap -q ip mysql:/etc/postfix/policyd_blacklist_client_maps.cf'
+# results shold be empty if ip is not in sql, if the ip is in sql either DISCARD or REJECT should be displayed
+# when that is working, add that check to you client_check
+#

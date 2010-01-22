@@ -1,0 +1,58 @@
+OpenVISP Admin 00README
+-----------------------
+
+OpenVISP Admin is a fork of Postfix Admin before the License change.
+
+What will do OpenVISP Admin :
+
+- Unique way to log into the webinterface: no more needs to 
+  have a .htpasswd like in Postfix Admin
+- Have Web hosting feature
+- Have Amavisd-new integration
+- ... 
+
+Installation :
+
+You need to have a webserver with PHP support (Apache, or whatever).
+
+PHP needs support for :
+  - MySQL 5.0 or later (mysql or mysqli)
+  - session
+  - pcre
+  - snmp if you will use "datacenter" part
+  - posix 
+  - sockets to communicate with amavisd-new
+  - gd for captcha stuff 
+  - pear-Net-IMAP for IMAP filter editions
+  - pear-MDB2 and your locate database MDB2 Driver
+
+
+Point your webserver to /where/is/located/this/file/htdocs/ like for this
+example (Apache)
+
+Alias /admin/ /where/is/located/this/file/htdocs/
+
+You will need to setup a MySQL database (Postgres SQL is more or less 
+supported,the code is here, but SQL schema is not updated or tested).
+
+Use file doc/DATABASE.TXT to populate the database. Check permissions for
+getting acces to this database from PHP and webserver.
+
+Copy config.inc.php.sample into config.inc.php and update and modify it
+to your needs.
+
+Point your favorite browser to http://host/admin/setup.php and look around
+the setup process.
+
+When finished *DON'T FORGET* to *REMOVE* this file. Or you'll get some security
+problems !!
+
+Then go to http://host/admin/ and login with the default user and passord :
+
+login : admin@ova.local
+pass  : admin
+
+Don't forget to create one user for you and *delete* this temporaly user.
+
+
+

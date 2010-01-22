@@ -1,0 +1,11 @@
+vlogger - virtual web logfile rotater/parser
+(c) 2005 - steve j. kondik <shade@chemlab.org>
+see COPYING for license information.
+
+vlogger requires perl and Date::Format, availiable from CPAN.
+optionally, DBI will be used for the tracker feature if enabled.
+
+see vlogger(1), or perldoc vlogger for usage.
+
+Patched version for use with OVA database.
+Fetch the whost id in a view to add the bytes used.

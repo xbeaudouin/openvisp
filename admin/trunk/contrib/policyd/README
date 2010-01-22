@@ -1,0 +1,8 @@
+$Id: README,v 1.1 2008/10/01 11:30:16 kiwi Exp $
+
+This directory contains some modifications and/or patches for policyd.
+
+
+- policydinnodb180.patch
+  Patch by Benny Pedersen to use InnoDB as backend for policyd.
+  http://bugs.gentoo.org/show_bug.cgi?id=238806

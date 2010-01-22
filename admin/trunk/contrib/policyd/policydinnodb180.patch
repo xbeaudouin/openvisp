@@ -1,0 +1,435 @@
+diff -r -u policyd-v1.80/DATABASE.mysql policyd-v1.80-innodb/DATABASE.mysql
+--- policyd-v1.80/DATABASE.mysql	2005-12-23 08:38:47.000000000 +0100
++++ policyd-v1.80-innodb/DATABASE.mysql	2008-09-08 00:07:23.000000000 +0200
+@@ -6,14 +6,14 @@
+   _optin       tinyint(1) unsigned NOT NULL default '1',
+   _priority    tinyint(1) unsigned NOT NULL default '0',
+   UNIQUE KEY _rcpt (_rcpt,_optin) 
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE policy_training (
+   _rcpt        char(60) NOT NULL default '',
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _rcpt (_rcpt),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE throttle (
+   _from        char(60) NOT NULL default '',
+@@ -34,7 +34,7 @@
+   _log_panic   int(10) unsigned NOT NULL default '0',
+   _priority    tinyint(1) unsigned NOT NULL default '0',
+   UNIQUE KEY _from (_from)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE throttle_from_instance (
+   _instance    char(60) NOT NULL default '',
+@@ -42,7 +42,7 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _instance (_instance),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE throttle_rcpt (
+   _rcpt        char(60) NOT NULL default '',
+@@ -56,7 +56,7 @@
+   _log_warn    int(10) unsigned NOT NULL default '0',
+   _log_panic   int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _rcpt (_rcpt)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE triplet (
+   _from        char(60) NOT NULL default '',
+@@ -68,7 +68,7 @@
+   UNIQUE KEY _host (_host,_from,_rcpt),
+   KEY _datelast (_datelast),
+   KEY _datenew (_datenew)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+   
+ CREATE TABLE whitelist (
+   _whitelist   char(15) NOT NULL default '',
+@@ -76,7 +76,7 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _whitelist (_whitelist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE whitelist_sender (
+   _whitelist   char(60) NOT NULL default '',
+@@ -84,7 +84,7 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _whitelist (_whitelist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE whitelist_dnsname (
+   _whitelist   char(60) NOT NULL default '',
+@@ -92,7 +92,7 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _whitelist (_whitelist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE blacklist (
+   _blacklist   char(15) NOT NULL default '',
+@@ -100,12 +100,12 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _blacklist (_blacklist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE blacklist_helo (
+   _helo        char(60) NOT NULL default '',
+   UNIQUE KEY _helo (_helo)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE blacklist_sender (
+   _blacklist   char(60) NOT NULL default '',
+@@ -113,7 +113,7 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _blacklist (_blacklist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE blacklist_dnsname (
+   _blacklist   char(60) NOT NULL default '',
+@@ -121,13 +121,13 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _blacklist (_blacklist),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE spamtrap (
+   _rcpt        char(60) NOT NULL default '',
+   _active      tinyint(1) unsigned NOT NULL default '1',
+   UNIQUE KEY _rcpt (_rcpt,_active)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+ CREATE TABLE helo (
+   _host        char(15) NOT NULL default '',
+@@ -135,5 +135,5 @@
+   _expire      int(10) unsigned NOT NULL default '0',
+   UNIQUE KEY _host (_host,_helo),
+   KEY _expire (_expire)
+-) TYPE=MyISAM;
++) TYPE=InnoDB;
+ 
+diff -r -u policyd-v1.80/README.txt policyd-v1.80-innodb/README.txt
+--- policyd-v1.80/README.txt	2006-07-07 09:18:51.000000000 +0200
++++ policyd-v1.80-innodb/README.txt	2008-09-08 15:18:04.000000000 +0200
+@@ -511,6 +511,15 @@
+   module=bypass		<- mysql failed inside module
+                            (module can be whitelist,blacklist,helo,etc..)
+ 
++###
++# innodb patch
++##################
++
++This patch will properly be unsuported for a long time until all can use
++policyd v2 with have all tables as innodb, i created that patch here to
++backport this in to v1 olso, it should solve most issues that remains
++with cleanups
++
+ #######
+ # EOF #
+ #######
+diff -r -u policyd-v1.80/blacklist_helo.c policyd-v1.80-innodb/blacklist_helo.c
+--- policyd-v1.80/blacklist_helo.c	2006-07-03 15:23:33.000000000 +0200
++++ policyd-v1.80-innodb/blacklist_helo.c	2008-09-08 00:08:37.000000000 +0200
+@@ -70,12 +70,12 @@
+     {
+       /* build up query */
+       snprintf(mysqlquery_array[fd], 512,
+-        "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s.%%','# blacklisted helo: (%s)',%d)",
++        "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s.%%','# blacklisted helo: (%s)',%d)",
+        host_array[fd][2], triplet_array[fd][5], expire);
+     } else { /* blacklist host ip */
+       /* build up query */
+       snprintf(mysqlquery_array[fd], 512,
+-        "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# blacklisted helo: (%s)',%d)",
++        "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# blacklisted helo: (%s)',%d)",
+         host_array[fd][2], triplet_array[fd][5], expire);
+     }
+     /* execute query */
+diff -r -u policyd-v1.80/cleanup.c policyd-v1.80-innodb/cleanup.c
+--- policyd-v1.80/cleanup.c	2005-11-13 19:39:59.000000000 +0100
++++ policyd-v1.80-innodb/cleanup.c	2008-09-08 15:07:19.000000000 +0200
+@@ -71,7 +71,7 @@
+     
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM triplet WHERE _datelast < %d LIMIT 100000",
++      "DELETE FROM triplet WHERE _datelast < %d LIMIT 100000",
+       timenow - TRIPLET_AUTH_TIMEOUT);
+     if(db_deletequery(0) == -1) exit(-1);
+ 
+@@ -81,7 +81,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM triplet WHERE _datenew < %d AND _count = 0 LIMIT 100000",
++      "DELETE FROM triplet WHERE _datenew < %d AND _count = 0 LIMIT 100000",
+       timenow - TRIPLET_UNAUTH_TIMEOUT);
+     if(db_deletequery(0) == -1) exit(-1);
+   }
+@@ -95,7 +95,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM blacklist WHERE _expire <= %d \
++      "DELETE FROM blacklist WHERE _expire <= %d \
+        AND _expire != 0 LIMIT 100000",
+       timenow);
+     if(db_deletequery(0) == -1) exit(-1);
+@@ -111,7 +111,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM whitelist WHERE _expire <= %d AND \
++      "DELETE FROM whitelist WHERE _expire <= %d AND \
+        _expire != 0 LIMIT 100000",
+       timenow);
+     if(db_deletequery(0) == -1) exit(-1);
+@@ -127,7 +127,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM helo WHERE _expire <= %d AND _expire != 0 LIMIT 100000",
++      "DELETE FROM helo WHERE _expire <= %d AND _expire != 0 LIMIT 100000",
+       timenow);
+     if(db_deletequery(0) == -1) exit(-1);
+   }
+@@ -141,7 +141,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM throttle WHERE _date < %d",
++      "DELETE FROM throttle WHERE _date < %d",
+       timenow - SENDER_INACTIVE_EXPIRE);
+     if(db_deletequery(0) == -1) exit(-1);
+ 
+@@ -151,7 +151,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM throttle_from_instance WHERE _expire < %d",
++      "DELETE FROM throttle_from_instance WHERE _expire < %d",
+       timenow - 3600);
+     if(db_deletequery(0) == -1) exit(-1);
+   }
+@@ -165,7 +165,7 @@
+ 
+      /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM throttle_rcpt WHERE _date < %d",
++      "DELETE FROM throttle_rcpt WHERE _date < %d",
+       timenow - RECIPIENT_INACTIVE_EXPIRE);
+     if(db_deletequery(0) == -1) exit(-1);
+   }
+@@ -180,7 +180,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[0], 512,
+-      "DELETE QUICK FROM policy_training WHERE _expire < %d and _expire != 0",
++      "DELETE FROM policy_training WHERE _expire < %d and _expire != 0",
+       timenow - TRAINING_POLICY_TIMEOUT);
+     if(db_deletequery(0) == -1) exit(-1);
+   }
+diff -r -u policyd-v1.80/greylist.c policyd-v1.80-innodb/greylist.c
+--- policyd-v1.80/greylist.c	2006-07-03 15:22:38.000000000 +0200
++++ policyd-v1.80-innodb/greylist.c	2008-09-08 15:08:11.000000000 +0200
+@@ -104,7 +104,7 @@
+   {
+     /* build up & execute query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO triplet (_datenew,_datelast,_host,_from,_rcpt) VALUES (%d,%d,'%s','%s','%s')",
++      "INSERT INTO triplet (_datenew,_datelast,_host,_from,_rcpt) VALUES (%d,%d,'%s','%s','%s')",
+       timenow, timenow, triplet_array[fd][0], triplet_array[fd][1], triplet_array[fd][2]);
+     if(db_doquery(fd) == -1) return(db_failure(fd, "greylist"));
+ 
+@@ -134,11 +134,11 @@
+         if(BLACKLIST_NETBLOCK==1)
+         { /* blacklist netblock */
+           snprintf(mysqlquery_array[fd], 512,
+-            "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s.%%','# autoblacklisted', %d)",
++            "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s.%%','# autoblacklisted', %d)",
+              triplet_array[fd][0], expire);
+         } else { /* blacklist host ip */
+           snprintf(mysqlquery_array[fd], 512,
+-            "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# autoblacklisted',%d)",
++            "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# autoblacklisted',%d)",
+              host_array[fd][2], expire);
+         }
+         /* execute query */
+@@ -155,7 +155,7 @@
+ 
+         /* build up & execute query */
+         snprintf(mysqlquery_array[fd], 512,
+-          "DELETE QUICK from triplet WHERE _host='%s'", triplet_array[fd][0]);
++          "DELETE from triplet WHERE _host='%s'", triplet_array[fd][0]);
+         if(db_doquery(fd) == -1) return(db_failure(fd, "greylist"));
+ 
+         /* reject */
+@@ -249,19 +249,19 @@
+       {
+         /* build up & execute query */
+         snprintf(mysqlquery_array[fd], 512,
+-          "INSERT DELAYED INTO whitelist (_whitelist,_description,_expire) VALUES ('%s.%%','# autowhitelisted host',%d)",
++          "INSERT INTO whitelist (_whitelist,_description,_expire) VALUES ('%s.%%','# autowhitelisted host',%d)",
+           triplet_array[fd][0], expire);
+       } else {
+         /* build up & execute query */
+         snprintf(mysqlquery_array[fd], 512,
+-          "INSERT DELAYED INTO whitelist (_whitelist,_description,_expire) VALUES ('%s','# autowhitelisted host',%d)",
++          "INSERT INTO whitelist (_whitelist,_description,_expire) VALUES ('%s','# autowhitelisted host',%d)",
+           host_array[fd][2], expire);
+       }
+       if(db_doquery(fd) == -1) return(db_failure(fd, "greylist"));
+ 
+       /* build up & execute query */
+       snprintf(mysqlquery_array[fd], 512,
+-        "DELETE QUICK from triplet WHERE _host='%s'", triplet_array[fd][0]);
++        "DELETE from triplet WHERE _host='%s'", triplet_array[fd][0]);
+       if(db_doquery(fd) == -1) return(db_failure(fd, "greylist"));
+ 
+       logmessage("rcpt=%lu, greylist=awl, host=%s (%s), from=%s, to=%s, size=%s, expire=%d\n",
+diff -r -u policyd-v1.80/helo.c policyd-v1.80-innodb/helo.c
+--- policyd-v1.80/helo.c	2006-06-19 09:12:34.000000000 +0200
++++ policyd-v1.80-innodb/helo.c	2008-09-08 15:08:27.000000000 +0200
+@@ -71,7 +71,7 @@
+ 
+     /* build up query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# helo abuse',%d)",
++      "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# helo abuse',%d)",
+       host_array[fd][2], expire);
+     if(db_doquery(fd) == -1) return(db_failure(fd, "helo"));
+ 
+@@ -88,7 +88,7 @@
+     /* clean up helo table entries */
+     /* build up query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "DELETE QUICK FROM helo WHERE _host='%s'", host_array[fd][2]);
++      "DELETE FROM helo WHERE _host='%s'", host_array[fd][2]);
+     if(db_doquery(fd) == -1) return(db_failure(fd, "helo"));
+ 
+     return (1);
+@@ -118,7 +118,7 @@
+ 
+     /* build up query & execute */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO helo (_host,_helo,_expire) VALUES ('%s','%s',%d)",
++      "INSERT INTO helo (_host,_helo,_expire) VALUES ('%s','%s',%d)",
+       host_array[fd][2], triplet_array[fd][5], expire);
+     if(db_doquery(fd) == -1) return(db_failure(fd, "helo"));
+   }
+diff -r -u policyd-v1.80/spamtrap.c policyd-v1.80-innodb/spamtrap.c
+--- policyd-v1.80/spamtrap.c	2006-07-03 15:22:51.000000000 +0200
++++ policyd-v1.80-innodb/spamtrap.c	2008-09-08 00:15:40.000000000 +0200
+@@ -68,12 +68,12 @@
+     {
+       /* build up query */
+       snprintf(mysqlquery_array[fd], 512,
+-        "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# spamtrap delivery: (%s)',%d)",
++        "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# spamtrap delivery: (%s)',%d)",
+        host_array[fd][3], triplet_array[fd][2], expire);
+     } else { /* blacklist host ip */
+       /* build up query */
+       snprintf(mysqlquery_array[fd], 512,
+-        "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# spamtrap delivery: (%s)',%d)",
++        "INSERT INTO blacklist (_blacklist,_description,_expire) VALUES ('%s','# spamtrap delivery: (%s)',%d)",
+       host_array[fd][2], triplet_array[fd][2], expire);
+     }
+     /* execute query */
+diff -r -u policyd-v1.80/throttle.c policyd-v1.80-innodb/throttle.c
+--- policyd-v1.80/throttle.c	2006-06-28 12:41:37.000000000 +0200
++++ policyd-v1.80-innodb/throttle.c	2008-09-08 00:16:38.000000000 +0200
+@@ -118,7 +118,7 @@
+       expire=timenow;
+ 
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO throttle_from_instance (_instance,_expire) VALUES ('%s',%d)",
++      "INSERT INTO throttle_from_instance (_instance,_expire) VALUES ('%s',%d)",
+       triplet_array[fd][6], expire);
+     if(db_doquery(fd) == -1) return(db_failure(fd, "throttle"));
+ 
+diff -r -u policyd-v1.80/throttle_from.c policyd-v1.80-innodb/throttle_from.c
+--- policyd-v1.80/throttle_from.c	2006-06-28 12:41:37.000000000 +0200
++++ policyd-v1.80-innodb/throttle_from.c	2008-09-08 00:17:20.000000000 +0200
+@@ -63,7 +63,7 @@
+       
+     /* build up & execute query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO throttle "
++      "INSERT INTO throttle "
+       "(_date,_from,_quota_cur,_quota_max,_rcpt_max,_mail_size,_count_max,_time_limit)"
+       " VALUES (%d, '%s', %d, %ld, %ld, %ld, %ld, %ld)",
+       timenow,
+@@ -199,7 +199,7 @@
+             expire=timenow+SENDER_THROTTLE_AUTOBLACKLIST_EXPIRE;
+         
+         snprintf(mysqlquery_array[fd], 512,
+-                 "INSERT DELAYED INTO blacklist_sender (_blacklist,_description,_expire) "
++                 "INSERT INTO blacklist_sender (_blacklist,_description,_expire) "
+                  "VALUES ('%s','# sender throttle autoblacklisted',%d)",
+                  mysqlchar_array[fd][0], expire);
+         
+diff -r -u policyd-v1.80/throttle_host.c policyd-v1.80-innodb/throttle_host.c
+--- policyd-v1.80/throttle_host.c	2006-06-28 12:41:37.000000000 +0200
++++ policyd-v1.80-innodb/throttle_host.c	2008-09-08 00:17:58.000000000 +0200
+@@ -63,7 +63,7 @@
+ 
+     /* build up & execute query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO throttle "
++      "INSERT INTO throttle "
+       "(_date,_from,_quota_cur,_quota_max,_rcpt_max,_mail_size,_count_max,_time_limit)"
+       " VALUES (%d, '%s', %d, %ld, %ld, %ld, %ld, %ld)",
+       timenow,
+@@ -199,7 +199,7 @@
+             expire=timenow+SENDER_THROTTLE_AUTOBLACKLIST_EXPIRE;
+         
+         snprintf(mysqlquery_array[fd], 512,
+-                 "INSERT DELAYED INTO blacklist (_blacklist,_description,_expire) "
++                 "INSERT INTO blacklist (_blacklist,_description,_expire) "
+                  "VALUES ('%s','# sender throttle autoblacklisted',%d)",
+                  mysqlchar_array[fd][0], expire);
+         
+diff -r -u policyd-v1.80/throttle_rcpt.c policyd-v1.80-innodb/throttle_rcpt.c
+--- policyd-v1.80/throttle_rcpt.c	2006-05-04 12:55:40.000000000 +0200
++++ policyd-v1.80-innodb/throttle_rcpt.c	2008-09-08 00:18:25.000000000 +0200
+@@ -85,7 +85,7 @@
+       
+     /* build up & execute query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO throttle_rcpt (_date,_rcpt,_count_max,_time_limit) "
++      "INSERT INTO throttle_rcpt (_date,_rcpt,_count_max,_time_limit) "
+       "VALUES (%d, '%s', %ld, %ld)",
+       timenow,
+       triplet_array[fd][2],
+diff -r -u policyd-v1.80/throttle_sasl.c policyd-v1.80-innodb/throttle_sasl.c
+--- policyd-v1.80/throttle_sasl.c	2006-04-04 16:39:57.000000000 +0200
++++ policyd-v1.80-innodb/throttle_sasl.c	2008-09-08 00:18:55.000000000 +0200
+@@ -64,7 +64,7 @@
+       
+     /* build up & execute query */
+     snprintf(mysqlquery_array[fd], 512,
+-      "INSERT DELAYED INTO throttle "
++      "INSERT INTO throttle "
+       "(_date,_from,_quota_cur,_quota_max,_rcpt_max,_mail_size,_count_max, _time_limit)"
+       " VALUES (%d, '%s', %d, %ld, %ld, %ld, %ld, %ld)",
+       timenow,

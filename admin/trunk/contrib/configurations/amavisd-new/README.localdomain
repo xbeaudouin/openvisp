@@ -1,0 +1,10 @@
+$Id: README.localdomain,v 1.1 2005/05/10 21:37:59 xpoint Exp $
+
+I made this to take all local domains from sql over to flat hash file for amavisd
+backup mx is not local
+
+run from cron like this
+
+#!/bin/sh
+lynx --auth=openvisp:PaSsWoRd --dump --nolist --dont-wrap-pre http://example.tld/localdomain.php > /var/amavis/local_domains
+amavisd reload

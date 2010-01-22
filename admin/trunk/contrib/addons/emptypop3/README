@@ -1,0 +1,8 @@
+$Id: README,v 1.1 2008/10/20 22:23:22 kiwi Exp $
+
+This file has being done for brain damaged people that cannot correct fix
+their mailboxes.
+
+This will use pop3 to empty their mailboxe (only INBOX then)...
+
+Use with caution.

@@ -1,0 +1,71 @@
+Postfix:
+--------
+
+OpenVISP use Postfix as MTA and MySQL to store user's informations.
+
+The file main.cf is the main file configuration of Postfix and is
+use to configure the MTA with the DB.
+
+main.cf:
+relay_domains = mysql:/usr/local/etc/postfix/mysql_relay_domains_maps.cf
+virtual_maps = mysql:/usr/local/etc/postfix/mysql_virtual_alias_maps.cf
+virtual_mailbox_base = /var/spool/postfix/virtual
+virtual_mailbox_domains = mysql:/usr/local/etc/postfix/mysql_virtual_domains_maps.cf
+virtual_mailbox_maps = mysql:/usr/local/etc/postfix/mysql_virtual_mailbox_maps.cf
+virtual_minimum_uid = 125
+virtual_transport = virtual
+virtual_uid_maps = static:125
+virtual_gid_maps = static:125
+
+mysql_virtual_alias_maps.cf: use to manage alias
+user = postfix
+password = postfix
+hosts = localhost
+dbname = postfix
+query = SELECT goto FROM alias WHERE address='%s'AND active='1'
+
+mysql_vitual_domains_maps.cf: use to manage hosted domains
+user = postfix
+password = postfix
+hosts = localhost
+dbname = postfix
+query = SELECT description FROM domain WHERE domain='%s' and backupmx='0' and active='1'
+
+mysql_virtual_mailbox_maps.cf:
+user = postfix
+password = postfix
+hosts = localhost
+dbname = postfix
+query = SELECT maildir FROM mailbox WHERE username='%s' AND active='1'
+
+mysql_relay_domains_maps.cf:
+user = postfix
+password = postfix
+hosts = localhost
+dbname = postfix
+query = SELECT domain FROM domain WHERE domain='%s' AND backupmx='1'
+
+and when soft quota (VDA patched postfix)
+
+main.cf:
+virtual_create_maildirsize = yes
+virtual_mailbox_limit_inbox = no
+virtual_mailbox_limit_maps = mysql:/etc/postfix/mysql_virtual_mailbox_limit_maps.cf
+virtual_mailbox_limit_override = yes
+virtual_maildir_extended = yes
+virtual_maildir_limit_message = Sorry, the user's maildir has overdrawn his diskspace quota, please try again later.
+virtual_overquota_bounce = yes
+virtual_trash_count = yes
+virtual_trash_name = .Trash
+
+mysql_virtual_mailbox_limit_maps.cf
+user = postfix
+password = postfix
+hosts = localhost
+dbname = postfix
+table = mailbox
+select_field = quota
+where_field = username
+additional_conditions = and active = '1'
+
+Don't forget to reload Postfix after this changment : postfix reload

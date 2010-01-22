@@ -1,0 +1,28 @@
+Datacenter utilities scripts
+----------------------------
+
+o ova-target.pl
+  This script add remove to the DB the targets from MRTG files 
+  used by routers2.cgi.
+
+  You have to edit this script and modify the line 10 according to
+  your system configuration of routers2.cgi in case of non standard
+  configuration of your machine.
+
+  Per default the script will have a look for routers2.conf file in
+  the following directories :
+
+  /etc
+  /usr/local/etc
+  /opt/etc
+
+  Starting with line 11 you have SQL database configuration (currently
+  tested and working with MySQL with DBI / DBD::mysql) to allow update
+  into the DB of the values. 
+
+  You should execute this script everytime you modifiy the 
+  mrtg configuration files.
+
+  You can execute this in a crontab, but avoid doing this to often
+  because it may load your SQL database with dummy request (on per
+  target in mrtg file... so be aware !!!).

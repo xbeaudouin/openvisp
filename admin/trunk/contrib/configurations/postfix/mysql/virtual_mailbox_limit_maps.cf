@@ -1,0 +1,7 @@
+## Only for people using quota in postfix
+# For lmtp user do not use this configuration file.
+user = ##DB_USER##
+password = ##DB_PASS##
+hosts = ##DB_HOST##
+dbname = ##DB_NAME##
+query = SELECT quota FROM USER  WHERE email='%s' and active = '1'

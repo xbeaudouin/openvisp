@@ -1,0 +1,64 @@
+<?php
+/****************************************************************************************
+
+    Author ......... Florian Kimmerl
+    Contact ........ info@spacekoeln.de
+    Home Site ...... http://www.spacekoeln.de/
+    Program ........ postfixadmin
+    Version ........ 0.3-1.4
+    Purpose ........ Allows you to change your postfixadmin settings within squirrelmail
+    File ........... config.php
+
+    *************************************************************************************
+
+    The Original Code is Postfix Admin.
+    The Initial Developer of the Original Code is Mischa Peters .
+    Portions created by Mischa Peters are Copyright (c) 2002, 2003, 2004.
+    All Rights Reserved.
+    Contributor(s):
+    This project includes work by Mischa Peters and others that is:
+    Copyright (c) 2002,2003,2004 Mischa Peters
+    All rights reserved.
+
+****************************************************************************************/
+// Database Config
+// 'database_type' is for future reference.
+$CONF['database_type'] = 'mysql';
+$CONF['database_host'] = 'localhost';
+$CONF['database_user'] = 'postfix';
+$CONF['database_password'] = 'xxxxx';
+$CONF['database_name'] = 'postfix';
+
+// Encrypt
+// In what way do you want the passwords to be crypted?
+// md5crypt = internal postfix admin md5
+// system = whatever you have set as your PHP system default
+// cleartext = clear text passwords (ouch!)
+$CONF['encrypt'] = 'md5crypt';
+
+// Virtual Vacation
+// If you use virtual vacation for you mailbox users set this to 'true'.
+// NOTE: Make sure that you install the vacation module. http://high5.net/postfixadmin/
+
+//$AllowVacation = true;    // true or false
+global $AllowVacation;
+$AllowVacation = true;
+
+// Change Password
+// Enables user to change the POP3/IMAP Password.
+//$AllowChangePass = true;    // true or false
+global $AllowChangePass;
+$AllowChangePass = true;
+
+// Default Aliases
+// The default aliases that need to be created for all domains.
+// see your original postfixadmin conf.file
+// not really necessarily for the plugin -
+$CONF['default_aliases'] = array (
+	'spam' => 'spam@domain.tld',
+	'hostmaster' => 'hostmaster@domain.tld',
+	'postmaster' => 'postmaster@domain.tld',
+	'webmaster' => 'webmaster@domain.tld'
+);
+
+?>

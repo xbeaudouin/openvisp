@@ -1,0 +1,72 @@
+$Id: README.SOFTWARE,v 1.6 2007/07/13 14:59:17 kiwi Exp $
+
+Software that will be used to make a full system.
+-------------------------------------------------
+
+Notice :
+
+  This list is based on my system and my experience, so you may
+  be able to port on other system but I'll maybe don't have time
+  to test all such possibility
+
+Introduction :
+--------------
+
+Idea of OpenVISP Admin is to have a centralized pannel that allow
+users based on its right to acces a part or some parts of OpenVISP
+Admin.
+
+Software are sperated in sevral parts :
+
+o Mail
+o WebHosting
+o Ftp Hosting
+o Access
+o ...
+
+
+Mail software :
+
+o MTA            : Postfix
+o POP/IMAP       : Courrier Imap (because of softquota support)
+                   Dovecot
+o Local Delivery : PLL LMTPD (that will handle some basic filter
+                              and also vacation support)
+o Webmail        : SquirrelMail
+o GreyListing    : policyd (http://policyd.sourceforge.net/)
+                   All Greylisting system is _based_ on this software.
+
+WebHosting 
+
+o Servers    : Caudium for static pages + VHS
+               Apache2 + mod_vhs + mod_php
+o Statistics : Webalizer
+
+FTP Hosting
+
+o Server : Pure-Ftpd using LDAP backend
+
+Access 
+
+(To be done...)
+
+o Radius : freeradius
+o PPTP   : m0n0wall on WRAP
+
+DataCenter
+
+o APC MasterSwitch : Models AP9210I & AP9606 are tested and working.
+		     Newer APC like AP7921 (Europe) and AP7900 (US)
+		     are tested and supported, they are known to be working.
+		     For APC AP7952 only the first 8 ports are working
+		     for now. Support of all the 24 outlets will be
+		     added RSN.
+                     Other model should work, please send me feedback
+o Switch stats     : Current developper uses routers2.cgi, for more
+                     information see http://www.steveshipway.org/software/
+                     For other software please send me patches.
+
+Also most of system will use LDAP as backend, and will use OpenLDAP + Perl
+backend for simpler look / work / ease to integrate.
+
+This part will be another project : OpenVISP LDAP

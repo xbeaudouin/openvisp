@@ -1,0 +1,79 @@
+Squirrelmail Plugin OpenVISPadmin
+*********************************
+
+This Software is Based on SMpostfixadmin with some little modifications 
+to handle OpenVISP Admin
+
+version 0.3-1.4 01/29/04
+
+Postfixadmin - Postfixadmin+MySQL DB plugin for SquirrelMail
+
+Author: Florian Kimmerl info@spacekoeln.de>
+
+The Postfixadmin SquirrelMail plugin let users change their virtual alias,
+vacation status/message and password if you are using the great postfixadmin
+tool from http://high5.net/postfixadmin
+
+The Initial Developer of the Original postfixadmin Code is Mischa Peters.
+Portions created by Mischa Peters are Copyright (c) 2002, 2003, 2004.
+All Rights Reserved.
+
+REQUIREMENTS
+
+o SquirrelMail 1.4x
+
+o A working Mail-System "Virtual Domains and Users with postfix+Courier-IMAP+MySQL" See http://high5.net/howto/
+
+o POSTFIXADMIN version 2.0.0 or higher. See http://high5.net/postfixadmin/
+
+o This plugin only uses the postfixadmin database
+
+
+INSTALLATION
+
+o These directions assume you already have a working install of postfix
+  with courier-imap,MySQL, postfixadmin, SquirrelMail and the database installed.
+
+o Unpack in the plugins directory of your SM installation.
+
+o Copy config.php.dist to config.php and edit config.php to change the
+  Database Config, the Language and enable/disable virtual vacation.
+
+o Enable the postfixadmin plugin.
+
+
+BUGS
+
+I'm sure there are some...
+
+
+TODO
+
+-Code Cleanup
+-Tranlation
+
+
+http://www.spacekoeln.de
+
+
+TRANSLATIONS
+
+Translations are welcome! Send the *.po-File to: info@spacekoeln.de
+
+
+ACKNOWLEDGMENTS
+
+Thanks to the SquirrelMail team for builing such a great app and
+for all the work they do to keep it running.
+
+Thanks to high5.net for writing the great postfixadmin Tool
+
+
+CHANGES
+
+17/01/2004		vers. 0.1-1.4  		Initial Release
+18/01/2004		vers. 0.2-1.4		General code cleanup
+									Fixed Error in setup.php
+29/01/2004		vers. 0.3-1.4		Added squirrelmail-style multi language support
+                					General code cleanup
+                                    drop variables.inc.php

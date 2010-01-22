@@ -1,0 +1,5 @@
+user = ##DB_USER##
+password = ##DB_PASS##
+hosts = ##DB_HOST##
+dbname = ##DB_NAME##
+query = SELECT transport FROM domain WHERE domain='%s' AND backupmx='1' AND active='1'

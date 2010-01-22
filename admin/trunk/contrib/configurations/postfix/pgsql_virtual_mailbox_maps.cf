@@ -1,0 +1,16 @@
+#
+# pgsql-virtual-maps.cf
+#
+# Postfix virtual_mailbox_maps
+# Lookup table with all the valid addresses in the domains that
+# match virtal_mailbox_domains
+#
+
+user            = user
+password        = password
+dbname          = database
+hosts           = host
+table           = mailbox
+select_field    = maildir
+where_field     = username
+additional_conditions = and active = 'true'

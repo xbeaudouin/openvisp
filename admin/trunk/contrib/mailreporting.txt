@@ -1,0 +1,37 @@
+Mail Reporting is a third party program that make some mail report
+to user of the content of their quarantine.
+
+if a mail is recognized as a spam but for the end-user this is ham,
+he loose this mail. If the policy is to deliver the email, the user 
+will not be annoyed by this problem, but if the policy is to put it
+in quarantine, the user will not be able to release it with out
+a web interface or the help of a mailadmin.
+
+So the goal is to have good policy to put spam in quarantine, and
+to inform the enduser every x hour (4hours is IMHO the best) a report
+of what his quarantine look like.
+so add the mailreport.php to your crontab.
+
+2 options are offered.
+the first is to release it, so the mail will be delivered in the 20 seconds.
+
+the second and last is to delete it.
+
+To make it working, we'll need a php page to be available to everybody.
+This page (mailaction.php) will receive some parameters (mailid and releaseid);
+
+
+
+In all case the mail in quarantine, will be marked to be deleted of
+the disk in the database.
+
+A 3rd program of cleaning process should be written to clean the spool
+quarantine release or delete spam every day or week as the  admin like. 
+
+
+PS : At this time the 2 php program don't have any central parameters.
+I don't know if we could split some part in different servers. 
+
+Don't forget to change this values to what you need :
+##WEBSERVER##
+##MAILDOMAIN##

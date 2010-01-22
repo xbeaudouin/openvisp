@@ -1,0 +1,107 @@
+TODO LIST
+
+* URGENT things *
+
+- Add an optionnal check if the current access is under https or not.
+- Put configuration of policyd in server / server - job / server - job model.
+	This update will allow to manage many policyd in the same time.
+
+* Others ones *
+
+- In case of unpaid bills
+  change admin account active to 0
+	change domain owned by admin to unpaid
+  change ftp_account to inactive
+  change web_site to inactive
+  change mail account to unpaid (can receive mail but no pop or imap)
+
+========	this jobs is done, users requested for test !.
+
+- Verify that all actions are logged into the database and can be viewed
+
+- Change the mailbox status to :
+	0 = inactive
+	1 = active
+	2 = to delete (not displayed in ova)
+	3 = delete in progress (not displayed too)
+
+- Move all SQL queries and insert / whatever into a include file (or
+  several includes files).
+- Double check on admin-mail/ that when creating an administrator
+  or deleting it that we only delete mail part.
+
+Upgrade :
+- Perl script to upgrade from postfixadmin v1 -> OpenVISP.
+- Perl script to upgrade from postfixadmin v2 -> OpenVISP.
+- PHP script to move users from 'admin' to 'accounts' table.
+- Script to upgrade SQL tables.
+
+Setup :
+- Add function to check operating system to determine WWW user(www or www-data?).
+- Add form to allow user setting default policy.
+
+General :
+
+- Add color legends for domains
+  o Red (1)        domain doesn't exist (no MX / NS / whatever)
+  o Yellow (2)    domain doesn't have MX correctly set (primary or secondary)
+  o Orange (3) domain doesn't have backup mx value according to the database
+  o Nothing (0) Everything is good
+  This will need a third party script (perl ?) that wil check that.
+
+- Add on site administrator a full log on all domains (Done)
+
+- Use a Framework to give us breathe, like for example :
+  http://www.symfony-project.com/
+
+- Start using AJAX stuff instead of using popup and javascript dialogs, for
+  example to give us some informations instead of having a big table
+  See http://www.macridesweb.com/oltest/
+
+- Document all API get it fast as possible and avoid to check and loose time
+  to see where is this bloody stuff I did before ? :p
+
+Site administrator :
+
+- Website adminstration       (done)
+- Ftp administration          (done)
+- Mysql Administration (?)
+- Datacenter administration
+   - Request for information  (done)
+   - APC Master Switch system (done)
+   - Servers inventory
+   - Statistics link / access 
+   - Admin APC                (done)
+   - Admin Stats
+   - Admin Users (for APC / Stats and also PPTP access using m0n0wall)
+- Search a user
+
+Postmaster :
+
+- Listing should list the domains option : 
+  o Anti-spam (SA Tag and Level) (Done)
+  o Anti-virus                   (Done / RO)
+  o Sender/domain verification
+  o GreyListing
+- All functionalities should be also done by :
+  o mailboxes
+  o aliases
+- Should see an limited extract of postfix logs about rejected mails.
+- Stats about domain.
+- Quarantine view and management.
+- Whitelisting / blacklisting management. 
+
+End user :
+
+- Same as postmaster but at user level.
+
+Other:
+
+- The motd system is awfull, we have to make a better one.
+- setup.php file :
+  o Generate password from the MySQL User
+  o Allow user to give the default domain name and it's default password.
+- In main menu, show the OpenVISP Admin version and add a check to see if
+  there is a new version to be downloaded.
+
+
