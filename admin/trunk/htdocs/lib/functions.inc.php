@@ -11,7 +11,7 @@ if (ereg ("functions.inc.php", $_SERVER['PHP_SELF']))
 }
 
 // Version of this software
-$version = "0.97-dev";
+$version = "1.0-RC1";
 
 //
 // check_session
