@@ -35,9 +35,12 @@ $CONF['slapd_perl'] = 0;
 
 // Database Config
 // 'database_type' is one of the following
-// mysql  = MySQL 3.23.x  or 4.0.x
-// mysqli = MySQL 4.1+ with PHP 5.+ (Warning not well tested, expect some bugs)
+// mysql  = MySQL 3.x, 4.x, 5.x and 6.x 
+// mysqli = MySQL 4.1+ with PHP 5.+
 // pgsql  = PostGresSQL
+// 
+// NOTICE: mysqli is not completly tested and may have some bug.
+//         See bug #3 about this issue.
 $CONF['database_type'] = 'mysql';
 $CONF['database_host'] = 'localhost';
 $CONF['database_user'] = 'openvispadmin';

@@ -11,6 +11,8 @@
 Version 1.0-RCx
 ---------------
   - Fix bug #4 reported byt Frederic Plé
+  - Add a big warning about mysqli support on OVA. Until we 
+    fix that. Bug #3
 
 Version 1.0-RC1
 ---------------
