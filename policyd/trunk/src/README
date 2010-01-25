@@ -1,5 +1,5 @@
 ####
-# Policy Daemon aka OpenVISP Policyd (OVP)
+# Policy Daemon aka OpenVISP Policyd (OVP) 
 ############################################
 
   Policyd is an anti-spam plugin for Postfix (written in C) that
