@@ -8,6 +8,10 @@
 # NOTE to developpers : please add your name when you update something.
 #                       usefull to give credit.. otherwise all credits
 #                       will be per defaut given to me... :p
+Version 1.0-RCx
+---------------
+  - Fix bug #4 reported byt Frederic Plé
+
 Version 1.0-RC1
 ---------------
   - We are now on version 1.0-RC1.
