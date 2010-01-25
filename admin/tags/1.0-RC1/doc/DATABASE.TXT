@@ -1,0 +1,1234 @@
+##############################
+# OpenVISP Admin Release 1.x #
+##############################
+#
+# Copyright (c) 2005-2007 Xavier Beaudouin & Association Kazar
+# Copyright (c) 2002, 2003, 2004 High5!
+# Created by: Mischa Peters <mischa at high5 dot net>
+#
+# This is the complete database structure for OpenVISP Admin.
+# If you are installing from scratch you can use this file otherwise you
+# need to use the TABLE_CHANGES.TXT or TABLE_BACKUP_MX.TXT that comes with
+# OpenVISP Admin.
+#
+# There are 2 entries for a database user in the file.
+# One you can use for Postfix and one for OpenVISP Admin.
+#
+# If you run this file twice (2x) you will get an error on the user creation in MySQL.
+# To go around this you can either comment the lines below "USE MySQL" until "USE postfix".
+# Or you can remove the users from the database and run it again.
+#
+# You can create the database from the shell with:
+#
+# mysql -u root [-p] < DATABASE.TXT
+
+##
+## WARNING !! WARNING !!
+##
+
+# You have to create the postfix database BEFORE using this file as is.
+
+# CREATE DATABASE openvispadmin;
+
+#USE openvispadmin;
+
+
+
+--
+-- Table structure for table `accounts`
+--
+
+CREATE TABLE IF NOT EXISTS `accounts` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `enabled` tinyint(1) NOT NULL default '1',
+  `tech` tinyint(1) unsigned NOT NULL COMMENT 'Is the custormer a technical contact',
+  `company` varchar(255) default '',
+  `address` varchar(255) default '',
+  `city` varchar(255) default '',
+  `postal_code` varchar(40) default '',
+  `weburl` varchar(255) default '',
+  `email` varchar(255) default '',
+  `phone` varchar(50) default '',
+  `fax` varchar(50) default '',
+  `logo` varchar(255) default '',
+  `emailsupport` varchar(150) default '',
+  `phonesupport` varchar(30) default '',
+  `websupport` varchar(255) default '',
+  `webfaq` varchar(255) default '',
+  `paid` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`id`),
+  KEY `username` (`username`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Accounts';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `alias`
+--
+
+CREATE TABLE IF NOT EXISTS `alias` (
+  `address` varchar(255) NOT NULL default '',
+  `goto` text NOT NULL,
+  `policy_id` int(10) unsigned NOT NULL default '1',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`address`),
+  KEY `policy_id` (`policy_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Aliases';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `apc`
+--
+
+CREATE TABLE `apc` (
+  `id` int(11) NOT NULL auto_increment,
+  `name` varchar(12) NOT NULL default '''apc''',
+  `ip` varchar(16) NOT NULL default '',
+  `nbports` int(2) NOT NULL default '8',
+  `apctype` int(16) NOT NULL default '1',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`id`)
+) TYPE=InnoDB COMMENT='APC Masterswitch List';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `apc_admins`
+--
+
+CREATE TABLE IF NOT EXISTS `apc_admins` (
+  `id` int(11) NOT NULL,
+  `apc` varchar(12) NOT NULL default '',
+  `port` tinyint(1) NOT NULL default '0',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='APC MasterSwitch Admins table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `apc_ports`
+--
+
+CREATE TABLE IF NOT EXISTS `apc_ports` (
+  `port` tinyint(1) unsigned NOT NULL default '0',
+  `descr` varchar(12) NOT NULL default '',
+  `apc` varchar(12) NOT NULL default '',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '1',
+  UNIQUE KEY `port` (`port`,`apc`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='APC MasterSwitch Ports';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `datacenter_admins`
+--
+
+CREATE TABLE IF NOT EXISTS `datacenter_admins` (
+  `id` int(11) unsigned NOT NULL,
+  `full` tinyint(1) NOT NULL default '0',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='DataCenter Admin Table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dbname`
+--
+
+CREATE TABLE IF NOT EXISTS `dbname` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `accounts_id` int(11) unsigned NOT NULL,
+  `server_id` INT( 11 ) unsigned NOT NULL,
+  `dbname` char(64) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `domain_id` int(11) unsigned NOT NULL,
+  `dbtype_id` tinyint(2) unsigned NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `dbname` (`dbname`),
+  KEY `accounts_id` (`accounts_id`),
+  KEY `domain_id` (`domain_id`),
+  KEY `dbtype_id` (`dbtype_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dbtype`
+--
+
+CREATE TABLE IF NOT EXISTS `dbtype` (
+  `id` tinyint(2) unsigned NOT NULL auto_increment,
+  `name` varchar(20) default NULL,
+  `active` tinyint(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `dbusers`
+--
+
+CREATE TABLE IF NOT EXISTS `dbusers` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `accounts_id` int(11) unsigned NOT NULL,
+  `server_id` INT( 11 ) unsigned NOT NULL,
+  `username` char(16) default NULL,
+  `password` char(20) default NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `domain_id` int(11) unsigned NOT NULL,
+  `dbtype_id` tinyint(2) unsigned NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `owner` (`accounts_id`),
+  KEY `username` (`username`),
+  KEY `accounts_id` (`accounts_id`),
+  KEY `domain_id` (`domain_id`),
+  KEY `dbtype_id` (`dbtype_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases users table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `domain`
+--
+
+CREATE TABLE IF NOT EXISTS `domain` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `domain` varchar(255) NOT NULL default '',
+  `description` varchar(255) NOT NULL default '',
+  `aliases` int(10) NOT NULL default '-1',
+  `mailboxes` int(10) NOT NULL default '-1',
+  `ftp_account` int(10) NOT NULL,
+  `db_count` int(11) NOT NULL default '0',
+  `db_users` int(11) NOT NULL default '0',
+  `db_quota` int(11) NOT NULL default '0',
+  `maxquota` int(10) NOT NULL default '-1',
+  `transport` varchar(255) default NULL,
+  `backupmx` tinyint(1) NOT NULL default '0',
+  `antivirus` tinyint(1) NOT NULL default '0',
+  `vrfysender` tinyint(1) NOT NULL default '1',
+  `vrfydomain` tinyint(1) NOT NULL default '1',
+  `greylist` tinyint(1) NOT NULL default '0',
+  `spf` tinyint(1) NOT NULL default '0',
+  `allowchangefwd` tinyint(1) NOT NULL default '0',
+  `allowchangepwd` tinyint(1) NOT NULL default '0',
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `active` tinyint(1) NOT NULL default '1',
+  `pdf_pop` varchar(255) default '',
+  `pdf_imap` varchar(255) default '',
+  `pdf_smtp` varchar(255) default '',
+  `pdf_webmail` varchar(255) default '',
+  `pdf_custadd` varchar(255) default '',
+  `paid` tinyint(1) NOT NULL default '1',
+  `status` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `domain` (`domain`),
+  UNIQUE KEY `domain_2` (`domain`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Domains';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `domain_admins`
+--
+
+CREATE TABLE IF NOT EXISTS `domain_admins` (
+  `accounts_id` int(11) unsigned NOT NULL,
+  `domain_id` int(11) unsigned NOT NULL,
+  `created` timestamp NULL default NULL,
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`accounts_id`,`domain_id`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain Admins';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `domain_alias`
+--
+
+CREATE TABLE IF NOT EXISTS `domain_alias` (
+  `dalias` varchar(255) NOT NULL default '',
+  `domain_id` int(11) unsigned NOT NULL,
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`dalias`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain aliases eg domain copys';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `filter`
+--
+
+CREATE TABLE IF NOT EXISTS `filter` (
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `exec_order` tinyint(4) NOT NULL default '0',
+  `filtername` varchar(100) NOT NULL default '',
+  `filter_field_id` tinyint(6) unsigned NOT NULL default '0',
+  `fieldvalue` varchar(255) NOT NULL default '',
+  `filteraction_id` tinyint(4) unsigned NOT NULL default '0',
+  `destination` text NOT NULL,
+  `active` tinyint(1) NOT NULL default '0',
+  `comment` varchar(255) NOT NULL default '',
+  `created` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `modified` timestamp NULL default NULL,
+  PRIMARY KEY  (`mailbox_id`,`exec_order`,`filter_field_id`,`filteraction_id`,`created`),
+  KEY `filter_field_id` (`filter_field_id`),
+  KEY `filteraction_id` (`filteraction_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `filteraction_field`
+--
+
+CREATE TABLE IF NOT EXISTS `filteraction_field` (
+  `id` tinyint(3) unsigned NOT NULL auto_increment,
+  `actionname` varchar(50) NOT NULL default '',
+  `active` tinyint(1) NOT NULL default '0',
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `created` timestamp NULL default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 PACK_KEYS=0;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `filter_field`
+--
+
+CREATE TABLE IF NOT EXISTS `filter_field` (
+  `id` tinyint(3) unsigned NOT NULL auto_increment,
+  `fieldname` varchar(50) NOT NULL default '',
+  `active` tinyint(1) NOT NULL default '0',
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `created` timestamp NULL default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ftpaccount`
+--
+
+CREATE TABLE IF NOT EXISTS `ftpaccount` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `login` varchar(40) NOT NULL default '',
+  `password` varchar(64) NOT NULL default '',
+  `domain_id` int(11) unsigned NOT NULL,
+  `uid` int(3) NOT NULL default '80',
+  `gid` int(3) NOT NULL default '80',
+  `dir` varchar(128) NOT NULL default '',
+  `quotafs` int(15) NOT NULL default '-1',
+  `quotasz` int(15) NOT NULL default '-1',
+  `ratioul` int(15) NOT NULL default '-1',
+  `ratiodl` int(15) NOT NULL default '-1',
+  `bandwidthul` int(15) NOT NULL default '-1',
+  `bandwidthdl` int(15) NOT NULL default '-1',
+  `created` date NOT NULL default '0000-00-00',
+  `modified` date NOT NULL default '0000-00-00',
+  `active` int(1) NOT NULL default '1',
+  `web` tinyint(1) NOT NULL default '0',
+  `server_id` int(11) unsigned NOT NULL,
+  `description` tinytext,
+  `owner` int(11) NOT NULL,
+  `paid` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`id`),
+  KEY `server_id` (`server_id`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `lmtp`
+--
+
+CREATE TABLE IF NOT EXISTS `lmtp` (
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `stamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `sender` varchar(255) character set latin1 default NULL,
+  `mailbox` varchar(255) character set latin1 default NULL,
+  `error` varchar(255) character set latin1 default NULL,
+  `msgsize` int(11) NOT NULL default '0',
+  `pid` int(11) NOT NULL default '0',
+  `counter` int(11) NOT NULL default '0',
+  `maps` varchar(255) character set latin1 default NULL,
+  `rcpt` varchar(255) character set latin1 default NULL,
+  `lhlo` varchar(255) character set latin1 default NULL,
+  `mid` varchar(255) character set latin1 default NULL,
+  `peer` varchar(255) character set latin1 default NULL,
+  `myname` varchar(255) character set latin1 default NULL,
+  `input` varchar(255) character set latin1 default NULL,
+  `start_time` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  KEY `sender` (`sender`(10)),
+  KEY `error` (`error`(10)),
+  KEY `mailbox` (`mailbox`(10)),
+  KEY `rcpt` (`rcpt`(10)),
+  KEY `stamp` (`stamp`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `log`
+--
+
+CREATE TABLE IF NOT EXISTS `log` (
+  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `accounts_id` int(11) unsigned NOT NULL,
+  `domain_id` int(11) unsigned NOT NULL,
+  `domain_name` varchar(255) NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `action` varchar(255) NOT NULL default '',
+  `data` varchar(255) NOT NULL default '',
+  KEY `domain` (`domain_name`),
+  KEY `accounts_id` (`accounts_id`),
+  KEY `domain_id` (`domain_id`),
+  KEY `domain_2` (`domain_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Log';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `maddr`
+--
+
+CREATE TABLE IF NOT EXISTS `maddr` (
+  `id` bigint(20) unsigned NOT NULL auto_increment,
+  `email` varchar(255) NOT NULL default '',
+  `domain` varchar(255) NOT NULL default '',
+  `partition_tag` int(11) default '0',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `maddr_idx_email` (`email`),
+  KEY `maddr_idx_domain` (`domain`),
+  KEY `email` (`email`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mailbox`
+--
+
+CREATE TABLE IF NOT EXISTS `mailbox` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `username` varchar(255) NOT NULL default '',
+  `domain_id` int(11) unsigned NOT NULL,
+  `password` varchar(255) NOT NULL default '',
+  `name` varchar(255) NOT NULL default '',
+  `maildir` varchar(255) NOT NULL default '',
+  `quota` int(10) NOT NULL default '-1',
+  `pop` tinyint(1) NOT NULL default '1',
+  `imap` tinyint(1) NOT NULL default '1',
+  `webmail` tinyint(1) NOT NULL default '1',
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `smtpauth` tinyint(1) NOT NULL default '0',
+  `allowchangefwd` tinyint(1) NOT NULL default '0',
+  `allowchangepwd` tinyint(1) NOT NULL default '0',
+  `spamreport` tinyint(1) NOT NULL default '0',
+  `update_filter` tinyint(1) NOT NULL default '0',
+  `active` tinyint(1) NOT NULL default '1',
+  `paid` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `username` (`username`),
+  KEY `maildir` (`maildir`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Mailboxes';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `msgrcpt`
+--
+
+CREATE TABLE IF NOT EXISTS `msgrcpt` (
+  `mail_id` varchar(12) NOT NULL default '',
+  `rid` int(10) unsigned NOT NULL default '0',
+  `ds` char(1) NOT NULL default '',
+  `rs` char(1) NOT NULL default '',
+  `bl` char(1) default '',
+  `wl` char(1) default '',
+  `bspam_level` float default NULL,
+  `smtp_resp` varchar(255) default '',
+  `partition_tag` int(11) default '0',
+  KEY `msgrcpt_idx_mail_id` (`mail_id`),
+  KEY `msgrcpt_idx_rid` (`rid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `msgs`
+--
+
+CREATE TABLE IF NOT EXISTS `msgs` (
+  `mail_id` varchar(12) NOT NULL default '',
+  `secret_id` varchar(12) default '',
+  `am_id` varchar(20) NOT NULL default '',
+  `time_num` int(10) unsigned NOT NULL default '0',
+  `time_iso` varchar(16) NOT NULL default '',
+  `sid` int(10) unsigned NOT NULL default '0',
+  `policy` varchar(255) default '',
+  `client_addr` varchar(255) default '',
+  `size` int(10) unsigned NOT NULL default '0',
+  `content` char(1) default NULL,
+  `quar_type` char(1) default NULL,
+  `dsn_sent` char(1) default NULL,
+  `spam_level` float default NULL,
+  `message_id` varchar(255) default '',
+  `from_addr` varchar(255) default '',
+  `subject` varchar(255) default '',
+  `host` varchar(255) NOT NULL default '',
+  `quar_loc` varchar(255) default '',
+  `partition_tag` int(11) default '0',
+  KEY `sid` (`sid`),
+  KEY `time_num` (`time_num`),
+  KEY `mail_id` (`mail_id`),
+  KEY `time_iso` (`time_iso`),
+  KEY `quar_type` (`quar_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ovavers`
+--
+
+CREATE TABLE IF NOT EXISTS `ovavers` (
+  `ova` char(20) default NULL,
+  `query` smallint(2) NOT NULL default '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `overquota`
+--
+
+CREATE TABLE IF NOT EXISTS `overquota` (
+  `user` varchar(255) NOT NULL,
+  `stamp` timestamp NULL default NULL,
+  `code` varchar(255) NOT NULL,
+  `num` varchar(255) NOT NULL,
+  `createdate` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`user`),
+  KEY `stamp` (`stamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `policy`
+--
+
+CREATE TABLE IF NOT EXISTS `policy` (
+  `domain_id` int(11) unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL auto_increment,
+  `virus_lover` char(1) default NULL,
+  `spam_lover` char(1) default NULL,
+  `banned_files_lover` char(1) default NULL,
+  `bad_header_lover` char(1) default NULL,
+  `bypass_virus_checks` char(1) default NULL,
+  `bypass_spam_checks` char(1) default NULL,
+  `bypass_banned_checks` char(1) default NULL,
+  `bypass_header_checks` char(1) default NULL,
+  `spam_modifies_subj` char(1) default NULL,
+  `virus_quarantine_to` varchar(64) default 'virus-quarantine',
+  `spam_quarantine_to` varchar(64) default 'spam-quarantine',
+  `banned_quarantine_to` varchar(64) default 'banned-quarantine',
+  `bad_header_quarantine_to` varchar(64) default 'bad-header-quarantine',
+  `spam_tag_level` float default NULL,
+  `spam_tag2_level` float default NULL,
+  `spam_kill_level` float default NULL,
+  `spam_dsn_cutoff_level` float default NULL,
+  `addr_extension_virus` varchar(64) default NULL,
+  `addr_extension_spam` varchar(64) default NULL,
+  `addr_extension_banned` varchar(64) default NULL,
+  `addr_extension_bad_header` varchar(64) default NULL,
+  `warnvirusrecip` char(1) default NULL,
+  `warnbannedrecip` char(1) default NULL,
+  `warnbadhrecip` char(1) default NULL,
+  `newvirus_admin` varchar(64) default NULL,
+  `virus_admin` varchar(64) default NULL,
+  `banned_admin` varchar(64) default NULL,
+  `bad_header_admin` varchar(64) default NULL,
+  `spam_admin` varchar(64) default NULL,
+  `spam_subject_tag` varchar(64) default NULL,
+  `spam_subject_tag2` varchar(64) default NULL,
+  `message_size_limit` int(11) default NULL,
+  `banned_rulenames` varchar(64) default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Policy Table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quota`
+--
+
+CREATE TABLE IF NOT EXISTS `quota` (
+  `accounts_id` int(11) unsigned NOT NULL,
+  `diskspace` int(11) NOT NULL,
+  `ftp` int(11) NOT NULL,
+  `mysqldb` int(11) NOT NULL,
+  `mysqlusers` int(11) NOT NULL,
+  `postgresqldb` int(11) NOT NULL,
+  `postgresqlusers` int(11) NOT NULL,
+  `domains` int(11) NOT NULL,
+  `emails` int(11) NOT NULL,
+  `emails_alias` int(11) NOT NULL,
+  `http` int(11) NOT NULL,
+  `http_alias` int(11) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`accounts_id`),
+  KEY `id` (`accounts_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp admin quota';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rights`
+--
+
+CREATE TABLE IF NOT EXISTS `rights` (
+  `accounts_id` int(11) unsigned NOT NULL,
+  `mail` tinyint(1) NOT NULL default '0',
+  `datacenter` tinyint(1) NOT NULL default '0',
+  `datacenter_manage` tinyint(1) NOT NULL default '0',
+  `ftp` tinyint(1) NOT NULL default '0',
+  `http` tinyint(1) NOT NULL default '0',
+  `domain` tinyint(1) NOT NULL default '0',
+  `postgresql` tinyint(1) NOT NULL default '0',
+  `mysql` tinyint(1) NOT NULL default '0',
+  `manage` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`accounts_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Rights';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `server`
+--
+
+CREATE TABLE IF NOT EXISTS `server` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `name` varchar(20) NOT NULL,
+  `public_name` varchar(255) NOT NULL,
+  `private_name` varchar(255) NOT NULL,
+  `description` tinytext NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `public_name` (`public_name`),
+  KEY `private_name` (`private_name`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `server_apps`
+--
+
+CREATE TABLE IF NOT EXISTS `server_apps` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `apps` varchar(255) NOT NULL,
+  `version` varchar(20) NOT NULL,
+  `server_jobmodel_id` INT( 11 ) UNSIGNED NOT NULL,
+  `description` tinytext NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`), 
+  KEY `server_jobmodel_id` ( `server_jobmodel_id` )
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `server_ip`
+--
+
+CREATE TABLE IF NOT EXISTS `server_ip` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `public` varchar(15) NOT NULL,
+  `private` varchar(15) NOT NULL,
+  `comment` varchar(100) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `server_job`
+--
+
+CREATE TABLE IF NOT EXISTS `server_job` (
+  `server_id` int(11) unsigned NOT NULL,
+  `server_jobmodel_id` int(11) unsigned NOT NULL,
+  `server_apps_id` int(11) unsigned NOT NULL,
+  `server_ip_id` int(11) unsigned NOT NULL,
+  `login` varchar(50) NOT NULL,
+  `password` varchar(50) NOT NULL,
+  `port` smallint(2) UNSIGNED NOT NULL,
+  `description` tinytext NOT NULL,
+  `active` tinyint(4) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`server_id`,`server_jobmodel_id`,`server_apps_id`,`server_ip_id`),
+  KEY `server_jobmodel_id` (`server_jobmodel_id`),
+  KEY `server_apps_id` (`server_apps_id`),
+  KEY `server_ip_id` (`server_ip_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `server_jobmodel`
+--
+
+CREATE TABLE IF NOT EXISTS `server_jobmodel` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `role` varchar(255) NOT NULL,
+  `description` tinytext NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `role` (`role`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `spamreport`
+--
+
+CREATE TABLE IF NOT EXISTS `spamreport` (
+  `id` varchar(32) NOT NULL,
+  `key2` varchar(32) NOT NULL,
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `created` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`,`key2`,`mailbox_id`),
+  KEY `mailbox_id` (`mailbox_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Spam Repport status ';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_admin`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_admin` (
+  `accounts_id` int(11) unsigned NOT NULL,
+  `graphid` int(5) NOT NULL default '0',
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `active` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`accounts_id`,`graphid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Statistics graph table for Admin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_datacenter_sw`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_datacenter_sw` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `router` varchar(255) NOT NULL,
+  `port` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `95per_lm_in` float default NULL,
+  `95per_lm_out` float default NULL,
+  `95per_lm_all` float default NULL,
+  `95per_l2m_in` float default NULL,
+  `95per_l2m_out` float default NULL,
+  `95per_l2m_all` float default NULL,
+  `95per_cur_in` float default NULL,
+  `95per_cur_out` float default NULL,
+  `95per_cur_all` float default NULL,
+  `cfgfile` varchar(255) NOT NULL,
+  `lm_cfgfile` int(11) NOT NULL,
+  `rrdfile` varchar(255) NOT NULL,
+  `created` datetime NOT NULL default '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`id`),
+  KEY `router` (`router`),
+  KEY `port` (`port`),
+  KEY `rrdfile` (`rrdfile`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Switch files and stats';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_ftpaccount`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_ftpaccount` (
+  `ftpaccount_id` int(11) unsigned NOT NULL,
+  `size` int(15) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY  (`ftpaccount_id`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_ftptransfert`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_ftptransfert` (
+  `ftpaccount_id` int(11) unsigned NOT NULL,
+  `upload` bigint(40) default '0',
+  `download` bigint(40) default '0',
+  `server_id` int(11) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY  (`ftpaccount_id`,`server_id`,`date`),
+  KEY `server_id` (`server_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_mailbox`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_mailbox` (
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `size` int(15) NOT NULL default '0',
+  `date` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`mailbox_id`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_mail_login`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_mail_login` (
+  `firstlogin` datetime NOT NULL,
+  `lastlogin` datetime NOT NULL,
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `method` varchar(10) NOT NULL,
+  `ip` varchar(20) NOT NULL,
+  `hostname` varchar(50) NOT NULL,
+  `count` int(6) NOT NULL default '0',
+  `status` tinyint(4) NOT NULL,
+  `comment` varchar(50) NOT NULL,
+  PRIMARY KEY  (`firstlogin`,`mailbox_id`,`method`,`ip`,`hostname`),
+  KEY `mailbox_id` (`mailbox_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_mail_user`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_mail_user` (
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `date` varchar(8) NOT NULL,
+  `last_date` int(10) NOT NULL,
+  `bytes_in` int(10) default NULL,
+  `bytes_out` int(10) default NULL,
+  `mail_in` int(10) default NULL,
+  `mail_out` varchar(10) default NULL,
+  `spam` int(10) default NULL,
+  `virus` int(10) default NULL,
+  `clean` int(10) default NULL,
+  `blocked` int(10) default NULL,
+  `malformed` int(10) default NULL,
+  PRIMARY KEY  (`mailbox_id`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stats_wwwusage`
+--
+
+CREATE TABLE IF NOT EXISTS `stats_wwwusage` (
+  `whost_id` int(11) unsigned NOT NULL,
+  `ldate` int(8) unsigned NOT NULL,
+  `bytes` int(32) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`whost_id`,`ldate`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='# Table used by Lighttd to store Bandwith usage';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vacation`
+--
+
+CREATE TABLE IF NOT EXISTS `vacation` (
+  `mailbox_id` int(11) unsigned NOT NULL,
+  `subject` varchar(255) NOT NULL default '',
+  `body` text NOT NULL,
+  `cache` text NOT NULL,
+  `domain` varchar(255) NOT NULL default '',
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `active` tinyint(1) NOT NULL default '1',
+  PRIMARY KEY  (`mailbox_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Vacation';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wblist`
+--
+
+CREATE TABLE IF NOT EXISTS `wblist` (
+  `rid` int(10) unsigned NOT NULL,
+  `sid` int(10) unsigned NOT NULL,
+  `wb` varchar(10) NOT NULL,
+  PRIMARY KEY  (`rid`,`sid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='# Table used by Amavis to Whitelist email';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost`
+--
+
+CREATE TABLE IF NOT EXISTS `whost` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `vhost` varchar(255) NOT NULL,
+  `DocumentRoot` varchar(255) NOT NULL,
+  `SetEnv` varchar(255) NOT NULL,
+  `CustomLog` varchar(255) NOT NULL,
+  `active` tinyint(1) NOT NULL default '1',
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `paid` tinyint(1) NOT NULL default '1',
+  `synced` tinyint(1) NOT NULL default '0',
+  `domain_id` int(11) unsigned NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `domain_id` (`domain_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Web Hosting Table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost_alias`
+--
+
+CREATE TABLE IF NOT EXISTS `whost_alias` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `vhost_alias` varchar(255) NOT NULL,
+  `whost_id` int(11) unsigned NOT NULL,
+  `active` tinyint(1) NOT NULL default '1',
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`,`whost_id`),
+  UNIQUE KEY `vhost_alias` (`vhost_alias`),
+  KEY `whost_id` (`whost_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Alias Web Hosting Table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost_config`
+--
+
+CREATE TABLE IF NOT EXISTS `whost_config` (
+  `whost_id` int(11) unsigned NOT NULL,
+  `option_id` int(11) unsigned NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `active` int(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`whost_id`,`option_id`),
+  KEY `option_id` (`option_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Assocation of Whost option and whost site';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost_options`
+--
+
+CREATE TABLE IF NOT EXISTS `whost_options` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `values` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `parent_id` tinyint(11) NOT NULL default '0',
+  `categorie_id` tinyint(11) NOT NULL,
+  `active` int(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`id`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Table with option list for webhosting';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost_option_cat`
+--
+
+CREATE TABLE IF NOT EXISTS `whost_option_cat` (
+  `int` int(11) NOT NULL,
+  `categorie` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `whost_server`
+--
+
+CREATE TABLE IF NOT EXISTS `whost_server` (
+  `whost_id` int(11) unsigned NOT NULL,
+  `server_id` int(11) unsigned NOT NULL,
+  `active` tinyint(1) NOT NULL,
+  `created` timestamp NULL default NULL,
+  `modified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`server_id`,`whost_id`),
+  KEY `whost_id` (`whost_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `alias`
+--
+ALTER TABLE `alias`
+  ADD CONSTRAINT `alias_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `dbname`
+--
+ALTER TABLE `dbname`
+  ADD CONSTRAINT `dbname_ibfk_4` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_5` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_6` FOREIGN KEY (`dbtype_id`) REFERENCES `dbtype` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_7` FOREIGN KEY (`server_id`) REFERENCES  `server` (`id`) ON DELETE CASCADE ;
+
+--
+-- Constraints for table `dbusers`
+--
+ALTER TABLE `dbusers`
+  ADD CONSTRAINT `dbusers_ibfk_4` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_5` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_6` FOREIGN KEY (`dbtype_id`) REFERENCES `dbtype` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_7` FOREIGN KEY (`server_id`) REFERENCES  `server` (`id`) ON DELETE CASCADE ;
+--
+-- Constraints for table `domain_admins`
+--
+ALTER TABLE `domain_admins`
+  ADD CONSTRAINT `domain_admins_ibfk_3` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `domain_admins_ibfk_4` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `domain_alias`
+--
+ALTER TABLE `domain_alias`
+  ADD CONSTRAINT `domain_alias_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `filter`
+--
+ALTER TABLE `filter`
+  ADD CONSTRAINT `filter_ibfk_10` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `filter_ibfk_11` FOREIGN KEY (`filter_field_id`) REFERENCES `filter_field` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `filter_ibfk_12` FOREIGN KEY (`filteraction_id`) REFERENCES `filteraction_field` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `ftpaccount`
+--
+ALTER TABLE `ftpaccount`
+  ADD CONSTRAINT `ftpaccount_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `ftpaccount_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `log`
+--
+ALTER TABLE `log`
+  ADD CONSTRAINT `log_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `log_ibfk_2` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mailbox`
+--
+ALTER TABLE `mailbox`
+  ADD CONSTRAINT `mailbox_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `policy`
+--
+ALTER TABLE `policy`
+  ADD CONSTRAINT `policy_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quota`
+--
+ALTER TABLE `quota`
+  ADD CONSTRAINT `quota_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `rights`
+--
+ALTER TABLE `rights`
+  ADD CONSTRAINT `rights_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `server_apps`
+--
+ALTER TABLE `server_apps`
+ADD CONSTRAINT `server_apps_ibfk_1` FOREIGN KEY (`server_jobmodel_id`) REFERENCES `server_jobmodel` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `server_job`
+--
+ALTER TABLE `server_job`
+  ADD CONSTRAINT `server_job_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_2` FOREIGN KEY (`server_jobmodel_id`) REFERENCES `server_jobmodel` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_3` FOREIGN KEY (`server_apps_id`) REFERENCES `server_apps` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_4` FOREIGN KEY (`server_ip_id`) REFERENCES `server_ip` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `spamreport`
+--
+ALTER TABLE `spamreport`
+  ADD CONSTRAINT `spamreport_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_admin`
+--
+ALTER TABLE `stats_admin`
+  ADD CONSTRAINT `stats_admin_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_ftpaccount`
+--
+ALTER TABLE `stats_ftpaccount`
+  ADD CONSTRAINT `stats_ftpaccount_ibfk_1` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_ftptransfert`
+--
+ALTER TABLE `stats_ftptransfert`
+  ADD CONSTRAINT `stats_ftptransfert_ibfk_3` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `stats_ftptransfert_ibfk_4` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_mailbox`
+--
+ALTER TABLE `stats_mailbox`
+  ADD CONSTRAINT `stats_mailbox_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_mail_login`
+--
+ALTER TABLE `stats_mail_login`
+  ADD CONSTRAINT `stats_mail_login_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_mail_user`
+--
+ALTER TABLE `stats_mail_user`
+  ADD CONSTRAINT `stats_mail_user_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stats_wwwusage`
+--
+ALTER TABLE `stats_wwwusage`
+  ADD CONSTRAINT `stats_wwwusage_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `vacation`
+--
+ALTER TABLE `vacation`
+  ADD CONSTRAINT `vacation_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `whost`
+--
+ALTER TABLE `whost`
+  ADD CONSTRAINT `whost_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `whost_alias`
+--
+ALTER TABLE `whost_alias`
+  ADD CONSTRAINT `whost_alias_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `whost_config`
+--
+ALTER TABLE `whost_config`
+  ADD CONSTRAINT `whost_config_ibfk_3` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `whost_config_ibfk_4` FOREIGN KEY (`option_id`) REFERENCES `whost_options` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `whost_server`
+--
+ALTER TABLE `whost_server`
+  ADD CONSTRAINT `whost_server_ibfk_3` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`),
+  ADD CONSTRAINT `whost_server_ibfk_4` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE;
+
+
+
+CREATE VIEW zz_vw_webvhost AS
+SELECT whost.id,CONCAT(whost.vhost,'.',domain.domain) as virtual FROM whost,domain WHERE whost.domain_id=domain.id;
+
+
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('database', 'Database Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('httpd', 'HTTPD Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('policy', 'Policyd Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('smtpd', 'SMTPD Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('pop', 'POP3 Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('imap', 'IMAP Server',  '1',  'NOW()');
+INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('ftpd', 'FTP Server',  '1',  'NOW()');
+
+INSERT INTO `server_apps` (`id`, `apps`, `version`, `description`, `server_jobmodel_id`, `active`, `created`, `modified`) VALUES
+(1, 'lighttpd', '1.4', 'Serveur lighttpd', 2, 1, '2008-06-01 14:04:58', '2008-06-01 14:04:58'),
+(2, 'postfix', '2.2', '', 4, 1, '2008-06-01 14:09:07', '2008-06-01 14:09:07'),
+(3, 'mysql', '5.0', '', 1, 1, '2008-06-01 14:09:25', '2008-06-01 14:09:25'),
+(4, 'dovecot', '0.9', 'serveur pop imap', 6, 1, '2008-06-01 14:14:41', '2008-06-01 14:14:41');
+
+
+INSERT INTO  `dbtype` (`name` ,`active` ,`created` ,`modified`)
+VALUES ('mysql',  '1', NOW( ) , CURRENT_TIMESTAMP);

@@ -1,0 +1,32 @@
+You will find here many sql scripts that can clean some
+stuff in the database.
+
+
+If you are using postifx-policyd with OVA before le 1st march 2008
+you have some error in the database.
+
+1) some policy id are not used any more.
+When an account is deleted the policy id is not.
+
+to view them
+
+SELECT dbpolicyd.policy._rcpt
+FROM dbpolicyd.policy
+LEFT JOIN dbopenvisp.alias
+ON dbopenvisp.alias.address=dbpolicyd.policy._rcpt
+WHERE dbopenvisp.alias.address IS NULL
+AND dbpolicyd.policy._rcpt not like '@%'
+
+to delete them exec this sql
+
+CREATE TEMPORARY TABLE tmp_del_table 
+SELECT dbpolicyd.policy._rcpt
+FROM dbpolicyd.policy
+LEFT JOIN dbopenvisp.alias
+ON dbopenvisp.alias.address=dbpolicyd.policy._rcpt
+WHERE dbopenvisp.alias.address IS NULL
+AND dbpolicyd.policy._rcpt not like '@%';
+
+DELETE FROM dbpolicyd.policy
+USING tmp_del_table, dbpolicyd.policy
+WHERE dbpolicyd.policy._rcpt = tmp_del_table._rcpt;

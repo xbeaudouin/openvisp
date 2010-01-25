@@ -1,0 +1,1026 @@
+<?php
+//
+// Language file English
+//
+$PALANG['LOCALE'] = 'C';
+$PALANG['YES'] = 'YES';
+$PALANG['NO'] = 'NO';
+$PALANG['edit'] = 'edit';
+$PALANG['del'] = 'del';
+$PALANG['manage'] = 'manage';
+$PALANG['confirm'] = 'Are you sure you want to delete this?';
+$PALANG['confirm_domain'] = 'Do you really want to delete all records for this domain? This can not be undone!';
+$PALANG['check_update'] = 'Check for update';
+$PALANG['wait'] = 'Please Wait...';
+$PALANG['main_welcome'] = 'Welcome to OpenVISP Admin';
+
+$PALANG['pLogin_welcome'] = 'Please enter your login and password here';
+$PALANG['pLogin_username'] = 'Login (email)';
+$PALANG['pLogin_password'] = 'Password';
+$PALANG['pLogin_crypto'] = 'Security code';
+$PALANG['pLogin_button'] = 'Login';
+$PALANG['pLogin_username_incorrect'] = '<div class="standout">Your login is not correct. Make sure that you login with your email address!</div>';
+$PALANG['pLogin_password_incorrect'] = '<div class="standout">Your password is not correct!</div>';
+$PALANG['pLogin_session_stolen'] = 'Your session seems to be stolen, please login in again.';
+$PALANG['pLogin_update_warning'] = 'Warning! Current version in database is older than the currently running version. Please proceed to upgrade.';
+$PALANG['pLogin_update_button'] = 'Upgrade to ';
+$PALANG['pLogin_update_error_unknown'] = 'Warning! The current version in database is unknown. Please check your batabase setup and have a check if you ran /setup.php';
+
+$PALANG['pMenu_overview'] = 'Overview';
+$PALANG['pMenu_addfilter'] = 'Add a mail filter';
+$PALANG['pMenu_pdf_domainemail'] = 'PDF of domain email account';
+$PALANG['pMenu_listfilter'] = 'List mail filter';
+$PALANG['pMenu_create_alias'] = 'Add Alias';
+$PALANG['pMenu_import_alias'] = 'Import Alias';
+$PALANG['pMenu_create_mailbox'] = 'Add Mailbox';
+$PALANG['pMenu_tools_domain'] = 'Domain Tools';
+$PALANG['pMenu_search_mail'] = 'Search Mail';
+$PALANG['pMenu_sendmail'] = 'Send Email';
+$PALANG['pMenu_password'] = 'Password';
+$PALANG['pMenu_viewlog'] = 'View Log';
+$PALANG['pMenu_logout'] = 'Main menu';
+$PALANG['pMenu_server_list_model'] = 'Server Model List';
+$PALANG['pMenu_server_list'] = 'Server List';
+$PALANG['pMenu_server_add'] = 'Add a new Server';
+$PALANG['pMenu_server_add_model'] = 'Add a new Server Model';
+$PALANG['pMenu_server_add_app'] = 'Add a new application';
+
+$PALANG['pTools_reset_quarantine'] = 'Reset the quarantine of the following users'; 
+$PALANG['pTools_reset_begindate'] = 'Begin to reset <br/>From ';
+$PALANG['pTools_reset_enddate'] = 'To ';
+$PALANG['pTools_find_mail'] = 'Find some email';
+$PALANG['pTools_find_mail_from'] = 'From';
+$PALANG['pTools_find_mail_to'] = 'To';
+$PALANG['pTools_find_mail_begindate'] = 'Date <br/>From';
+$PALANG['pTools_find_mail_enddate'] = 'To';
+$PALANG['pTools_reset_quarantine_status_successfull'] = 'Quarantine status reset successfully';
+$PALANG['pTools_reset_quarantine_status_unsuccessfull'] = 'Quarantine status was not reset successfully';
+$PALANG['pTools_clean_quarantine'] = 'Clean the quarantine of ';
+$PALANG['pTools_find_mail_error_on_date'] = 'You have an error in the date field';
+$PALANG['pTools_Greylisting'] = 'Greylisting ';
+
+$PALANG['pMain_welcome'] = 'OpenVISP Admin: Mail administration tools.';
+$PALANG['pMain_overview'] = 'List your aliases and mailboxes. You can add / edit / delete them from here.';
+$PALANG['pMain_create_alias'] = 'Create a new alias for your domain.';
+$PALANG['pMain_create_mailbox'] = 'Create a new mailbox for your domain.';
+$PALANG['pMenu_import_mailbox'] = 'Import some new mailbox';
+$PALANG['pMain_sendmail'] = 'Send an email to one of your newly created mailboxes.';
+$PALANG['pMain_password'] = 'Change the password for your admin account.';
+$PALANG['pMain_viewlog'] = 'View the log files.';
+$PALANG['pMain_logout'] = 'Go to main menu';
+
+$PALANG['pMainMain_welcome'] = 'Welcome to OpenVISP Admin main menu!';
+$PALANG['pMainMain_mail_admin'] = 'Manage your emails, mailboxes, aliases...';
+$PALANG['pMainMain_web_admin'] = 'Manage your websites and ftp accounts...';
+$PALANG['pMainMain_database_admin'] = 'Manage your databases';
+$PALANG['pMainMain_mail_site_admin'] = 'Manage the mail domains and associated data (site admin)';
+$PALANG['pMainMain_datacenter_admin'] = 'Access to datacenter options';
+$PALANG['pMainMain_logout'] = 'Logout from the system';
+$PALANG['pMain_userinfo'] = 'Informations about your account';
+$PALANG['pMainMain_account_admin'] = 'Account Management';
+$PALANG['pMainMain_server_admin'] = 'Server Management';
+$PALANG['pMainMain_policyd'] = 'Policyd Management';
+
+$PALANG['pOverview_button'] = 'Go';
+$PALANG['pOverview_limit_none'] = 'NONE';
+$PALANG['pOverview_tasks'] = 'Tasks';
+$PALANG['pOverview_no_add_aliases'] = ' Alias quota exceeded ';
+$PALANG['pOverview_no_add_mailboxes'] = ' Mailbox quota exceeded ';
+$PALANG['pOverview_welcome_text'] = 'Please select domain to add / modify email or aliases or use directly the following list : ';
+$PALANG['pOverview_welcome'] = 'Overview for ';
+$PALANG['pOverview_alias_alias_count'] = 'Aliases';
+$PALANG['pOverview_alias_mailbox_count'] = 'Mailboxes';
+$PALANG['pOverview_alias_address'] = 'From';
+$PALANG['pOverview_alias_goto'] = 'To';
+$PALANG['pOverview_alias_modified'] = 'Last Modified';
+$PALANG['pOverview_alias_amavisd'] = 'Amavisd';
+$PALANG['pOverview_mailbox_username'] = 'Email';
+$PALANG['pOverview_mailbox_name'] = 'Name';
+$PALANG['pOverview_mailbox_quota'] = 'Quota (MB)';
+$PALANG['pOverview_mailbox_modified'] = 'Last Modified';
+$PALANG['pOverview_mailbox_active'] = 'Active';
+$PALANG['pOverview_mailbox_amavisd'] = 'Amavisd';
+$PALANG['pOverview_mailbox_responder'] = 'AutoResponder';
+$PALANG['pOverview_mailbox_responder_inactive'] = 'No';
+$PALANG['pOverview_mailbox_responder_active'] = 'Yes';
+$PALANG['pOverview_mailbox_responder_inactive_msg'] = 'Inactive';
+$PALANG['pOverview_mailbox_responder_msg_status'] = 'AutoResponder status';
+$PALANG['pOverview_mailbox_responder_msg_status_inactive'] = 'AutoResponder status : Inactive';
+$PALANG['pOverview_mailbox_responder_msg_status_active'] = 'AutoResponder status : Active';
+$PALANG['pOverview_mailbox_forward'] = 'Forwarded';
+$PALANG['pOverview_mailbox_forward_active'] = 'Yes';
+$PALANG['pOverview_mailbox_forward_inactive'] = 'No';
+$PALANG['pOverview_mailbox_size'] = 'Mailbox Size in KB';
+$PALANG['pOverview_mailbox_quarantine'] = 'View Quarantine';
+$PALANG['pOverview_statistics'] = 'statistics';
+$PALANG['pOverview_mailbox_quota_used'] = 'Quota used';
+$PALANG['pOverview_get_security'] = 'Security';
+
+$PALANG['pStats_welcome'] = 'Statitics informations for ';
+
+$PALANG['pUserinfo_welcome'] = 'Informations about your account';
+$PALANG['pUserinfo_button'] = 'Commit your changes';
+$PALANG['pUserinfo_company'] = 'Company';
+$PALANG['pUserinfo_address'] = 'Address';
+$PALANG['pUserinfo_city'] = 'City';
+$PALANG['pUserinfo_postal_code'] = 'Postal Code';
+$PALANG['pUserinfo_weburl'] = 'Web Site';
+$PALANG['pUserinfo_email'] = 'Contact Email ';
+$PALANG['pUserinfo_phone'] = 'Contact Phone';
+$PALANG['pUserinfo_fax'] = 'Fax';
+$PALANG['pUserinfo_logo'] = 'Logo';
+$PALANG['pUserinfo_emailsupport'] = 'Support Email';
+$PALANG['pUserinfo_phonesupport'] = 'Phone Support ';
+$PALANG['pUserinfo_webfaq'] = 'Web Faq';
+$PALANG['pUserinfo_websupport'] = 'Internet Support';
+
+$PALANG['pPdf_tel'] = 'Phone';
+$PALANG['pPdf_fax'] = 'Fax';
+$PALANG['pPdf_web'] = 'Web';
+$PALANG['pPdf_object'] = 'Object';
+$PALANG['pPdf_phonesupport'] = 'By phone';
+$PALANG['pPdf_mailsupport'] = 'By email';
+$PALANG['pPdf_faqsupport'] = 'By our faq website';
+$PALANG['pPdf_noquota'] = 'No quota';
+$PALANG['pPdf_quota'] = 'Quota';
+$PALANG['pPdf_quota_mb'] = 'MB';
+$PALANG['pPdf_email']= 'Email';
+$PALANG['pPdf_login'] = 'Login';
+$PALANG['pPdf_password'] = 'Password';
+$PALANG['pPdf_serverpop3'] = 'POP3 server';
+$PALANG['pPdf_serverimap'] = 'IMAP server';
+$PALANG['pPdf_serversmtp'] = 'SMTP server';
+$PALANG['pPdf_serverwebmail'] = 'Webmail server';
+$PALANG['pPdf_string1'] = 'Your Email account parameters.';
+$PALANG['pPdf_string2'] = "Dear customer, you have subscribed an Email account %s company.\n\nTo allow you to use it without any pain, we invite you to keep this paper preciously and never show this information to anybody.\n\nYou are responsible for any usage of your accounts.\n\n\nIf you have any problems or doubts ask us for changing your password.\n\n";
+$PALANG['pPdf_string3'] = '   (WARNING !!! This server uses SMTP Auth)';
+$PALANG['pPdf_string4'] = 'Please use your ISP SMTP server.';
+$PALANG['pPdf_smtpauth'] = "Please note that the SMTP server needs the configuration of your mail user agent with SMTP Auth. If it is not yet done,\nplease verify your parameters using the FAQ.";
+$PALANG['pPdf_string5'] = 'For any problems about mail, please contact our technical support :';
+$PALANG['pPdf_byphone'] = 'By phone';
+$PALANG['pPdf_bymail'] = 'By mail';
+$PALANG['pPdf_website'] = 'By the website';
+$PALANG['pPdf_wwwfaq'] = 'You can also consult our website FAQ';
+
+$PALANG['pOverview_get_domain'] = 'Domain';
+$PALANG['pOverview_get_aliases'] = 'Aliases';
+$PALANG['pOverview_get_mailboxes'] = 'Mailboxes';
+$PALANG['pOverview_get_quota'] = 'Mailbox Quota (MB)';
+$PALANG['pOverview_get_antivirus'] = 'Antivirus';
+$PALANG['pOverview_get_spamass'] = 'Antispam';
+$PALANG['pOverview_get_modified'] = 'Last Modified';
+$PALANG['pOverview_get_total_mailbox_size'] = 'Total mailbox Disk usage';
+$PALANG['pOverview_get_security'] = 'Security';
+$PALANG['pOverview_get_security_edit'] = 'Edit';
+
+$PALANG['pDelete_delete_error'] = '<div class="standout">Unable to delete the entry ';
+$PALANG['pDelete_domain_error'] = '<div class="standout">This domain is not yours ';
+
+$PALANG['pCreate_alias_welcome'] = 'Create a new alias for your domain.';
+$PALANG['pCreate_alias_address'] = 'Alias';
+$PALANG['pCreate_alias_address_text_error1'] = '<br /><div class="standout">The ALIAS is not valid!</div>';
+$PALANG['pCreate_alias_address_text_error2'] = '<br /><div class="standout">This email address already exists, please choose a different one!</div>';
+$PALANG['pCreate_alias_address_text_error3'] = '<br /><div class="standout">You have reached your limit to create aliases!</div>';
+$PALANG['pCreate_alias_goto'] = 'To';
+$PALANG['pCreate_alias_button'] = 'Add Alias';
+$PALANG['pCreate_alias_goto_text'] = 'Where the mail needs to be send to.';
+$PALANG['pCreate_alias_goto_text_error'] = 'Where the email needs to go.<br /><div class="standout">The TO is not valid!</div>';
+$PALANG['pCreate_alias_result_error'] = '<div class="standout">Unable to add the alias to the alias table!</div>';
+$PALANG['pCreate_alias_result_error_exist'] = '<div class="standout">Unable to add twice the same alias!</div>';
+$PALANG['pCreate_alias_result_succes'] = 'The alias has been added to the alias table!';
+$PALANG['pCreate_alias_catchall_text'] = 'To create a catch-all use an "*" as alias.<br />For domain to domain forwarding use "*@domain.tld" as to.';
+$PALANG['pCreate_alias_policy_fail'] = '<div class="standout">Failed to add new alias in policyd</div>';
+$PALANG['pCreate_alias_policy_ok'] = 'New alias in policyd inserted';
+
+$PALANG['pDelete_alias_policy_fail'] = '<div class="standout">Failed to delete alias in policyd</div>';
+$PALANG['pDelete_alias_policy_ok'] = 'Deleted alias in policyd</div>';
+
+$PALANG['pCreate_domain_alias_goto_text'] = 'Where the domain needs to be aliased to.';
+$PALANG['pCreate_domain_alias_welcome'] = 'Create a new domain alias';
+$PALANG['pCreate_domain_alias_new_domain'] = 'New domain';
+$PALANG['pCreate_domain_alias_is'] = ' -> ';
+$PALANG['pCreate_domain_alias_button'] = 'Add a new domain aliase';
+$PALANG['pCreate_domain_alias_text_error1'] = '<br><div class="standout">Please add a domain name</div>';
+$PALANG['pCreate_domain_alias_text_error2'] = '<br><div class="standout">This domain already exist in local domains</div>';
+$PALANG['pCreate_domain_alias_text_error3'] = '<br><div class="standout">This domains has been already added into domain aliases</div>';
+$PALANG['pCreate_domain_alias_result_error'] = '<div class="standout">Unable to add the domain alias into domain alias table!</div>';
+$PALANG['pCreate_domain_alias_result_succes'] = 'The domain alias has been added !';
+
+$PALANG['pEdit_alias_welcome'] = 'Edit an alias for your domain.<br />One entry per line.';
+$PALANG['pEdit_alias_address'] = 'Alias';
+$PALANG['pEdit_alias_address_error'] = '<div class="standout">Unable to locate alias!</div>';
+$PALANG['pEdit_alias_goto'] = 'To';
+$PALANG['pEdit_alias_goto_text_error1'] = '<div class="standout">You didn\'t enter anything at To</div>';
+$PALANG['pEdit_alias_goto_text_error2'] = '<div class="standout">The email address that you have entered is not valid: ';
+$PALANG['pEdit_alias_domain_error'] = '<div class="standout">This domain is not yours: ';
+$PALANG['pEdit_alias_button'] = 'Edit Alias';
+$PALANG['pEdit_alias_result_error'] = '<div class="standout">Unable to modify the alias!</div>';
+
+$PALANG['pImport_mailbox_welcome'] = 'Import some new mailbox for your domain.';
+
+$PALANG['pCreate_mailbox_welcome'] = 'Create a new mailbox for your domain.';
+$PALANG['pCreate_mailbox_username'] = 'Username';
+$PALANG['pCreate_mailbox_username_text_error1'] = '<br /><div class="standout">The EMAIL is not valid!</div>';
+$PALANG['pCreate_mailbox_username_text_error2'] = '<br /><div class="standout">This email address already exists, please choose a different one!</div>';
+$PALANG['pCreate_mailbox_username_text_error3'] = '<br /><div class="standout">You have reached your limit to create mailboxes!</div>';
+$PALANG['pCreate_mailbox_password'] = 'Password';
+$PALANG['pCreate_mailbox_password2'] = 'Password (again)';
+$PALANG['pCreate_mailbox_password_text'] = 'Password for POP3/IMAP';
+$PALANG['pCreate_mailbox_password_text_error'] = 'Password for POP3/IMAP<br /><div class="standout">The passwords that you supplied don\'t match!<br />Or are empty!</div>';
+$PALANG['pCreate_mailbox_password_text_mismatch'] = 'Password for POP3/IMAP<br /><div class="standout">The passwords that you supplied don\'t match!</div>';
+$PALANG['pCreate_mailbox_name'] = 'Name';
+$PALANG['pCreate_mailbox_name_text'] = 'Full name';
+$PALANG['pCreate_mailbox_quota'] = 'Quota';
+$PALANG['pCreate_mailbox_quota_max'] = 'Max:';
+$PALANG['pCreate_mailbox_quota_text'] = 'MB';
+$PALANG['pCreate_mailbox_quota_text_error'] = 'MB<br /><div class="standout">The quota that you specified is incorrect (too high or too small)!</div>';
+$PALANG['pCreate_mailbox_active'] = 'Active';
+$PALANG['pCreate_mailbox_mail'] = 'Create mailbox';
+$PALANG['pCreate_mailbox_button'] = 'Add Mailbox';
+$PALANG['pCreate_mailbox_result_error'] = '<div class="standout">Unable to add the mailbox to the mailbox table!</div>';
+$PALANG['pCreate_mailbox_result_succes'] = 'The mailbox has been added to the mailbox table!';
+// TODO: which one is the right one ?
+$PALANG['pCreate_mailbox_greylisting_error'] = 'An error occured when inserting greylisting';
+$PALANG['pCreate_account_greylisting_error'] = 'An error occured when inserting greylisting';
+
+$PALANG['pEdit_mailbox_welcome'] = 'Edit a mailbox for your domain.';
+$PALANG['pEdit_mailbox_username'] = 'Username';
+$PALANG['pEdit_mailbox_username_error'] = '<div class="standout">Unable to locate mailbox!</div>';
+$PALANG['pEdit_mailbox_password'] = 'New Password';
+$PALANG['pEdit_mailbox_password2'] = 'New Password (again)';
+$PALANG['pEdit_show_mailbox_password'] = 'Actual User Password';
+$PALANG['pEdit_mailbox_password_text_error'] = '<div class="standout">The passwords that you supplied don\'t match!</div>';
+$PALANG['pEdit_mailbox_name'] = 'Name';
+$PALANG['pEdit_mailbox_quota'] = 'Quota';
+$PALANG['pEdit_mailbox_quota_max'] = 'Max';
+$PALANG['pEdit_mailbox_quota_text'] = 'MB';
+$PALANG['pEdit_mailbox_quota_text_error'] = 'MB<br /><div class="standout">The quota that you specified is to high!</div>';
+$PALANG['pEdit_mailbox_domain_error'] = '<div class="standout">This domain is not yours: ';
+$PALANG['pEdit_mailbox_button'] = 'Edit Mailbox';
+$PALANG['pEdit_mailbox_result_error'] = '<div class="standout">Unable to modify the mailbox!</div>';
+
+$PALANG['pEdit_ftp_welcome'] = 'Modify the ftp account <br> -1 is unlimited';
+$PALANG['pEdit_ftp_login'] = 'FTP Login';
+$PALANG['pEdit_ftp_active'] = 'FTP Active';
+$PALANG['pEdit_ftp_quota_disk'] = 'Disk Quota (MB)';
+$PALANG['pEdit_ftp_button'] = 'Commit ftp account';
+$PALANG['pEdit_ftp_max_num_file'] = 'Maximum number of file';
+$PALANG['pEdit_ftp_bwul'] = 'Upload Bandwith';
+$PALANG['pEdit_ftp_bwdl'] = 'Download Bandwith';
+$PALANG['pEdit_ftp_error'] = 'you\'re not allowed to do that';
+$PALANG['pEdit_ftp_quota_error'] = 'you must insert a quota value';
+$PALANG['pEdit_ftp_maxsize_error'] = 'you must insert a maximum file size value';
+$PALANG['pEdit_ftp_bwul_error'] = 'you must insert a bandwith upload value';
+$PALANG['pEdit_ftp_bwdl_error'] = 'you must insert a bandwith download value';
+$PALANG['pEdit_ftp_ratioul'] = 'FTP Ratio Upload';
+$PALANG['pEdit_ftp_ratiodl'] = 'FTP Ratio Download';
+
+
+$PALANG['pEdit_security_mailbox_error'] = 'Mailbox security update error';
+$PALANG['pEdit_security_mailbox_error1'] = 'Mailbox security update error 1';
+$PALANG['pEdit_security_mailbox_error2'] = 'Mailbox security update error 2';
+$PALANG['pEdit_security_alias_error'] = 'Alias security update error ';
+
+$PALANG['pPassword_welcome'] = 'Change your login password.';
+$PALANG['pPassword_admin'] = 'Login';
+$PALANG['pPassword_admin_text_error'] = '<div class="standout">The LOGIN that you supplied doesn\'t match a mailbox!</div>';
+$PALANG['pPassword_password_current'] = 'Current Password';
+$PALANG['pPassword_password_current_text_error'] = '<div class="standout">You didn\'t supply your current password!</div>';
+$PALANG['pPassword_password'] = 'New Password';
+$PALANG['pPassword_password2'] = 'New Password (again)';
+$PALANG['pPassword_password_text_error'] = '<div class="standout">The passwords that you supplied don\'t match!<br />Or are empty!</div>';
+$PALANG['pPassword_button'] = 'Change Password';
+$PALANG['pPassword_result_error'] = '<div class="standout">Unable to change your password!</div>';
+$PALANG['pPassword_result_succes'] = 'Your password has been changed!';
+
+$PALANG['pViewlog_welcome'] = 'View the last 10 actions for ';
+$PALANG['pViewlog_timestamp'] = 'Timestamp';
+$PALANG['pViewlog_username'] = 'Admin';
+$PALANG['pViewlog_domain'] = 'Domain';
+$PALANG['pViewlog_action'] = 'Action';
+$PALANG['pViewlog_data'] = 'Data';
+
+$PALANG['pViewlog_button'] = 'Go';
+$PALANG['pViewlog_result_error'] = '<div class="standout">Unable to find the logs!</div>';
+
+$PALANG['pSendmail_welcome'] = 'Send an email.';
+$PALANG['pSendmail_admin'] = 'From';
+$PALANG['pSendmail_to'] = 'To';
+$PALANG['pSendmail_to_text_error'] = '<div class="standout">To is empty or is not a valid email address!</div>';
+$PALANG['pSendmail_subject'] = 'Subject';
+$PALANG['pSendmail_subject_text'] = 'Welcome';
+$PALANG['pSendmail_body'] = 'Body';
+$PALANG['pSendmail_body_text'] = <<<EOM
+Hi,
+
+Welcome to your new account.
+EOM;
+$PALANG['pSendmail_button'] = 'Send Message';
+$PALANG['pSendmail_result_error'] = '<div class="standout">Unable to create mailbox!</div>';
+$PALANG['pSendmail_result_succes'] = 'The mailbox has been created!';
+
+$PALANG['pVcp_welcome'] = 'Change your mailbox password.';
+$PALANG['pVcp_username'] = 'Email';
+$PALANG['pVcp_username_text_error'] = '<div class="standout">The EMAIL that you supplied doesn\'t match a mailbox!</div>';
+$PALANG['pVcp_password_current'] = 'Current Password';
+$PALANG['pVcp_password_current_text_error'] = '<div class="standout">You didn\'t supply your current password!</div>';
+$PALANG['pVcp_password'] = 'New Password';
+$PALANG['pVcp_password2'] = 'New Password (again)';
+$PALANG['pVcp_password_text_error'] = '<div class="standout">The passwords that you supplied don\'t match!<br />Or are empty!</div>';
+$PALANG['pVcp_button'] = 'Change Password';
+$PALANG['pVcp_result_error'] = '<div class="standout">Unable to change your password!</div>';
+$PALANG['pVcp_result_succes'] = 'Your password has been changed!';
+
+$PALANG['pAdminMenu_list_admin'] = 'Admin List';
+$PALANG['pAdminMenu_list_domain'] = 'Domain List';
+$PALANG['pAdminMenu_list_virtual'] = 'Virtual List';
+$PALANG['pAdminMenu_list_policy'] = 'Policy List';
+$PALANG['pAdminMenu_viewlog'] = 'View Log';
+$PALANG['pAdminMenu_backup'] = 'Backup';
+$PALANG['pAdminMenu_create_domain_admins'] = 'Domain Admins';
+$PALANG['pAdminMenu_create_admin'] = 'New Admin';
+$PALANG['pAdminMenu_create_domain'] = 'New Domain';
+$PALANG['pAdminMenu_create_domain_alias'] = 'New Domain Alias';
+$PALANG['pAdminMenu_create_alias'] = 'Add Alias';
+$PALANG['pAdminMenu_create_mailbox'] = 'Add Mailbox';
+$PALANG['pAdminMenu_logout'] = 'Go to main menu';
+$PALANG['pAdminMenu_import_admin'] = 'Import data';
+$PALANG['pAdminMenu_import_domain'] = 'Import Domain';
+$PALANG['pAdminMenu_list_ftp'] = 'FTP Account List';
+$PALANG['pAdminMenu_list_webvirtual'] = 'web virtual host list';
+
+$PALANG['pAdminList_admin_domain'] = 'Domain';
+$PALANG['pAdminList_admin_username'] = 'Admin';
+$PALANG['pAdminList_admin_count'] = 'Domains';
+$PALANG['pAdminList_admin_modified'] = 'Last Modified';
+$PALANG['pAdminList_admin_active'] = 'Active';
+
+$PALANG['pAdminList_domain_domain'] = 'Domain';
+$PALANG['pAdminList_domain_legend'] = 'Legend';
+$PALANG['pAdminList_domain_description'] = 'Description';
+$PALANG['pAdminList_domain_aliases'] = 'Aliases';
+$PALANG['pAdminList_domain_mailboxes'] = 'Mailboxes';
+$PALANG['pAdminList_domain_antivirus'] = 'AV';
+$PALANG['pAdminList_domain_greylisting'] = 'GL';
+$PALANG['pAdminList_domain_verify_mail'] = 'VM';
+$PALANG['pAdminList_domain_verify_domain'] = 'VD';
+$PALANG['pAdminList_domain_verify_spf'] = 'SPF';
+$PALANG['pAdminList_domain_antivirus_legend'] = 'Antivirus';
+$PALANG['pAdminList_domain_greylisting_legend'] = 'GreyListing';
+$PALANG['pAdminList_domain_verify_mail_legend'] = 'Verify Sender Mail';
+$PALANG['pAdminList_domain_verify_domain_legend'] = 'Verify Sender Domain (DNS, MX,...)';
+$PALANG['pAdminList_domain_verify_spf_legend'] = 'Verify SPF (Sender Policy Framework)';
+$PALANG['pAdminList_domain_spamass'] = 'Antispam';
+$PALANG['pAdminList_domain_maxquota'] = 'Max Quota (MB)';
+$PALANG['pAdminList_domain_modified'] = 'Last Modified';
+$PALANG['pAdminList_domain_active'] = 'Active';
+$PALANG['pAdminList_domain_alias_domain'] = 'Domain';
+$PALANG['pAdminList_domain_alias_aliasto'] = 'Aliased to';
+$PALANG['pAdminList_domain_alias_modified'] = 'Last Modified';
+$PALANG['pAdminList_domain_alias_active'] = 'Active';
+$PALANG['pAdminList_domain_sql'] = 'Databases';
+$PALANG['pAdminList_domain_status'] = 'Status';
+$PALANG['pAdminList_domain_ftp'] = 'Ftp Accounts';
+$PALANG['pAdminList_domain_http'] = 'Web Sites';
+$PALANG['pAdminList_domain_overquota'] = 'Sorry your have no more possibilities to add a new domain, please contact the administrator to increase your domain quota limit. ';
+
+$PALANG['pAdminList_policy_id'] = 'ID';
+$PALANG['pAdminList_policy_name'] = 'Description';
+$PALANG['pAdminList_policy_bypass_virus'] = 'NAV';
+$PALANG['pAdminList_policy_bypass_virus_legend'] = 'Disable antivirus';
+$PALANG['pAdminList_policy_bypass_spam'] = 'NAS';
+$PALANG['pAdminList_policy_bypass_spam_legend'] = 'Disable antispam';
+$PALANG['pAdminList_policy_bypass_banned_check'] = 'NBC';
+$PALANG['pAdminList_policy_bypass_banned_check_legend'] = 'Don\'t block forbiden extentions';
+$PALANG['pAdminList_policy_bypass_header'] = 'NHC';
+$PALANG['pAdminList_policy_bypass_header_legend'] = 'Don\'t check headers';
+$PALANG['pAdminList_policy_spam_mod_subj'] = 'ModH';
+$PALANG['pAdminList_policy_spam_mod_subj_legend'] = 'Modify mail\'s header if spam detected';
+$PALANG['pAdminList_policy_spam_subj_tag'] = 'TS';
+$PALANG['pAdminList_policy_spam_subj_tag_legend'] = 'Tag mail if spam detected';
+$PALANG['pAdminList_policy_warnvirusrecip'] = 'WR';
+$PALANG['pAdminList_policy_warnvirusrecip_legend'] = 'Warn recipient if virus detected';
+$PALANG['pAdminList_policy_spam_tag_level'] = 'ST';
+$PALANG['pAdminList_policy_spam_tag_level_legend'] = 'Tag mail as spam since this level'; 
+$PALANG['pAdminList_policy_spam_tag2_level'] = 'ST2';
+$PALANG['pAdminList_policy_spam_tag2_level_legend'] = 'Tag Spam level 2'; 
+$PALANG['pAdminList_policy_spam_kill_level'] = 'SK';
+$PALANG['pAdminList_policy_spam_kill_level_legend'] = 'Kill spam';
+$PALANG['pAdminList_policy_warnvirusrecip'] = 'WVR';
+$PALANG['pAdminList_policy_warnvirusrecip_legend'] = 'Warn Virus recipient';
+$PALANG['pAdminList_policy_warnbannedrecip'] = 'WBR';
+$PALANG['pAdminList_policy_warnbannedrecip_legend'] = 'Warn Banned recipient';
+$PALANG['pAdminList_policy_warnbadhrecip'] = 'WBHR';
+$PALANG['pAdminList_policy_warnbadhrecip_legend'] = 'Warn Bad Header recipient';
+
+$PALANG['pAdminList_virtual_button'] = 'Go';
+$PALANG['pAdminList_virtual_welcome'] = 'Overview for ';
+$PALANG['pAdminList_virtual_alias_alias_count'] = 'Aliases';
+$PALANG['pAdminList_virtual_alias_mailbox_count'] = 'Mailboxes';
+$PALANG['pAdminList_virtual_alias_address'] = 'From';
+$PALANG['pAdminList_virtual_alias_goto'] = 'To';
+$PALANG['pAdminList_virtual_alias_modified'] = 'Last Modified';
+$PALANG['pAdminList_virtual_alias_amavisd'] = 'Amavisd';
+$PALANG['pAdminList_virtual_mailbox_username'] = 'Email';
+$PALANG['pAdminList_virtual_mailbox_name'] = 'Name';
+$PALANG['pAdminList_virtual_mailbox_quota'] = 'Quota (MB)';
+$PALANG['pAdminList_virtual_mailbox_modified'] = 'Last Modified';
+$PALANG['pAdminList_virtual_mailbox_active'] = 'Active';
+$PALANG['pAdminList_virtual_mailbox_amavisd'] = 'Amavisd';
+$PALANG['pAdminList_virtual_ftp_welcome'] = 'Overview for ';
+$PALANG['pAdminList_virtual_ftp_count'] = 'Account ';
+$PALANG['pAdminList_virtual_ftp_login'] = 'Login';
+$PALANG['pAdminList_virtual_ftp_password'] = 'Password';
+$PALANG['pAdminList_virtual_ftp_dir'] = 'Directory';
+$PALANG['pAdminList_virtual_ftp_dlrt'] = 'Download ratio';
+$PALANG['pAdminList_virtual_ftp_uprt'] = 'Upload ratio';
+$PALANG['pAdminList_virtual_ftp_quotadk'] = 'Quota Disk';
+$PALANG['pAdminList_virtual_ftp_quotamfs'] = 'Maximum File Size';
+$PALANG['pAdminList_virtual_ftp_bwul'] = 'Upload Bandwith KB';
+$PALANG['pAdminList_virtual_ftp_bwdl'] = 'Download Bandwith KB';
+$PALANG['pAdminList_virtual_ftp_active'] = 'Active';
+$PALANG['pAdminList_virtual_ftp_used'] = 'Space Used';
+$PALANG['pAdminList_virtual_ftp_transfert'] = 'FTP Transfert on current Month';
+
+
+$PALANG['pAdminCreate_domain_welcome'] = 'Add a new domain';
+$PALANG['pAdminCreate_domain_domain'] = 'Domain';
+$PALANG['pAdminCreate_domain_domain_text_error'] = '<div class="standout">The domain already exists!</div>';
+$PALANG['pAdminCreate_domain_description'] = 'Description';
+$PALANG['pAdminCreate_domain_aliases'] = 'Aliases';
+$PALANG['pAdminCreate_domain_aliases_text'] = '0 = disable | -1 = unlimited';
+$PALANG['pAdminCreate_domain_mailboxes'] = 'Mailboxes';
+$PALANG['pAdminCreate_domain_mailboxes_text'] = '0 = disable | -1 = unlimited';
+$PALANG['pAdminCreate_domain_maxquota'] = 'Max Quota';
+$PALANG['pAdminCreate_domain_maxquota_text'] = 'MB<br /> 0 = disable | -1 = unlimited';
+$PALANG['pAdminCreate_domain_defaultaliases'] = 'Add default mail aliases';
+$PALANG['pAdminCreate_domain_antivirus'] = 'Antivirus';
+$PALANG['pAdminCreate_domain_spamass'] = 'Antispam';
+$PALANG['pAdminCreate_domain_vrfysender'] = 'Verify sender email address';
+$PALANG['pAdminCreate_domain_vrfydomain'] = 'Verify sender domain validity';
+$PALANG['pAdminCreate_domain_spf'] = 'Verify sender domain SPF valididy';
+$PALANG['pAdminCreate_domain_greylisting'] = 'Enable GreyListing';
+$PALANG['pAdminCreate_domain_heloforbidden'] = 'List of forbidden helo for smtp';
+$PALANG['pAdminCreate_domain_backupmx'] = 'Mail server is backup MX';
+$PALANG['pAdminCreate_domain_button'] = 'Add Domain';
+$PALANG['pAdminCreate_domain_result_error'] = '<div class="standout">Unable to add domain!</div>';
+$PALANG['pAdminCreate_domain_result_error2'] = '<div class="standout">Unable to add domain(2)!</div>';
+$PALANG['pAdminCreate_domain_result_error3'] = '<div class="standout">Unable to add domain(3)!</div>';
+$PALANG['pAdminCreate_domain_result_succes'] = 'Domain has been added!';
+
+$PALANG['pAdminEdit_domain_welcome'] = 'Edit a domain';
+$PALANG['pAdminEdit_domain_domain'] = 'Domain';
+$PALANG['pAdminEdit_domain_lock'] = 'Lock the Domain';
+$PALANG['pAdminEdit_domain_unlock'] = 'Unlock the Domain';
+$PALANG['pAdminEdit_domain_description'] = 'Description';
+$PALANG['pAdminEdit_domain_aliases'] = 'Aliases';
+$PALANG['pAdminEdit_domain_aliases_text'] = '0 = disable | -1 = unlimited';
+$PALANG['pAdminEdit_domain_mailboxes'] = 'Mailboxes';
+$PALANG['pAdminEdit_domain_mailboxes_text'] = '0 = disable | -1 = unlimited';
+$PALANG['pAdminEdit_domain_ftpaccount'] = 'Ftp Account';
+$PALANG['pAdminEdit_domain_maxdbquota'] = 'DB Quota';
+$PALANG['pAdminEdit_domain_maxdb'] = 'Max number DB';
+$PALANG['pAdminEdit_domain_maxdbaccount'] = 'Max DB User Account';
+$PALANG['pAdminEdit_domain_maxquota'] = 'Max Quota';
+$PALANG['pAdminEdit_domain_maxquota_text'] = 'MB<br /> 0 = disable | -1 = unlimited';
+$PALANG['pAdminEdit_domain_backupmx'] = 'Mail server is backup MX';
+$PALANG['pAdminEdit_domain_antivirus'] = 'Antivirus';
+$PALANG['pAdminEdit_domain_spamass'] = 'Antispam';
+$PALANG['pAdminEdit_domain_vrfysender'] = 'Verify sender email address';
+$PALANG['pAdminEdit_domain_vrfydomain'] = 'Verify sender domain validity';
+$PALANG['pAdminEdit_domain_vrfyspf'] = 'Verify SPF domain validity';
+$PALANG['pAdminEdit_domain_greylisting'] = 'Enable Greylisting';
+$PALANG['pAdminEdit_domain_active'] = 'Active';
+$PALANG['pAdminEdit_domain_button'] = 'Edit Domain';
+$PALANG['pAdminEdit_domain_result_error'] = '<div class="standout">Unable to modify domain!</div>';
+$PALANG['pAdminEdit_domain_pop'] = 'POP Server';
+$PALANG['pAdminEdit_domain_webmail'] = 'Webmail Server';
+$PALANG['pAdminEdit_domain_imap'] = 'IMAP Server';
+$PALANG['pAdminEdit_domain_smtp'] = 'SMTP Server';
+$PALANG['pAdminEdit_domain_address'] = 'Customer Address';
+$PALANG['pAdminEdit_domain_transport'] = 'IP address of primary mail server';
+$PALANG['pAdminEdit_domain_imap_allowed'] = 'Domain is allowed to use IMAP server';
+$PALANG['pAdminEdit_domain_pop_allowed'] = 'Domain is allowed to use POP server';
+$PALANG['pAdminEdit_domain_smtp_allowed'] = 'Domain is allowed to use SMTP Auth server';
+
+$PALANG['pAdminEdit_active_domain_spamass_welcome'] = 'Update Antispam rules of'; 
+$PALANG['pAdminEdit_active_domain_spamass_active'] = 'Enable Antispam';
+$PALANG['pAdminEdit_active_domain_spamass_active_text'] = 'Enable or disable antispam';
+$PALANG['pAdminEdit_active_domain_spamass_modsubj'] = 'Modify subject';
+$PALANG['pAdminEdit_active_domain_spamass_modsubj_text'] = 'Modify or not subject if spam detected';
+$PALANG['pAdminEdit_active_domain_spamass_satag'] = 'Tag value';
+$PALANG['pAdminEdit_active_domain_spamass_satag_text'] = 'Number between -999.0 to +999.0, default is 6.3';
+$PALANG['pAdminEdit_active_domain_spamass_savalue'] = 'Subject "Tag"';
+$PALANG['pAdminEdit_active_domain_spamass_savalue_text'] = 'to be insert on the begining of subject';
+$PALANG['pAdminEdit_active_domain_spamass_savalue2'] = 'Tag value 2';
+$PALANG['pAdminEdit_active_domain_spamass_savalue2_text'] = 'Number between -999.0 to +999.0, default is 6.3';
+$PALANG['pAdminEdit_active_domain_spamass_savalueK'] = 'Tag value kill';
+$PALANG['pAdminEdit_active_domain_spamass_savalueK_text'] = 'Number between -999.0 to +999.0, default is 6.3';
+$PALANG['pAdminEdit_active_domain_spamass_button'] = 'Update Antispam rules';
+$PALANG['pAdminEdit_active_domain_spamass_result_error'] = '<div class="standout">Unable to modify Antispam rules for this domain!</div>';
+
+$PALANG['pAdminEdit_active_domain_antivir_welcome'] = 'Update Antivirus rules of';
+$PALANG['pAdminEdit_active_domain_antivir_active'] = 'Enable Antivirus';
+$PALANG['pAdminEdit_active_domain_antivir_active_text'] = 'Enable or disable Antivirus';
+$PALANG['pAdminEdit_active_domain_antivir_header'] = 'Check header';
+$PALANG['pAdminEdit_active_domain_antivir_header_text'] = 'Check header';
+$PALANG['pAdminEdit_active_domain_antivir_banned'] = 'Check extentions';
+$PALANG['pAdminEdit_active_domain_antivir_banned_text'] = 'Check banned file type';
+$PALANG['pAdminEdit_active_domain_antivir_button'] = 'Update Antivirus rules';
+$PALANG['pAdminEdit_active_domain_antivir_result_error'] = '<div class="standout">Unable to modify Antivirus rules for this domain!</div>';
+
+$PALANG['pAdminEdit_active_domain_policy_welcome'] = 'Update policy of';
+$PALANG['pAdminEdit_active_domain_policy_button'] = 'Save';
+$PALANG['pAdminEdit_active_domain_policy_result_error'] = '<div class="standout">Unable to modify policy for this domain!</div>';
+
+$PALANG['pAdminEdit_active_domain_warn'] = 'Warning';
+$PALANG['pAdminEdit_active_domain_warnvirusrecip'] = 'Virus';
+$PALANG['pAdminEdit_active_domain_warnvirusrecip_text'] = 'Warn recipient of virus';
+$PALANG['pAdminEdit_active_domain_warnbannedrecip'] = 'Banned';
+$PALANG['pAdminEdit_active_domain_warnbannedrecip_text'] = 'Warn recipient of banned files';
+$PALANG['pAdminEdit_active_domain_warnbadhrecip'] = 'Headers';
+$PALANG['pAdminEdit_active_domain_warnbadhrecip_text'] = 'Warn recipient of bad headers';
+
+$PALANG['pAdminEdit_active_domain_backupmx_welcome'] = 'Update Backup MX of domain';
+$PALANG['pAdminEdit_active_domain_backupmx_transport'] = 'Transport mail by';
+$PALANG['pAdminEdit_active_domain_backupmx_transport_text'] = 'uses postfix transport map syntax';
+$PALANG['pAdminEdit_active_domain_backupmx_button'] = 'Update Backup MX';
+$PALANG['pAdminEdit_active_domain_backupmx_result_error'] = '<div class="standout">Unable to modify Backup MX for this domain!</div>';
+
+$PALANG['pAdminCreate_admin_welcome'] = 'Add a new domain admin';
+$PALANG['pAdminCreate_admin_username'] = 'Admin';
+$PALANG['pAdminCreate_admin_username_text'] = 'Email address';
+$PALANG['pAdminCreate_admin_username_text_error1'] = 'Email address<br /><div class="standout">Admin is not a valid email address!</div>';
+$PALANG['pAdminCreate_admin_username_text_error2'] = 'Email address<br /><div class="standout">The admin already exists or is not valid</div>';
+$PALANG['pAdminCreate_admin_password'] = 'Password';
+$PALANG['pAdminCreate_admin_password2'] = 'Password (again)';
+$PALANG['pAdminCreate_admin_password_text_error'] = '<div class="standout">The passwords that you supplied don\'t match!<br />Or are empty!</div>';
+$PALANG['pAdminCreate_admin_password_text_mismatch'] = '<div class="standout">The passwords that you supplied don\'t match!</div>';
+$PALANG['pAdminCreate_admin_button'] = 'Add Admin';
+$PALANG['pAdminCreate_admin_result_error'] = '<div class="standout">Unable to add admin!</div>';
+$PALANG['pAdminCreate_admin_result_succes'] = 'Admin has been added!';
+$PALANG['pAdminCreate_admin_address'] = 'Domain';
+$PALANG['pAdminCreate_admin_select_domains'] = 'Select domains for this new administrator (you can select the <i>ALL</i> domain if you want to create a Site Administrator like you)';
+
+$PALANG['pAdminEdit_admin_welcome'] = 'Edit a domain admin';
+$PALANG['pAdminEdit_admin_username'] = 'Admin';
+$PALANG['pAdminEdit_admin_password'] = 'Password';
+$PALANG['pAdminEdit_admin_password2'] = 'Password (again)';
+$PALANG['pAdminEdit_admin_password_text_error'] = '<div class="standout">The passwords that you supplied don\'t match!<br />Or are empty!</div>';
+$PALANG['pAdminEdit_admin_active'] = 'Active';
+$PALANG['pAdminEdit_admin_button'] = 'Edit Admin';
+$PALANG['pAdminEdit_admin_result_error'] = '<div class="standout">Unable to modify admin!</div>';
+$PALANG['pAdminEdit_admin_result_succes'] = 'Admin has been modified!';
+$PALANG['pAdminEdit_admin_select_domains'] = 'Select domains for this new administrator (you can select the <i>ALL</i> domain if you want to create a Site Administrator like you)';
+
+$PALANG['pUsersMenu_vacation'] = 'Auto Response';
+$PALANG['pUsersMenu_edit_alias'] = 'Change your forward';
+$PALANG['pUsersMenu_password'] = 'Change Password';
+$PALANG['pUsersMenu_filter'] = 'Edit your mail filters';
+
+$PALANG['pUsersMain_welcome'] = 'Change your mailbox settings here!';
+$PALANG['pUsersMain_vacation'] = 'Set an "out of office" message or auto responder for your mail.';
+$PALANG['pUsersMain_edit_alias'] = 'Change your email forwarding.';
+$PALANG['pUsersMain_password'] = 'Change your current password.';
+
+$PALANG['pUsersFilterTable_priority'] = 'Priority';
+$PALANG['pUsersFilterTable_filtername'] = 'Filter Name';
+$PALANG['pUsersFilterTable_filterfield'] = 'Field';
+$PALANG['pUsersFilterTable_fieldvalue'] = 'Field Value';
+$PALANG['pUsersFilterTable_action'] = 'Action';
+$PALANG['pUsersFilterTable_destination'] = 'Destination';
+$PALANG['pUsersFilterTable_active'] = 'Active';
+$PALANG['pUsersFilterTable_comments'] = 'Comments';
+$PALANG['pUsersFilterTable_creationdate'] = 'Creation Date';
+$PALANG['pUsersFilterTable_modificationdate'] = 'Modification Date';
+
+$PALANG['pUsersFilter_name'] = 'Filter Name';
+$PALANG['pUsersFilter_order'] = 'Execution Order';
+$PALANG['pUsersFilter_field'] = 'Filter Field';
+$PALANG['pUsersFilter_value'] = 'Value to find';
+$PALANG['pUsersFilter_comment'] = 'Filter Comments';
+$PALANG['pUsersFilter_destination'] = '';
+$PALANG['pUsersFilter_destination_folder'] = 'Destination Folder (if deliver is selected)';
+$PALANG['pUsersFilter_destination_email'] = 'Destination email (if forward is selected)';
+$PALANG['pUsersFilter_action'] = 'Action';
+$PALANG['pUsersFilter_addsubmit'] = 'Add Filter';
+$PALANG['pUsersFilter_modsubmit'] = 'Modify filter';
+$PALANG['pUsersFilter_active'] = 'Active Filter';
+$PALANG['pUsersFilter_not_owner'] = 'Sorry you are not the owner of this filter';
+$PALANG['pEdit_update_filter_error'] = 'Filter Update error ';
+$PALANG['pEdit_update_filter_succes'] = 'Filter Update succes ';
+$PALANG['pEdit_add_filter_error'] = 'Unable to add filter ';
+$PALANG['pEdit_add_filter_succes'] = 'Filter has been added ';
+$PALANG['pEdit_delete_filter_error'] = 'Unable to delete filter ';
+$PALANG['pEdit_delete_filter_succes'] = 'Filter has been Deleted';
+$PALANG['pEdit_mailbox_filter_error'] = 'Mailbox filter status not updated';
+$PALANG['pEdit_mailbox_filter_succes'] = 'Mailbox filter status updated';
+$PALANG['pUsersFilter_archive'] = 'Name of the archive folder <br>(%Y for the year, %m for the month, %d for the day)';
+
+$PALANG['pUsersVacation_welcome'] = 'Auto Response.';
+$PALANG['pUsersVacation_welcome_text'] = 'You already have an auto response configured!';
+$PALANG['pUsersVacation_subject'] = 'Subject';
+$PALANG['pUsersVacation_subject_text'] = 'Out of Office';
+$PALANG['pUsersVacation_body'] = 'Body';
+$PALANG['pUsersVacation_body_text'] = <<<EOM
+I will be away from <date> until <date>.
+For urgent matters you can contact <contact person>.
+EOM;
+$PALANG['pUsersVacation_button_away'] = 'Going Away';
+$PALANG['pUsersVacation_button_back'] = 'Coming Back';
+$PALANG['pUsersVacation_result_error'] = '<div class="standout">Unable to update your auto response settings!</div>';
+$PALANG['pUsersVacation_result_succes'] = 'Your auto response has been removed!';
+
+// Datacenter part
+$PALANG['pDataCenter_welcome'] = 'OpenVISP Admin: Welcome to DataCenter Options';
+$PALANG['pDataCenter_welcome_text'] = 'This part of OpenVISP Admin allow you to handle all your hosting actions :';
+$PALANG['pDataCenter_requests'] = 'Requests';
+$PALANG['pDataCenter_requests_text'] = 'Allow hosting users to make a request for a status,... anything about your hosted machine(s).';
+$PALANG['pDataCenter_apc'] = 'APC';
+$PALANG['pDataCenter_apc_text'] = 'Allow hosting users to control the power of hosted machine(s).';
+$PALANG['pDataCenter_stats'] = 'Stats';
+$PALANG['pDataCenter_stats_text'] = 'Allow hosting users to see statistics about ethernet ports of hosted machine(s).';
+$PALANG['pDataCenter_return_to_main'] = 'Main Menu';
+$PALANG['pDataCenter_return_to_main_text'] = 'Return to Main Menu';
+$PALANG['pDataCenter_su_welcome_text'] = 'Super users can use the following options :';
+$PALANG['pDataCenter_su_admin_apc'] = 'APC Admin';
+$PALANG['pDataCenter_su_admin_apc_text'] = 'Admin your APC here.';
+$PALANG['pDataCenter_su_admin_stats'] = 'Stats Admin';
+$PALANG['pDataCenter_su_admin_stats_text'] = 'Admin stats here.';
+$PALANG['pDataCenter_su_admin_users'] = 'Users Admin';
+$PALANG['pDataCenter_su_admin_users_text'] = 'Admin DataCenter Users here.';
+
+$PALANG['pDataCenter_requests_welcome'] = 'Request for hosting interventions.';
+$PALANG['pDataCenter_requests_intro'] = 'You can choose here what interventions you can do.';
+$PALANG['pDataCenter_requests_tech'] = 'Ask for help from a technician';
+$PALANG['pDataCenter_requests_admin'] = 'Ask for admin access';
+$PALANG['pDataCenter_requests_continue'] = 'Continue &gt;&gt;';
+$PALANG['pDataCenter_requests_warning'] = '<div class="standout"><b>Warning</b></div>';
+$PALANG['pDataCenter_requests_warning_text'] = '<div class="standout">Please don\'t forget to write in <b><i>comment</i></b> how to join you or this request will be void.</div>';
+$PALANG['pDataCenter_requests_tech_reboot'] = 'Reboot the hosted machine';
+$PALANG['pDataCenter_requests_tech_led'] = 'Ask for report of LED activity';
+$PALANG['pDataCenter_requests_tech_screen'] = 'Ask for report of screen activity';
+$PALANG['pDataCenter_requests_tech_ping'] = 'Ask for test of ping reachability (please specify in comment the ip address to ping)';
+$PALANG['pDataCenter_requests_tech_others'] = 'Others (please specify)';
+$PALANG['pDataCenter_requests_tech_comment'] = 'Comment';
+$PALANG['pDataCenter_requests_tech_error_comment'] = '<div class="standout">You must add a comment with information about your machine and how to join you. Please try again.</div>';
+$PALANG['pDataCenter_requests_tech_error_nocheckboxes'] = '<div class="standout">Please <b>select</b> a least one check box.</div>';
+$PALANG['pDataCenter_requests_sendmail'] = 'The following message has been sent to our Team, you will be contacted soon.';
+$PALANG['pDataCenter_requests_admin_type'] = 'Type of work';
+$PALANG['pDataCenter_requests_admin_datetime'] = 'Date and time of wanted access';
+$PALANG['pDataCenter_requests_admin_names'] = 'Names of accessing people';
+$PALANG['pDataCenter_requests_admin_comment'] = 'Comment';
+$PALANG['pDataCenter_requests_admin_error'] = '<div class="standout">You must fill <b>all</b> the form. Please try again.</div>';
+
+$PALANG['pDataCenter_adminapc_welcome'] = 'OpenVISP Admin DataCenter : Admin APC';
+$PALANG['pDataCenter_adminapc_apc_name'] = 'APC Name';
+$PALANG['pDataCenter_adminapc_apc_ip'] = 'IP';
+$PALANG['pDataCenter_adminapc_apc_modified'] = 'Modified';
+$PALANG['pDataCenter_adminapc_apc_active'] = 'Active';
+$PALANG['pDataCenter_adminapc_apc_add'] = 'Add a new APC';
+$PALANG['pDataCenter_adminapc_apc_print'] = 'Print SNMP APC Infos';
+$PALANG['pDataCenter_adminapc_apc_import_names'] = 'Import Outlet Infos into DB';
+$PALANG['pDataCenter_adminapc_apc_add_submit'] = 'Add this APC ';
+$PALANG['pDataCenter_adminapc_apc_add_error'] = '<div class="standout">The APC Name or IP address already exist or is wrong, please try again.</div>';
+$PALANG['pDataCenter_adminapc_apc_add_snmp_error'] = '<div class="standout">Cannot reach APC using SNMP. Please double check the SNMP Mib is configured correctly, the IP address is good and you have <b>LOGOUT</b> the APC MasterSwitch Device (telnet / web or serial) before adding this device.</div>';
+$PALANG['pDataCenter_adminapc_apc_add_sql_error'] = '<div class="standout">Cannot APC into DB.</div>';
+$PALANG['pDataCenter_adminapc_apc_add_done'] = 'The following APC has been added';
+$PALANG['pDataCenter_adminapc_apc_model'] = 'Model Number';
+$PALANG['pDataCenter_adminapc_apc_serial'] = 'Serial Number';
+$PALANG['pDataCenter_adminapc_apc_firmware'] = 'Firmware Revision';
+$PALANG['pDataCenter_adminapc_apc_hardware'] = 'Hardware Revision';
+$PALANG['pDataCenter_adminapc_apc_bornon'] = 'Born on Date';
+$PALANG['pDataCenter_adminapc_apc_netmask'] = 'Netmask';
+$PALANG['pDataCenter_adminapc_apc_mac'] = 'Mac Address';
+$PALANG['pDataCenter_adminapc_apc_uptime'] = 'Uptime';
+$PALANG['pDataCenter_adminapc_apc_amps'] = 'Current Load';
+$PALANG['pDataCenter_adminapc_apc_outlet'] = 'Outlet';
+$PALANG['pDataCenter_adminapc_apc_outlet_nb'] = 'Nb of Outlets';
+$PALANG['pDataCenter_adminapc_apc_outlet_name'] = 'Outlet Name';
+$PALANG['pDataCenter_adminapc_apc_outlet_on'] = '<img src="../images/on.gif" alt="Powered On"> (Powered On)';
+$PALANG['pDataCenter_adminapc_apc_outlet_off'] = '<img src="../images/off.gif" alt="Powered Off"> (Powered Off)';
+$PALANG['pDataCenter_adminapc_apc_outlet_reboot'] = '<img src="../images/reboot.gif" alt="Rebooting"> (Rebooting)';
+$PALANG['pDataCenter_adminapc_result_error'] = '<div class="standout">Unable to modify APC!</div>';
+$PALANG['pDataCenter_adminapc_apc_edit'] = 'Modify the followinc APC';
+$PALANG['pDataCenter_adminapc_apc_edit_outlet_on'] = 'On';
+$PALANG['pDataCenter_adminapc_apc_edit_outlet_off'] = 'Off';
+$PALANG['pDataCenter_adminapc_apc_edit_outlet_reboot'] = 'Reboot';
+$PALANG['pDataCenter_adminapc_apc_edit_outlet_changed'] = 'Updated';
+$PALANG['pDataCenter_adminapc_apc_edit_error'] = '<div class="standout">Errors while updating APC</div>';
+$PALANG['pDataCenter_adminapc_apc_edit_ok'] = 'Updating the following APC is now finished.';
+$PALANG['pDataCenter_adminapc_apc_edit_button'] = 'Updating the APC';
+
+$PALANG['pDataCenter_adminuser_username'] = 'Administrator Name';
+$PALANG['pDataCenter_adminuser_apc_ports'] = 'APC Ports';
+$PALANG['pDataCenter_adminuser_modified'] = 'Last modified';
+$PALANG['pDataCenter_adminuser_active'] = 'Active';
+$PALANG['pDataCenter_adminuser_add'] = 'Add User';
+$PALANG['pDataCenter_adminuser_add_user'] = 'Username (email)';
+$PALANG['pDataCenter_adminuser_add_full'] = 'Full Power ?';
+$PALANG['pDataCenter_adminuser_add_submit'] = 'Add this User';
+$PALANG['pDataCenter_adminuser_add_impossible'] = '<div class="standout">There is no available datacenter users in the database.</div>';
+$PALANG['pDataCenter_adminuser_add_apc_impossible'] = '<div class="standout">There is no available APC in the database.</div>';
+$PALANG['pDataCenter_adminuser_add_back'] = 'Go Back to the list of users.';
+$PALANG['pDataCenter_adminuser_add_error'] = '<div class="standout">Cannot add user.</div>';
+$PALANG['pDataCenter_adminuser_result_error'] = '<div class="standout">Unable to update user.</div>';
+$PALANG['pDataCenter_adminuser_edit_welcome'] = 'Change password for user';
+$PALANG['pDataCenter_adminuser_edit_submit'] = 'Update Administrator Password';
+
+$PALANG['pDataCenter_admindelete_result_error1'] = '<div class="standout">Unable to delete user from DataCenter Admin Table</div>';
+$PALANG['pDataCenter_admindelete_result_error2'] = '<div class="standout">Unable to delete user from Global Admin Table</div>';
+
+$PALANG['pDataCenter_adminuser_apc_welcome'] = 'Select APC to be accessed by user'; 
+$PALANG['pDataCenter_adminuser_apc_select_outlets'] = 'APC Outlets'; 
+$PALANG['pDataCenter_adminuser_apc_select_submit'] = 'Update APC for Administrator'; 
+
+$PALANG['pDataCenter_apc_welcome'] = 'You can control the following APC ports';
+$PALANG['pDataCenter_apc_welcome_none'] = '<div class="standout">We are sorry, but you don\'t have any acces to any APC.<br/>Please use another menu.</div>'; 
+$PALANG['pDataCenter_apc_legend'] = 'APC :: port number (port name)';
+$PALANG['pDataCenter_apc_password'] = 'User Password (security check)';
+$PALANG['pDataCenter_apc_submit'] = 'Set APC control (press once please)';
+$PALANG['pDataCenter_apc_error1'] = '<div class="standout">Password is needed to change APC port status. Please enter your login password.</div>';
+$PALANG['pDataCenter_apc_error2'] = '<div class="standout">Password is incorrect. Please enter your login password.</div>';
+
+$PALANG['pDataCenter_stats_welcome'] = 'You have access to the following statistics';
+$PALANG['pDataCenter_stats_welcome_none'] = '<div class="standout">There is no statistics configured for your account.</div>';
+
+$PALANG['pSmtp_auth_active'] = 'Smtp Auth Actived';
+$PALANG['pPop3_active'] = 'POP3 Actived';
+$PALANG['pImap_active'] = 'IMAP Actived';
+$PALANG['pSpam_report_active'] = 'Spam Report Actived';
+$PALANG['pGenerate_new_password'] = 'Generate a new password';
+
+$PALANG['pAdminImport_file'] = 'domains file';
+$PALANG['pAdminImport_help'] = 'The file must contains the informations like the following exemple :';
+$PALANG['pAdminImport_help2'] = 'domain ; backup_mx ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*';
+$PALANG['pAdminImport_help3'] = 'the options followed by  a  * can be 0 or 1 ';
+
+$PALANG['pImport_Users_file'] = 'users file';
+$PALANG['pImport_Users_help'] = 'The file must contains the informations like the following exemple :';
+$PALANG['pImport_Users_help2'] = 'FirstName ; LastName ; password ; email ; Mb quota ; active* ; create mailbox* ; smtpauth activated*';
+$PALANG['pImport_Users_help3'] = 'the options followed by  a  * can be 0 or 1<br/>The email can contain or not the @domain.tld';
+$PALANG['pImport_Users_return'] = 'Return to the domain details';
+
+$PALANG['pImport_Alias_file'] = 'Alias file';
+$PALANG['pImport_Alias_help'] = 'The file must contains the informations like the following exemple :';
+$PALANG['pImport_Alias_help2'] = 'Email from ; Email to';
+$PALANG['pImport_Alias_help3'] = 'Example : <br/>webmaster ; user1@domain.tld, user2@domain.tld; 1<br/>postmaster ; admin@domain.tld<br/><br/>';
+
+//
+// Accounts part
+//
+$PALANG['pAccountMenu_list_accounts'] = 'List accounts';
+$PALANG['pAccountMenu_add_account'] = 'Add account';
+$PALANG['pAccountMenu_viewlog'] = 'View logs';
+$PALANG['pAccountMenu_backup'] = 'Backup';
+$PALANG['pAccountMenu_import_accounts'] = 'Import accounts';
+$PALANG['pAccountMenu_logout'] = 'Return to main menu';
+
+$PALANG['pAccountList_account_username'] = 'Account';
+$PALANG['pAccountList_account_mail'] = 'Mail';
+$PALANG['pAccountList_account_datacenter'] = 'Datacenter';
+$PALANG['pAccountList_account_datacenter_sadmin'] = 'DS S-Admin';
+$PALANG['pAccountList_account_ftp'] = 'FTP';
+$PALANG['pAccountList_account_http'] = 'HTTP';
+$PALANG['pAccountList_account_modified'] = 'Last modification';
+$PALANG['pAccountList_account_enabled'] = 'Enabled';
+$PALANG['pAccountList_account_sadmin'] = 'Super Admin';
+$PALANG['pAccountList_account_domain'] = 'Domain';
+$PALANG['pAccountList_account_mysql'] = 'Mysql';
+$PALANG['pAccountList_account_postgresql'] = 'Postgresql';
+
+$PALANG['pAccountCreate_account_welcome'] = 'Create user account';
+$PALANG['pAccountCreate_account_username'] = 'Username';
+$PALANG['pAccountCreate_account_username_ex'] = 'user@domaine.tld';
+$PALANG['pAccountCreate_account_password'] = 'Password';
+$PALANG['pAccountCreate_account_password2'] = 'Password (confirmation)';
+$PALANG['pAccountCreate_account_button'] = 'Create user';
+$PALANG['pAccountCreate_account_result_error'] = 'An error occure while creating ';
+$PALANG['pAccountCreate_account_result_success'] = 'The account has been created';
+
+$PALANG['pAccountEdit_account_welcome'] = 'Edit user';
+$PALANG['pAccountEdit_account_block'] = 'Block user account ';
+$PALANG['pAccountEdit_account_unblock'] = 'Unblock user account ';
+$PALANG['pAccountEdit_account_username'] = 'Username';
+$PALANG['pAccountEdit_account_password'] = 'Password';
+$PALANG['pAccountEdit_account_password2'] = 'Password (confirmation)';
+$PALANG['pAccountEdit_account_button'] = 'Validate changements';
+$PALANG['pAccountEdit_account_result_error1'] = 'An error occure while updating password';
+$PALANG['pAccountEdit_account_result_error2'] = 'An error occure while updating services';
+$PALANG['pAccountEdit_account_active_error'] = 'An error occure while updating user status';
+
+$PALANG['pAccountList_details'] = 'Details for';
+
+$PALANG['pAccountList_ftp_login'] = 'Login';
+$PALANG['pAccountList_ftp_dir'] = 'HomeDir';
+$PALANG['pAccountList_ftp_quota'] = 'Quotas';
+$PALANG['pAccountList_ftp_bandwidthul'] = 'Upload speed limit';
+$PALANG['pAccountList_ftp_bandwidthdl'] = 'Download speed limit';
+$PALANG['pAccountList_ftp_created'] = 'Created';
+$PALANG['pAccountList_ftp_modified'] = 'Last modification';
+$PALANG['pAccountList_ftp_enabled'] = 'Enabled';
+
+$PALANG['pWhostMenu_domain'] = 'Manage your domains';
+$PALANG['pWhostMenu_add_ftp'] = 'Add a FTP account';
+$PALANG['pWhostMenu_add_website'] = 'Add a website';
+$PALANG['pWhostMenu_add_website_alias'] = 'Add a website alias';
+
+$PALANG['pWhostList_admin_no_domain'] = 'You had to declare your domains first!';
+$PALANG['pWhostList_admin_no_website'] = 'You had to declare your websites first!';
+$PALANG['pWhostList_admin_empty'] = 'No website';
+$PALANG['pWhostList_admin_ftp_empty'] = 'No FTP account';
+$PALANG['pWhostList_Admin_vhost'] = 'Site';
+$PALANG['pWhostList_Admin_DocumentRoot'] = 'Document Root';
+$PALANG['pWhostList_Admin_Alias'] = 'Alias';
+$PALANG['pWhostList_Admin_CustomLog'] = 'Custom Log';
+$PALANG['pWhostList_Admin_active'] = 'Enabled';
+
+$PALANG['pWhostCreate_ftp_welcome'] = 'Create a FTP account';
+$PALANG['pWhostCreate_ftp_website'] = 'Select the root directory';
+$PALANG['pWhostCreate_ftp_website_domain'] = 'Select the domain';
+$PALANG['pWhostCreate_ftp_website_virtual'] = 'Select the virtual';
+$PALANG['pWhostCreate_ftp_path']    = 'Indicate relative directory';
+$PALANG['pWhostCreate_ftp_username'] = 'Login';
+$PALANG['pWhostCreate_ftp_password'] = 'Password';
+$PALANG['pWhostCreate_ftp_password2'] = 'Confirm password';
+$PALANG['pWhostCreate_ftp_button'] = 'Create account';
+$PALANG['pWhostCreate_ftp_exist'] = 'This FTP account already exists';
+$PALANG['pWhostCreate_ftp_error_password'] = 'Password is different of password confirmation';
+$PALANG['pWhostCreate_ftp_error_empty_password'] = 'Password fields are empty<br>Please give two identical password';
+$PALANG['pWhostCreate_ftp_update_password'] = 'Ftp password updated successfully';
+$PALANG['pWhostCreate_ftp_update_error_password'] = 'Ftp password not updated';
+
+$PALANG['pWhostCreate_website_welcome'] = 'Create website';
+$PALANG['pWhostCreate_website_domain'] = 'Domain';
+$PALANG['pWhostCreate_website_vhost'] = 'Virtual host: <br>If nothing is specified<br>default aliases will be created.';
+$PALANG['pWhostCreate_website_button'] = 'Create the website';
+$PALANG['pWhostCreate_website_exist'] = 'This website already exists';
+
+$PALANG['pWhostCreate_website_alias_welcome'] = 'Create alias website';
+$PALANG['pWhostCreate_website_alias_vhost'] = 'Alias';
+$PALANG['pWhostCreate_website_alias_target'] = 'Website target';
+$PALANG['pWhostCreate_website_alias_button'] = 'Create the alias';
+
+$PALANG['pWhostEdit_website_welcome'] = 'Edit website';
+$PALANG['pWhostEdit_website_vhost'] = 'Virtual host';
+$PALANG['pWhostEdit_website_button'] = 'Change the website';
+$PALANG['pWhostEdit_website_error'] = 'An error occured when try to change the website';
+
+$PALANG['pWhostEdit_whost_active_error'] = 'Error while updating status of the website';
+$PALANG['pWhostEdit_whost_delete_error'] = 'Error while deleting site';
+$PALANG['pWhostEdit_ftp_active_error'] = 'Error while updating status of the FTP account';
+$PALANG['pWhostEdit_ftp_delete_error'] = 'Error while deleting FTP account';
+
+$PALANG['pWhost_pdf_ftp_subject'] = 'Your FTP account parameters.';
+$PALANG['pWhost_pdf_ftp_body'] = "Dear customer, you have subscribed an FTP account from %s company.\n\nTo allow you to use it without any pain, we invite you to keep this paper preciously and never show this information to anybody.\n\nYou are responsible for any usage of your accounts.\n\n\nIf you have any problems or doubts ask us for changing your password.\n\n";
+$PALANG['pWhost_pdf_ftpserver'] = "FTP Server";
+$PALANG['pWhost_pdf_quota_nb_file'] = "Maximum files allowed";
+$PALANG['PWhost_pdf_bandwidth_ul'] = "Upload Bandwidth";
+$PALANG['PWhost_pdf_bandwidth_dl'] = "Download Bandwidth";
+
+$PALANG['pWhost_pdf_db_subject'] = 'Your database account parameters.';
+$PALANG['pWhost_pdf_db_body'] = "Dear customer, you have subscribed an database account from %s company.\n\nTo allow you to use it without any pain, we invite you to keep this paper preciously and never show this information to anybody.\n\nYou are responsible for any usage of your accounts.\n\n\nIf you have any problems or doubts ask us for changing your password.\n\n";
+$PALANG['pWhost_pdf_dbserver'] = "Database Server";
+$PALANG['pWhost_pdf_dbname'] = "Database Name";
+$PALANG['pWhost_pdf_dbhost'] = "You connect to the server : %s\n\n";
+$PALANG['pWhost_pdf_dbport'] = "Port";
+
+$PALANG['pPolicyd_manage_ip_bl'] = 'Manage blacklisted IP';
+$PALANG['pPolicyd_manage_helo'] = 'Manage forbidden EHLO';
+$PALANG['pPolicyd_manage_sender_bl'] = 'Manage blacklisted Sender';
+$PALANG['pPolicyd_manage_ip_wl'] = 'Manage whitelisted IP';
+
+$PALANG['pPolicyd_form_ip'] = 'IP Address';
+$PALANG['pPolicyd_form_desc'] = 'Description';
+$PALANG['pPolicyd_form_date'] = 'Expiration (in days)';
+$PALANG['pPolicyd_form_helo'] = 'Helo to forbidden';
+$PALANG['pPolicyd_form_sender'] = 'Sender to blacklist';
+$PALANG['pPolicyd_form_exp'] = 'Expiration (days)';
+
+$PALANG['pPolicyd_table_ip'] = 'IP Address';
+$PALANG['pPolicyd_table_desc'] = 'Description';
+$PALANG['pPolicyd_table_exp'] = 'Ends';
+$PALANG['pPolicyd_table_insert'] = 'Insert date';
+$PALANG['pPolicyd_table_action'] = 'Action';
+$PALANG['pPolicyd_table_sender'] = 'Email';
+$PALANG['pPolicyd_table_helo'] = 'Helo forbiden';
+
+$PALANG['pPolicyd_never'] = 'Never';
+$PALANG['pPolicyd_delete'] = 'Delete';
+
+$PALANG['pQuarantine_Subject'] = 'Quarantine Access Code';
+$PALANG['pQuarantine_Part1'] = 'Here is your web access to your quarantine for the following date : ';
+$PALANG['pQuarantine_Resend_mail'] = 'Resend the mail of quarantine access';
+
+$PALANG['pOverquota_mail_Subject'] = 'Overquota userlist';
+$PALANG['pOverquota_mail_Body'] = 'Here are the overquota userlist for today : ';
+
+$PALANG['pGreylisting_active'] = 'Greylisting Actived';
+$PALANG['pMailfilter_active'] = 'Server side filtering Actived';
+
+$PALANG['pBytes'] = 'Bytes';
+$PALANG['pBytes_kilo'] = 'KBytes';
+$PALANG['pBytes_mega'] = 'MBytes';
+$PALANG['pBytes_giga'] = 'GBytes';
+$PALANG['pBytes_tera'] = 'TBytes';
+
+$PALANG['pAmavis_Delete'] = "</br>Your delete submit is in progress.";
+$PALANG['pAmavis_Submit'] = "</br>Your release submit is in progress.";
+$PALANG['pAmavis_Nospam'] = "</br>You have no more spam";
+
+$PALANG['lock_domain_ftp_account_successfull'] = "All ftp account for the domain are now locked";
+$PALANG['lock_domain_ftp_account_unsuccessfull'] = "An error occured, all ftp account for the domain are not locked";
+$PALANG['lock_user_account_successfull'] = "The user account is now locked";
+$PALANG['lock_user_account_unsuccessfull'] = "An error occured, the user account is not locked";
+$PALANG['lock_domain_mailbox_account_successfull'] = "All mailbox account for the domain are now locked";
+$PALANG['lock_domain_mailbox_account_unsuccessfull'] = "An error occured, all maibox account for the domain are not locked";
+$PALANG['lock_domain_successfull'] = "The domain is now locked";
+$PALANG['lock_domain_unsuccessfull'] = "An error occured, the domain is not locked";
+$PALANG['lock_domain_whost_successfull'] = "The web hosting is now locked";
+$PALANG['lock_domain_whost_unsuccessfull'] = "An error occured, the web hosting is not locked";
+
+$PALANG['unlock_domain_ftp_account_successfull'] = "All ftp account for the domain are now unlocked";
+$PALANG['unlock_domain_ftp_account_unsuccessfull'] = "An error occured, all ftp account for the domain are not unlocked";
+$PALANG['unlock_user_account_successfull'] = "The user account is now unlocked";
+$PALANG['unlock_user_account_unsuccessfull'] = "An error occured, the user account is not unlocked";
+$PALANG['unlock_domain_mailbox_account_successfull'] = "All mailbox account for the domain are now unlocked";
+$PALANG['unlock_domain_mailbox_account_unsuccessfull'] = "An error occured, all mailbox account for the domain are not unlocked";
+$PALANG['unlock_domain_successfull'] = "The domain is now unlocked";
+$PALANG['unlock_domain_unsuccessfull'] = "An error occured, the domain is not unlocked";
+$PALANG['unlock_domain_whost_successfull'] = "The web hosting  is now unlocked";
+$PALANG['unlock_domain_whost_unsuccessfull'] = "An error occured, the web hosting is not unlocked";
+
+
+$PALANG['pDBMenu_add_mysql_database'] = "Create a Mysql Database";
+$PALANG['pDBMenu_add_postgresql_database'] = "Create a Mysql Database";
+$PALANG['pDBList_db_name'] = "Database Name";
+$PALANG['pDBList_db_size'] = "Database Size";
+$PALANG['pDBList_db_created'] = "Database Created";
+$PALANG['pDBList_db_type'] = "Database Type";
+$PALANG['pDBList_db_active'] = "Database Active";
+$PALANG['pDBMenu_list_db'] = "Databases List";
+$PALANG['pDBCreate_db_mysql_welcome'] = "Add a new Mysql database";
+$PALANG['pDBCreate_db_domain'] = "Select the domain ";
+$PALANG['pDBCreate_db_number_to_create'] = "Number to create ";
+$PALANG['pDBCreate_db_create_database'] = "Create database(s)";
+$PALANG['pDBCreate_db_create_associated_user'] = "Create associated database(s) user(s)";
+$PALANG['pDBCreate_db_overquota'] = "Sorry you don't have enought quota left";
+$PALANG['pDBNot_admin'] = "Sorry you are not allowed to manage Databases";
+$PALANG['pDBCreate_user_mysql_welcome'] = "Add a new Mysql user";
+$PALANG['pDBMenu_add_mysql_user'] = "Create a Mysql User";
+$PALANG['pDBCreate_db_create_user'] = "Create database User(s)";
+$PALANG['pDBList_dbusername'] = "User Name";
+$PALANG['pDBList_db_access'] = "Database access";
+$PALANG['pDBCreate_db_choose_server'] = "Choose Mysql Server :";
+$PALANG['pDBList_db_host'] = "Database Server";
+
+$PALANG['pServerModel_exist'] = "Server Model already exist";
+$PALANG['pAdd_server_model'] = "Add new model";
+$PALANG['pAdd_server_model_successful'] = "New model added";
+$PALANG['pAdd_server_model_unsuccessful'] = "New model is not added";
+$PALANG['pAdd_server_name'] = "Server Name";
+$PALANG['pAdd_server_name_ok'] = "Add new server";
+$PALANG['pServer_exist'] = "Server name already exist";
+$PALANG['pAdd_server_successful'] = "New server added";
+$PALANG['pAdd_server_unsuccessful'] = "New server is not added";
+$PALANG['pApplication_login'] = "Login for application";
+$PALANG['pApplication_password'] = "Password for application";
+$PALANG['pApplication_name'] = "Application Name";
+$PALANG['pApplication_desc'] = "Application Description";
+$PALANG['pAdd_app'] = "Add Application";
+$PALANG['pAdd_app_successful'] = "New application added";
+$PALANG['pAdd_app_unsuccessful'] = "New application is not added";
+$PALANG['pApplication_version'] = "Application Version";
+$PALANG['pApplication_group'] = "Application Group";
+$PALANG['pMenu_server_list_app'] = "Application List";
+$PALANG['pMenu_server_list_ip'] = "Manage IP Address";
+
+$PALANG['pAdd_server_public_ip'] = "Add a public ip";
+$PALANG['pAdd_server_private_ip'] = "Add a private ip";
+$PALANG['pAdd_server_role'] = "Add a role";
+$PALANG['pAdd_server_app'] = "Add an application";
+$PALANG['pAdd_server_role'] = "Add a role";
+$PALANG['pAdd_server_desc'] = "Server Description";
+$PALANG['pAdd_server_fqdn'] = "Server Full Qualified Domain Name";
+$PALANG['pServer_public_ip'] = "Server Public IP";
+$PALANG['pServer_private_ip'] = "Server Private IP";
+$PALANG['pServer_ip_prv_used'] = "Private IP already used";
+$PALANG['pServer_ip_pub_used'] = "Public IP already used";
+$PALANG['pServer_ip_notprv'] = "IP is not a private one";
+$PALANG['pServer_ip_notpub'] = "IP is not a public one";
+$PALANG['pServer_edit'] = 'Edit';
+$PALANG['pServer_delete'] = 'Delete';
+$PALANG['pServer_manage_application'] = 'Manage Application';
+
+$PALANG['pModify_Server_Info_OK'] = "Server Informations successfully modified";
+$PALANG['pModify_Server_Info_KO'] = "Server Informations unsuccessfully modified";
+$PALANG['pModify_Server_IP_OK'] = "Server IP Informations successfully modified";
+$PALANG['pModify_Server_IP_KO'] = "Server IP Informations unsuccessfully modified";
+$PALANG['pModify_Server_Apps_OK'] = "Server Application Informations successfully modified";
+$PALANG['pModify_Server_Apps_KO'] = "Server Application Informations unsuccessfully modified";
+$PALANG['pModify_server_name_ok'] = "Modify server";
+
+$PALANG['pCreate_Admin_Account_Not_Email'] = "The";
+
+
+?>

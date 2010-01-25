@@ -1,0 +1,16 @@
+#
+# pgsql-virtual.cf
+#
+# Postfix virtual_alias_maps
+# Postfix is final destination for the specified list of domains. Mail
+# is delivered via the virtual_transport mail delivery transport.
+#
+
+user            = user
+password        = password
+dbname          = database
+hosts           = host
+table           = alias
+select_field    = goto
+where_field     = address
+additional_conditions = and active = 'true'

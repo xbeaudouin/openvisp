@@ -1,0 +1,103 @@
+Amavisd-new and MySQL:
+---------------------
+
+Amavisd allow to control which user address should be
+scan by an antivirus or an antispam. This can be managed
+via a web interface and MySQL.
+
+This file describe procedure to link amavisd with MySQL for current release.
+
+1 - Update alias & mailbox table:
+---------------------------------
+
+	use postfix;
+	ALTER TABLE alias ADD policy_id CHAR(1) DEFAULT '0' NOT NULL;
+	ALTER TABLE mailbox ADD policy_id CHAR(1) DEFAULT '0' NOT NULL;
+
+2 - Create policy table:
+------------------------
+
+/!\ : the attribute SERIAL was introduced with MySQL 4.1.0;
+		with earlier versions one can use INT UNSIGNED NOT NULL AUTO_INCREMENT
+
+	CREATE TABLE policy (
+  		id         SERIAL PRIMARY KEY,    -- this is the _only_ required field
+  		domain		 varchar(32),     -- not used by amavisd-new
+  		virus_lover          char(1),     -- Y/N
+  		spam_lover           char(1),     -- Y/N
+  		banned_files_lover   char(1),     -- Y/N
+  		bad_header_lover     char(1),     -- Y/N
+  		bypass_virus_checks  char(1),     -- Y/N
+  		bypass_spam_checks   char(1),     -- Y/N
+  		bypass_banned_checks char(1),     -- Y/N
+  		bypass_header_checks char(1),     -- Y/N
+  		spam_modifies_subj   char(1),     -- Y/N
+  		virus_quarantine_to      varchar(64) default NULL,
+  		spam_quarantine_to       varchar(64) default NULL,
+  		banned_quarantine_to     varchar(64) default NULL,
+  		bad_header_quarantine_to varchar(64) default NULL,
+  		spam_tag_level  float default NULL,  -- higher score inserts spam info headers
+  		spam_tag2_level float default NULL,  -- inserts 'declared spam' header fields
+  		spam_kill_level float default NULL,  -- higher score activates evasive actions, e.g.
+                                       -- reject/drop, quarantine, ...
+                                     -- (subject to final_spam_destiny setting)
+  		spam_dsn_cutoff_level float default NULL,
+  		addr_extension_virus      varchar(64) default NULL,
+  		addr_extension_spam       varchar(64) default NULL,
+  		addr_extension_banned     varchar(64) default NULL,
+  		addr_extension_bad_header varchar(64) default NULL,
+  		warnvirusrecip      char(1)     default NULL, -- Y/N
+  		warnbannedrecip     char(1)     default NULL, -- Y/N
+  		warnbadhrecip       char(1)     default NULL, -- Y/N
+  		newvirus_admin      varchar(64) default NULL,
+  		virus_admin         varchar(64) default NULL,
+  		banned_admin        varchar(64) default NULL,
+  		bad_header_admin    varchar(64) default NULL,
+  		spam_admin          varchar(64) default NULL,
+  		spam_subject_tag    varchar(64) default NULL,
+  		spam_subject_tag2   varchar(64) default NULL,
+  		message_size_limit  integer     default NULL, -- size in bytes
+  		banned_rulenames    varchar(64) default NULL  -- comma-separated list of ...
+   	     -- names mapped through %banned_rules to actual banned_filename tables
+	);
+
+Now, we populate the table:
+
+	INSERT INTO policy (id, domain,
+  		virus_lover, spam_lover, banned_files_lover, bad_header_lover,
+  		bypass_virus_checks, bypass_spam_checks,
+  		bypass_banned_checks, bypass_header_checks, spam_modifies_subj,
+  		spam_tag_level, spam_tag2_level, spam_kill_level) VALUES
+  		(1, 'Non-paying',    'N','N','N','N', 'Y','Y','Y','N', 'Y', 3.0,   7, 10);
+
+These values are 'defaults' values used by amavisd and they can be
+easily modified to reflect your own policy.
+
+3 - Update amavisd.conf:
+-----------------------
+
+@lookup_sql_dsn is use to define SQL informations to amavisd. It's possible
+to specify several databases to use them as failover with amavisd.
+
+	@lookup_sql_dsn =
+     ( ['DBI:mysql:database=mail;host=127.0.0.1;port=3306', 'user1', 'passwd1'],
+       ['DBI:mysql:database=mail;host=192.168.0.1;port=3306', 'username2', 'password2'] );
+	#     ["DBI:SQLite:dbname=$MYHOME/sql/mail_prefs.sqlite", '', ''] );
+
+@storage_sql_dsn is not use for the moment by OpenVISP so you can disabled this functionality
+by the line below.
+
+	@storage_sql_dsn = @lookup_sql_dsn;  # none, same, or separate database
+
+$sql_select_policy is use by amavisd to checked if a user/domain must be check for spam or virus
+so you must put the same line as below in your amavisd.conf to be able to check mails.
+
+	$sql_select_policy = 'SELECT *,alias.address FROM alias,policy'.
+    	' WHERE (alias.policy_id = policy.id) AND (alias.address IN (%k))';
+
+$sql_select_white_black_list is use to manage white and blacks lists but is not in use
+for the moment by OpenVISP so can disabled it in putting the follow line in your file configuration.
+
+	$sql_select_white_black_list = undef;  # undef disables SQL white/blacklisting
+
+

@@ -1,0 +1,166 @@
+
+=> WARNING ! WARNING ! WARNING : This file is *not* up to date.
+   Error given is INTENTIONNAL !!!
+
+- OpenVISP Admin Release 1.x --
+----------------------------------------------------------
+--
+-- Copyirght (c) 2005 Xavier Beaudouin & Assocation KAZAR
+-- Copyright (c) 2002, 2003, 2004 High5!
+-- Created by: Mischa Peters <mischa at high5 dot net>
+--
+-- NOTICE !!!!! This file is not up to date. Please double CHECK
+--              The MySQL version one BEFORE even thinking of using this one.
+--
+-- This is the complete database structure for OpenVISP Admin.
+-- If you are installing from scratch you can use this file otherwise you
+-- need to use the TABLE_CHANGES.TXT or TABLE_BACKUP_MX.TXT that comes with
+-- OpenVISP Admin.
+--
+-- There are 2 entries for a database user in the file.
+-- One you can use for Postfix and one for OpenVISP Admin.
+--
+-- If you run this file twice (2x) you will get an error on the user creation in MySQL.
+-- To go around this you can either comment the lines below "USE MySQL" until "USE postfix".
+-- Or you can remove the users from the database and run it again.
+--
+-- You can create the database from the shell with:
+--  creatuser -P postfix
+--        creatuser -P postfixadmin
+--        createdb postfix
+--        psql postfix
+--        postfix=# \i postfix.sql
+--        postfix=# \q
+--        exit
+--
+-- Postfix / PgSQL
+--
+-- USE mysql;
+-- Postfix user & password
+-- INSERT INTO user (Host, User, Password) VALUES ('localhost','postfix',password('postfix'));
+-- INSERT INTO db (Host, Db, User, Select_priv) VALUES ('localhost','postfix','postfix','Y');
+-- OpenVISP Admin user & password
+-- INSERT INTO user (Host, User, Password) VALUES ('localhost','postfixadmin',password('postfixadmin'));
+-- INSERT INTO db (Host, Db, User, Select_priv, Insert_priv, Update_priv, Delete_priv) VALUES ('localhost', 'postfix', 'postfixadmin', 'Y', 'Y', 'Y', 'Y');
+-- FLUSH PRIVILEGES;
+-- GRANT USAGE ON postfix.* TO postfix@localhost;
+-- GRANT SELECT, INSERT, DELETE, UPDATE ON postfix.* TO postfix@localhost;
+-- GRANT USAGE ON postfix.* TO postfixadmin@localhost;
+-- GRANT SELECT, INSERT, DELETE, UPDATE ON postfix.* TO postfixadmin@localhost;
+-- CREATE DATABASE postfix;
+-- USE postfix;
+\connect - postfixadmin
+
+SET SESSION AUTHORIZATION 'postfixadmin';
+--SET SESSION AUTHORIZATION 'postfix';
+
+--
+-- Table structure for table admin
+--
+CREATE TABLE "admin" (
+ "username" character varying(255) NOT NULL default '',
+ "password" character varying(255) NOT NULL default '',
+ "created" timestamp(13) with time zone default '1999-04-23 01:05:06',
+ "modified" timestamp(13) with time zone default '1999-04-23 01:05:06',
+ "active" boolean NOT NULL default true,
+ Constraint "admin_key" Primary Key ("username")
+);
+COMMENT ON TABLE admin IS 'OpenVISP Admin - Virtual Admins';
+--
+-- Table structure for table alias
+--
+CREATE TABLE alias (
+ address character varying(255) NOT NULL default '',
+ goto text NOT NULL,
+ domain character varying(255) NOT NULL default '',
+ created timestamp(13) with time zone default '1999-04-23 01:05:06',
+ modified timestamp(13) with time zone default '1999-04-23 01:05:06',
+ active boolean NOT NULL default true,
+--  PRIMARY KEY  ("address"),
+--  KEY address ("address"),
+ Constraint "alias_key" Primary Key ("address")
+);
+COMMENT ON TABLE alias IS 'OpenVISP Admin - Virtual Aliases';
+
+--
+-- Table structure for table domain
+--
+CREATE TABLE domain (
+ domain character varying(255) NOT NULL default '',
+ description character varying(255) NOT NULL default '',
+ aliases integer NOT NULL default '-1',
+ mailboxes integer NOT NULL default '-1',
+ maxquota integer NOT NULL default '-1',
+ transport character varying(255) default NULL,
+ backupmx boolean  NOT NULL default false,
+ created timestamp(13) with time zone default '1999-04-23 01:05:06',
+ modified timestamp(13) with time zone default '1999-04-23 01:05:06',
+ active boolean NOT NULL default true,
+--  PRIMARY KEY  ("domain"),
+--  KEY domain ("domain"),
+ Constraint "domain_key" Primary Key ("domain")
+
+);
+COMMENT ON TABLE domain IS 'OpenVISP Admin - Virtual Domains';
+
+--
+-- Table structure for table domain_admins
+--
+CREATE TABLE domain_admins (
+ username character varying(255) NOT NULL default '',
+ domain character varying(255) NOT NULL default '',
+ created timestamp(13) with time zone default '1999-04-23 01:05:06',
+ active boolean NOT NULL default true
+--  KEY username ("username")
+);
+COMMENT ON TABLE domain_admins IS 'OpenVISP Admin - Domain Admins';
+
+--
+-- Table structure for table log
+--
+CREATE TABLE log (
+ timestamp timestamp(13) with time zone default '1999-04-23 01:05:06',
+ username character varying(255) NOT NULL default '',
+ domain character varying(255) NOT NULL default '',
+ action character varying(255) NOT NULL default '',
+ data character varying(255) NOT NULL default ''
+--  KEY timestamp ("timestamp")
+);
+COMMENT ON TABLE log IS 'OpenVISP Admin - Log';
+
+--
+-- Table structure for table mailbox
+--
+CREATE TABLE mailbox (
+ username character varying(255) NOT NULL default '',
+ password character varying(255) NOT NULL default '',
+ name character varying(255) NOT NULL default '',
+ maildir character varying(255) NOT NULL default '',
+ quota integer NOT NULL default '-1',
+ domain character varying(255) NOT NULL default '',
+ created timestamp(13) with time zone default '1999-04-23 01:05:06',
+ modified timestamp(13) with time zone default '1999-04-23 01:05:06',
+ active boolean NOT NULL default true,
+--  PRIMARY KEY  ("username"),
+--  KEY username ("username"),
+ Constraint "mailbox_key" Primary Key ("username")
+
+);
+COMMENT ON TABLE mailbox IS 'OpenVISP Admin - Virtual Mailboxes';
+
+--
+-- Table structure for table vacation
+--
+CREATE TABLE vacation (
+ email character varying(255) NOT NULL default '',
+ subject character varying(255) NOT NULL default '',
+ body text NOT NULL,
+ cache text NOT NULL,
+ domain character varying(255) NOT NULL default '',
+ created timestamp(13) with time zone default '1999-04-23 01:05:06',
+ active boolean NOT NULL default true,
+--  PRIMARY KEY  ("email"),
+--  KEY email ("email")
+  Constraint "vacation_key" Primary Key ("email")
+);
+COMMENT ON TABLE vacation IS 'OpenVISP Admin - Virtual Vacation';

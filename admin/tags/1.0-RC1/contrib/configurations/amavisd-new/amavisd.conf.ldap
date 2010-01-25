@@ -1,0 +1,35 @@
+# enable ldap, first:
+$enable_ldap = 1;
+
+# our query filter (
+#
+# from /usr/sbin/amavisd:
+#
+# Hash lookups (e.g. for user+foo@sub.example.com) are performed in the
+# following sequence:
+#  - lookup for user+foo@sub.example.com
+#  - lookup for user@sub.example.com (only if $recipient_delimiter nonempty)
+#  - lookup for user+foo@
+#  - lookup for user@  (only if $recipient_delimiter is nonempty)
+#  - lookup for sub.example.com
+#  - lookup for .sub.example.com
+#  - lookup for .example.com
+#  - lookup for .com
+#  - lookup for .
+$default_ldap = {
+    hostname => 'localhost', tls => 0,
+    base => '<YOUR_BASEDN_HERE>', scope => 'sub',
+    query_filter => '(&(objectClass=posixAccount)(|(mail=%m)(alias=%m)(uid=%m)))'
+    };
+
+#
+# NOTE:
+# amavisd has an internal design, that makes a NON-EXISTING res_attr to have a POSITIVE result.
+# So ALL existing users MUST have
+#     amavisBypassSpamChecks=FALSE
+# in order to NOT do any spamcheck!
+# That's ugly, but not easy to fix because it has a generic lookup map specification like with
+# postfix.
+#
+$bypass_spam_checks_ldap  = {res_attr => 'amavisBypassSpamChecks'};
+

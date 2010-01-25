@@ -1,0 +1,16 @@
+user = policyd-username
+password = policyd-password
+hosts = localhost
+dbname = policyd-database
+query = SELECT CONCAT('spam@junc.org') FROM spamtrap WHERE _rcpt='%s' AND _active='1'
+#
+# spam@junc.org is my spam mailbox, it recieves no spam :-)
+#
+# if that will be in config.inc.php change the query
+#
+# in postfix main.cf
+#
+# add 
+#
+# virtual_alias_maps = proxy:mysql:/etc/postfix/openvisp_virtual_alias_maps.cf, proxy:mysql:/etc/postfix/policyd_spamtrap_alias_maps.cf
+#

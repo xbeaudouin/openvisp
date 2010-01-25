@@ -1,0 +1,44 @@
+--- vlogger	2008-08-30 12:34:21.000000000 +0200
++++ vlogger.save	2005-03-18 15:43:34.000000000 +0100
+@@ -502,28 +502,26 @@
+ 
+ # sub to update the database with the tracker data
+ sub dump_tracker {
+-
+     if ( keys(%tracker) > 0 ) {
+         my $dbh = DBI->connect( $DBI_DSN, $DBI_USER, $DBI_PASS )
+           or warn "DBI Error: $!";
+-
+         foreach my $key ( keys(%tracker) ) {
+             my $ts = time2str( "%m%d%Y", time() );
+             my $sth =
+-              $dbh->prepare( "SELECT stats_wwwusage.* FROM stats_wwwusage, zz_vw_webvhost  WHERE stats_wwwusage.whost_id=zz_vw_webvhost.id AND zz_vw_webvhost.virtual='" . $key
+-                . "' and stats_wwwusage.ldate='" . $ts . "'" );
+-            $sth->execute ;
++              $dbh->prepare( "select * from wwwusage where vhost='" . $key
++                . "' and ldate='" . $ts . "'" );
++            $sth->execute;
+             if ( $sth->rows ) {
+                 my $query =
+-                  "UPDATE stats_wwwusage, zz_vw_webvhost SET stats_wwwusage.bytes=stats_wwwusage.bytes+"
++                  "update wwwusage set bytes=bytes+"
+                   . $tracker{$key}
+-                  . " WHERE stats_wwwusage.whost_id=zz_vw_webvhost.id AND zz_vw_webvhost.virtual='" . $key
+-                  . "' and stats_wwwusage.ldate='" . $ts . "'";
++                  . " where vhost='" . $key
++                  . "' and ldate='" . $ts . "'";
+                 $dbh->do($query);
+             }
+             else {
+-                my $query = "INSERT INTO stats_wwwusage (whost_id, ldate, bytes) values ((SELECT id FROM zz_vw_webvhost WHERE virtual='$key'), '$ts', '$tracker{$key}')";
+-                $dbh->do($query)  or warn "INSERT  FAILED";
++                my $query = "insert into wwwusage (vhost, ldate, bytes) values ('$key', '$ts', '$tracker{$key}')";
++                $dbh->do($query);
+             }
+         }
+         $dbh->disconnect;
+@@ -562,3 +560,4 @@
+     print "-r, the template becomes %m%d%Y-%T-xxx.log.  SIZE is given in bytes.\n\n";
+     print "Report bugs to <shade\@chemlab.org>.\n";
+ }
++

@@ -1,0 +1,21 @@
+
+The mailbox_size.pl is a perl program that get information in the the mail account table.
+
+The program get email and maildir folder, and get the maildir folder size to store
+it in a another database.
+
+With this program we can follow user disk usage, this his usefull to know if we have
+to ask a customer if he need more space or not.
+
+Requirement :
+
+Perl
+DBI : Mysql
+Mysql
+Maildir folder has mail storage 
+
+Tested on a FreeBSD System but should work on any Unix.
+
+Release 1.0
+
+Creation.

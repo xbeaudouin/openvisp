@@ -1,0 +1,29 @@
+$Id: m0n0wall_radius.txt,v 1.1 2005/04/14 13:37:32 kiwi Exp $
+
+Radius Attributes for m0n0wall pptp access :
+
+Quickest for getting it to work:
+
+1) Edit clients.conf and add an entry for your NAS (the m0n0-box)
+2) Edit users and include:
+
+testuser Auth-Type := MS-CHAP, Password == thisisatest
+        Service-Type = Framed-User,
+        Framed-Protocol = PPP,
+        Framed-IP-Address = 192.168.11.22,
+        Framed-IP-Netmask = 255.255.255.240,
+        Framed-Routing = Broadcast-Listen,
+        Framed-Filter-Id = "std.ppp",
+        Framed-MTU = 1500,
+        Framed-Compression = Van-Jacobsen-TCP-IP
+3) configure m0n0-box
+4) configure freeradius and move towards pam/ldap/oracle setup (probably in that order ;-)
+     - adding reasonable DEFAULT entry with something like:
+       Framed-IP-Address = 192.168.11.16+,
+       Framed-IP-Netmask = 255.255.255.240,
+     could help if you want to keep it simple and use system auth.
+
+That's it from me, there are people who know better ...
+
+Thomas
+
