@@ -1,4 +1,6 @@
-Changes from v1.80 -> v1.9x
+Changes from policyd v1.80 -> v1.9x
+
+Note this is now OpenVISP Policyd, based on v1.9x tree.
 
 1. If you are upgrading from <= v1.80 then please add to policyd.conf:
 RCPT_ACL=0

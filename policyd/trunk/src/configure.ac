@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([policyd], [1.9x-200706261857], [policyd-devel@lists.sourceforge.net])
+AC_INIT([policyd], [1.00], [openvisp-devel@lists.oav.net])
 AC_CONFIG_SRCDIR([src/policyd.c])
 AC_CONFIG_HEADER([config.h])
 
