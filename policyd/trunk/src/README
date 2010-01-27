@@ -2,13 +2,15 @@
 # Policy Daemon aka OpenVISP Policyd (OVP) 
 ############################################
 
-  Policyd is an anti-spam plugin for Postfix (written in C) that
+  Ovp  is  an  anti-spam  plugin for Postfix (written in C) that
   does Greylisting, Sender-(envelope,  SASL or  host / ip)-based
   throttling (on messages and/or volume per  defined time unit),
   Spamtrap monitoring / blacklisting, helo auto blacklisting and
   helo randomization prevention (HRP).
 
 
+  OVP is a fork of Policyd v1.9x, see http://www.policyd.org/ for
+  more informations.
 
 ###
 # Greylisting
@@ -261,7 +263,7 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 
   # crontab -e
 
-  0 * * * * /usr/local/policyd/cleanup -c /usr/local/policyd/policyd.conf
+  0 * * * * /usr/local/ovp/cleanup -c /usr/local/ovp/ovp.conf
 
   questions / comments / ideas etc can goto:
   cami@mweb.co.za
@@ -273,7 +275,7 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 #########
 
 
-  Usage: /usr/local/policyd/policyd -c /usr/local/policyd/policyd.conf
+  Usage: /usr/local/ovp/ovpd -c /usr/local/ovp/ovp.conf
 
   Thats pretty much it, all configuration options are read out
   of the configuration file. A standard/demo configuration file
@@ -298,13 +300,13 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
     check_policy_service inet:127.0.0.1:10031
   ..
 
-  127.0.0.1 -> host policyd is on
-  10031     -> port policyd is listening on
+  127.0.0.1 -> host ovpd is on
+  10031     -> port ovpd is listening on
 
-  Please ensure that it matches your policyd.conf settings
+  Please ensure that it matches your ovp.conf settings
   for BINDHOST and BINDPORT.
 
-  If policyd is listening on an IPv6 address you should surround the IPv6 
+  If ovpd is listening on an IPv6 address you should surround the IPv6 
   address with brackets in main.cf.
 
     check_policy_service inet:[::1]:10031
@@ -315,10 +317,10 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 ############
 
   This code has only been tested on MySQL v4.xx (recommended) and v3.xx
-  Included is a file called 'DATABASE.mysql' which you can use to create
+  Included is a file called 'mysql.sql' which you can use to create
   all the necessary tables.
 
-  # mysql -p < DATABASE.mysql
+  # mysql -p < database/mysql.sql
   
 
   Permissions for policyd:
@@ -327,11 +329,11 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 
   Example for 1 host:
   
-    GRANT ALL ON policyd.* TO postfix@127.0.0.1 IDENTIFIED by 'p0stf1x';
+    GRANT ALL ON ovp.* TO postfix@127.0.0.1 IDENTIFIED by 'p0stf1x';
 
   Example for a netblock:
  
-    GRANT ALL ON policyd.* TO postfix@"192.168.0.0/255.255.255.0" \
+    GRANT ALL ON ovp.* TO postfix@"192.168.0.0/255.255.255.0" \
     IDENTIFIED by 'p0stf1x';
 
 
@@ -340,12 +342,12 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 # Whitelist
 #############
 
-  Included is a file called 'docs/WHITELIST.sql'. It contains several whitelisted
+  Included is a file called 'doc/whitelist.sql'. It contains several whitelisted
   hosts to cut down on false positives.
 
   Import it into mysql by doing:
 
-    mysql policyd < docs/WHITELIST.sql -p 
+    mysql policyd < doc/whitelist.sql -p 
     
 
   IP Whitelisting format: 
@@ -510,7 +512,7 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
 ##################
   
   # rcpt
-  Dec  2 20:40:05 localhost policyd: rcpt=8712, greylist=update, host=192.168.0.2
+  Dec  2 20:40:05 localhost ovpd: rcpt=8712, greylist=update, host=192.168.0.2
     (localhost), from=cami@mweb.co.za, to=camis@mweb.co.za
 
   rcpt is the number of times that Postfix has connected to policyd and issued
@@ -534,7 +536,7 @@ INSERT INTO throttle_rcpt (_rcpt,_count_max,_time_limit,_date)
   greylist=abuse        <- 2 or more mail delivery attempts within defined
                            TRIPLET_TIME (policyd.conf) 5 minutes of first attempt
   Example:
-   Dec  2 20:40:05 localhost policyd: greylist=update, host=192.168.0.2
+   Dec  2 20:40:05 localhost ovpd: greylist=update, host=192.168.0.2
      (localhost), from=cami@mweb.co.za, to=camis@mweb.co.za 
 
   # spamtrap / other

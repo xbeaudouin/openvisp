@@ -13,5 +13,5 @@ EXTRA_DIST+=contrib/policyd.spec.fedora
 
 EXTRA_DIST+=doc/blacklist_helo.sql doc/support.txt doc/whitelist.sql
 
-EXTRA_DIST+=policyd.conf
+EXTRA_DIST+=ovp.conf
 

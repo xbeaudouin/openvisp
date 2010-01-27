@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = policyd$(EXEEXT) cleanup$(EXEEXT) stats$(EXEEXT)
+bin_PROGRAMS = ovpd$(EXEEXT) cleanup$(EXEEXT) stats$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -52,20 +52,18 @@ cleanup_OBJECTS = $(am_cleanup_OBJECTS)
 cleanup_DEPENDENCIES =
 cleanup_LINK = $(CCLD) $(cleanup_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_policyd_OBJECTS = policyd-policyd.$(OBJEXT) \
-	policyd-syslog.$(OBJEXT) policyd-generic.$(OBJEXT) \
-	policyd-mysql.$(OBJEXT) policyd-greylist.$(OBJEXT) \
-	policyd-throttle.$(OBJEXT) policyd-sockets.$(OBJEXT) \
-	policyd-cidr.$(OBJEXT) policyd-spamtrap.$(OBJEXT) \
-	policyd-blacklist.$(OBJEXT) policyd-blacklist_helo.$(OBJEXT) \
-	policyd-whitelist.$(OBJEXT) policyd-throttle_host.$(OBJEXT) \
-	policyd-throttle_sasl.$(OBJEXT) \
-	policyd-throttle_from.$(OBJEXT) \
-	policyd-throttle_rcpt.$(OBJEXT) policyd-helo.$(OBJEXT) \
-	policyd-rcpt_acl.$(OBJEXT)
-policyd_OBJECTS = $(am_policyd_OBJECTS)
-policyd_DEPENDENCIES =
-policyd_LINK = $(CCLD) $(policyd_CFLAGS) $(CFLAGS) $(policyd_LDFLAGS) \
+am_ovpd_OBJECTS = ovpd-ovp.$(OBJEXT) ovpd-syslog.$(OBJEXT) \
+	ovpd-generic.$(OBJEXT) ovpd-mysql.$(OBJEXT) \
+	ovpd-greylist.$(OBJEXT) ovpd-throttle.$(OBJEXT) \
+	ovpd-sockets.$(OBJEXT) ovpd-cidr.$(OBJEXT) \
+	ovpd-spamtrap.$(OBJEXT) ovpd-blacklist.$(OBJEXT) \
+	ovpd-blacklist_helo.$(OBJEXT) ovpd-whitelist.$(OBJEXT) \
+	ovpd-throttle_host.$(OBJEXT) ovpd-throttle_sasl.$(OBJEXT) \
+	ovpd-throttle_from.$(OBJEXT) ovpd-throttle_rcpt.$(OBJEXT) \
+	ovpd-helo.$(OBJEXT) ovpd-rcpt_acl.$(OBJEXT)
+ovpd_OBJECTS = $(am_ovpd_OBJECTS)
+ovpd_DEPENDENCIES =
+ovpd_LINK = $(CCLD) $(ovpd_CFLAGS) $(CFLAGS) $(ovpd_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_stats_OBJECTS = stats-stats.$(OBJEXT) stats-cidr.$(OBJEXT) \
 	stats-syslog.$(OBJEXT) stats-generic.$(OBJEXT) \
@@ -81,8 +79,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(cleanup_SOURCES) $(policyd_SOURCES) $(stats_SOURCES)
-DIST_SOURCES = $(cleanup_SOURCES) $(policyd_SOURCES) $(stats_SOURCES)
+SOURCES = $(cleanup_SOURCES) $(ovpd_SOURCES) $(stats_SOURCES)
+DIST_SOURCES = $(cleanup_SOURCES) $(ovpd_SOURCES) $(stats_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -179,17 +177,17 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-policyd_SOURCES = policyd.c syslog.c generic.c mysql.c greylist.c \
-	throttle.c sockets.c cidr.c spamtrap.c blacklist.c \
-	blacklist_helo.c whitelist.c throttle_host.c throttle_sasl.c \
-	throttle_from.c throttle_rcpt.c helo.c rcpt_acl.c policyd.h
-policyd_LDADD = @LIBMYSQLCLIENT@
-policyd_LDFLAGS = -lm
-policyd_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
-cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c policyd.h
+ovpd_SOURCES = ovp.c syslog.c generic.c mysql.c greylist.c throttle.c \
+	sockets.c cidr.c spamtrap.c blacklist.c blacklist_helo.c \
+	whitelist.c throttle_host.c throttle_sasl.c throttle_from.c \
+	throttle_rcpt.c helo.c rcpt_acl.c ovp.h
+ovpd_LDADD = @LIBMYSQLCLIENT@
+ovpd_LDFLAGS = -lm
+ovpd_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
 cleanup_LDADD = @LIBMYSQLCLIENT@
 cleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
-stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c policyd.h
+stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
 stats_LDADD = @LIBMYSQLCLIENT@
 stats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 all: all-am
@@ -251,9 +249,9 @@ clean-binPROGRAMS:
 cleanup$(EXEEXT): $(cleanup_OBJECTS) $(cleanup_DEPENDENCIES) 
 	@rm -f cleanup$(EXEEXT)
 	$(cleanup_LINK) $(cleanup_OBJECTS) $(cleanup_LDADD) $(LIBS)
-policyd$(EXEEXT): $(policyd_OBJECTS) $(policyd_DEPENDENCIES) 
-	@rm -f policyd$(EXEEXT)
-	$(policyd_LINK) $(policyd_OBJECTS) $(policyd_LDADD) $(LIBS)
+ovpd$(EXEEXT): $(ovpd_OBJECTS) $(ovpd_DEPENDENCIES) 
+	@rm -f ovpd$(EXEEXT)
+	$(ovpd_LINK) $(ovpd_OBJECTS) $(ovpd_LDADD) $(LIBS)
 stats$(EXEEXT): $(stats_OBJECTS) $(stats_DEPENDENCIES) 
 	@rm -f stats$(EXEEXT)
 	$(stats_LINK) $(stats_OBJECTS) $(stats_LDADD) $(LIBS)
@@ -270,24 +268,24 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-mysql.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-sockets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-syslog.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-blacklist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-blacklist_helo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-cidr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-generic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-greylist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-helo.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-mysql.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-policyd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-rcpt_acl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-sockets.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-spamtrap.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-syslog.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-throttle.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-throttle_from.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-throttle_host.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-throttle_rcpt.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-throttle_sasl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policyd-whitelist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-blacklist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-blacklist_helo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-cidr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-generic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-greylist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-helo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-mysql.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-ovp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-rcpt_acl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-sockets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-spamtrap.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-syslog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_from.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_host.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_rcpt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_sasl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-whitelist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-cidr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-generic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-mysql.Po@am__quote@
@@ -393,257 +391,257 @@ cleanup-mysql.obj: mysql.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
 
-policyd-policyd.o: policyd.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-policyd.o -MD -MP -MF $(DEPDIR)/policyd-policyd.Tpo -c -o policyd-policyd.o `test -f 'policyd.c' || echo '$(srcdir)/'`policyd.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-policyd.Tpo $(DEPDIR)/policyd-policyd.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='policyd.c' object='policyd-policyd.o' libtool=no @AMDEPBACKSLASH@
+ovpd-ovp.o: ovp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-ovp.o -MD -MP -MF $(DEPDIR)/ovpd-ovp.Tpo -c -o ovpd-ovp.o `test -f 'ovp.c' || echo '$(srcdir)/'`ovp.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-ovp.Tpo $(DEPDIR)/ovpd-ovp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ovp.c' object='ovpd-ovp.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-policyd.o `test -f 'policyd.c' || echo '$(srcdir)/'`policyd.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-ovp.o `test -f 'ovp.c' || echo '$(srcdir)/'`ovp.c
 
-policyd-policyd.obj: policyd.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-policyd.obj -MD -MP -MF $(DEPDIR)/policyd-policyd.Tpo -c -o policyd-policyd.obj `if test -f 'policyd.c'; then $(CYGPATH_W) 'policyd.c'; else $(CYGPATH_W) '$(srcdir)/policyd.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-policyd.Tpo $(DEPDIR)/policyd-policyd.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='policyd.c' object='policyd-policyd.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-ovp.obj: ovp.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-ovp.obj -MD -MP -MF $(DEPDIR)/ovpd-ovp.Tpo -c -o ovpd-ovp.obj `if test -f 'ovp.c'; then $(CYGPATH_W) 'ovp.c'; else $(CYGPATH_W) '$(srcdir)/ovp.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-ovp.Tpo $(DEPDIR)/ovpd-ovp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ovp.c' object='ovpd-ovp.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-policyd.obj `if test -f 'policyd.c'; then $(CYGPATH_W) 'policyd.c'; else $(CYGPATH_W) '$(srcdir)/policyd.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-ovp.obj `if test -f 'ovp.c'; then $(CYGPATH_W) 'ovp.c'; else $(CYGPATH_W) '$(srcdir)/ovp.c'; fi`
 
-policyd-syslog.o: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-syslog.o -MD -MP -MF $(DEPDIR)/policyd-syslog.Tpo -c -o policyd-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-syslog.Tpo $(DEPDIR)/policyd-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='policyd-syslog.o' libtool=no @AMDEPBACKSLASH@
+ovpd-syslog.o: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-syslog.o -MD -MP -MF $(DEPDIR)/ovpd-syslog.Tpo -c -o ovpd-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-syslog.Tpo $(DEPDIR)/ovpd-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpd-syslog.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
 
-policyd-syslog.obj: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-syslog.obj -MD -MP -MF $(DEPDIR)/policyd-syslog.Tpo -c -o policyd-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-syslog.Tpo $(DEPDIR)/policyd-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='policyd-syslog.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-syslog.obj: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-syslog.obj -MD -MP -MF $(DEPDIR)/ovpd-syslog.Tpo -c -o ovpd-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-syslog.Tpo $(DEPDIR)/ovpd-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpd-syslog.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
 
-policyd-generic.o: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-generic.o -MD -MP -MF $(DEPDIR)/policyd-generic.Tpo -c -o policyd-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-generic.Tpo $(DEPDIR)/policyd-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='policyd-generic.o' libtool=no @AMDEPBACKSLASH@
+ovpd-generic.o: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-generic.o -MD -MP -MF $(DEPDIR)/ovpd-generic.Tpo -c -o ovpd-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-generic.Tpo $(DEPDIR)/ovpd-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpd-generic.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
 
-policyd-generic.obj: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-generic.obj -MD -MP -MF $(DEPDIR)/policyd-generic.Tpo -c -o policyd-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-generic.Tpo $(DEPDIR)/policyd-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='policyd-generic.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-generic.obj: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-generic.obj -MD -MP -MF $(DEPDIR)/ovpd-generic.Tpo -c -o ovpd-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-generic.Tpo $(DEPDIR)/ovpd-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpd-generic.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
 
-policyd-mysql.o: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-mysql.o -MD -MP -MF $(DEPDIR)/policyd-mysql.Tpo -c -o policyd-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-mysql.Tpo $(DEPDIR)/policyd-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='policyd-mysql.o' libtool=no @AMDEPBACKSLASH@
+ovpd-mysql.o: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-mysql.o -MD -MP -MF $(DEPDIR)/ovpd-mysql.Tpo -c -o ovpd-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-mysql.Tpo $(DEPDIR)/ovpd-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpd-mysql.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
 
-policyd-mysql.obj: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-mysql.obj -MD -MP -MF $(DEPDIR)/policyd-mysql.Tpo -c -o policyd-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-mysql.Tpo $(DEPDIR)/policyd-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='policyd-mysql.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-mysql.obj: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-mysql.obj -MD -MP -MF $(DEPDIR)/ovpd-mysql.Tpo -c -o ovpd-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-mysql.Tpo $(DEPDIR)/ovpd-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpd-mysql.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
 
-policyd-greylist.o: greylist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-greylist.o -MD -MP -MF $(DEPDIR)/policyd-greylist.Tpo -c -o policyd-greylist.o `test -f 'greylist.c' || echo '$(srcdir)/'`greylist.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-greylist.Tpo $(DEPDIR)/policyd-greylist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='greylist.c' object='policyd-greylist.o' libtool=no @AMDEPBACKSLASH@
+ovpd-greylist.o: greylist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-greylist.o -MD -MP -MF $(DEPDIR)/ovpd-greylist.Tpo -c -o ovpd-greylist.o `test -f 'greylist.c' || echo '$(srcdir)/'`greylist.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-greylist.Tpo $(DEPDIR)/ovpd-greylist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='greylist.c' object='ovpd-greylist.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-greylist.o `test -f 'greylist.c' || echo '$(srcdir)/'`greylist.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-greylist.o `test -f 'greylist.c' || echo '$(srcdir)/'`greylist.c
 
-policyd-greylist.obj: greylist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-greylist.obj -MD -MP -MF $(DEPDIR)/policyd-greylist.Tpo -c -o policyd-greylist.obj `if test -f 'greylist.c'; then $(CYGPATH_W) 'greylist.c'; else $(CYGPATH_W) '$(srcdir)/greylist.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-greylist.Tpo $(DEPDIR)/policyd-greylist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='greylist.c' object='policyd-greylist.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-greylist.obj: greylist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-greylist.obj -MD -MP -MF $(DEPDIR)/ovpd-greylist.Tpo -c -o ovpd-greylist.obj `if test -f 'greylist.c'; then $(CYGPATH_W) 'greylist.c'; else $(CYGPATH_W) '$(srcdir)/greylist.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-greylist.Tpo $(DEPDIR)/ovpd-greylist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='greylist.c' object='ovpd-greylist.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-greylist.obj `if test -f 'greylist.c'; then $(CYGPATH_W) 'greylist.c'; else $(CYGPATH_W) '$(srcdir)/greylist.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-greylist.obj `if test -f 'greylist.c'; then $(CYGPATH_W) 'greylist.c'; else $(CYGPATH_W) '$(srcdir)/greylist.c'; fi`
 
-policyd-throttle.o: throttle.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle.o -MD -MP -MF $(DEPDIR)/policyd-throttle.Tpo -c -o policyd-throttle.o `test -f 'throttle.c' || echo '$(srcdir)/'`throttle.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle.Tpo $(DEPDIR)/policyd-throttle.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle.c' object='policyd-throttle.o' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle.o: throttle.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle.o -MD -MP -MF $(DEPDIR)/ovpd-throttle.Tpo -c -o ovpd-throttle.o `test -f 'throttle.c' || echo '$(srcdir)/'`throttle.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle.Tpo $(DEPDIR)/ovpd-throttle.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle.c' object='ovpd-throttle.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle.o `test -f 'throttle.c' || echo '$(srcdir)/'`throttle.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle.o `test -f 'throttle.c' || echo '$(srcdir)/'`throttle.c
 
-policyd-throttle.obj: throttle.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle.obj -MD -MP -MF $(DEPDIR)/policyd-throttle.Tpo -c -o policyd-throttle.obj `if test -f 'throttle.c'; then $(CYGPATH_W) 'throttle.c'; else $(CYGPATH_W) '$(srcdir)/throttle.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle.Tpo $(DEPDIR)/policyd-throttle.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle.c' object='policyd-throttle.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle.obj: throttle.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle.obj -MD -MP -MF $(DEPDIR)/ovpd-throttle.Tpo -c -o ovpd-throttle.obj `if test -f 'throttle.c'; then $(CYGPATH_W) 'throttle.c'; else $(CYGPATH_W) '$(srcdir)/throttle.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle.Tpo $(DEPDIR)/ovpd-throttle.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle.c' object='ovpd-throttle.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle.obj `if test -f 'throttle.c'; then $(CYGPATH_W) 'throttle.c'; else $(CYGPATH_W) '$(srcdir)/throttle.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle.obj `if test -f 'throttle.c'; then $(CYGPATH_W) 'throttle.c'; else $(CYGPATH_W) '$(srcdir)/throttle.c'; fi`
 
-policyd-sockets.o: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-sockets.o -MD -MP -MF $(DEPDIR)/policyd-sockets.Tpo -c -o policyd-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-sockets.Tpo $(DEPDIR)/policyd-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='policyd-sockets.o' libtool=no @AMDEPBACKSLASH@
+ovpd-sockets.o: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-sockets.o -MD -MP -MF $(DEPDIR)/ovpd-sockets.Tpo -c -o ovpd-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-sockets.Tpo $(DEPDIR)/ovpd-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpd-sockets.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
 
-policyd-sockets.obj: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-sockets.obj -MD -MP -MF $(DEPDIR)/policyd-sockets.Tpo -c -o policyd-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-sockets.Tpo $(DEPDIR)/policyd-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='policyd-sockets.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-sockets.obj: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-sockets.obj -MD -MP -MF $(DEPDIR)/ovpd-sockets.Tpo -c -o ovpd-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-sockets.Tpo $(DEPDIR)/ovpd-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpd-sockets.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
 
-policyd-cidr.o: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-cidr.o -MD -MP -MF $(DEPDIR)/policyd-cidr.Tpo -c -o policyd-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-cidr.Tpo $(DEPDIR)/policyd-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='policyd-cidr.o' libtool=no @AMDEPBACKSLASH@
+ovpd-cidr.o: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-cidr.o -MD -MP -MF $(DEPDIR)/ovpd-cidr.Tpo -c -o ovpd-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-cidr.Tpo $(DEPDIR)/ovpd-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpd-cidr.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
 
-policyd-cidr.obj: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-cidr.obj -MD -MP -MF $(DEPDIR)/policyd-cidr.Tpo -c -o policyd-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-cidr.Tpo $(DEPDIR)/policyd-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='policyd-cidr.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-cidr.obj: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-cidr.obj -MD -MP -MF $(DEPDIR)/ovpd-cidr.Tpo -c -o ovpd-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-cidr.Tpo $(DEPDIR)/ovpd-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpd-cidr.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
 
-policyd-spamtrap.o: spamtrap.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-spamtrap.o -MD -MP -MF $(DEPDIR)/policyd-spamtrap.Tpo -c -o policyd-spamtrap.o `test -f 'spamtrap.c' || echo '$(srcdir)/'`spamtrap.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-spamtrap.Tpo $(DEPDIR)/policyd-spamtrap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spamtrap.c' object='policyd-spamtrap.o' libtool=no @AMDEPBACKSLASH@
+ovpd-spamtrap.o: spamtrap.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-spamtrap.o -MD -MP -MF $(DEPDIR)/ovpd-spamtrap.Tpo -c -o ovpd-spamtrap.o `test -f 'spamtrap.c' || echo '$(srcdir)/'`spamtrap.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-spamtrap.Tpo $(DEPDIR)/ovpd-spamtrap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spamtrap.c' object='ovpd-spamtrap.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-spamtrap.o `test -f 'spamtrap.c' || echo '$(srcdir)/'`spamtrap.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-spamtrap.o `test -f 'spamtrap.c' || echo '$(srcdir)/'`spamtrap.c
 
-policyd-spamtrap.obj: spamtrap.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-spamtrap.obj -MD -MP -MF $(DEPDIR)/policyd-spamtrap.Tpo -c -o policyd-spamtrap.obj `if test -f 'spamtrap.c'; then $(CYGPATH_W) 'spamtrap.c'; else $(CYGPATH_W) '$(srcdir)/spamtrap.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-spamtrap.Tpo $(DEPDIR)/policyd-spamtrap.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spamtrap.c' object='policyd-spamtrap.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-spamtrap.obj: spamtrap.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-spamtrap.obj -MD -MP -MF $(DEPDIR)/ovpd-spamtrap.Tpo -c -o ovpd-spamtrap.obj `if test -f 'spamtrap.c'; then $(CYGPATH_W) 'spamtrap.c'; else $(CYGPATH_W) '$(srcdir)/spamtrap.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-spamtrap.Tpo $(DEPDIR)/ovpd-spamtrap.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='spamtrap.c' object='ovpd-spamtrap.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-spamtrap.obj `if test -f 'spamtrap.c'; then $(CYGPATH_W) 'spamtrap.c'; else $(CYGPATH_W) '$(srcdir)/spamtrap.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-spamtrap.obj `if test -f 'spamtrap.c'; then $(CYGPATH_W) 'spamtrap.c'; else $(CYGPATH_W) '$(srcdir)/spamtrap.c'; fi`
 
-policyd-blacklist.o: blacklist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-blacklist.o -MD -MP -MF $(DEPDIR)/policyd-blacklist.Tpo -c -o policyd-blacklist.o `test -f 'blacklist.c' || echo '$(srcdir)/'`blacklist.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-blacklist.Tpo $(DEPDIR)/policyd-blacklist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist.c' object='policyd-blacklist.o' libtool=no @AMDEPBACKSLASH@
+ovpd-blacklist.o: blacklist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-blacklist.o -MD -MP -MF $(DEPDIR)/ovpd-blacklist.Tpo -c -o ovpd-blacklist.o `test -f 'blacklist.c' || echo '$(srcdir)/'`blacklist.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-blacklist.Tpo $(DEPDIR)/ovpd-blacklist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist.c' object='ovpd-blacklist.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-blacklist.o `test -f 'blacklist.c' || echo '$(srcdir)/'`blacklist.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-blacklist.o `test -f 'blacklist.c' || echo '$(srcdir)/'`blacklist.c
 
-policyd-blacklist.obj: blacklist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-blacklist.obj -MD -MP -MF $(DEPDIR)/policyd-blacklist.Tpo -c -o policyd-blacklist.obj `if test -f 'blacklist.c'; then $(CYGPATH_W) 'blacklist.c'; else $(CYGPATH_W) '$(srcdir)/blacklist.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-blacklist.Tpo $(DEPDIR)/policyd-blacklist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist.c' object='policyd-blacklist.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-blacklist.obj: blacklist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-blacklist.obj -MD -MP -MF $(DEPDIR)/ovpd-blacklist.Tpo -c -o ovpd-blacklist.obj `if test -f 'blacklist.c'; then $(CYGPATH_W) 'blacklist.c'; else $(CYGPATH_W) '$(srcdir)/blacklist.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-blacklist.Tpo $(DEPDIR)/ovpd-blacklist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist.c' object='ovpd-blacklist.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-blacklist.obj `if test -f 'blacklist.c'; then $(CYGPATH_W) 'blacklist.c'; else $(CYGPATH_W) '$(srcdir)/blacklist.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-blacklist.obj `if test -f 'blacklist.c'; then $(CYGPATH_W) 'blacklist.c'; else $(CYGPATH_W) '$(srcdir)/blacklist.c'; fi`
 
-policyd-blacklist_helo.o: blacklist_helo.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-blacklist_helo.o -MD -MP -MF $(DEPDIR)/policyd-blacklist_helo.Tpo -c -o policyd-blacklist_helo.o `test -f 'blacklist_helo.c' || echo '$(srcdir)/'`blacklist_helo.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-blacklist_helo.Tpo $(DEPDIR)/policyd-blacklist_helo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist_helo.c' object='policyd-blacklist_helo.o' libtool=no @AMDEPBACKSLASH@
+ovpd-blacklist_helo.o: blacklist_helo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-blacklist_helo.o -MD -MP -MF $(DEPDIR)/ovpd-blacklist_helo.Tpo -c -o ovpd-blacklist_helo.o `test -f 'blacklist_helo.c' || echo '$(srcdir)/'`blacklist_helo.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-blacklist_helo.Tpo $(DEPDIR)/ovpd-blacklist_helo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist_helo.c' object='ovpd-blacklist_helo.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-blacklist_helo.o `test -f 'blacklist_helo.c' || echo '$(srcdir)/'`blacklist_helo.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-blacklist_helo.o `test -f 'blacklist_helo.c' || echo '$(srcdir)/'`blacklist_helo.c
 
-policyd-blacklist_helo.obj: blacklist_helo.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-blacklist_helo.obj -MD -MP -MF $(DEPDIR)/policyd-blacklist_helo.Tpo -c -o policyd-blacklist_helo.obj `if test -f 'blacklist_helo.c'; then $(CYGPATH_W) 'blacklist_helo.c'; else $(CYGPATH_W) '$(srcdir)/blacklist_helo.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-blacklist_helo.Tpo $(DEPDIR)/policyd-blacklist_helo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist_helo.c' object='policyd-blacklist_helo.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-blacklist_helo.obj: blacklist_helo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-blacklist_helo.obj -MD -MP -MF $(DEPDIR)/ovpd-blacklist_helo.Tpo -c -o ovpd-blacklist_helo.obj `if test -f 'blacklist_helo.c'; then $(CYGPATH_W) 'blacklist_helo.c'; else $(CYGPATH_W) '$(srcdir)/blacklist_helo.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-blacklist_helo.Tpo $(DEPDIR)/ovpd-blacklist_helo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='blacklist_helo.c' object='ovpd-blacklist_helo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-blacklist_helo.obj `if test -f 'blacklist_helo.c'; then $(CYGPATH_W) 'blacklist_helo.c'; else $(CYGPATH_W) '$(srcdir)/blacklist_helo.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-blacklist_helo.obj `if test -f 'blacklist_helo.c'; then $(CYGPATH_W) 'blacklist_helo.c'; else $(CYGPATH_W) '$(srcdir)/blacklist_helo.c'; fi`
 
-policyd-whitelist.o: whitelist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-whitelist.o -MD -MP -MF $(DEPDIR)/policyd-whitelist.Tpo -c -o policyd-whitelist.o `test -f 'whitelist.c' || echo '$(srcdir)/'`whitelist.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-whitelist.Tpo $(DEPDIR)/policyd-whitelist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='whitelist.c' object='policyd-whitelist.o' libtool=no @AMDEPBACKSLASH@
+ovpd-whitelist.o: whitelist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-whitelist.o -MD -MP -MF $(DEPDIR)/ovpd-whitelist.Tpo -c -o ovpd-whitelist.o `test -f 'whitelist.c' || echo '$(srcdir)/'`whitelist.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-whitelist.Tpo $(DEPDIR)/ovpd-whitelist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='whitelist.c' object='ovpd-whitelist.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-whitelist.o `test -f 'whitelist.c' || echo '$(srcdir)/'`whitelist.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-whitelist.o `test -f 'whitelist.c' || echo '$(srcdir)/'`whitelist.c
 
-policyd-whitelist.obj: whitelist.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-whitelist.obj -MD -MP -MF $(DEPDIR)/policyd-whitelist.Tpo -c -o policyd-whitelist.obj `if test -f 'whitelist.c'; then $(CYGPATH_W) 'whitelist.c'; else $(CYGPATH_W) '$(srcdir)/whitelist.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-whitelist.Tpo $(DEPDIR)/policyd-whitelist.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='whitelist.c' object='policyd-whitelist.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-whitelist.obj: whitelist.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-whitelist.obj -MD -MP -MF $(DEPDIR)/ovpd-whitelist.Tpo -c -o ovpd-whitelist.obj `if test -f 'whitelist.c'; then $(CYGPATH_W) 'whitelist.c'; else $(CYGPATH_W) '$(srcdir)/whitelist.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-whitelist.Tpo $(DEPDIR)/ovpd-whitelist.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='whitelist.c' object='ovpd-whitelist.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-whitelist.obj `if test -f 'whitelist.c'; then $(CYGPATH_W) 'whitelist.c'; else $(CYGPATH_W) '$(srcdir)/whitelist.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-whitelist.obj `if test -f 'whitelist.c'; then $(CYGPATH_W) 'whitelist.c'; else $(CYGPATH_W) '$(srcdir)/whitelist.c'; fi`
 
-policyd-throttle_host.o: throttle_host.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_host.o -MD -MP -MF $(DEPDIR)/policyd-throttle_host.Tpo -c -o policyd-throttle_host.o `test -f 'throttle_host.c' || echo '$(srcdir)/'`throttle_host.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_host.Tpo $(DEPDIR)/policyd-throttle_host.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_host.c' object='policyd-throttle_host.o' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_host.o: throttle_host.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_host.o -MD -MP -MF $(DEPDIR)/ovpd-throttle_host.Tpo -c -o ovpd-throttle_host.o `test -f 'throttle_host.c' || echo '$(srcdir)/'`throttle_host.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_host.Tpo $(DEPDIR)/ovpd-throttle_host.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_host.c' object='ovpd-throttle_host.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_host.o `test -f 'throttle_host.c' || echo '$(srcdir)/'`throttle_host.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_host.o `test -f 'throttle_host.c' || echo '$(srcdir)/'`throttle_host.c
 
-policyd-throttle_host.obj: throttle_host.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_host.obj -MD -MP -MF $(DEPDIR)/policyd-throttle_host.Tpo -c -o policyd-throttle_host.obj `if test -f 'throttle_host.c'; then $(CYGPATH_W) 'throttle_host.c'; else $(CYGPATH_W) '$(srcdir)/throttle_host.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_host.Tpo $(DEPDIR)/policyd-throttle_host.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_host.c' object='policyd-throttle_host.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_host.obj: throttle_host.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_host.obj -MD -MP -MF $(DEPDIR)/ovpd-throttle_host.Tpo -c -o ovpd-throttle_host.obj `if test -f 'throttle_host.c'; then $(CYGPATH_W) 'throttle_host.c'; else $(CYGPATH_W) '$(srcdir)/throttle_host.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_host.Tpo $(DEPDIR)/ovpd-throttle_host.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_host.c' object='ovpd-throttle_host.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_host.obj `if test -f 'throttle_host.c'; then $(CYGPATH_W) 'throttle_host.c'; else $(CYGPATH_W) '$(srcdir)/throttle_host.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_host.obj `if test -f 'throttle_host.c'; then $(CYGPATH_W) 'throttle_host.c'; else $(CYGPATH_W) '$(srcdir)/throttle_host.c'; fi`
 
-policyd-throttle_sasl.o: throttle_sasl.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_sasl.o -MD -MP -MF $(DEPDIR)/policyd-throttle_sasl.Tpo -c -o policyd-throttle_sasl.o `test -f 'throttle_sasl.c' || echo '$(srcdir)/'`throttle_sasl.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_sasl.Tpo $(DEPDIR)/policyd-throttle_sasl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_sasl.c' object='policyd-throttle_sasl.o' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_sasl.o: throttle_sasl.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_sasl.o -MD -MP -MF $(DEPDIR)/ovpd-throttle_sasl.Tpo -c -o ovpd-throttle_sasl.o `test -f 'throttle_sasl.c' || echo '$(srcdir)/'`throttle_sasl.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_sasl.Tpo $(DEPDIR)/ovpd-throttle_sasl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_sasl.c' object='ovpd-throttle_sasl.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_sasl.o `test -f 'throttle_sasl.c' || echo '$(srcdir)/'`throttle_sasl.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_sasl.o `test -f 'throttle_sasl.c' || echo '$(srcdir)/'`throttle_sasl.c
 
-policyd-throttle_sasl.obj: throttle_sasl.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_sasl.obj -MD -MP -MF $(DEPDIR)/policyd-throttle_sasl.Tpo -c -o policyd-throttle_sasl.obj `if test -f 'throttle_sasl.c'; then $(CYGPATH_W) 'throttle_sasl.c'; else $(CYGPATH_W) '$(srcdir)/throttle_sasl.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_sasl.Tpo $(DEPDIR)/policyd-throttle_sasl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_sasl.c' object='policyd-throttle_sasl.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_sasl.obj: throttle_sasl.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_sasl.obj -MD -MP -MF $(DEPDIR)/ovpd-throttle_sasl.Tpo -c -o ovpd-throttle_sasl.obj `if test -f 'throttle_sasl.c'; then $(CYGPATH_W) 'throttle_sasl.c'; else $(CYGPATH_W) '$(srcdir)/throttle_sasl.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_sasl.Tpo $(DEPDIR)/ovpd-throttle_sasl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_sasl.c' object='ovpd-throttle_sasl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_sasl.obj `if test -f 'throttle_sasl.c'; then $(CYGPATH_W) 'throttle_sasl.c'; else $(CYGPATH_W) '$(srcdir)/throttle_sasl.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_sasl.obj `if test -f 'throttle_sasl.c'; then $(CYGPATH_W) 'throttle_sasl.c'; else $(CYGPATH_W) '$(srcdir)/throttle_sasl.c'; fi`
 
-policyd-throttle_from.o: throttle_from.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_from.o -MD -MP -MF $(DEPDIR)/policyd-throttle_from.Tpo -c -o policyd-throttle_from.o `test -f 'throttle_from.c' || echo '$(srcdir)/'`throttle_from.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_from.Tpo $(DEPDIR)/policyd-throttle_from.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_from.c' object='policyd-throttle_from.o' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_from.o: throttle_from.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_from.o -MD -MP -MF $(DEPDIR)/ovpd-throttle_from.Tpo -c -o ovpd-throttle_from.o `test -f 'throttle_from.c' || echo '$(srcdir)/'`throttle_from.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_from.Tpo $(DEPDIR)/ovpd-throttle_from.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_from.c' object='ovpd-throttle_from.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_from.o `test -f 'throttle_from.c' || echo '$(srcdir)/'`throttle_from.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_from.o `test -f 'throttle_from.c' || echo '$(srcdir)/'`throttle_from.c
 
-policyd-throttle_from.obj: throttle_from.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_from.obj -MD -MP -MF $(DEPDIR)/policyd-throttle_from.Tpo -c -o policyd-throttle_from.obj `if test -f 'throttle_from.c'; then $(CYGPATH_W) 'throttle_from.c'; else $(CYGPATH_W) '$(srcdir)/throttle_from.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_from.Tpo $(DEPDIR)/policyd-throttle_from.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_from.c' object='policyd-throttle_from.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_from.obj: throttle_from.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_from.obj -MD -MP -MF $(DEPDIR)/ovpd-throttle_from.Tpo -c -o ovpd-throttle_from.obj `if test -f 'throttle_from.c'; then $(CYGPATH_W) 'throttle_from.c'; else $(CYGPATH_W) '$(srcdir)/throttle_from.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_from.Tpo $(DEPDIR)/ovpd-throttle_from.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_from.c' object='ovpd-throttle_from.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_from.obj `if test -f 'throttle_from.c'; then $(CYGPATH_W) 'throttle_from.c'; else $(CYGPATH_W) '$(srcdir)/throttle_from.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_from.obj `if test -f 'throttle_from.c'; then $(CYGPATH_W) 'throttle_from.c'; else $(CYGPATH_W) '$(srcdir)/throttle_from.c'; fi`
 
-policyd-throttle_rcpt.o: throttle_rcpt.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_rcpt.o -MD -MP -MF $(DEPDIR)/policyd-throttle_rcpt.Tpo -c -o policyd-throttle_rcpt.o `test -f 'throttle_rcpt.c' || echo '$(srcdir)/'`throttle_rcpt.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_rcpt.Tpo $(DEPDIR)/policyd-throttle_rcpt.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_rcpt.c' object='policyd-throttle_rcpt.o' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_rcpt.o: throttle_rcpt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_rcpt.o -MD -MP -MF $(DEPDIR)/ovpd-throttle_rcpt.Tpo -c -o ovpd-throttle_rcpt.o `test -f 'throttle_rcpt.c' || echo '$(srcdir)/'`throttle_rcpt.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_rcpt.Tpo $(DEPDIR)/ovpd-throttle_rcpt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_rcpt.c' object='ovpd-throttle_rcpt.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_rcpt.o `test -f 'throttle_rcpt.c' || echo '$(srcdir)/'`throttle_rcpt.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_rcpt.o `test -f 'throttle_rcpt.c' || echo '$(srcdir)/'`throttle_rcpt.c
 
-policyd-throttle_rcpt.obj: throttle_rcpt.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-throttle_rcpt.obj -MD -MP -MF $(DEPDIR)/policyd-throttle_rcpt.Tpo -c -o policyd-throttle_rcpt.obj `if test -f 'throttle_rcpt.c'; then $(CYGPATH_W) 'throttle_rcpt.c'; else $(CYGPATH_W) '$(srcdir)/throttle_rcpt.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-throttle_rcpt.Tpo $(DEPDIR)/policyd-throttle_rcpt.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_rcpt.c' object='policyd-throttle_rcpt.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-throttle_rcpt.obj: throttle_rcpt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-throttle_rcpt.obj -MD -MP -MF $(DEPDIR)/ovpd-throttle_rcpt.Tpo -c -o ovpd-throttle_rcpt.obj `if test -f 'throttle_rcpt.c'; then $(CYGPATH_W) 'throttle_rcpt.c'; else $(CYGPATH_W) '$(srcdir)/throttle_rcpt.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-throttle_rcpt.Tpo $(DEPDIR)/ovpd-throttle_rcpt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='throttle_rcpt.c' object='ovpd-throttle_rcpt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-throttle_rcpt.obj `if test -f 'throttle_rcpt.c'; then $(CYGPATH_W) 'throttle_rcpt.c'; else $(CYGPATH_W) '$(srcdir)/throttle_rcpt.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-throttle_rcpt.obj `if test -f 'throttle_rcpt.c'; then $(CYGPATH_W) 'throttle_rcpt.c'; else $(CYGPATH_W) '$(srcdir)/throttle_rcpt.c'; fi`
 
-policyd-helo.o: helo.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-helo.o -MD -MP -MF $(DEPDIR)/policyd-helo.Tpo -c -o policyd-helo.o `test -f 'helo.c' || echo '$(srcdir)/'`helo.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-helo.Tpo $(DEPDIR)/policyd-helo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='helo.c' object='policyd-helo.o' libtool=no @AMDEPBACKSLASH@
+ovpd-helo.o: helo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-helo.o -MD -MP -MF $(DEPDIR)/ovpd-helo.Tpo -c -o ovpd-helo.o `test -f 'helo.c' || echo '$(srcdir)/'`helo.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-helo.Tpo $(DEPDIR)/ovpd-helo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='helo.c' object='ovpd-helo.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-helo.o `test -f 'helo.c' || echo '$(srcdir)/'`helo.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-helo.o `test -f 'helo.c' || echo '$(srcdir)/'`helo.c
 
-policyd-helo.obj: helo.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-helo.obj -MD -MP -MF $(DEPDIR)/policyd-helo.Tpo -c -o policyd-helo.obj `if test -f 'helo.c'; then $(CYGPATH_W) 'helo.c'; else $(CYGPATH_W) '$(srcdir)/helo.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-helo.Tpo $(DEPDIR)/policyd-helo.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='helo.c' object='policyd-helo.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-helo.obj: helo.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-helo.obj -MD -MP -MF $(DEPDIR)/ovpd-helo.Tpo -c -o ovpd-helo.obj `if test -f 'helo.c'; then $(CYGPATH_W) 'helo.c'; else $(CYGPATH_W) '$(srcdir)/helo.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-helo.Tpo $(DEPDIR)/ovpd-helo.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='helo.c' object='ovpd-helo.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-helo.obj `if test -f 'helo.c'; then $(CYGPATH_W) 'helo.c'; else $(CYGPATH_W) '$(srcdir)/helo.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-helo.obj `if test -f 'helo.c'; then $(CYGPATH_W) 'helo.c'; else $(CYGPATH_W) '$(srcdir)/helo.c'; fi`
 
-policyd-rcpt_acl.o: rcpt_acl.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-rcpt_acl.o -MD -MP -MF $(DEPDIR)/policyd-rcpt_acl.Tpo -c -o policyd-rcpt_acl.o `test -f 'rcpt_acl.c' || echo '$(srcdir)/'`rcpt_acl.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-rcpt_acl.Tpo $(DEPDIR)/policyd-rcpt_acl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rcpt_acl.c' object='policyd-rcpt_acl.o' libtool=no @AMDEPBACKSLASH@
+ovpd-rcpt_acl.o: rcpt_acl.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-rcpt_acl.o -MD -MP -MF $(DEPDIR)/ovpd-rcpt_acl.Tpo -c -o ovpd-rcpt_acl.o `test -f 'rcpt_acl.c' || echo '$(srcdir)/'`rcpt_acl.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-rcpt_acl.Tpo $(DEPDIR)/ovpd-rcpt_acl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rcpt_acl.c' object='ovpd-rcpt_acl.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-rcpt_acl.o `test -f 'rcpt_acl.c' || echo '$(srcdir)/'`rcpt_acl.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-rcpt_acl.o `test -f 'rcpt_acl.c' || echo '$(srcdir)/'`rcpt_acl.c
 
-policyd-rcpt_acl.obj: rcpt_acl.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -MT policyd-rcpt_acl.obj -MD -MP -MF $(DEPDIR)/policyd-rcpt_acl.Tpo -c -o policyd-rcpt_acl.obj `if test -f 'rcpt_acl.c'; then $(CYGPATH_W) 'rcpt_acl.c'; else $(CYGPATH_W) '$(srcdir)/rcpt_acl.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/policyd-rcpt_acl.Tpo $(DEPDIR)/policyd-rcpt_acl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rcpt_acl.c' object='policyd-rcpt_acl.obj' libtool=no @AMDEPBACKSLASH@
+ovpd-rcpt_acl.obj: rcpt_acl.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-rcpt_acl.obj -MD -MP -MF $(DEPDIR)/ovpd-rcpt_acl.Tpo -c -o ovpd-rcpt_acl.obj `if test -f 'rcpt_acl.c'; then $(CYGPATH_W) 'rcpt_acl.c'; else $(CYGPATH_W) '$(srcdir)/rcpt_acl.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpd-rcpt_acl.Tpo $(DEPDIR)/ovpd-rcpt_acl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='rcpt_acl.c' object='ovpd-rcpt_acl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(policyd_CFLAGS) $(CFLAGS) -c -o policyd-rcpt_acl.obj `if test -f 'rcpt_acl.c'; then $(CYGPATH_W) 'rcpt_acl.c'; else $(CYGPATH_W) '$(srcdir)/rcpt_acl.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-rcpt_acl.obj `if test -f 'rcpt_acl.c'; then $(CYGPATH_W) 'rcpt_acl.c'; else $(CYGPATH_W) '$(srcdir)/rcpt_acl.c'; fi`
 
 stats-stats.o: stats.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-stats.o -MD -MP -MF $(DEPDIR)/stats-stats.Tpo -c -o stats-stats.o `test -f 'stats.c' || echo '$(srcdir)/'`stats.c
