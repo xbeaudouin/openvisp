@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = ovpd cleanup stats
+bin_PROGRAMS = ovpd ovpcleanup ovpstats
 
 
 ovpd_SOURCES = ovp.c syslog.c generic.c mysql.c greylist.c throttle.c 
@@ -10,11 +10,11 @@ ovpd_LDADD = @LIBMYSQLCLIENT@
 ovpd_LDFLAGS = -lm
 ovpd_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 
-ovp-cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
-ovp-cleanup_LDADD = @LIBMYSQLCLIENT@
-ovp-cleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovpcleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
+ovpcleanup_LDADD = @LIBMYSQLCLIENT@
+ovpcleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 
-ovp-stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
-ovp-stats_LDADD = @LIBMYSQLCLIENT@
-ovp-stats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovpstats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
+ovpstats_LDADD = @LIBMYSQLCLIENT@
+ovpstats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 

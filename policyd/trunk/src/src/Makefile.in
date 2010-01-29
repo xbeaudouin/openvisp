@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = ovpd$(EXEEXT) cleanup$(EXEEXT) stats$(EXEEXT)
+bin_PROGRAMS = ovpd$(EXEEXT) ovpcleanup$(EXEEXT) ovpstats$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -44,13 +44,13 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_cleanup_OBJECTS = cleanup-cleanup.$(OBJEXT) \
-	cleanup-syslog.$(OBJEXT) cleanup-cidr.$(OBJEXT) \
-	cleanup-generic.$(OBJEXT) cleanup-sockets.$(OBJEXT) \
-	cleanup-mysql.$(OBJEXT)
-cleanup_OBJECTS = $(am_cleanup_OBJECTS)
-cleanup_DEPENDENCIES =
-cleanup_LINK = $(CCLD) $(cleanup_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+am_ovpcleanup_OBJECTS = ovpcleanup-cleanup.$(OBJEXT) \
+	ovpcleanup-syslog.$(OBJEXT) ovpcleanup-cidr.$(OBJEXT) \
+	ovpcleanup-generic.$(OBJEXT) ovpcleanup-sockets.$(OBJEXT) \
+	ovpcleanup-mysql.$(OBJEXT)
+ovpcleanup_OBJECTS = $(am_ovpcleanup_OBJECTS)
+ovpcleanup_DEPENDENCIES =
+ovpcleanup_LINK = $(CCLD) $(ovpcleanup_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am_ovpd_OBJECTS = ovpd-ovp.$(OBJEXT) ovpd-syslog.$(OBJEXT) \
 	ovpd-generic.$(OBJEXT) ovpd-mysql.$(OBJEXT) \
@@ -65,12 +65,12 @@ ovpd_OBJECTS = $(am_ovpd_OBJECTS)
 ovpd_DEPENDENCIES =
 ovpd_LINK = $(CCLD) $(ovpd_CFLAGS) $(CFLAGS) $(ovpd_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am_stats_OBJECTS = stats-stats.$(OBJEXT) stats-cidr.$(OBJEXT) \
-	stats-syslog.$(OBJEXT) stats-generic.$(OBJEXT) \
-	stats-sockets.$(OBJEXT) stats-mysql.$(OBJEXT)
-stats_OBJECTS = $(am_stats_OBJECTS)
-stats_DEPENDENCIES =
-stats_LINK = $(CCLD) $(stats_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+am_ovpstats_OBJECTS = ovpstats-stats.$(OBJEXT) ovpstats-cidr.$(OBJEXT) \
+	ovpstats-syslog.$(OBJEXT) ovpstats-generic.$(OBJEXT) \
+	ovpstats-sockets.$(OBJEXT) ovpstats-mysql.$(OBJEXT)
+ovpstats_OBJECTS = $(am_ovpstats_OBJECTS)
+ovpstats_DEPENDENCIES =
+ovpstats_LINK = $(CCLD) $(ovpstats_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -79,8 +79,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(cleanup_SOURCES) $(ovpd_SOURCES) $(stats_SOURCES)
-DIST_SOURCES = $(cleanup_SOURCES) $(ovpd_SOURCES) $(stats_SOURCES)
+SOURCES = $(ovpcleanup_SOURCES) $(ovpd_SOURCES) $(ovpstats_SOURCES)
+DIST_SOURCES = $(ovpcleanup_SOURCES) $(ovpd_SOURCES) \
+	$(ovpstats_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -184,12 +185,12 @@ ovpd_SOURCES = ovp.c syslog.c generic.c mysql.c greylist.c throttle.c \
 ovpd_LDADD = @LIBMYSQLCLIENT@
 ovpd_LDFLAGS = -lm
 ovpd_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
-cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
-cleanup_LDADD = @LIBMYSQLCLIENT@
-cleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
-stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
-stats_LDADD = @LIBMYSQLCLIENT@
-stats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovpcleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
+ovpcleanup_LDADD = @LIBMYSQLCLIENT@
+ovpcleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovpstats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
+ovpstats_LDADD = @LIBMYSQLCLIENT@
+ovpstats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -246,15 +247,15 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-cleanup$(EXEEXT): $(cleanup_OBJECTS) $(cleanup_DEPENDENCIES) 
-	@rm -f cleanup$(EXEEXT)
-	$(cleanup_LINK) $(cleanup_OBJECTS) $(cleanup_LDADD) $(LIBS)
+ovpcleanup$(EXEEXT): $(ovpcleanup_OBJECTS) $(ovpcleanup_DEPENDENCIES) 
+	@rm -f ovpcleanup$(EXEEXT)
+	$(ovpcleanup_LINK) $(ovpcleanup_OBJECTS) $(ovpcleanup_LDADD) $(LIBS)
 ovpd$(EXEEXT): $(ovpd_OBJECTS) $(ovpd_DEPENDENCIES) 
 	@rm -f ovpd$(EXEEXT)
 	$(ovpd_LINK) $(ovpd_OBJECTS) $(ovpd_LDADD) $(LIBS)
-stats$(EXEEXT): $(stats_OBJECTS) $(stats_DEPENDENCIES) 
-	@rm -f stats$(EXEEXT)
-	$(stats_LINK) $(stats_OBJECTS) $(stats_LDADD) $(LIBS)
+ovpstats$(EXEEXT): $(ovpstats_OBJECTS) $(ovpstats_DEPENDENCIES) 
+	@rm -f ovpstats$(EXEEXT)
+	$(ovpstats_LINK) $(ovpstats_OBJECTS) $(ovpstats_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -262,12 +263,12 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-cidr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-cleanup.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-generic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-mysql.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-sockets.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanup-syslog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-cidr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-cleanup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-generic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-mysql.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-sockets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpcleanup-syslog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-blacklist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-blacklist_helo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-cidr.Po@am__quote@
@@ -286,12 +287,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_rcpt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-throttle_sasl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpd-whitelist.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-cidr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-generic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-mysql.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-sockets.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-stats.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stats-syslog.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-cidr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-generic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-mysql.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-sockets.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-stats.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ovpstats-syslog.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -307,89 +308,89 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
-cleanup-cleanup.o: cleanup.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-cleanup.o -MD -MP -MF $(DEPDIR)/cleanup-cleanup.Tpo -c -o cleanup-cleanup.o `test -f 'cleanup.c' || echo '$(srcdir)/'`cleanup.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-cleanup.Tpo $(DEPDIR)/cleanup-cleanup.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cleanup.c' object='cleanup-cleanup.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-cleanup.o: cleanup.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-cleanup.o -MD -MP -MF $(DEPDIR)/ovpcleanup-cleanup.Tpo -c -o ovpcleanup-cleanup.o `test -f 'cleanup.c' || echo '$(srcdir)/'`cleanup.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-cleanup.Tpo $(DEPDIR)/ovpcleanup-cleanup.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cleanup.c' object='ovpcleanup-cleanup.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-cleanup.o `test -f 'cleanup.c' || echo '$(srcdir)/'`cleanup.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-cleanup.o `test -f 'cleanup.c' || echo '$(srcdir)/'`cleanup.c
 
-cleanup-cleanup.obj: cleanup.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-cleanup.obj -MD -MP -MF $(DEPDIR)/cleanup-cleanup.Tpo -c -o cleanup-cleanup.obj `if test -f 'cleanup.c'; then $(CYGPATH_W) 'cleanup.c'; else $(CYGPATH_W) '$(srcdir)/cleanup.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-cleanup.Tpo $(DEPDIR)/cleanup-cleanup.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cleanup.c' object='cleanup-cleanup.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-cleanup.obj: cleanup.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-cleanup.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-cleanup.Tpo -c -o ovpcleanup-cleanup.obj `if test -f 'cleanup.c'; then $(CYGPATH_W) 'cleanup.c'; else $(CYGPATH_W) '$(srcdir)/cleanup.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-cleanup.Tpo $(DEPDIR)/ovpcleanup-cleanup.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cleanup.c' object='ovpcleanup-cleanup.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-cleanup.obj `if test -f 'cleanup.c'; then $(CYGPATH_W) 'cleanup.c'; else $(CYGPATH_W) '$(srcdir)/cleanup.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-cleanup.obj `if test -f 'cleanup.c'; then $(CYGPATH_W) 'cleanup.c'; else $(CYGPATH_W) '$(srcdir)/cleanup.c'; fi`
 
-cleanup-syslog.o: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-syslog.o -MD -MP -MF $(DEPDIR)/cleanup-syslog.Tpo -c -o cleanup-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-syslog.Tpo $(DEPDIR)/cleanup-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='cleanup-syslog.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-syslog.o: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-syslog.o -MD -MP -MF $(DEPDIR)/ovpcleanup-syslog.Tpo -c -o ovpcleanup-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-syslog.Tpo $(DEPDIR)/ovpcleanup-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpcleanup-syslog.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
 
-cleanup-syslog.obj: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-syslog.obj -MD -MP -MF $(DEPDIR)/cleanup-syslog.Tpo -c -o cleanup-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-syslog.Tpo $(DEPDIR)/cleanup-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='cleanup-syslog.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-syslog.obj: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-syslog.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-syslog.Tpo -c -o ovpcleanup-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-syslog.Tpo $(DEPDIR)/ovpcleanup-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpcleanup-syslog.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
 
-cleanup-cidr.o: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-cidr.o -MD -MP -MF $(DEPDIR)/cleanup-cidr.Tpo -c -o cleanup-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-cidr.Tpo $(DEPDIR)/cleanup-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='cleanup-cidr.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-cidr.o: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-cidr.o -MD -MP -MF $(DEPDIR)/ovpcleanup-cidr.Tpo -c -o ovpcleanup-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-cidr.Tpo $(DEPDIR)/ovpcleanup-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpcleanup-cidr.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
 
-cleanup-cidr.obj: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-cidr.obj -MD -MP -MF $(DEPDIR)/cleanup-cidr.Tpo -c -o cleanup-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-cidr.Tpo $(DEPDIR)/cleanup-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='cleanup-cidr.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-cidr.obj: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-cidr.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-cidr.Tpo -c -o ovpcleanup-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-cidr.Tpo $(DEPDIR)/ovpcleanup-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpcleanup-cidr.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
 
-cleanup-generic.o: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-generic.o -MD -MP -MF $(DEPDIR)/cleanup-generic.Tpo -c -o cleanup-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-generic.Tpo $(DEPDIR)/cleanup-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='cleanup-generic.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-generic.o: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-generic.o -MD -MP -MF $(DEPDIR)/ovpcleanup-generic.Tpo -c -o ovpcleanup-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-generic.Tpo $(DEPDIR)/ovpcleanup-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpcleanup-generic.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
 
-cleanup-generic.obj: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-generic.obj -MD -MP -MF $(DEPDIR)/cleanup-generic.Tpo -c -o cleanup-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-generic.Tpo $(DEPDIR)/cleanup-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='cleanup-generic.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-generic.obj: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-generic.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-generic.Tpo -c -o ovpcleanup-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-generic.Tpo $(DEPDIR)/ovpcleanup-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpcleanup-generic.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
 
-cleanup-sockets.o: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-sockets.o -MD -MP -MF $(DEPDIR)/cleanup-sockets.Tpo -c -o cleanup-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-sockets.Tpo $(DEPDIR)/cleanup-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='cleanup-sockets.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-sockets.o: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-sockets.o -MD -MP -MF $(DEPDIR)/ovpcleanup-sockets.Tpo -c -o ovpcleanup-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-sockets.Tpo $(DEPDIR)/ovpcleanup-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpcleanup-sockets.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
 
-cleanup-sockets.obj: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-sockets.obj -MD -MP -MF $(DEPDIR)/cleanup-sockets.Tpo -c -o cleanup-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-sockets.Tpo $(DEPDIR)/cleanup-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='cleanup-sockets.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-sockets.obj: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-sockets.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-sockets.Tpo -c -o ovpcleanup-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-sockets.Tpo $(DEPDIR)/ovpcleanup-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpcleanup-sockets.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
 
-cleanup-mysql.o: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-mysql.o -MD -MP -MF $(DEPDIR)/cleanup-mysql.Tpo -c -o cleanup-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-mysql.Tpo $(DEPDIR)/cleanup-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='cleanup-mysql.o' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-mysql.o: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-mysql.o -MD -MP -MF $(DEPDIR)/ovpcleanup-mysql.Tpo -c -o ovpcleanup-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-mysql.Tpo $(DEPDIR)/ovpcleanup-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpcleanup-mysql.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
 
-cleanup-mysql.obj: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -MT cleanup-mysql.obj -MD -MP -MF $(DEPDIR)/cleanup-mysql.Tpo -c -o cleanup-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/cleanup-mysql.Tpo $(DEPDIR)/cleanup-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='cleanup-mysql.obj' libtool=no @AMDEPBACKSLASH@
+ovpcleanup-mysql.obj: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -MT ovpcleanup-mysql.obj -MD -MP -MF $(DEPDIR)/ovpcleanup-mysql.Tpo -c -o ovpcleanup-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpcleanup-mysql.Tpo $(DEPDIR)/ovpcleanup-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpcleanup-mysql.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cleanup_CFLAGS) $(CFLAGS) -c -o cleanup-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpcleanup_CFLAGS) $(CFLAGS) -c -o ovpcleanup-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
 
 ovpd-ovp.o: ovp.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -MT ovpd-ovp.o -MD -MP -MF $(DEPDIR)/ovpd-ovp.Tpo -c -o ovpd-ovp.o `test -f 'ovp.c' || echo '$(srcdir)/'`ovp.c
@@ -643,89 +644,89 @@ ovpd-rcpt_acl.obj: rcpt_acl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpd_CFLAGS) $(CFLAGS) -c -o ovpd-rcpt_acl.obj `if test -f 'rcpt_acl.c'; then $(CYGPATH_W) 'rcpt_acl.c'; else $(CYGPATH_W) '$(srcdir)/rcpt_acl.c'; fi`
 
-stats-stats.o: stats.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-stats.o -MD -MP -MF $(DEPDIR)/stats-stats.Tpo -c -o stats-stats.o `test -f 'stats.c' || echo '$(srcdir)/'`stats.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-stats.Tpo $(DEPDIR)/stats-stats.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stats.c' object='stats-stats.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-stats.o: stats.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-stats.o -MD -MP -MF $(DEPDIR)/ovpstats-stats.Tpo -c -o ovpstats-stats.o `test -f 'stats.c' || echo '$(srcdir)/'`stats.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-stats.Tpo $(DEPDIR)/ovpstats-stats.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stats.c' object='ovpstats-stats.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-stats.o `test -f 'stats.c' || echo '$(srcdir)/'`stats.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-stats.o `test -f 'stats.c' || echo '$(srcdir)/'`stats.c
 
-stats-stats.obj: stats.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-stats.obj -MD -MP -MF $(DEPDIR)/stats-stats.Tpo -c -o stats-stats.obj `if test -f 'stats.c'; then $(CYGPATH_W) 'stats.c'; else $(CYGPATH_W) '$(srcdir)/stats.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-stats.Tpo $(DEPDIR)/stats-stats.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stats.c' object='stats-stats.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-stats.obj: stats.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-stats.obj -MD -MP -MF $(DEPDIR)/ovpstats-stats.Tpo -c -o ovpstats-stats.obj `if test -f 'stats.c'; then $(CYGPATH_W) 'stats.c'; else $(CYGPATH_W) '$(srcdir)/stats.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-stats.Tpo $(DEPDIR)/ovpstats-stats.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='stats.c' object='ovpstats-stats.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-stats.obj `if test -f 'stats.c'; then $(CYGPATH_W) 'stats.c'; else $(CYGPATH_W) '$(srcdir)/stats.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-stats.obj `if test -f 'stats.c'; then $(CYGPATH_W) 'stats.c'; else $(CYGPATH_W) '$(srcdir)/stats.c'; fi`
 
-stats-cidr.o: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-cidr.o -MD -MP -MF $(DEPDIR)/stats-cidr.Tpo -c -o stats-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-cidr.Tpo $(DEPDIR)/stats-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='stats-cidr.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-cidr.o: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-cidr.o -MD -MP -MF $(DEPDIR)/ovpstats-cidr.Tpo -c -o ovpstats-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-cidr.Tpo $(DEPDIR)/ovpstats-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpstats-cidr.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-cidr.o `test -f 'cidr.c' || echo '$(srcdir)/'`cidr.c
 
-stats-cidr.obj: cidr.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-cidr.obj -MD -MP -MF $(DEPDIR)/stats-cidr.Tpo -c -o stats-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-cidr.Tpo $(DEPDIR)/stats-cidr.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='stats-cidr.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-cidr.obj: cidr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-cidr.obj -MD -MP -MF $(DEPDIR)/ovpstats-cidr.Tpo -c -o ovpstats-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-cidr.Tpo $(DEPDIR)/ovpstats-cidr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='cidr.c' object='ovpstats-cidr.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-cidr.obj `if test -f 'cidr.c'; then $(CYGPATH_W) 'cidr.c'; else $(CYGPATH_W) '$(srcdir)/cidr.c'; fi`
 
-stats-syslog.o: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-syslog.o -MD -MP -MF $(DEPDIR)/stats-syslog.Tpo -c -o stats-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-syslog.Tpo $(DEPDIR)/stats-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='stats-syslog.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-syslog.o: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-syslog.o -MD -MP -MF $(DEPDIR)/ovpstats-syslog.Tpo -c -o ovpstats-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-syslog.Tpo $(DEPDIR)/ovpstats-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpstats-syslog.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-syslog.o `test -f 'syslog.c' || echo '$(srcdir)/'`syslog.c
 
-stats-syslog.obj: syslog.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-syslog.obj -MD -MP -MF $(DEPDIR)/stats-syslog.Tpo -c -o stats-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-syslog.Tpo $(DEPDIR)/stats-syslog.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='stats-syslog.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-syslog.obj: syslog.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-syslog.obj -MD -MP -MF $(DEPDIR)/ovpstats-syslog.Tpo -c -o ovpstats-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-syslog.Tpo $(DEPDIR)/ovpstats-syslog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='syslog.c' object='ovpstats-syslog.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-syslog.obj `if test -f 'syslog.c'; then $(CYGPATH_W) 'syslog.c'; else $(CYGPATH_W) '$(srcdir)/syslog.c'; fi`
 
-stats-generic.o: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-generic.o -MD -MP -MF $(DEPDIR)/stats-generic.Tpo -c -o stats-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-generic.Tpo $(DEPDIR)/stats-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='stats-generic.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-generic.o: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-generic.o -MD -MP -MF $(DEPDIR)/ovpstats-generic.Tpo -c -o ovpstats-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-generic.Tpo $(DEPDIR)/ovpstats-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpstats-generic.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-generic.o `test -f 'generic.c' || echo '$(srcdir)/'`generic.c
 
-stats-generic.obj: generic.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-generic.obj -MD -MP -MF $(DEPDIR)/stats-generic.Tpo -c -o stats-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-generic.Tpo $(DEPDIR)/stats-generic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='stats-generic.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-generic.obj: generic.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-generic.obj -MD -MP -MF $(DEPDIR)/ovpstats-generic.Tpo -c -o ovpstats-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-generic.Tpo $(DEPDIR)/ovpstats-generic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='generic.c' object='ovpstats-generic.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-generic.obj `if test -f 'generic.c'; then $(CYGPATH_W) 'generic.c'; else $(CYGPATH_W) '$(srcdir)/generic.c'; fi`
 
-stats-sockets.o: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-sockets.o -MD -MP -MF $(DEPDIR)/stats-sockets.Tpo -c -o stats-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-sockets.Tpo $(DEPDIR)/stats-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='stats-sockets.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-sockets.o: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-sockets.o -MD -MP -MF $(DEPDIR)/ovpstats-sockets.Tpo -c -o ovpstats-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-sockets.Tpo $(DEPDIR)/ovpstats-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpstats-sockets.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-sockets.o `test -f 'sockets.c' || echo '$(srcdir)/'`sockets.c
 
-stats-sockets.obj: sockets.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-sockets.obj -MD -MP -MF $(DEPDIR)/stats-sockets.Tpo -c -o stats-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-sockets.Tpo $(DEPDIR)/stats-sockets.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='stats-sockets.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-sockets.obj: sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-sockets.obj -MD -MP -MF $(DEPDIR)/ovpstats-sockets.Tpo -c -o ovpstats-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-sockets.Tpo $(DEPDIR)/ovpstats-sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sockets.c' object='ovpstats-sockets.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-sockets.obj `if test -f 'sockets.c'; then $(CYGPATH_W) 'sockets.c'; else $(CYGPATH_W) '$(srcdir)/sockets.c'; fi`
 
-stats-mysql.o: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-mysql.o -MD -MP -MF $(DEPDIR)/stats-mysql.Tpo -c -o stats-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-mysql.Tpo $(DEPDIR)/stats-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='stats-mysql.o' libtool=no @AMDEPBACKSLASH@
+ovpstats-mysql.o: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-mysql.o -MD -MP -MF $(DEPDIR)/ovpstats-mysql.Tpo -c -o ovpstats-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-mysql.Tpo $(DEPDIR)/ovpstats-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpstats-mysql.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-mysql.o `test -f 'mysql.c' || echo '$(srcdir)/'`mysql.c
 
-stats-mysql.obj: mysql.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -MT stats-mysql.obj -MD -MP -MF $(DEPDIR)/stats-mysql.Tpo -c -o stats-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/stats-mysql.Tpo $(DEPDIR)/stats-mysql.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='stats-mysql.obj' libtool=no @AMDEPBACKSLASH@
+ovpstats-mysql.obj: mysql.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -MT ovpstats-mysql.obj -MD -MP -MF $(DEPDIR)/ovpstats-mysql.Tpo -c -o ovpstats-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/ovpstats-mysql.Tpo $(DEPDIR)/ovpstats-mysql.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mysql.c' object='ovpstats-mysql.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(stats_CFLAGS) $(CFLAGS) -c -o stats-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ovpstats_CFLAGS) $(CFLAGS) -c -o ovpstats-mysql.obj `if test -f 'mysql.c'; then $(CYGPATH_W) 'mysql.c'; else $(CYGPATH_W) '$(srcdir)/mysql.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
