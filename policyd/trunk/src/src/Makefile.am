@@ -10,11 +10,11 @@ ovpd_LDADD = @LIBMYSQLCLIENT@
 ovpd_LDFLAGS = -lm
 ovpd_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 
-cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
-cleanup_LDADD = @LIBMYSQLCLIENT@
-cleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovp-cleanup_SOURCES = cleanup.c syslog.c cidr.c generic.c sockets.c mysql.c ovp.h
+ovp-cleanup_LDADD = @LIBMYSQLCLIENT@
+ovp-cleanup_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 
-stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
-stats_LDADD = @LIBMYSQLCLIENT@
-stats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
+ovp-stats_SOURCES = stats.c cidr.c syslog.c generic.c sockets.c mysql.c ovp.h
+ovp-stats_LDADD = @LIBMYSQLCLIENT@
+ovp-stats_CFLAGS = @MYSQL_INCLUDE@ $(AM_CFLAGS)
 
