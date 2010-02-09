@@ -40,13 +40,20 @@ if ( check_domain_admin($SESSID_USERNAME) )
 
 }
 
-if ( check_admin($SESSID_USERNAME) ){
+if ( check_admin($SESSID_USERNAME)  ){
 	?>
 
 <tr>
   <td nowrap><a target="_top" href="../accounts/list-accounts.php"><img src="../images/ico-manage_user.png" width="64" height="64" class="png_main" border="0"></a></td>
   <td><a target="_top" href="../accounts/list-accounts.php"><?php print $PALANG['pMainMain_account_admin']; ?></a></td>
 </tr>
+
+<?php
+ }
+
+if ( $CONF['manage_server'] == 'YES' )
+	{
+?>
 
 <tr>
   <td nowrap><a target="_top" href="../server/manage.php"><img src="../images/servers.png" width="64" height="64" class="png_main" border="0"></a></td>
