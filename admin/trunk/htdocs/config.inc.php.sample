@@ -29,6 +29,8 @@ $CONF['default_language'] = 'en';
 # forced Locale YES or NO
 $CONF['default_language_forced'] = 'NO';
 
+$CONF['manage_server'] = 'NO';
+
 // Backend configuration
 // Select if you want use DB backend or Perl backend
 $CONF['slapd_perl'] = 0;
