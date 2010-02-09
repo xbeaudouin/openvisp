@@ -32,6 +32,8 @@ if ($_SERVER["REQUEST_METHOD"] == "GET")
 	 }
 	 else{
 		 $list_server = list_server();
+		 $list_job_model = list_server_model();
+
 		 include ("../templates/server/list-server.tpl");
 	 }
 
