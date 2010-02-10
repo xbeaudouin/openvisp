@@ -30,7 +30,7 @@ $total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
    include ("../templates/header.tpl");
-   include ("../templates/users/menu.tpl");
+   include ("../templates/userinfo-menu.tpl");
 
    $result = db_query ("SELECT * FROM accounts WHERE username='$SESSID_USERNAME'");
 
@@ -88,7 +88,7 @@ where username='$username'
 
    
    include ("../templates/header.tpl");
-   include ("../templates/users/menu.tpl");
+   include ("../templates/userinfo-menu.tpl");
 
    $result = db_query ("SELECT * FROM accounts WHERE username='$SESSID_USERNAME'");
 
