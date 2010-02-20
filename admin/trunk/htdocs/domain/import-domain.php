@@ -19,26 +19,35 @@
 require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
+require ("../lib/accounts.inc.php");
 include ("../languages/" . check_language () . ".lang");
 
 $SESSID_USERNAME = check_admin_session();
+$list_admins = list_admins();
+
+
+$account_information = get_account_info($SESSID_USERNAME);
+$account_quota = get_account_quota($account_information['id']);
+$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
 
 include ("../templates/header.tpl");
-include ("../templates/admin_menu.tpl");
-
+include ("../templates/users/menu.tpl");
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 	{
 		$pAdminCreate_admin_username_text = $PALANG['pAdminCreate_admin_username_text'];
 		$tDomains[] = "";
-		
-		include ("../templates/admin_import-domain.tpl");
+
+
+	 include ("../templates/admin_import-domain.tpl");
+
+
 	}
 
 if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 
-        $uploadfile = $CONF['uploaddir'] ."/". basename($_FILES['domain_file']['name']);                                                                                                
+	$uploadfile = $CONF['uploaddir'] ."/". basename($_FILES['domain_file']['name']);                                                                                                
 
 	if (move_uploaded_file($_FILES['domain_file']['tmp_name'], $uploadfile)) {
 
@@ -73,42 +82,32 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 						$fMailboxes = 0;
 						$fMaxquota = 0;
 					}
-				$result = db_query ("INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,spamass,vrfydomain,vrfysender,greylist,spf,created,modified,active) VALUES ('$fDomain','$fDescription','$fAliases','$fMailboxes','$fMaxquota','$fBackupmx','$fAntivirus','$fSpamass','$fVrfyDomain','$fVrfySender','$fGreyListing','$fSPF',NOW(),NOW(),'$fActive')");
+				$result = db_query ("INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active) VALUES ('$fDomain','$fDescription','$fAliases','$fMailboxes','$fMaxquota','$fBackupmx','$fAntivirus','$fVrfyDomain','$fVrfySender','$fGreyListing','$fSPF',NOW(),NOW(),'$fActive')");
 				if ($result['rows'] != 1)
 					{
 						$tMessage = $PALANG['pAdminCreate_domain_result_error'] . "<br />($fDomain)<br />";
 					}
+				else {
+					$domain_id = $result['inserted_id'];
+				}
+
+				if ($fAntivirus == 0 )
+					{ $fAntivirus = 'N'; 	$virus_lover = 'Y'; $banned_files_lover = 'Y'; $bad_header_lover = 'Y';
+					$bypass_banned_checks = 'Y'; $bypass_header_checks = 'Y'; }
+				else
+					{ $fAntivirus = 'Y'; $virus_lover = 'N'; $banned_files_lover = 'N'; $bad_header_lover = 'N';
+					$bypass_banned_checks = 'N'; $bypass_header_checks = 'N'; }
 
 
-				if ($fAntivirus == 1)
-					{ 
-						$fAntivirus = 'N'; 
-						$virus_lover = 'N';
-						$spam_lover = 'N';
-						$banned_files_lover = 'N';
-						$bad_header_lover = 'N';
-						$bypass_banned_checks = 'N';
-						$bypass_header_checks = 'N';
-					} 
-				else 
-					{ 
-						$fAntivirus = 'Y';
-						$virus_lover = 'Y';
-						$spam_lover = 'Y';
-						$banned_files_lover = 'Y';
-						$bad_header_lover = 'Y';
-						$bypass_banned_checks = 'Y';
-						$bypass_header_checks = 'Y';
-					}
 				if ($fSpamass == 1) { $fSpamass = 'N'; } else { $fSpamass = 'Y'; }
-				$result = db_query ("INSERT INTO policy (domain,virus_lover,spam_lover,banned_files_lover,bad_header_lover,bypass_virus_checks,bypass_spam_checks,bypass_banned_checks,bypass_header_checks,spam_modifies_subj,virus_quarantine_to,spam_quarantine_to,banned_quarantine_to,bad_header_quarantine_to,spam_tag_level,spam_tag2_level,spam_kill_level,spam_dsn_cutoff_level,addr_extension_virus,addr_extension_spam,addr_extension_banned,addr_extension_bad_header,warnvirusrecip,warnbannedrecip,warnbadhrecip,newvirus_admin,virus_admin,banned_admin,bad_header_admin,spam_admin,spam_subject_tag,spam_subject_tag2,message_size_limit,banned_rulenames) VALUES ('$fDomain','$virus_lover','$spam_lover','$banned_files_lover','$bad_header_lover','$fAntivirus','$fSpamass','$bypass_banned_checks','$bypass_header_checks','Y','".$CONF['virus_quarantine_to']."','".$CONF['spam_quarantine_to']."','".$CONF['banned_quarantine_to']."','','".$CONF['sa_tag_level']."','".$CONF['sa_tag2_level'] ."','".$CONF['sa_kill_level'] ."','','','','','','N','N','N','','','','','','".$CONF['spam_subject_tag']."','".$CONF['spam_subject_tag2']."','','')");
+				$result = db_query ("INSERT INTO policy (domain_id,virus_lover,spam_lover,banned_files_lover,bad_header_lover,bypass_virus_checks,bypass_spam_checks,bypass_banned_checks,bypass_header_checks,spam_modifies_subj,virus_quarantine_to,spam_quarantine_to,banned_quarantine_to,bad_header_quarantine_to,spam_tag_level,spam_tag2_level,spam_kill_level,spam_dsn_cutoff_level,addr_extension_virus,addr_extension_spam,addr_extension_banned,addr_extension_bad_header,warnvirusrecip,warnbannedrecip,warnbadhrecip,newvirus_admin,virus_admin,banned_admin,bad_header_admin,spam_admin,spam_subject_tag,spam_subject_tag2,message_size_limit,banned_rulenames) VALUES ('$domain_id','$virus_lover','$spam_lover','$banned_files_lover','$bad_header_lover','$fAntivirus','$fSpamass','$bypass_banned_checks','$bypass_header_checks','Y','".$CONF['virus_quarantine_to']."','".$CONF['spam_quarantine_to']."','".$CONF['banned_quarantine_to']."','','".$CONF['sa_tag_level']."','".$CONF['sa_tag2_level'] ."','".$CONF['sa_kill_level'] ."','','','','','','N','N','N','','','','','','".$CONF['spam_subject_tag']."','".$CONF['spam_subject_tag2']."','','')");
 				if ($result['rows'] != 1)
 					{
 						$tMessage = $PALANG['pAdminCreate_domain_result_error2'] . "<br />($fDomain)<br />";
 					}
 				else
 					{
-						$result = db_query ("SELECT id FROM policy WHERE domain = '$fDomain'");
+						$policy_id = $result['inserted_id'];
 						if ($result['rows'] == 1)
 							{
 								$row = db_array ($result['result']);
@@ -135,12 +134,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 		//	include ("../templates/admin_create-domain.tpl");
 
 	}
-	$tMessage="TT";
-	include ("../templates/footer.tpl");
+	//	$tMessage="TT";
 
 //		phpinfo();
 
 }
 
 
+	include ("../templates/footer.tpl");		
 ?>
