@@ -752,7 +752,7 @@ $PALANG['pGenerate_new_password'] = 'Generate a new password';
 
 $PALANG['pAdminImport_file'] = 'domains file';
 $PALANG['pAdminImport_help'] = 'The file must contains the informations like the following exemple :';
-$PALANG['pAdminImport_help2'] = 'domain ; backup_mx ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*';
+$PALANG['pAdminImport_help2'] = 'domain ; backup_mx* ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*; Active*';
 $PALANG['pAdminImport_help3'] = 'the options followed by  a  * can be 0 or 1 ';
 
 $PALANG['pImport_Users_file'] = 'users file';
