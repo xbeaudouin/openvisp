@@ -6,6 +6,8 @@
         $domain_overquota = 0;
         print_menu("domain/create-domain.php?username=".$SESSID_USERNAME,$PALANG['pAdminMenu_create_domain']);
         print_dot();
+        print_menu("domain/import-domain.php?username=".$SESSID_USERNAME,$PALANG['pAdminMenu_import_domain']);
+        print_dot();
         print_menu("users/create-domain-alias.php",$PALANG['pAdminMenu_create_domain_alias']);
         print_dot();
      }
