@@ -42,42 +42,45 @@ for ($i = 0; $i < sizeof ($list_domains); $i++)
    if ((is_array ($list_domains) and sizeof ($list_domains) > 0))
    {
       $limit = get_domain_properties ($list_domains[$i]);
-			$domain_policy = get_domain_policy ($list_domains[$i]);
+      if ( $limit['alias_count'] > 0 && $limit['mailbox_count'] > 0 ){
+				$domain_policy = get_domain_policy ($list_domains[$i]);
 
-			$total_alias_count += $limit['alias_count'];
-			$total_mailbox_count += $limit['mailbox_count'];
-			$total_maxalias_count += $limit['aliases'];
-			$total_maxmailbox_count += $limit['mailboxes'];
+				$total_alias_count += $limit['alias_count'];
+				$total_mailbox_count += $limit['mailbox_count'];
+				$total_maxalias_count += $limit['aliases'];
+				$total_maxmailbox_count += $limit['mailboxes'];
 
-      print "<tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">";
-      print "<td><a href=\"overview.php?domain=" . $list_domains[$i] . "\">" . $list_domains[$i] . "</a></td>";
-      print "<td>" . $limit['alias_count'] . " / ";
-      switch ($limit['aliases']) {
-        case "0" : print $PALANG['pOverview_limit_none']; break;
-        case "-1": print "&infin;"; break;
-        default  : print $limit['aliases']; break;
+				print "<tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">";
+				print "<td><a href=\"overview.php?domain=" . $list_domains[$i] . "\">" . $list_domains[$i] . "</a></td>";
+				print "<td>" . $limit['alias_count'] . " / ";
+				switch ($limit['aliases']) {
+        	case "0" : print $PALANG['pOverview_limit_none']; break;
+        	case "-1": print "&infin;"; break;
+        	default  : print $limit['aliases']; break;
+        }
+        print "</td><td>" . $limit['mailbox_count'] . " / "; //. $limit['mailboxes'] . "</td>";
+        switch ($limit['mailboxes']) {
+        	case "0" : print $PALANG['pOverview_limit_none']; break;
+        	case "-1": print "&infin;"; break;
+        	default  : print $limit['mailboxes']; break;
+        }
+        print "</td>";
+        if ($CONF['quota'] == 'YES') {
+      	  print " <td>";
+      	  switch($limit['maxquota']) {
+      	  	case "-1" : print "&infin;"; break;
+      	  	default   : print $limit['maxquota']; break;
+      	  }
+      	  print "</td>";
+      	}
+
+      	$total_domain_mbox = total_quota_mailbox_domain($list_domains[$i]);
+      	print " <td> ". number_format($total_domain_mbox,0, ',', ' ')."</td>";
+      	$total_mbdisk_count += $total_domain_mbox;
+      	print "<td><a href=\"edit-active-domain-policy.php?domain=" . $list_domains[$i] . "\">" . $PALANG['pOverview_get_security_edit'] . "</a></td>";
+      	print "</tr>";
       }
-      print "</td><td>" . $limit['mailbox_count'] . " / "; //. $limit['mailboxes'] . "</td>";
-      switch ($limit['mailboxes']) {
-        case "0" : print $PALANG['pOverview_limit_none']; break;
-        case "-1": print "&infin;"; break;
-        default  : print $limit['mailboxes']; break;
-      }
-      print "</td>";
-      if ($CONF['quota'] == 'YES') {
-      print " <td>";
-      switch($limit['maxquota']) {
-        case "-1" : print "&infin;"; break;
-        default   : print $limit['maxquota']; break;
-      }
-      print "</td>";
-      }
-			$total_domain_mbox = total_quota_mailbox_domain($list_domains[$i]);
-      print " <td> ". number_format($total_domain_mbox,0, ',', ' ')."</td>";
-			$total_mbdisk_count += $total_domain_mbox;
-			print "<td><a href=\"edit-active-domain-policy.php?domain=" . $list_domains[$i] . "\">" . $PALANG['pOverview_get_security_edit'] . "</a></td>";
-      print "</tr>";
-   }
+    }
 }
 
 print "   <tr>\n";
