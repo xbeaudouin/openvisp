@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
    }
    
    include ("../templates/header.tpl");
-   include ("../templates/users/menu.tpl");
+   include ("../templates/users/menu_viewlog.tpl");
    include ("../templates/viewlog.tpl");
    include ("../templates/footer.tpl");
 }
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
    }
 
    include ("../templates/header.tpl");
-   include ("../templates/users/menu.tpl");
+   include ("../templates/users/menu_viewlog.tpl");
    include ("../templates/viewlog.tpl");
    include ("../templates/footer.tpl");
 }
