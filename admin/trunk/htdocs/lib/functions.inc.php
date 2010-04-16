@@ -2139,7 +2139,8 @@ function check_overquota_user ($username)
 //
 // total_quota_mailbox_domain
 // Action: Get the sum of all domain mailbox disk space used
-// Call: check_quota_user ( string domain)
+// Call: total_quota_mailbox_domain ( string domain)
+// TODO : Remove all direct call to be change by domain object call
 //
 function total_quota_mailbox_domain ($domain)
 {
