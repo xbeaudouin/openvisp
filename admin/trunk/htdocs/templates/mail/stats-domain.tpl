@@ -26,7 +26,9 @@ for ($i = 0; $i < sizeof ($list_domains); $i++)
 
 	 print "Stats globales des mails sur les 3 derniers mois \n</br>";
 
-	 $sql_query = "SELECT DATE_FORMAT(FROM_UNIXTIME(stats_mail_user.last_date),'%Y-%m') as month, SUM(spam) as spam, SUM(clean) as clean, SUM(blocked) as blocked , SUM(malformed) as malformed, SUM(virus) as virus, SUM(bytes_in) as bytes_in, SUM(bytes_out) as bytes_out, SUM(mail_out) as mail_out
+	 $sql_query = "SELECT DATE_FORMAT(FROM_UNIXTIME(stats_mail_user.last_date),'%Y-%m') as month,
+	 SUM(spam) as spam, SUM(clean) as clean, SUM(blocked) as blocked , SUM(malformed) as malformed,
+	 SUM(virus) as virus, SUM(bytes_in) as bytes_in, SUM(bytes_out) as bytes_out, SUM(mail_out) as mail_out
 FROM stats_mail_user, domain, mailbox
 WHERE domain.domain = '$fDomain'
 AND domain.id = mailbox.domain_id
@@ -34,6 +36,7 @@ AND mailbox.id = stats_mail_user.mailbox_id
 AND DATE_FORMAT(FROM_UNIXTIME(stats_mail_user.last_date),'%Y-%m')  BETWEEN DATE_SUB('". $year."-".$month."-01', INTERVAL $nb_month MONTH) AND '". $year."-".$month."-01'
 GROUP BY month
 ";
+
 
 	 $result = db_query($sql_query);
 	 if ($result['rows'] > 0)
@@ -124,7 +127,7 @@ GROUP BY month, mailbox.username
 		 }
 
 
-//	 print "<img src=\"./stats-domain-img.php?domain=$fDomain&year=".$today['year']."&month=".$today['mon']."\">";
+	 print "<img src=\"./stats-domain-img.php?domain=$fDomain&year=".$year."&month=".$month."\">";
 
 
 /* print "<b>". $PALANG['pStats_welcome'] . $fDomain . "</b><br />\n"; */
