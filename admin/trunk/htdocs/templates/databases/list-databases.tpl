@@ -32,75 +32,75 @@
 		return url;
 	};
 
-YAHOO.widget.DataTable.prototype.saveCellEditor = function() {
-
-
-				// ++++ this is the inner function to handle the several possible failure conditions
-				var onFailure = function (msg) {
-					alert(msg);
-
-					// --------      on failure section
-					this.resetCellEditor();
-					this.fireEvent("editorRevertEvent",
-					{editor:this._oCellEditor, oldData:oldData, newData:newData}
-												 );
-					// --------      end of on failure section
-
-				};
-
-				// +++ this comes from the original except for the part I cut to place in the function above.
-
-				if(this._oCellEditor.isActive) {
-					var newData = this._oCellEditor.value;
-					var oldData = this._oCellEditor.record.getData(this._oCellEditor.column.key);
-
-					if(this._oCellEditor.validator) {
-            newData = this._oCellEditor.validator.call(this, newData, oldData);
-            this._oCellEditor.value = newData;
-            if(newData === null ) {
-
-							// this is where the contents of the inner function onFailure used to be.
-							onFailure('validation');
-							return;
-            }
-					}
-
-					// ++++++ from here on I added new, except for the 'success' case pasted in.
-					var act = 'manage-db.php';
-					var postdata = 'upfield=' + this._oCellEditor.column.key + '&newvalue=' + escape(newData) + myBuildUrl.call(this, this._oCellEditor.record);
-
-					YAHOO.util.Connect.asyncRequest(
-																					'POST',
-																					act,
-																					{
-																					success: function (o) {
-
-																							if ( o.responseText == 'OK' ) {
-																								
-																								// --------     on success section
-																								this._oRecordSet.updateRecordValue(this._oCellEditor.record, this._oCellEditor.column.key, this._oCellEditor.value);
-																								this.formatCell(this._oCellEditor.cell.firstChild);
-																								this.resetCellEditor();
-																								this.fireEvent("editorSaveEvent",
-																															 {editor:this._oCellEditor, oldData:oldData, newData:newData}
-																															 );
-																								// --------     end of on success section
-																								
-																							} else {
-																								onFailure.call(this,o.responseText);
-																							}
-																						},
-																							failure: function(o) {
-																							onFailure(this, o.statusText);
-																						},
-																							scope: this
-																							},
-																					postdata
-																					);
-				} else {
-				}
-			};
-
+	YAHOO.widget.DataTable.prototype.saveCellEditor = function() {
+	  
+	  
+	  // ++++ this is the inner function to handle the several possible failure conditions
+	  var onFailure = function (msg) {
+	    alert(msg);
+	    
+	    // --------      on failure section
+	    this.resetCellEditor();
+	    this.fireEvent("editorRevertEvent",
+	      {editor:this._oCellEditor, oldData:oldData, newData:newData}
+	      );
+	    // --------      end of on failure section
+	    
+	  };
+	  
+	  // +++ this comes from the original except for the part I cut to place in the function above.
+	  
+	  if(this._oCellEditor.isActive) {
+	    var newData = this._oCellEditor.value;
+	    var oldData = this._oCellEditor.record.getData(this._oCellEditor.column.key);
+	    
+	    if(this._oCellEditor.validator) {
+	      newData = this._oCellEditor.validator.call(this, newData, oldData);
+	      this._oCellEditor.value = newData;
+	      if(newData === null ) {
+	        
+	        // this is where the contents of the inner function onFailure used to be.
+	        onFailure('validation');
+	        return;
+	      }
+	    }
+	    
+	    // ++++++ from here on I added new, except for the 'success' case pasted in.
+	    var act = 'manage-db.php';
+	    var postdata = 'upfield=' + this._oCellEditor.column.key + '&newvalue=' + escape(newData) + myBuildUrl.call(this, this._oCellEditor.record);
+	    
+	    YAHOO.util.Connect.asyncRequest(
+	      'POST',
+	      act,
+	      {
+	        success: function (o) {
+	          
+	          if ( o.responseText == 'OK' ) {
+	            
+	            // --------     on success section
+	            this._oRecordSet.updateRecordValue(this._oCellEditor.record, this._oCellEditor.column.key, this._oCellEditor.value);
+	            this.formatCell(this._oCellEditor.cell.firstChild);
+	            this.resetCellEditor();
+	            this.fireEvent("editorSaveEvent",
+	              {editor:this._oCellEditor, oldData:oldData, newData:newData}
+	              );
+	            // --------     end of on success section
+	            
+	          } else {
+	            onFailure.call(this,o.responseText);
+	          }
+	        },
+	        failure: function(o) {
+	          onFailure(this, o.statusText);
+	        },
+	        scope: this
+	      },
+	      postdata
+	      );
+	  } else {
+	  }
+	};
+	
 
 YAHOO.util.Event.addListener(window, "load", function() { 
 
