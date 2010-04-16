@@ -57,22 +57,19 @@ class USER
 	{
 		if ( $this->rights['manage'] == 1 )
 			{
-				$query = "SELECT domain.domain, domain.id
-FROM domain
-WHERE domain.domain != 'ova.local'
-";
+				$query = "SELECT domain.domain, domain.id, domain.modified
+				FROM domain
+				WHERE domain.domain != 'ova.local'";
 			}
 		else
 			{
-				$query = "SELECT domain.domain, domain.id
-FROM domain, domain_admins
-WHERE domain_admins.accounts_id = ".$this->data['id']."
-AND domain_admins.domain_id=domain.id
-";
+				$query = "SELECT domain.domain, domain.id, domain.modified
+				FROM domain, domain_admins
+				WHERE domain_admins.accounts_id = ".$this->data['id']."
+				AND domain_admins.domain_id=domain.id
+				";
 			}
-		$query .= "
-ORDER BY domain.domain
-";
+		$query .= "ORDER BY domain.domain";
 
 
 		$result = $this->db_link->sql_query($query);
@@ -82,7 +79,39 @@ ORDER BY domain.domain
 
 	}
 
+	function fetch_active_domains($search_param = NULL)
+	{
+		if ( $this->rights['manage'] == 1 )
+		{
+		  $query = "SELECT domain.domain, domain.id, domain.modified
+		  FROM domain
+		  WHERE domain.domain != 'ova.local'
+		  AND domain.active=1
+		  ";
+		}
+		else
+		{
+		  $query = "SELECT domain.domain, domain.id, domain.modified
+		  FROM domain, domain_admins
+		  WHERE domain_admins.accounts_id = ".$this->data['id']."
+		  AND domain_admins.domain_id=domain.id
+		  AND domain.active=1
+		  ";
+		}
+		
+		if ( $search_param != NULL ){
+		  $query .= "AND domain.domain like '".$search_param."%'";
+		}
+		
+		$query .= "ORDER BY domain.domain";
 
+
+		$result = $this->db_link->sql_query($query);
+
+		$this->data_managed_active_domain = $result['result'];
+		$this->total_managed_active_domain = $result['rows'];
+
+	}
 
 	function check_quota($type)
 	{
@@ -114,9 +143,70 @@ ORDER BY domain.domain
 
 	}
 
+	//
+	// function fetch_quota_status
+	// this function fetch values for consumned thing
+	//
+
+	function fetch_quota_status()
+	{
+	  if ( $this->rights['manage'] == 1 )
+	  {
+
+	    $query = "SELECT COUNT(username) AS total_mailbox FROM mailbox";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_mailbox = $result['result'][0]['total_mailbox'];
+	    
+	    $query = "SELECT COUNT(address) AS total_alias FROM alias";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_mail_alias = $result['result'][0]['total_alias'];
+
+	    $query = "SELECT COUNT(vhost) AS total_vhost FROM whost";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_web_host = $result['result'][0]['total_vhost'];
+
+	    $query = "SELECT COUNT(login) AS total_ftp_account FROM ftpaccount";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_ftp_account = $result['result'][0]['total_ftp_account'];
+
+	    $query = "SELECT COUNT(dbname.id) AS total_db FROM dbname, dbtype WHERE dbname.dbtype_id=dbtype.id AND dbtype.name='mysql'";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_mysql_db = $result['result'][0]['total_db'];
+
+	    $query = "SELECT COUNT(dbusers.id) AS count_users FROM dbusers,dbtype WHERE dbusers.dbtype_id=dbtype.id AND dbtype.name='mysql'";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_mysql_user = $result['result'][0]['count_users'];
+	    
+	    $query = "SELECT COUNT(dbname.id) AS total_db FROM dbname, dbtype WHERE dbname.dbtype_id=dbtype.id AND dbtype.name='mysql'";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_pgsql_db = $result['result'][0]['total_db'];
+
+	    $query = "SELECT COUNT(dbusers.id) AS count_users FROM dbusers,dbtype WHERE dbusers.dbtype_id=dbtype.id AND dbtype.name='mysql'";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed_pgsql_user = $result['result'][0]['count_users'];
+	    
+	  }
+	}
 
 
-
+	function check_domain_access($domain_id)
+	{
+	  if ($this->rights['manage'] != 1){
+	    $query = "SELECT domain_id
+	    FROM domain_admins
+	    WHERE domain_admins.accounts_id = ".$this->data['id']."
+	    AND domain_admins.domain_id=$domain_id";
+	    
+	    $result = $this->db_link->sql_query($query);
+	    if ( $result['rows'] == 0 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+	    }
+	  }
+	}
+	
 }
 
 
