@@ -14,7 +14,7 @@ if (ereg ("versions.inc.php", $_SERVER['PHP_SELF']))
 $hash_version = array(
 	"0.96" => "0000",
 	"0.97-dev" => "0001",
-	"1.0-RC1" => "0002",
+	"1.0-RC1" =>  "0002",
 );
 
 //
