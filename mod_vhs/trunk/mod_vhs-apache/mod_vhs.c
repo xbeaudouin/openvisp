@@ -1459,7 +1459,7 @@ static int vhs_translate_name(request_rec * r)
 	} else {
 		r->server->server_admin = apr_pstrcat(r->pool, "webmaster@", r->hostname, NULL);
 	}
-	r->server->server_hostname = apr_pstrcat(r->pool, host, NULL);
+	r->server->server_hostname = apr_pstrcat(r->connection->pool, host, NULL);
 	r->parsed_uri.path = apr_pstrcat(r->pool, vhr->path_prefix ? vhr->path_prefix : "", reqc->docroot, r->parsed_uri.path, NULL);
 	r->parsed_uri.hostname = r->server->server_hostname;
 	r->parsed_uri.hostinfo = r->server->server_hostname;
