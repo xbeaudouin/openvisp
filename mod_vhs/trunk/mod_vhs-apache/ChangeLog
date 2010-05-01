@@ -1,5 +1,10 @@
 Since mod_vhs 1.0.3x
 --------------------
+o added some #define to avoid LDAP stuff to be compiled when apache doesn't
+  have LDAP support (Guillaum de Lafond)
+o added mpm-itk support (Thanks to Guillaume de Lafond to port patch)
+o added mod_ldap support
+o Droped libhome support 
 o Added support for suphp for non-systems users (Stephane Locatelli)
   This allow suphp support when it is compiled with "force" mode and
   don't break compatibility with "owner" mode.

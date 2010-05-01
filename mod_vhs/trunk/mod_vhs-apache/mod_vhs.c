@@ -54,7 +54,12 @@
 /*
  * $Id: mod_vhs.c,v 1.108 2009-05-22 20:27:29 kiwi Exp $
  */
-
+/*
+ * Brief instructions to use mod_vhs with apache2-mpm-itk support.
+ * - To compile mod_vhs with apache2-mpm-itk support add "-DHAVE_MPM_ITK_SUPPORT" to your "CFLAGS".
+ * - To enable apache2-mpm-itk support set "vhs_itk_enable On" in your <VirtualHost> section.
+ * - Pass the uidNumber and gidNumber to the uid and gid directive in your home.conf like the example in the README file.
+ */
 /*
  * Version of mod_vhs
  */
@@ -78,6 +83,7 @@
 /* Original Author: Michael Link <mlink@apache.org> */
 /* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
 /* Some parts of this code has been stolen from mod_alias */
+/* added support for apache2-mpm-itk by Rene Kanzler <rk (at) cosmomill (dot) de> */
 
 /* We need this to be able to access the docroot. */
 #define CORE_PRIVATE
@@ -196,6 +202,13 @@ typedef struct {
 	unsigned short int 	phpopt_fromdb;		/* Get PHP options from database/ldap */
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
+#ifdef HAVE_MPM_ITK_SUPPORT
+	unsigned short int itk_enable; /* MPM-ITK support */
+	uid_t itk_defuid;
+	gid_t itk_defgid;
+	char *itk_defusername;
+#endif /* HAVE_MPM_ITK_SUPPORT */
+
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	char				*suphp_config_path;	/* suPHP_ConfigPath */
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
@@ -309,6 +322,11 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	vhr->ldap_have_deref= 0;
 	vhr->ldap_deref		= always;
 #endif /* APR_HAS_LDAP */
+#ifdef HAVE_MPM_ITK_SUPPORT
+/* disable MPM-ITK support by default */
+	vhr->itk_enable = 0;
+#endif /* HAVE_MPM_ITK_SUPPORT */
+
 	/*
 	 * From mod_alias.c
 	 */
@@ -348,6 +366,9 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 #ifdef HAVE_MOD_SUPHP_SUPPORT
     conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
+#ifdef HAVE_MPM_ITK_SUPPORT
+	conf->itk_enable = (child->itk_enable ? child->itk_enable : parent->itk_enable);
+#endif /* HAVE_MPM_ITK_SUPPORT */
 
 #ifdef APR_HAS_LDAP
     if (child->ldap_have_url) {
@@ -978,29 +999,73 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 			vhr->log_notfound = 0;
 		}
 		break;
-
+#ifdef HAVE_MPM_ITK_SUPPORT
+	case 8:
+		if (flag) {
+			vhr->itk_enable = 1;
+		} else {
+			vhr->itk_enable = 0;
+		}
+		break;
+#endif /* HAVE_MPM_ITK_SUPPORT  */
 	}
 
 	return NULL;
 }
 
+#ifdef HAVE_MPM_ITK_SUPPORT
+typedef struct {
+	uid_t uid;
+	gid_t gid;
+	char   *username;
+} itk_conf;
+#endif /* HAVE_MPM_ITK_SUPPORT  */
 
 static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
 {
 #ifdef APR_HAS_LDAP
-    /* make sure that mod_ldap (util_ldap) is loaded */
-    if (ap_find_linked_module("util_ldap.c") == NULL) {
-        ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, s,
-                     "Module mod_ldap missing. Mod_ldap (aka. util_ldap) "
-                     "must be loaded in order for mod_vhs to function properly");
-        return HTTP_INTERNAL_SERVER_ERROR;
-    }
+	/* make sure that mod_ldap (util_ldap) is loaded */
+	if (ap_find_linked_module("util_ldap.c") == NULL) {
+		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, s,
+			"Module mod_ldap missing. Mod_ldap (aka. util_ldap) "
+			"must be loaded in order for mod_vhs to function properly");
+		return HTTP_INTERNAL_SERVER_ERROR;
+	}
 #endif /* APR_HAS_LDAP */
 
 #ifdef VH_DEBUG
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, "loading version %s.", VH_VERSION);
 #endif				/* VH_DEBUG */
 	ap_add_version_component(pconf, VH_VERSION);
+
+#ifdef HAVE_MPM_ITK_SUPPORT
+	unsigned short int itk_enable = 1;
+	server_rec *sp;
+
+	module *mpm_itk_module = ap_find_linked_module("itk.c");
+	if (mpm_itk_module == NULL) {
+		ap_log_error(APLOG_MARK, APLOG_ERR, 0, s, "vhs_init_handler: itk.c is not loaded");
+		itk_enable = 0;
+	}
+
+	for (sp = s; sp; sp = sp->next) {
+		vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(sp->module_config, &vhs_module);
+
+		if (vhr->itk_enable) {
+			if (!itk_enable) {
+				vhr->itk_enable = 0;
+			} else {
+				itk_conf *cfg = (itk_conf *) ap_get_module_config(sp->module_config, mpm_itk_module);
+				vhr->itk_defuid = cfg->uid;
+				vhr->itk_defgid = cfg->gid;
+				vhr->itk_defusername = cfg->username;
+
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, sp, "vhs_init_handler: itk uid='%d' itk gid='%d' itk username='%s'", cfg->uid, cfg->gid, cfg->username );
+			}
+		}       
+	}
+#endif /* HAVE_MPM_ITK_SUPPORT  */
+
 	return OK;
 }
 
@@ -1023,6 +1088,93 @@ static int vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 #endif				/* VH_DEBUG */
 	return DECLINED;
 }
+
+#ifdef HAVE_MPM_ITK_SUPPORT
+/*
+ * This function will configure MPM-ITK
+ */
+static int vhs_itk_post_read(request_rec *r)
+{
+	struct passwd  *p;
+
+	uid_t libhome_uid;
+	gid_t libhome_gid;
+	
+  	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(r->server->module_config, &vhs_module);
+
+	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
+
+	if (p == NULL) {
+		if (vhr->lamer_mode) {
+			#ifdef VH_DEBUG
+		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
+			#endif
+			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) {
+				char           *lhost;
+				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
+				#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
+				#endif
+				p = vhs_get_home_stuff(r, vhr, lhost);
+				if (p != NULL) {
+					libhome_uid = p->pw_uid;
+					libhome_gid = p->pw_gid;
+					#ifdef VH_DEBUG
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: lamer for %s -> %s has itk uid='%d' itk gid='%d'", r->hostname, lhost, libhome_uid, libhome_gid);
+					#endif
+				} else {
+					libhome_uid = vhr->itk_defuid;
+					libhome_gid = vhr->itk_defgid;
+					#ifdef VH_DEBUG
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
+					#endif
+				}
+			} else {
+				libhome_uid = vhr->itk_defuid;
+				libhome_gid = vhr->itk_defgid;
+				#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
+				#endif
+			}
+		} else {
+			libhome_uid = vhr->itk_defuid;
+			libhome_gid = vhr->itk_defgid;
+		}
+	} else {
+		libhome_uid = p->pw_uid;
+		libhome_gid = p->pw_gid;
+	}
+
+       /* If ITK support is not enabled, then don't process request */
+	if (vhr->itk_enable) {
+
+       	module *mpm_itk_module = ap_find_linked_module("itk.c");
+       
+		if (mpm_itk_module == NULL) {
+			ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_itk_post_read: itk.c is not loaded");
+			return HTTP_INTERNAL_SERVER_ERROR;
+		}
+       	itk_conf *cfg = (itk_conf *) ap_get_module_config(r->server->module_config, mpm_itk_module);
+
+       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' before change", cfg->uid, cfg->gid, cfg->username);
+	if ((libhome_uid == -1 || libhome_gid == -1)) { 
+			cfg->uid = vhr->itk_defuid;
+			cfg->gid = vhr->itk_defgid;
+			cfg->username = vhr->itk_defusername;
+		} else {
+       		cfg->uid = libhome_uid;
+       		cfg->gid = libhome_uid;
+			/* set the username - otherwise MPM-ITK will not work */
+			char *itk_username = NULL;
+			itk_username = apr_psprintf(r->pool, "#%d", libhome_uid);
+       	       cfg->username = itk_username;
+		}
+      	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
+	}
+       return OK;
+}
+#endif /* HAVE_MPM_ITK_SUPPORT  */
+
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 /*
@@ -1105,6 +1257,94 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	ap_set_module_config(r->server->module_config, suphp_module, cfg);
 }
 #endif /* HAVE_MOD_SUPHP_SUPPORT  */
+
+
+#ifdef HAVE_MPM_ITK_SUPPORT
+/*
+ * This function will configure MPM-ITK
+ */
+static int vhs_itk_post_read(request_rec *r)
+{
+	struct passwd  *p;
+
+	uid_t libhome_uid;
+	gid_t libhome_gid;
+	
+  	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(r->server->module_config, &vhs_module);
+
+	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
+
+	if (p == NULL) {
+		if (vhr->lamer_mode) {
+			#ifdef VH_DEBUG
+			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
+			#endif
+			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) {
+				char           *lhost;
+				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
+				#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
+				#endif
+				p = vhs_get_home_stuff(r, vhr, lhost);
+				if (p != NULL) {
+					libhome_uid = p->pw_uid;
+					libhome_gid = p->pw_gid;
+					#ifdef VH_DEBUG
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: lamer for %s -> %s has itk uid='%d' itk gid='%d'", r->hostname, lhost, libhome_uid, libhome_gid);
+					#endif
+				} else {
+					libhome_uid = vhr->itk_defuid;
+					libhome_gid = vhr->itk_defgid;
+					#ifdef VH_DEBUG
+					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
+					#endif
+				}
+			} else {
+				libhome_uid = vhr->itk_defuid;
+				libhome_gid = vhr->itk_defgid;
+				#ifdef VH_DEBUG
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
+				#endif
+			}
+		} else {
+			libhome_uid = vhr->itk_defuid;
+			libhome_gid = vhr->itk_defgid;
+		}
+	} else {
+		libhome_uid = p->pw_uid;
+		libhome_gid = p->pw_gid;
+	}
+
+       /* If ITK support is not enabled, then don't process request */
+	if (vhr->itk_enable) {
+
+       	module *mpm_itk_module = ap_find_linked_module("itk.c");
+       
+		if (mpm_itk_module == NULL) {
+			ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_itk_post_read: itk.c is not loaded");
+			return HTTP_INTERNAL_SERVER_ERROR;
+		}
+
+       	itk_conf *cfg = (itk_conf *) ap_get_module_config(r->server->module_config, mpm_itk_module);
+
+       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' before change", cfg->uid, cfg->gid, cfg->username);
+		if ((libhome_uid == -1 || libhome_gid == -1)) { 
+			cfg->uid = vhr->itk_defuid;
+			cfg->gid = vhr->itk_defgid;
+			cfg->username = vhr->itk_defusername;
+		} else {
+       		cfg->uid = libhome_uid;
+       		cfg->gid = libhome_uid;
+			/* set the username - otherwise MPM-ITK will not work */
+			char *itk_username = NULL;
+			itk_username = apr_psprintf(r->pool, "#%d", libhome_uid);
+       	       cfg->username = itk_username;
+		}
+       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
+	}
+       return OK;
+}
+#endif /* HAVE_MPM_ITK_SUPPORT  */
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 /*
@@ -1368,8 +1608,9 @@ static int vhs_translate_name(request_rec * r)
 	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 #endif				/* VH_DEBUG */
 
+#ifdef APR_HAS_LDAP
 	vals = getldaphome(r, vhr, (char *) host);
-
+#endif
 	if (!vals) {
 		/*
 		 * Trying to get lamer mode or not
@@ -1384,7 +1625,9 @@ static int vhs_translate_name(request_rec * r)
 #ifdef VH_DEBUG
 				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
 #endif
+#ifdef APR_HAS_LDAP
 				vals = getldaphome(r, vhr, lhost);
+#endif
 				if (!vals) {
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
@@ -1414,6 +1657,8 @@ static int vhs_translate_name(request_rec * r)
 		/* We have values so work with them */
 		//reqc->dn = apr_pstrdup(r->pool, dn);
 
+
+#ifdef APR_HAS_LDAP
 		int i = 0;
 		while (ldap_attributes[i]) {
 		    if (strcasecmp (ldap_attributes[i], "apacheServerName") == 0) {
@@ -1439,6 +1684,7 @@ static int vhs_translate_name(request_rec * r)
 		    }
 		    i++;
 		}
+#endif
 	}
 
 #ifdef WANT_VH_HOST
@@ -1518,6 +1764,9 @@ static const command_rec vhs_commands[] = {
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	AP_INIT_TAKE1( "vhs_suphp_config_path", set_field, (void *)10, RSRC_CONF, "The SuPHP configuration path for the user"),
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
+#ifdef HAVE_MPM_ITK_SUPPORT
+	AP_INIT_FLAG("vhs_itk_enable", set_flag, (void *)8, RSRC_CONF, "Enable MPM-ITK support"),
+#endif /* HAVE_MPM_ITK_SUPPORT */
 
 	AP_INIT_TAKE2( "vhs_Alias", add_alias, NULL, RSRC_CONF, "a fakename and a realname"),
 	AP_INIT_TAKE2( "vhs_ScriptAlias", add_alias, "cgi-script", RSRC_CONF, "a fakename and a realname"),
@@ -1556,6 +1805,12 @@ static void register_hooks(apr_pool_t * p)
 	/* Modules that have to be loaded after mod_vhs */
 	static const char *const aszSucc[] =
 	{"mod_php.c", "mod_suphp.c", NULL};
+	
+#ifdef HAVE_MPM_ITK_SUPPORT
+	static const char * const aszSuc_itk[]= {"itk.c",NULL };
+	ap_hook_post_read_request(vhs_itk_post_read, NULL, aszSuc_itk, APR_HOOK_REALLY_FIRST);
+#endif /* HAVE_MPM_ITK_SUPPORT */
+	
 	ap_hook_post_config(vhs_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_translate_name(vhs_translate_name, aszPre, aszSucc, APR_HOOK_FIRST);
 	ap_hook_fixups(fixup_redir, NULL, NULL, APR_HOOK_MIDDLE);

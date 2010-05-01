@@ -14,3 +14,7 @@ o Nat Makarevitch
 
 o Author of mod_vhost_ldap (Ondej Surý) that gave 
   me some stuff to use mod_ldap on Apache 2.2.xx
+
+o Guillaume de Lafond for his help to merge some of patches
+  I got, and because of lack of time... I didn't had the time to 
+  merge that.
