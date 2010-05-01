@@ -34,10 +34,13 @@ for ($i = 0; $i < sizeof ($user_info->data_managed_active_domain); $i++)
 
 print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
 print load_js("../lib/yui/connection/connection-min.js");
-print load_js("../lib/yui/autocomplete/autocomplete-min.js");
-print load_js("../lib/yui/element/element-beta.js");
-print load_js("../lib/yui/datasource/datasource-beta-min.js");
-print load_js("../lib/yui/datatable/datatable-beta-min.js");
+//print load_js("../lib/yui/autocomplete/autocomplete-min.js");
+print load_js("../lib/yui/json/json-min.js");
+print load_js("../lib/yui/element/element-min.js");
+print load_js("../lib/yui/paginator/paginator-min.js");
+print load_js("../lib/yui/datasource/datasource-min.js");
+print load_js("../lib/yui/datatable/datatable-min.js");
+
 
 print load_css("../css/datatable.css");
 
@@ -45,33 +48,37 @@ print load_css("../css/datatable.css");
 <style type="text/css">
 
 </style>
+<div id="dt-pag-nav"></div> 
+<div id="xml"></div>
 
 <?php
 
 $ajax_yui->start();
 if ( $CONF['quota'] == 'YES') {
   $item_list= array(
-    "name" => "sortable:true",
-    "aliases" => "sortable:true",
-    "quota_aliases" => "sortable:true",
-    "mailboxes" => "sortable:true",
-    "quota_mailboxes" => "sortable:true",
-    "maxquota" => "sortable:true",
-    "diskspace_mailboxes" => "sortable:true"
+    "domain" => 'sortable:true, parser:"text"',
+    "aliases" => 'sortable:false, parser:"number"',
+    "quota_aliases" => 'sortable:false, parser:"number"',
+    "mailboxes" => 'sortable:false, parser:"number"',
+    "quota_mailboxes" => 'sortable:false, parser:"number"',
+    "maxquota" => 'sortable:false, parser:"number"',
+    "diskspace_mailboxes" => 'sortable:false, editor:"textarea", parser:"number"'
+
     );
+  //    "delete" => "../images/ico-exit.png|delete row|Are you sure to delete ?|./manage-app.php|action=delete"
 }
 else{
   $item_list= array(
     "name" => "sortable:true",
-    "aliases" => "sortable:true",
-    "mailboxes" => "sortable:true",
-    "maxquota" => "sortable:true",
-    "diskspace_mailboxes" => "sortable:true"
+    "aliases" => "sortable:false",
+    "mailboxes" => "sortable:false",
+    "maxquota" => "sortable:false",
+    "diskspace_mailboxes" => 'sortable:false, editor:"textarea"'
     );
 }
 
 $ajax_info = array(
-  "url" => "../ajax/mail/domain_mail_overview.php",
+  "url" => "../ajax/mail/domain_mail_overview.php?",
   "method" => "post"
   );
 
@@ -83,9 +90,15 @@ $search_form[] = array(
   );
 
 $ajax_yui->ajax_info($ajax_info);
+$ajax_yui->attr_add('root','records');
+$ajax_yui->attr_add('sort','domain');
+$ajax_yui->attr_add('sortdir','asc');
+$ajax_yui->attr_add('startindex','0');
+$ajax_yui->attr_add('results','10');
+$ajax_yui->attr_add('maxrows','10');
+
 $ajax_yui->add_search_form($search_form);
 $ajax_yui->item_add($item_list);
-$ajax_yui->xml_attr_add('root','domain');
 //$ajax_yui->create_celleditor();
 $ajax_yui->create_listener();
 $ajax_yui->end();
@@ -109,7 +122,6 @@ $ajax_yui->end();
   </tr>
 <table>
 
-<div id="xml"></div>
 
 <?php
 print "<table>\n";
