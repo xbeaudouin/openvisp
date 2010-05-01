@@ -59,7 +59,8 @@ class USER
 			{
 				$query = "SELECT domain.domain, domain.id, domain.modified
 				FROM domain
-				WHERE domain.domain != 'ova.local'";
+				WHERE domain.domain != 'ova.local'
+        ";
 			}
 		else
 			{
@@ -79,14 +80,14 @@ class USER
 
 	}
 
-	function fetch_active_domains($search_param = NULL)
+	function fetch_active_domains($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
 	{
 		if ( $this->rights['manage'] == 1 )
 		{
 		  $query = "SELECT domain.domain, domain.id, domain.modified
 		  FROM domain
 		  WHERE domain.domain != 'ova.local'
-		  AND domain.active=1
+		  AND domain.active = 1
 		  ";
 		}
 		else
@@ -94,17 +95,25 @@ class USER
 		  $query = "SELECT domain.domain, domain.id, domain.modified
 		  FROM domain, domain_admins
 		  WHERE domain_admins.accounts_id = ".$this->data['id']."
-		  AND domain_admins.domain_id=domain.id
-		  AND domain.active=1
+		  AND domain_admins.domain_id = domain.id
+		  AND domain.active = 1
 		  ";
 		}
 		
 		if ( $search_param != NULL ){
-		  $query .= "AND domain.domain like '".$search_param."%'";
+		  $query .= "AND domain.domain like '".$search_param."%' ";
 		}
 		
-		$query .= "ORDER BY domain.domain";
+		if ( $order_by_field == NULL ){
+			$query .= "ORDER BY domain.domain ";
+		}
+		else {
+			$query .= "ORDER BY $order_by_field $order_dir ";
+		}
 
+		if ( $result_limit != NULL ){
+			$query .= "LIMIT $result_limit ";
+		}
 
 		$result = $this->db_link->sql_query($query);
 
@@ -112,6 +121,55 @@ class USER
 		$this->total_managed_active_domain = $result['rows'];
 
 	}
+
+	// Function : fetch_active_domains_with_mail
+
+	function fetch_active_domains_with_mail($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
+	{
+		if ( $this->rights['manage'] == 1 )
+		{
+		  $query = "SELECT domain.domain, domain.id, domain.modified
+		  FROM domain
+		  WHERE domain.domain != 'ova.local'
+		  AND domain.active = 1
+		  AND domain.mailboxes <> 0
+		  ";
+		}
+		else
+		{
+		  $query = "SELECT domain.domain, domain.id, domain.modified
+		  FROM domain, domain_admins
+		  WHERE domain_admins.accounts_id = ".$this->data['id']."
+		  AND domain_admins.domain_id = domain.id
+		  AND domain.active = 1
+		  AND domain.mailboxes <> 0
+		  ";
+		}
+		
+		if ( $search_param != NULL ){
+		  $query .= "AND domain.domain like '".$search_param."%' ";
+		}
+		
+		if ( $order_by_field == NULL ){
+			$query .= "ORDER BY domain.domain ";
+		}
+		else {
+			$query .= "ORDER BY $order_by_field $order_dir ";
+		}
+
+		if ( $result_limit != NULL ){
+			$query .= "LIMIT $result_limit ";
+		}
+
+		$result = $this->db_link->sql_query($query);
+
+		debug_info($query);
+
+		$this->data_managed_active_domain_with_mail = $result['result'];
+		$this->total_managed_active_domain_with_mail = $result['rows'];
+
+	}
+
 
 	function check_quota($type)
 	{
