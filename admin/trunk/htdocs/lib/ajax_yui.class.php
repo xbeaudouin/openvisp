@@ -31,21 +31,15 @@ class AJAX_YUI
 	  
 	    YAHOO.widget.DataTable.prototype.saveCellEditor = function() {
 	  
-	  
-	      // ++++ this is the inner function to handle the several possible failure conditions
 	      var onFailure = function (msg) {
 	        alert(msg);
 	        
-	        // --------      on failure section
 	        this.resetCellEditor();
 	        this.fireEvent(\"editorRevertEvent\",
 	          {editor:this._oCellEditor, oldData:oldData, newData:newData}
 	          );
-	        // --------      end of on failure section
 	        
 	      };
-	  
-	      // +++ this comes from the original except for the part I cut to place in the function above.
 	      
 	      if(this._oCellEditor.isActive) {
 	        var newData = this._oCellEditor.value;
@@ -55,14 +49,11 @@ class AJAX_YUI
 	          newData = this._oCellEditor.validator.call(this, newData, oldData);
 	          this._oCellEditor.value = newData;
 	          if(newData === null ) {
-	            
-	            // this is where the contents of the inner function onFailure used to be.
 	            onFailure('validation');
 	            return;
 	          }
 	        }
 	        
-	        // ++++++ from here on I added new, except for the 'success' case pasted in.
 	        var act = 'manage-db.php';
 	        var postdata = 'upfield=' + this._oCellEditor.column.key + '&newvalue=' + escape(newData) + myBuildUrl.call(this, this._oCellEditor.record);
 	        
@@ -73,15 +64,12 @@ class AJAX_YUI
 	            success: function (o) {
 	              
 	              if ( o.responseText == 'OK' ) {
-	                
-	                // --------     on success section
 	                this._oRecordSet.updateRecordValue(this._oCellEditor.record, this._oCellEditor.column.key, this._oCellEditor.value);
 	                this.formatCell(this._oCellEditor.cell.firstChild);
 	                this.resetCellEditor();
 	                this.fireEvent(\"editorSaveEvent\",
 	                  {editor:this._oCellEditor, oldData:oldData, newData:newData}
 	                  );
-	                // --------     end of on success section
 	                
 	              } else {
 	                onFailure.call(this,o.responseText);
@@ -99,26 +87,115 @@ class AJAX_YUI
 	    };
 	    ";
 	}
+
+	function create_listener(){
+	 	$this->buffer .= "YAHOO.example.DynamicData = function() {
+	 	  var myColumnDefs = [";
+	 	  $boucle=1;
+	 	  $editable_item = array();
+	 	  $deletable_item = array();
+	 	  
+	 	  foreach ($this->item_list as $item => $attributes) {
+	 	    
+	 	    if ( strstr($attributes, 'editor:') ) {$editable_item[] = $item;}
+	 	    if ( $item == "delete" ){
+	 	      $delete_items = explode("|", $attributes);
+	 	      $this->buffer .="{key:'delete', label:' ',formatter:function(elCell){
+	 	      elCell.innerHTML = '<img src=\"".$delete_items[0]."\" title=\"".$delete_items[1]."\" height=\"20\" width=\"20\"/>';
+	 	      elCell.style.cursor = 'pointer';
+	 	      }
+	 	      }";
+	 	      $deletable_item[] = $attributes;
+	 	    }
+	 	    else{
+	 	      $temp_attributes = preg_replace('/(.*), parser:"number"/', '$1', $attributes);
+	 	      $this->buffer .= '{key:"'.$item.'", label:"'.$item.'", '.$temp_attributes.'}'."";
+	 	    }
+	 	    if ( $boucle < sizeof($this->item_list)){
+	 	      $this->buffer .= ",\n";
+	 	    }
+	 	    $boucle++;
+	 	  }
+	 	  
+	 	  $this->buffer .= "];
+	 	  
+	 	  
+	 	  myDataSource = new YAHOO.util.DataSource(\"".$this->ajax_info['url']."\");";
+	 	    if ( $this->ajax_info['method'] == "post" ){
+	 	      $this->buffer.="myDataSource.connMethodPost = true;";
+	 	    }
+	 	    else{
+	 	      $this->buffer.="myDataSource.connMethodPost = false;";
+	 	    }
+	 	    
+	 	    $this->buffer.='
+	 	    myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	 	    
+	 	    myDataSource.responseSchema = {
+	 	    resultsList: "'.$this->info['root'].'",
+	 	    fields: ['."\n";
+	 	    
+	 	    $boucle=1;
+	 	    foreach ($this->item_list as $item => $attributes) {
+	 	      if ( $item != "delete" ){
+	 	        $temp_attributes = preg_replace('/.*(parser:"number")/', '$1', $attributes);
+	 	        $this->buffer .= '	                {key:"'.$item.'", '.$temp_attributes.'}';
+	 	        //$this->buffer .= '	                {key:"'.$item.'"}';
+	 	        if ( $boucle < sizeof($this->item_list)){
+	 	          $this->buffer .= ",\n";
+	 	        }
+	 	      }
+	 	      $boucle++;
+	 	    } 
+	 	    
+	 	    
+	 	    $this->buffer.="],\n
+	 	    metaFields: { 
+	 	      totalRecords: \"totalRecords\"
+	 	    } 
+	 	    };";
+	 	    
+	 	    $this->buffer.="
+	 	    
+	 	    var myConfigs = {
+	 	      initialRequest: \"method=json&sort=".$this->info['sort']."&dir=".$this->info['sortdir']."&startIndex=".$this->info['startindex']."&results=".$this->info['maxrows']."\",
+	 	      dynamicData: true,
+	 	      sortedBy : {key:\"".$this->info['sort']."\", dir:YAHOO.widget.DataTable.CLASS_ASC},
+	 	      paginator: new YAHOO.widget.Paginator({ rowsPerPage:".$this->info['maxrows']." })
+	 	    };
+        ";
+
+
+
+				$this->buffer.="
+	 	    
+	 	    myDataTable = new YAHOO.widget.DataTable(\"xml\", myColumnDefs, myDataSource, myConfigs);
+	 	    
+	 	    myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
+	 	      oPayload.totalRecords = oResponse.meta.totalRecords;
+	 	      return oPayload;
+	 	    }
+	 	    
+	 	    return {
+          ds: myDataSource,
+          dt: myDataTable
+        };
+
+	 	    ";
+	 	    
+	 	    
+	 	$this->buffer .= "}();";
+	}
 	
-	function create_listener (){
+	function create_listener2 (){
 	  $this->buffer .="
+
 	    YAHOO.util.Event.addListener(window, \"load\", function() { 
 
 	        var Dom = YAHOO.util.Dom, Event = YAHOO.util.Event;
 	        
 
 	        ";	        
-	        /*
-	        var getDomainname = function(query) { 
-	          myDataSource.sendRequest('domain_name=' + Dom.get('dt_input_domainname').value + '&db_name=' + Dom.get('dt_input_dbname').value,
-	            myDataTable.onDataReturnInitializeTable, myDataTable); 
-	        }; 
-	        
-	        var getDbname = function(query) { 
-	          myDataSource.sendRequest('domain_name=' + Dom.get('dt_input_domainname').value + '&db_name=' + Dom.get('dt_input_dbname').value,
-	            myDataTable.onDataReturnInitializeTable, myDataTable); 
-	        }; ";
-	        */
 
 	        $boucle=1;
 	        $request_url="";
@@ -138,20 +215,7 @@ class AJAX_YUI
 	        
 	        $this->buffer .="
 	        Event.onDOMReady(function() {"; 
-	         
-	            /*
-	            var oACDS_domainname = new YAHOO.widget.DS_JSFunction(getDomainname); 
-	            oACDS_domainname.queryMatchContains = true; 
-	            
-	            var oAutoCompDomain = new YAHOO.widget.AutoComplete(\"dt_input_domainname\",\"dt_ac_domainname_container\", oACDS_domainname); 
-	            oAutoCompDomain.minQueryLength = 3;
-	            
-	            var oACDS_dbname = new YAHOO.widget.DS_JSFunction(getDbname); 
-	            oACDS_dbname.queryMatchContains = true; 
-	            
-	            var oAutoCompDbname = new YAHOO.widget.AutoComplete(\"dt_input_dbname\",\"dt_ac_dbname_container\", oACDS_dbname); 
-	            oAutoCompDbname.minQueryLength = 3; 
-	            */
+
 
 	            foreach ($this->search_form as $item => $value) {
 	              $this->buffer .="var oACDS_".$value['name']." = new YAHOO.widget.DS_JSFunction(get".ucfirst($value['name']).");
@@ -168,35 +232,33 @@ class AJAX_YUI
 	            }; 
 	            
 	            var myColumnDefs = [";
-	            $boucle=0;
+	            $boucle=1;
+	            $editable_item = array();
+	            $deletable_item = array();
+	            
 	            foreach ($this->item_list as $item => $attributes) {
-	              $this->buffer .= '{key:"'.$item.'",'.$attributes.'}';
+	              
+	              if ( strstr($attributes, 'editor:') ) {$editable_item[] = $item;}
+	              if ( $item == "delete" ){
+	                $delete_items = explode("|", $attributes);
+	                $this->buffer .="{key:'delete', label:' ',formatter:function(elCell){
+	                  elCell.innerHTML = '<img src=\"".$delete_items[0]."\" title=\"".$delete_items[1]."\" height=\"20\" width=\"20\"/>';
+	                  elCell.style.cursor = 'pointer';
+	                  }
+	                }";
+	                $deletable_item[] = $attributes;
+	              }
+	              else{
+	                $temp_attributes = preg_replace('/(.*), parser:"number"/', '$1', $attributes);
+	                $this->buffer .= '{key:"'.$item.'",'.$temp_attributes.'}'."";
+	              }
 	              if ( $boucle < sizeof($this->item_list)){
-	                  $this->buffer .= ",";
+	                  $this->buffer .= ",\n";
 	              }
-	                $boucle++;
+	              $boucle++;
 	            } 
-	            
-	            /*
-	            {key:\"name\", sortable:true},
-	            {key:\"aliases\", sortable:true},
-	            {key:\"quota_aliases\", sortable:true},
-	            {key:\"mailboxes\", sortable:true},
-	            {key:\"quota_mailboxes\", sortable:true},
-	            {key:\"diskspace_mailboxes\", sortable:true},
-	            {key:'pdf',label:' ',formatter:function(elCell) {
-	              elCell.innerHTML = '<img src=\"../images/pdf.png\" title=\"Display PDF\" width=\"20\"/>';
-	              elCell.style.cursor = 'pointer';
-	              }
-	            },
-	            {key:'delete',label:' ',formatter:function(elCell) {
-	              elCell.innerHTML = '<img src=\"../images/ico-exit.png\" title=\"delete row\" height=\"20\" width=\"20\"/>';
-	              elCell.style.cursor = 'pointer';
-	              }
-	            }
-	            */
-	            
-	            $this->buffer.="];
+
+	            $this->buffer.="\n];\n
 	            
 	            myDataSource = new YAHOO.util.DataSource(\"".$this->ajax_info['url']."\");";
 	            if ( $this->ajax_info['method'] == "post" ){
@@ -210,25 +272,57 @@ class AJAX_YUI
 	            myDataSource.responseType = YAHOO.util.DataSource.TYPE_XML;
 	            
 	            myDataSource.responseSchema = {
-	            resultNode: "'.$this->xmlinfo['root'].'",
-	            fields: [';
+	              resultsData: "'.$this->info['root'].'",
+	              fields: ['."\n";
 	            
-	            $boucle=0;
+	            $boucle=1;
 	            foreach ($this->item_list as $item => $attributes) {
-	              $this->buffer .= '"'.$item.'"';
-	              if ( $boucle < sizeof($this->item_list)){
-	                $this->buffer .= ",";
+	              if ( $item != "delete" ){
+	                $temp_attributes = preg_replace('/.*(parser:"number")/', '$1', $attributes);
+	                $this->buffer .= '	                {key:"'.$item.'", '.$temp_attributes.'}';
+	                //$this->buffer .= '	                {key:"'.$item.'"}';
+	                if ( $boucle < sizeof($this->item_list)){
+	                  $this->buffer .= ",\n";
+	                }
 	              }
 	              $boucle++;
 	            } 
 
-	            $this->buffer.="]
-	            };";
-
-
-	            $this->buffer.="
-	            myDataTable = new YAHOO.widget.DataTable(\"xml\", myColumnDefs, myDataSource);
 	            
+	            $this->buffer.="],\n
+	            metaFields: { 
+	              totalRecords: \"totalRecords\", 
+	              paginationRecordOffset : \"startIndex\", 
+	              paginationRowsPerPage : \"pageSize\", 
+	              sortKey: \"sort\", 
+	              sortDir: \"dir\" 
+	              } 
+	            };";
+	            
+	            
+	            /*
+	            $this->buffer.="]
+	            };\n";
+	            */
+	            
+	            $this->buffer.="
+	            
+	            var myConfigs = {
+	            initialRequest: \"sort=id&dir=asc&startIndex=0&results=25\", // Initial request for first page of data
+	            dynamicData: true, // Enables dynamic server-driven data
+	            sortedBy : {key:\"name\", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
+	            paginator: new YAHOO.widget.Paginator({ rowsPerPage:10 }) // Enables pagination 
+	            };
+
+	            
+	            myDataTable = new YAHOO.widget.DataTable(\"xml\", myColumnDefs, myDataSource, myConfigs);
+	            
+	            myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
+	              oPayload.totalRecords = oResponse.meta.totalRecords;
+	              return oPayload;
+	            }
+	            
+
 	            this.highlightEditableCell = function(oArgs) {
 	              var elCell = oArgs.target;
 	              if(YAHOO.util.Dom.hasClass(elCell, \"yui-dt-editable\")) {
@@ -242,20 +336,27 @@ class AJAX_YUI
 	            myDataTable.subscribe('cellClickEvent',function(ev) {
 	                var target = YAHOO.util.Event.getTarget(ev);
 	                var column = this.getColumn(target);
-	                
-	                if (column.key == 'description') {
+	                ";
+	            for ($i=0; $i<sizeof($editable_item); $i++){
+	              $this->buffer .= "if (column.key == '".$editable_item[$i]."') {
 	                  this.onEventShowCellEditor(ev);
 	                }
-	                
+	              ";
+	            }
+	            
+	            for ($i=0; $i<sizeof($deletable_item); $i++){
+	              
+	            }
+	            $this->buffer.="
 	                if (column.key == 'delete') {
 	                  
 	                  var record = this.getRecord(target);
 	                  
-	                  if (confirm('Are you sure to delete ?')) {
+	                  if (confirm()) {
 	                    
 	                    var record = this.getRecord(target);
-	                    var act = './manage-app.php';
-	                    var postdata = 'server_id=1' + '&action=delete' + myBuildUrl.call(this, record);
+	                    var act = '';
+	                    var postdata = 'action=delete' + myBuildUrl.call(this, record);
 	                    YAHOO.util.Connect.asyncRequest(
 	                      \"POST\",
 	                      act,
@@ -314,8 +415,8 @@ class AJAX_YUI
 	  $this->ajax_info=$item_list;
 	}
 	
-	function xml_attr_add($item, $value){
-	  $this->xmlinfo[$item]=$value;
+	function attr_add($item, $value){
+	  $this->info[$item]=$value;
 	}
 	
 	function add_search_form($item_list){
