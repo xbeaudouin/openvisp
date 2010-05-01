@@ -33,13 +33,6 @@ $domain_info = new DOMAIN($ovadb);
 
 $fDomain_name = get_post("domain_name");
 
-
-
-/* $buffer = '<?xml version="1.0"?>';  */
-/* $buffer .= "<resultat>\n"; */
-
-
-
 $json_data_array = array();
 $json_array = array();
 
@@ -59,11 +52,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
   if ( (is_array($user_info->data_managed_active_domain_with_mail)) and sizeof ($user_info->data_managed_active_domain_with_mail > 0))
   {
     
-/*     $buffer .= "<totalRecords>".$total_domain_with_mail."</totalRecords>\n"; */
-/*     $buffer .= "<startIndex>".$fStartIndex."</startIndex>\n"; */
-/*     $buffer .= "<dir>".$fDir."</dir>\n"; */
-/*     $buffer .= "<pageSize>".$fResults."</pageSize>\n"; */
-    
     $json_array['totalRecords'] = $total_domain_with_mail;
     $json_array['startIndex'] = $fStartIndex;
     $json_array['recordsReturned'] = sizeof($user_info->data_managed_active_domain_with_mail);
@@ -73,8 +61,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 		debug_info( "JS : ".$json_array['totalRecords'] );
     
-    // method=json&sort=id&dir=asc&startIndex=0&results=25\
-    // "recordsReturned":25,"totalRecords":1397,"startIndex":0,"sort":"id","dir":"asc","pageSize":25,"records"
     
     for ( $i=0; $i < sizeof($user_info->data_managed_active_domain_with_mail); $i++)
     {
@@ -103,41 +89,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
             'mailboxes' => $domain_info->used_quota['mailbox']
             );
         }
-        
-/*         $buffer .= "<domain>\n"; */
-/*         $buffer .= "<info>".sizeof($user_info->data_managed_active_domain_with_mail)."</info>\n"; */
-/*         $buffer .= "<name>".$user_info->data_managed_active_domain_with_mail[$i]['domain']."</name>\n"; */
-/*         $buffer .= "<aliases>".$domain_info->used_quota['mail_alias']."</aliases>\n"; */
-/*         $buffer .= "<mailboxes>".$domain_info->used_quota['mailbox']."</mailboxes>\n"; */
-        
-        
-/*         if ($CONF['quota'] == 'YES') { */
-/*           $buffer .= "<maxquota>"; */
-/*           switch($domain_info->quota['maxquota']) { */
-/*           case "-1" : $buffer .= "&#8734;"; break; */
-/*             default   : $buffer .= $domain_info->quota['maxquota']; break; */
-/*           } */
-/*           $buffer .= "</maxquota>\n"; */
-          
-/*           $buffer .= "<quota_aliases>"; */
-/*           switch($domain_info->quota['mail_aliases']) { */
-/*           case "-1" : $buffer .= "&#8734;"; break; */
-/*             default   : $buffer .= $domain_info->quota['mail_aliases']; break; */
-/*           } */
-/*           $buffer .= "</quota_aliases>\n"; */
-          
-/*           $buffer .= "<quota_mailboxes>"; */
-/*           switch($domain_info->quota['mailboxes']) { */
-/*           case "-1" : $buffer .= "&#8734;"; break; */
-/*             default   : $buffer .= $domain_info->quota['mailboxes']; break; */
-/*           } */
-/*           $buffer .= "</quota_mailboxes>\n"; */
-          
-/*         } */
-        
-/*         $buffer .= "<diskspace_mailboxes>".number_format($domain_info->data['total_diskspace_used_mailboxes'],0, ',', ' ')."</diskspace_mailboxes>\n"; */
-/*         $buffer .= "<modified>".$user_info->data_managed_active_domain_with_mail[$i]['modified']."</modified>\n"; */
-/*         $buffer .= "</domain>\n"; */
+
       }
     }
 		
@@ -150,10 +102,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	
 	
 }
-
-
-
-
 
 
 ?> 
