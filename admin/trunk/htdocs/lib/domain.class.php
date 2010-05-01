@@ -68,6 +68,7 @@ class DOMAIN
 	//
 	function storhash ()
 	{
+		$dir = "";
 		$directory = explode('.',$this->domain_name);
 		if (strlen($directory[0]) > 2)
 			{
