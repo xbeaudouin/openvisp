@@ -3860,6 +3860,13 @@ function convert_on_to_no ($string)
 }
 
 
+function debug_info ($string)
+{
+
+	file_put_contents('php://stderr', "DEBUG OVA DEV : $string\n");
+
+}
+
 
 /*
  * If you visit a file that doesn't contain these lines at its end, please
