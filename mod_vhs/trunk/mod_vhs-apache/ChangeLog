@@ -1,10 +1,21 @@
 Since mod_vhs 1.0.3x
 --------------------
-o added some #define to avoid LDAP stuff to be compiled when apache doesn't
-  have LDAP support (Guillaum de Lafond)
-o added mpm-itk support (Thanks to Guillaume de Lafond to port patch)
-o added mod_ldap support
-o Droped libhome support 
+o mod_dbd support merged into mod_vhs (Thanks to Guillaume de Lafond to
+  port MySolo module into mod_vhs).
+  Current SQL query is now :
+  SELECT ServerName, ServerAdmin, DocumentRoot, suexec_uid, suexec_gid, 
+         php_env, associateddomain, isalias 
+  FROM The_Table 
+  WHERE ServerName = %s AND active = 'yes'"
+  "The_Table" is given with apache configuration :
+  vhs_VhostDBDTable
+o Splited code into 3 files, smaller files, better to work with.
+  (Guillaume de Lafond)
+o Added #defines to avoid LDAP stuff to be compiled when apache 
+  doesn't have LDAP support (Guillaume de Lafond)
+o Added mpm-itk support (Thanks to Guillaume de Lafond to port patch)
+o Added mod_ldap support
+o Dropped libhome support
 o Added support for suphp for non-systems users (Stephane Locatelli)
   This allow suphp support when it is compiled with "force" mode and
   don't break compatibility with "owner" mode.

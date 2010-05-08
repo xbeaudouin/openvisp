@@ -60,248 +60,19 @@
  * - To enable apache2-mpm-itk support set "vhs_itk_enable On" in your <VirtualHost> section.
  * - Pass the uidNumber and gidNumber to the uid and gid directive in your home.conf like the example in the README file.
  */
-/*
- * Version of mod_vhs
- */
-#define VH_VERSION	"mod_vhs/1.0.33-expiremental"
 
-/*
- * Set this if you'd like to have looooots of debug
- */
-/*
- * #define VH_DEBUG 1
- */
+#include "mod_vhs.h"
 
-/*
- * Define this if you have Linux/Debian since it seems to have non standards
- * includes
- */
-/*
- * #define DEBIAN 1
- */
-
-/* Original Author: Michael Link <mlink@apache.org> */
-/* mod_vhs author : Xavier Beaudouin <kiwi@oav.net> */
-/* Some parts of this code has been stolen from mod_alias */
-/* added support for apache2-mpm-itk by Rene Kanzler <rk (at) cosmomill (dot) de> */
-
-/* We need this to be able to access the docroot. */
-#define CORE_PRIVATE
-
-#define APR_WANT_STRFUNC
-#include "apr_want.h"
-
-#include "apr.h"
-#include "apr_strings.h"
-#include "apr_lib.h"
-#include "apr_uri.h"
-#include "apr_thread_mutex.h"
-#if APR_MAJOR_VERSION > 0
-#include "apr_regexp.h"
-#endif
-
-#include "ap_config.h"
-#include "httpd.h"
-#include "http_config.h"
-#include "http_core.h"
-#include "http_log.h"
-#include "http_main.h"
-#include "http_protocol.h"
-#include "http_request.h"
-#include "util_script.h"
-#include "util_ldap.h"
-#include "apr_ldap.h"
-#include "apr_strings.h"
-#include "apr_reslist.h"
-
-#include "ap_config_auto.h"
-
-#if !defined(APU_HAS_LDAP) && !defined(APR_HAS_LDAP)
-# error mod_vhs requires APR-utils to have LDAP support built in
-#endif
-
-/* XXX: Do we need that ? */
-//#include "ap_mpm.h" /* XXX */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-
-/*
- * To enable Apache 2.2 compatibility
- */
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20050217
-# ifndef DEBIAN
-#  define DEBIAN
-# endif
-#endif
-
-/*
- * Include php support
- */
-/*
- * #define HAVE_MOD_PHP_SUPPORT
- */
-
-#ifdef HAVE_MOD_PHP_SUPPORT
-#include <zend.h>
-#include <zend_qsort.h>
-#include <zend_API.h>
-#include <zend_ini.h>
-#include <zend_alloc.h>
-#include <zend_operators.h>
-#endif
-
-/*
- * For mod_alias like operations
- */
-#define AP_MAX_REG_MATCH 10
-
-/*
- * To avoid compatibity and segfault
- */
-#ifdef HAVE_MOD_PHP_SUPPORT
-# ifdef HAVE_MOD_SUPHP_SUPPORT
-#  error mod_vhs cannot support mod_php and suphp in the same time.
-#  error Please chose what support you want to have
-# endif
-#endif
+#ifdef HAVE_MOD_DBD_SUPPORT
+static ap_dbd_t *(*vhost_dbd_acquire_fn)(request_rec*) = NULL;
+static void (*vhost_dbd_prepare_fn)(server_rec*, const char*, const char*) = NULL;
+#define VH_KEY "mod_vhs"
+#endif /* HAVE_MOD_DBD_SUPPORT */
 
 /*
  * Let's start coding
  */
 module AP_MODULE_DECLARE_DATA vhs_module;
-
-/*
- * Configuration structure
- */
-typedef struct {
-	unsigned short int	enable;				/* Enable the module */
-	char           		*path_prefix;		/* Prefix to add to path returned by database/ldap */
-	char           		*default_host;		/* Default host to redirect to */
-
-	unsigned short int 	lamer_mode;			/* Lamer friendly mode */
-	unsigned short int 	log_notfound;		/* Log request for vhost/path is not found */
-
-#ifdef HAVE_MOD_PHP_SUPPORT
-	char           		*openbdir_path;		/* PHP open_basedir default path */
-
-	unsigned short int 	safe_mode;			/* PHP Safe mode */
-	unsigned short int 	open_basedir;		/* PHP open_basedir */
-	unsigned short int 	append_basedir;		/* PHP append current directory to open_basedir */
-	unsigned short int 	display_errors;		/* PHP display_error */
-	unsigned short int 	phpopt_fromdb;		/* Get PHP options from database/ldap */
-#endif /* HAVE_MOD_PHP_SUPPORT */
-
-#ifdef HAVE_MPM_ITK_SUPPORT
-	unsigned short int itk_enable; /* MPM-ITK support */
-	uid_t itk_defuid;
-	gid_t itk_defgid;
-	char *itk_defusername;
-#endif /* HAVE_MPM_ITK_SUPPORT */
-
-#ifdef HAVE_MOD_SUPHP_SUPPORT
-	char				*suphp_config_path;	/* suPHP_ConfigPath */
-#endif /* HAVE_MOD_SUPHP_SUPPORT */
-
-#ifdef APR_HAS_LDAP
-	char				*ldap_url;		/* String representation of LDAP URL */
-	char				*ldap_host;		/* Name of the ldap server or space separated list */
-	int				ldap_port;		/* Port of the LDAP server */
-	char				*ldap_basedn;		/* Base DN */
-	int				ldap_scope;		/* Scope of search */
-	char				*ldap_filter;		/* LDAP Filter */
-	deref_options			ldap_deref;		/* How to handle alias dereferening */
-
-	char				*ldap_binddn;		/* DN to bind to server (can be NULL) */
-	char				*ldap_bindpw;		/* Password to bind to server (can be NULL) */
-
-	int				ldap_have_deref;	/* Set if we have found an Deref option */
-	int 				ldap_have_url;		/* Set if we have found an LDAP url */
-
-	int				ldap_secure;		/* True if SSL connections are requested */
-#endif /* APR_HAS_LDAP */
-	/*
-	 * From mod_alias.c
-	 */
-	apr_array_header_t	*aliases;
-	apr_array_header_t	*redirects;
-	/*
-	 * End of borrowing
-	 */
-} vhs_config_rec;
-
-#ifdef APR_HAS_LDAP
-typedef struct mod_vhs_ldap_request_t {
-    char *dn;				/* The saved dn from a successful search */
-    char *name;				/* ServerName or host accessed uppon request */
-    char *associateddomain;	/* The real server name */
-    char *admin;			/* ServerAdmin or email for admin */
-    char *docroot;			/* DocumentRoot */
-    char *phpoptions;		/* PHP Options */
-    char *uid;				/* Suexec Uid */
-    char *gid;				/* Suexec Gid */
-} mod_vhs_ldap_request_t;
-
-/* TODO: make KazarPerson stuff */
-char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
-
-/* TODO: cca marche ? */
-static APR_OPTIONAL_FN_TYPE(uldap_connection_close) *util_ldap_connection_close;
-static APR_OPTIONAL_FN_TYPE(uldap_connection_find) *util_ldap_connection_find;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn) *util_ldap_cache_comparedn;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_compare) *util_ldap_cache_compare;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_checkuserid) *util_ldap_cache_checkuserid;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn) *util_ldap_cache_getuserdn;
-static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported) *util_ldap_ssl_supported;
-
-static void ImportULDAPOptFn(void)
-{
-    util_ldap_connection_close  = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_close);
-    util_ldap_connection_find   = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_find);
-    util_ldap_cache_comparedn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_comparedn);
-    util_ldap_cache_compare     = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_compare);
-    util_ldap_cache_checkuserid = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_checkuserid);
-    util_ldap_cache_getuserdn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_getuserdn);
-    util_ldap_ssl_supported     = APR_RETRIEVE_OPTIONAL_FN(uldap_ssl_supported);
-}
-#endif /* APR_HAS_LDAP */
-
-/*
- * From mod_alias.c
- */
-typedef struct {
-	const char     *real;
-	const char     *fake;
-	char           *handler;
-
-#if APR_MAJOR_VERSION > 0
-	ap_regex_t     *regexp;
-#else
-#ifdef DEBIAN
-	ap_regex_t     *regexp;
-#else
-	regex_t        *regexp;
-#endif /* DEBIAN */
-#endif /* APR_MAJOR_VERSION */
-	int		redir_status;	/* 301, 302, 303, 410, etc... */
-}	alias_entry;
-
-typedef struct {
-	apr_array_header_t *redirects;
-}	alias_dir_conf;
-/*
- * End of borrowing
- */
 
 /*
  * Apache per server config structure
@@ -315,26 +86,31 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	 * Pre default the module is not enabled
 	 */
 	vhr->enable 		= 0;
-#ifdef APR_HAS_LDAP
+
+	/*
+	 * From mod_alias.c
+	 */
+	vhr->aliases		= apr_array_make(p, 20, sizeof(alias_entry));
+	vhr->redirects		= apr_array_make(p, 20, sizeof(alias_entry));
+
+#ifdef HAVE_LDAP_SUPPORT
 	vhr->ldap_binddn	= NULL;
 	vhr->ldap_bindpw	= NULL;
 	vhr->ldap_have_url	= 0;
 	vhr->ldap_have_deref= 0;
 	vhr->ldap_deref		= always;
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
+
 #ifdef HAVE_MPM_ITK_SUPPORT
-/* disable MPM-ITK support by default */
 	vhr->itk_enable = 0;
 #endif /* HAVE_MPM_ITK_SUPPORT */
 
-	/*
-	 * From mod_alias.c
-	 */
-	vhr->aliases	= apr_array_make(p, 20, sizeof(alias_entry));
-	vhr->redirects	= apr_array_make(p, 20, sizeof(alias_entry));
-	/*
-	 * End of borrowing
-	 */
+#ifdef HAVE_MOD_DBD_SUPPORT
+	vhr->dbd_table_name	= NULL;
+	vhr->query			= NULL;
+	vhr->label			= NULL;
+#endif
+
 	return (void *)vhr;
 }
 
@@ -366,11 +142,12 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 #ifdef HAVE_MOD_SUPHP_SUPPORT
     conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
+
 #ifdef HAVE_MPM_ITK_SUPPORT
 	conf->itk_enable = (child->itk_enable ? child->itk_enable : parent->itk_enable);
 #endif /* HAVE_MPM_ITK_SUPPORT */
 
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
     if (child->ldap_have_url) {
     	conf->ldap_have_url = child->ldap_have_url;
     	conf->ldap_url      = child->ldap_url;
@@ -400,7 +177,13 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 
     conf->ldap_binddn = (child->ldap_binddn ? child->ldap_binddn : parent->ldap_binddn);
     conf->ldap_bindpw = (child->ldap_bindpw ? child->ldap_bindpw : parent->ldap_bindpw);
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
+	
+#ifdef HAVE_MOD_DBD_SUPPORT
+	conf->dbd_table_name = (child->dbd_table_name ? child->dbd_table_name : parent->dbd_table_name);
+	conf->query			 = (child->query ? child->query : parent->query);
+	conf->label			 = (child->label ? child->label : parent->label);
+#endif /* HAVE_MOD_DBD_SUPPORT */
 
 	conf->aliases   = apr_array_append(p, child->aliases, parent->aliases);
 	conf->redirects = apr_array_append(p, child->redirects, parent->redirects);
@@ -408,355 +191,6 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	return conf;
 }
 
-/*
- * From mod_alias.c
- */
-static void * create_alias_dir_config(apr_pool_t * p, char *d)
-{
-	alias_dir_conf *a = (alias_dir_conf *) apr_pcalloc(p, sizeof(alias_dir_conf));
-	a->redirects = apr_array_make(p, 2, sizeof(alias_entry));
-	return a;
-}
-
-static void * merge_alias_dir_config(apr_pool_t * p, void *basev, void *overridesv)
-{
-	alias_dir_conf *a = (alias_dir_conf *) apr_pcalloc(p, sizeof(alias_dir_conf));
-	alias_dir_conf *base = (alias_dir_conf *) basev;
-	alias_dir_conf *overrides = (alias_dir_conf *) overridesv;
-	a->redirects = apr_array_append(p, overrides->redirects, base->redirects);
-	return a;
-}
-
-/* need prototype for overlap check */
-static int alias_matches(const char *uri, const char *alias_fakename);
-
-static const char * add_alias_internal(cmd_parms * cmd, void *dummy, const char *f, const char *r, int use_regex)
-{
-	server_rec     *s = cmd->server;
-	vhs_config_rec *conf = ap_get_module_config(s->module_config,
-						    &vhs_module);
-	alias_entry    *new = apr_array_push(conf->aliases);
-	alias_entry    *entries = (alias_entry *) conf->aliases->elts;
-	int		i;
-
-	/* XX r can NOT be relative to DocumentRoot here... compat bug. */
-
-	if (use_regex) {
-#ifdef DEBIAN
-		new->regexp = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
-#else
-		new->regexp = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
-#endif /* DEBIAN */
-		if (new->regexp == NULL)
-			return "Regular expression could not be compiled.";
-		new->real = r;
-	} else {
-		/*
-		 * XXX This may be optimized, but we must know that new->real
-		 * exists.  If so, we can dir merge later, trusing new->real
-		 * and just canonicalizing the remainder.  Not till I finish
-		 * cleaning out the old ap_canonical stuff first.
-		 */
-		new->real = r;
-	}
-	new->fake = f;
-	new->handler = cmd->info;
-
-	/*
-	 * check for overlapping (Script)Alias directives and throw a warning
-	 * if found one
-	 */
-	if (!use_regex) {
-		for (i = 0; i < conf->aliases->nelts - 1; ++i) {
-			alias_entry    *p = &entries[i];
-
-			if ((!p->regexp && alias_matches(f, p->fake) > 0)
-			    || (p->regexp && !ap_regexec(p->regexp, f, 0, NULL, 0))) {
-				ap_log_error(APLOG_MARK, APLOG_WARNING, 0, cmd->server,
-					     "The %s directive in %s at line %d will probably "
-				"never match because it overlaps an earlier "
-					     "%sAlias%s.",
-				   cmd->cmd->name, cmd->directive->filename,
-					     cmd->directive->line_num,
-					     p->handler ? "Script" : "",
-					     p->regexp ? "Match" : "");
-				break;	/* one warning per alias should be
-					 * sufficient */
-			}
-		}
-	}
-	return NULL;
-}
-
-static const char * add_alias(cmd_parms * cmd, void *dummy, const char *f, const char *r)
-{
-	return add_alias_internal(cmd, dummy, f, r, 0);
-}
-
-static const char * add_alias_regex(cmd_parms * cmd, void *dummy, const char *f, const char *r)
-{
-	return add_alias_internal(cmd, dummy, f, r, 1);
-}
-
-static const char * add_redirect_internal(cmd_parms * cmd, alias_dir_conf * dirconf,
-		                                  const char *arg1, const char *arg2,
-		                                  const char *arg3, int use_regex)
-{
-	alias_entry    *new;
-	server_rec     *s = cmd->server;
-	vhs_config_rec *serverconf = ap_get_module_config(s->module_config,
-							  &vhs_module);
-	int		status = (int)(long)cmd->info;
-#if APR_MAJOR_VERSION > 0
-	ap_regex_t     *r = NULL;
-#else
-#ifdef DEBIAN
-	ap_regex_t     *r = NULL;
-#else
-	regex_t        *r = NULL;
-#endif				/* DEBIAN */
-#endif
-	const char     *f = arg2;
-	const char     *url = arg3;
-
-	if (!strcasecmp(arg1, "gone"))
-		status = HTTP_GONE;
-	else if (!strcasecmp(arg1, "permanent"))
-		status = HTTP_MOVED_PERMANENTLY;
-	else if (!strcasecmp(arg1, "temp"))
-		status = HTTP_MOVED_TEMPORARILY;
-	else if (!strcasecmp(arg1, "seeother"))
-		status = HTTP_SEE_OTHER;
-	else if (apr_isdigit(*arg1))
-		status = atoi(arg1);
-	else {
-		f = arg1;
-		url = arg2;
-	}
-
-	if (use_regex) {
-#ifdef DEBIAN
-		r = ap_pregcomp(cmd->pool, f, AP_REG_EXTENDED);
-#else
-		r = ap_pregcomp(cmd->pool, f, REG_EXTENDED);
-#endif /* DEBIAN */
-		if (r == NULL)
-			return "Regular expression could not be compiled.";
-	}
-	if (ap_is_HTTP_REDIRECT(status)) {
-		if (!url)
-			return "URL to redirect to is missing";
-		if (!use_regex && !ap_is_url(url))
-			return "Redirect to non-URL";
-	} else {
-		if (url)
-			return "Redirect URL not valid for this status";
-	}
-
-	if (cmd->path)
-		new = apr_array_push(dirconf->redirects);
-	else
-		new = apr_array_push(serverconf->redirects);
-
-	new->fake = f;
-	new->real = url;
-	new->regexp = r;
-	new->redir_status = status;
-	return NULL;
-}
-
-
-static const char * add_redirect(cmd_parms * cmd, void *dirconf,
-	                             const char *arg1, const char *arg2,
-	                             const char *arg3)
-{
-	return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 0);
-}
-
-static const char * add_redirect2(cmd_parms * cmd, void *dirconf,
-	                              const char *arg1, const char *arg2)
-{
-	return add_redirect_internal(cmd, dirconf, arg1, arg2, NULL, 0);
-}
-
-static const char * add_redirect_regex(cmd_parms * cmd, void *dirconf,
-		                               const char *arg1, const char *arg2,
-		                               const char *arg3)
-{
-	return add_redirect_internal(cmd, dirconf, arg1, arg2, arg3, 1);
-}
-
-static int alias_matches(const char *uri, const char *alias_fakename)
-{
-	const char     *aliasp = alias_fakename, *urip = uri;
-
-	while (*aliasp) {
-		if (*aliasp == '/') {
-			/*
-			 * any number of '/' in the alias matches any number
-			 * in the supplied URI, but there must be at least
-			 * one...
-			 */
-			if (*urip != '/')
-				return 0;
-
-			do {
-				++aliasp;
-			} while (*aliasp == '/');
-			do {
-				++urip;
-			} while (*urip == '/');
-		} else {
-			/* Other characters are compared literally */
-			if (*urip++ != *aliasp++)
-				return 0;
-		}
-	}
-
-	/* Check last alias path component matched all the way */
-
-	if (aliasp[-1] != '/' && *urip != '\0' && *urip != '/')
-		return 0;
-
-	/*
-	 * Return number of characters from URI which matched (may be greater
-	 * than length of alias, since we may have matched doubled slashes)
-	 */
-
-	return urip - uri;
-}
-
-static char * try_alias_list(request_rec * r, apr_array_header_t * aliases,
-	                         int doesc, int *status)
-{
-	alias_entry    *entries = (alias_entry *) aliases->elts;
-#ifdef DEBIAN
-	ap_regmatch_t	regm [AP_MAX_REG_MATCH];
-#else
-	regmatch_t	regm [AP_MAX_REG_MATCH];
-#endif  /* DEBIAN */
-	char           *found = NULL;
-	int		i;
-
-	for (i = 0; i < aliases->nelts; ++i) {
-		alias_entry    *p = &entries[i];
-		int		l;
-
-		if (p->regexp) {
-			if (!ap_regexec(p->regexp, r->uri, AP_MAX_REG_MATCH, regm, 0)) {
-				if (p->real) {
-					found = ap_pregsub(r->pool, p->real, r->uri,
-						    AP_MAX_REG_MATCH, regm);
-					if (found && doesc) {
-						apr_uri_t	uri;
-						apr_uri_parse(r->pool, found, &uri);
-						/*
-						 * Do not escape the query
-						 * string or fragment.
-						 */
-						found = apr_uri_unparse(r->pool, &uri,
-						     APR_URI_UNP_OMITQUERY);
-						found = ap_escape_uri(r->pool, found);
-						if (uri.query) {
-							found = apr_pstrcat(r->pool, found, "?",
-							   uri.query, NULL);
-						}
-						if (uri.fragment) {
-							found = apr_pstrcat(r->pool, found, "#",
-							uri.fragment, NULL);
-						}
-					}
-				} else {
-					/* need something non-null */
-					found = apr_pstrdup(r->pool, "");
-				}
-			}
-		} else {
-			l = alias_matches(r->uri, p->fake);
-
-			if (l > 0) {
-				if (doesc) {
-					char           *escurl;
-					escurl = ap_os_escape_path(r->pool, r->uri + l, 1);
-
-					found = apr_pstrcat(r->pool, p->real, escurl, NULL);
-				} else
-					found = apr_pstrcat(r->pool, p->real, r->uri + l, NULL);
-			}
-		}
-
-		if (found) {
-			if (p->handler) {	/* Set handler, and leave a
-						 * note for mod_cgi */
-				r->handler = p->handler;
-				apr_table_setn(r->notes, "alias-forced-type", r->handler);
-			}
-			/*
-			 * XXX This is as SLOW as can be, next step, we
-			 * optimize and merge to whatever part of the found
-			 * path was already canonicalized.  After I finish
-			 * eliminating os canonical. Better fail test for
-			 * ap_server_root_relative needed here.
-			 */
-			if (!doesc) {
-				found = ap_server_root_relative(r->pool, found);
-			}
-			if (found) {
-				*status = p->redir_status;
-			}
-			return found;
-		}
-	}
-
-	return NULL;
-}
-
-static int fixup_redir(request_rec * r)
-{
-	void           *dconf = r->per_dir_config;
-	alias_dir_conf *dirconf =
-	(alias_dir_conf *) ap_get_module_config(dconf, &vhs_module);
-	char           *ret;
-	int		status;
-
-	/* It may have changed since last time, so try again */
-
-	if ((ret = try_alias_list(r, dirconf->redirects, 1, &status)) != NULL) {
-		if (ap_is_HTTP_REDIRECT(status)) {
-			if (ret[0] == '/') {
-				char           *orig_target = ret;
-
-				ret = ap_construct_url(r->pool, ret, r);
-				ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
-				"incomplete redirection target of '%s' for "
-					      "URI '%s' modified to '%s'",
-					      orig_target, r->uri, ret);
-			}
-			if (!ap_is_url(ret)) {
-				status = HTTP_INTERNAL_SERVER_ERROR;
-				ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-					    "cannot redirect '%s' to '%s'; "
-					      "target is not a valid absoluteURI or abs_path",
-					      r->uri, ret);
-			} else {
-				/*
-				 * append requested query only, if the config
-				 * didn't supply its own.
-				 */
-				if (r->args && !ap_strchr(ret, '?')) {
-					ret = apr_pstrcat(r->pool, ret, "?", r->args, NULL);
-				}
-				apr_table_setn(r->headers_out, "Location", ret);
-			}
-		}
-		return status;
-	}
-	return DECLINED;
-}
-
-/*
- * End of borrowing
- */
 
 /*
  * Set the fields inside the conf struct
@@ -764,11 +198,35 @@ static int fixup_redir(request_rec * r)
 static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 {
 	int		pos = (int)parms->info;
+
+#ifdef HAVE_MOD_DBD_SUPPORT
+	static unsigned int label_num = 0;
+#endif
 	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
 
 	switch (pos) {
-	/* case 0: break; not used anymore */
+#ifdef HAVE_MOD_DBD_SUPPORT
+	case 0:
+	  vhr->dbd_table_name = apr_pstrdup(parms->pool, arg);
+	  vhr->query = apr_pstrdup(parms->pool, apr_pstrcat(parms->pool, "SELECT ServerName, ServerAdmin, DocumentRoot, suexec_uid, suexec_gid, php_env, associateddomain, isalias FROM ", vhr->dbd_table_name, " WHERE ServerName = %s AND active = 'yes'", NULL));
 
+	  /*	  VH_AP_LOG_ERROR (APLOG_MARK, APLOG_DEBUG, 0, parms->server,
+		       "set_field: Query='%s' arg='%s' for server: '%s' line: %d",
+		       vhr->query, arg, parms->server->defn_name, parms->server->defn_line_number );
+	  */
+	  /* code repris de mod_authn_dbd pour preparer la connection et requete a la base. */
+	  if (vhost_dbd_prepare_fn == NULL) {
+	    vhost_dbd_prepare_fn = APR_RETRIEVE_OPTIONAL_FN(ap_dbd_prepare);
+	    if (vhost_dbd_prepare_fn == NULL) {
+	      return "You must load mod_dbd to enable VhostDBD functions";
+	    }
+	    vhost_dbd_acquire_fn = APR_RETRIEVE_OPTIONAL_FN(ap_dbd_acquire);
+	  }
+	  vhr->label = apr_psprintf(parms->pool, "vhost_vhs_%d", ++label_num);
+
+	  vhost_dbd_prepare_fn(parms->server, vhr->query, vhr->label);
+	  break;
+#endif /* HAVE_MOD_DBD_SUPPORT */
 	case 1:
 		vhr->path_prefix = apr_pstrdup(parms->pool, arg);
 		break;
@@ -781,7 +239,7 @@ static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 		break;
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
 	case 4:
 		vhr->ldap_binddn = apr_pstrdup(parms->pool, arg);
 		break;
@@ -811,7 +269,7 @@ static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 	        return "Unrecognized value for vhs_DAPAliasDereference directive";
 	    }
 		break;
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	case 10:
@@ -829,7 +287,7 @@ static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
  * host and port.
  * Is out of set_field because it is very big stuff
  */
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
 static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const char *url)
 {
     int result;
@@ -838,38 +296,32 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 
     vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(cmd->server->module_config, &vhs_module);
 
-#ifdef VH_DEBUG
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: `%s'",
 	         url);
-#endif	/* VH_DEBUG */
 
     result = apr_ldap_url_parse(cmd->pool, url, &(urld), &(ldap_result));
     if (result != APR_SUCCESS) {
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, cmd->server, "ldap url not parsed : %s.", ldap_result->reason);
-#endif	/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, cmd->server, "ldap url not parsed : %s.", ldap_result->reason);
     	return ldap_result->reason;
     }
     vhr->ldap_url = apr_pstrdup(cmd->pool, url);
 
-#ifdef VH_DEBUG
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: Host: %s", urld->lud_host);
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: Port: %d", urld->lud_port);
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: DN: %s", urld->lud_dn);
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: attrib: %s", urld->lud_attrs? urld->lud_attrs[0] : "(null)");
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: scope: %s",
 	         (urld->lud_scope == LDAP_SCOPE_SUBTREE? "subtree" :
 		 urld->lud_scope == LDAP_SCOPE_BASE? "base" :
 		 urld->lud_scope == LDAP_SCOPE_ONELEVEL? "onelevel" : "unknown"));
-    ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
+    VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0,
 	         cmd->server, "ldap url parse: filter: %s", urld->lud_filter);
-#endif	/* VH_DEBUG */
 
     /* Set all the values, or at least some sane defaults */
     if (vhr->ldap_host) {
@@ -910,25 +362,22 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
     {
         vhr->ldap_secure = 1;
         vhr->ldap_port = urld->lud_port? urld->lud_port : LDAPS_PORT;
-#ifdef VH_DEBUG
-        ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
+
+        VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
                      "LDAP: using SSL connections");
-#endif	/* VH_DEBUG */
     }
     else
     {
         vhr->ldap_secure = 0;
         vhr->ldap_port = urld->lud_port? urld->lud_port : LDAP_PORT;
-#ifdef VH_DEBUG
-        ap_log_error(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
+        VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, cmd->server,
                      "LDAP: not using SSL connections");
-#endif	/* VH_DEBUG */
     }
 
     vhr->ldap_have_url = 1;
     return NULL;
 }
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
 
 /*
  * To setting flags
@@ -938,6 +387,9 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 	int		pos = (int)parms->info;
 	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(parms->server->module_config, &vhs_module);
 
+	/*	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, parms->server,
+		     "set_flag:Flag='%d' for server: '%s' for pos='%d' line: %d",
+		     flag, parms->server->defn_name, pos, parms->server->defn_line_number ); */
 	switch (pos) {
 	case 0:
 		if (flag) {
@@ -1009,7 +461,6 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 		break;
 #endif /* HAVE_MPM_ITK_SUPPORT  */
 	}
-
 	return NULL;
 }
 
@@ -1018,12 +469,13 @@ typedef struct {
 	uid_t uid;
 	gid_t gid;
 	char   *username;
+        int nice_value;
 } itk_conf;
 #endif /* HAVE_MPM_ITK_SUPPORT  */
 
 static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * ptemp, server_rec * s)
 {
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
 	/* make sure that mod_ldap (util_ldap) is loaded */
 	if (ap_find_linked_module("util_ldap.c") == NULL) {
 		ap_log_error(APLOG_MARK, APLOG_ERR|APLOG_NOERRNO, 0, s,
@@ -1031,11 +483,10 @@ static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * 
 			"must be loaded in order for mod_vhs to function properly");
 		return HTTP_INTERNAL_SERVER_ERROR;
 	}
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
 
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, "loading version %s.", VH_VERSION);
-#endif				/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, s, "loading version %s.", VH_VERSION);
+
 	ap_add_version_component(pconf, VH_VERSION);
 
 #ifdef HAVE_MPM_ITK_SUPPORT
@@ -1060,7 +511,7 @@ static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * 
 				vhr->itk_defgid = cfg->gid;
 				vhr->itk_defusername = cfg->username;
 
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, sp, "vhs_init_handler: itk uid='%d' itk gid='%d' itk username='%s'", cfg->uid, cfg->gid, cfg->username );
+				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, sp, "vhs_init_handler: itk uid='%d' itk gid='%d' "/*itk username='%s'*/, cfg->uid, cfg->gid/*, cfg->username */);
 			}
 		}       
 	}
@@ -1074,20 +525,116 @@ static int vhs_init_handler(apr_pool_t * pconf, apr_pool_t * plog, apr_pool_t * 
  */
 static int vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
 {
-
 	if (vhr->default_host) {
 		apr_table_setn(r->headers_out, "Location", vhr->default_host);
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "redirect_stuff: using a redirect to %s for %s", vhr->default_host, r->hostname);
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "redirect_stuff: using a redirect to %s for %s", vhr->default_host, r->hostname);
 		return HTTP_MOVED_TEMPORARILY;
 	}
 	/* Failsafe */
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_ALERT, 0, r->server, "redirect_stuff: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
-#endif				/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_ALERT, 0, r->server, "redirect_stuff: no host found (non HTTP/1.1 request, no default set) %s", r->hostname);
 	return DECLINED;
 }
+
+#ifdef HAVE_MOD_DBD_SUPPORT 
+/*
+ *  Get the stuff from Mod DBD
+ */
+int getmoddbdhome(request_rec *r, vhs_config_rec *vhr, const char *hostname, mod_vhs_request_t *reqc)
+{
+	const char     		*host = 0;
+
+	apr_status_t rv = 0;
+	ap_dbd_t *dbd;
+	apr_dbd_prepared_t *statement;
+	apr_dbd_results_t *res = NULL;
+	apr_dbd_row_t *row = NULL;
+
+	VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome --------------------------------------------");
+
+	/*	mod_vhs_request_t *reqc;
+    	reqc = (mod_vhs_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_request_t));
+    	ap_set_module_config(r->request_config, &vhs_module, reqc);
+	*/
+        if (!vhr->enable) {
+	  return DECLINED;
+        }
+
+	if (vhr->query == NULL) {
+	  ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "getmoddbdhome: No VhostDBDQuery has been specified");
+	  return DECLINED;
+	}
+	/*    host = r->hostname; */
+	  host = ap_get_server_name(r);
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: search for vhost: '%s'", host);
+
+	  dbd = vhost_dbd_acquire_fn(r);
+	  if (dbd == NULL) {
+	    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "getmoddbdhome: Failed to acquire database connection to look up host '%s'", host);
+	    return DECLINED;
+	  }
+
+	  statement = apr_hash_get(dbd->prepared, vhr->label, APR_HASH_KEY_STRING);
+	  if (statement == NULL) {
+	    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "getmoddbdhome: A prepared statement could not be found for "
+			  "VhostDBDQuery with the key '%s'", vhr->label);
+	    return DECLINED;
+	  }
+
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: query='%s'", vhr->query);
+	  /* execute the query of a statement and parameter host */
+	  if (apr_dbd_pvselect(dbd->driver, r->pool, dbd->handle, &res, statement, 0, host, NULL) != 0) {
+	    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "getmoddbdhome: Query execution error looking up '%s' in database", host);
+	    return DECLINED;
+	  }
+
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: apr_dbd_get_row return : %d", rv);
+	  if ((rv = apr_dbd_get_row(dbd->driver, r->pool, res, &row, -1))) {
+	    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "No found results for host '%s' in database", host);
+	    return DECLINED;
+	  }
+	  /* requete dbd ok */
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: dbd is ok");
+
+
+	  /* "SELECT ServerName, ServerAdmin, DocumentRoot, suexec_uid, suexec_gid, php_env, associateddomain, isalias FROM ", vhr->dbd_table_name, " WHERE ServerName = %s AND active = 'yes'" */
+
+	  /* servername */
+	  reqc->name = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 0));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: server_name='%s'", reqc->name);
+
+	  /* email admin server */
+	  reqc->admin = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 1));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: server_admin='%s'", reqc->admin);
+
+	  /* document root */
+	  reqc->docroot = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 2));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: docroot=%s", reqc->docroot);
+
+	  /* suexec UID */
+	  reqc->uid = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 3));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: uid=%s", reqc->uid);
+
+	  /* suexec GID */
+	  reqc->gid = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 4));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: gid=%s", reqc->gid);
+
+	  /* phpopt_fromdb / options PHP */
+	  reqc->phpoptions = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 5));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: phpoptions=%s", reqc->phpoptions);
+
+	  /* associate domain */
+	  reqc->associateddomain = apr_pstrdup(r->pool, apr_dbd_get_entry(dbd->driver, row, 6));
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: associateddomain=%s", reqc->associateddomain);
+
+
+	  /* the vhost has been found, set vhost_found to VH_VHOST_INFOS_FOUND */
+	  reqc->vhost_found = VH_VHOST_INFOS_FOUND;
+
+	  apr_pool_userdata_set(reqc, VH_KEY, apr_pool_cleanup_null, r->pool);
+
+	  return OK;
+}
+#endif /* HAVE_MOD_DBD_SUPPORT */
 
 #ifdef HAVE_MPM_ITK_SUPPORT
 /*
@@ -1095,82 +642,106 @@ static int vhs_redirect_stuff(request_rec * r, vhs_config_rec * vhr)
  */
 static int vhs_itk_post_read(request_rec *r)
 {
-	struct passwd  *p;
+  //	struct passwd  *p;
 
 	uid_t libhome_uid;
 	gid_t libhome_gid;
+	int vhost_found_by_request = DECLINED;
 	
   	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(r->server->module_config, &vhs_module);
+	VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: BEGIN ***");
 
-	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
+	mod_vhs_request_t *reqc;
 
-	if (p == NULL) {
-		if (vhr->lamer_mode) {
-			#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
-			#endif
+	reqc = ap_get_module_config(r->request_config, &vhs_module);
+	if (reqc)
+	  return OK;
+
+	reqc = ap_get_module_config(r->request_config, &vhs_module);	
+	if (!reqc)
+	  {
+		reqc = (mod_vhs_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_request_t));
+		reqc->vhost_found = VH_VHOST_INFOS_NOT_YET_REQUESTED;
+		ap_set_module_config(r->request_config, &vhs_module, reqc);
+		/* VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: variable reqc does not already exists.... creating ! pid=%d request_rec=%d @request_config='%d'", getpid(), r, &(r->request_config)); */
+	  }
+
+#ifdef HAVE_LDAP_SUPPORT
+		vhost_found_by_request = getldaphome(r, vhr, r->hostname, reqc);
+#endif
+#ifdef HAVE_MOD_DBD_SUPPORT
+		vhost_found_by_request = getmoddbdhome(r, vhr, r->hostname, reqc);
+#endif
+	if (vhost_found_by_request == OK)
+	  {
+		libhome_uid = atoi(reqc->uid);
+		libhome_gid = atoi(reqc->gid);
+	  }
+	else
+	  {
+		if (vhr->lamer_mode) 
+		  {
+			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
 			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) {
 				char           *lhost;
 				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
-				#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
-				#endif
-				p = vhs_get_home_stuff(r, vhr, lhost);
-				if (p != NULL) {
-					libhome_uid = p->pw_uid;
-					libhome_gid = p->pw_gid;
-					#ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: lamer for %s -> %s has itk uid='%d' itk gid='%d'", r->hostname, lhost, libhome_uid, libhome_gid);
-					#endif
+			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
+#ifdef HAVE_LDAP_SUPPORT
+			  vhost_found_by_request = getldaphome(r, vhr, lhost, reqc);
+#endif
+#ifdef HAVE_MOD_DBD_SUPPORT
+			  vhost_found_by_request = getmoddbdhome(r, vhr, lhost, reqc);
+#endif
+			  if (vhost_found_by_request == OK) {
+				libhome_uid = atoi(reqc->uid);
+				libhome_gid = atoi(reqc->gid);
+				VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: lamer for %s -> %s has itk uid='%d' itk gid='%d'", r->hostname, lhost, libhome_uid, libhome_gid);
 				} else {
 					libhome_uid = vhr->itk_defuid;
 					libhome_gid = vhr->itk_defgid;
-					#ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
-					#endif
+				VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
 				}
-			} else {
+			} else { /* if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) */
 				libhome_uid = vhr->itk_defuid;
 				libhome_gid = vhr->itk_defgid;
-				#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
-				#endif
+			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
 			}
-		} else {
+		  } else { /* if (vhr->lamer_mode) */
 			libhome_uid = vhr->itk_defuid;
 			libhome_gid = vhr->itk_defgid;
 		}
-	} else {
-		libhome_uid = p->pw_uid;
-		libhome_gid = p->pw_gid;
 	}
 
        /* If ITK support is not enabled, then don't process request */
 	if (vhr->itk_enable) {
-
        	module *mpm_itk_module = ap_find_linked_module("itk.c");
        
 		if (mpm_itk_module == NULL) {
 			ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_itk_post_read: itk.c is not loaded");
 			return HTTP_INTERNAL_SERVER_ERROR;
 		}
-       	itk_conf *cfg = (itk_conf *) ap_get_module_config(r->server->module_config, mpm_itk_module);
+	  itk_conf *cfg = (itk_conf *) ap_get_module_config(r->per_dir_config, mpm_itk_module);
 
-       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' before change", cfg->uid, cfg->gid, cfg->username);
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' before change", cfg->uid, cfg->gid, cfg->username);
 	if ((libhome_uid == -1 || libhome_gid == -1)) { 
 			cfg->uid = vhr->itk_defuid;
 			cfg->gid = vhr->itk_defgid;
 			cfg->username = vhr->itk_defusername;
 		} else {
+		char *itk_username = NULL;
+		/* struct passwd *pw = getpwuid(libhome_uid); */
+
        		cfg->uid = libhome_uid;
-       		cfg->gid = libhome_uid;
+		cfg->gid = libhome_gid;
+
 			/* set the username - otherwise MPM-ITK will not work */
-			char *itk_username = NULL;
-			itk_username = apr_psprintf(r->pool, "#%d", libhome_uid);
+		/* itk_username = apr_psprintf(r->pool, "%s", pw->pw_name); */
+		itk_username = apr_psprintf(r->pool, "root");
        	       cfg->username = itk_username;
 		}
-      	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
+	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
 	}
+	VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: END ***");
        return OK;
 }
 #endif /* HAVE_MPM_ITK_SUPPORT  */
@@ -1216,7 +787,7 @@ static int vhs_suphp_handler(request_rec *r)
 
 static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd, char *username)
 {
-	// Path to the suPHP config file per user
+  /* Path to the suPHP config file per user */
 	char *transformedPath = NULL;
 	char *transformedUid = NULL;
 	char *transformedGid = NULL;
@@ -1230,9 +801,7 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 		transformedPath = path;
 	}
 
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir set to %s", transformedPath);
-#endif /* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir set to %s", transformedPath);
 
 	module *suphp_module = ap_find_linked_module("mod_suphp.c");
 
@@ -1258,94 +827,6 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 }
 #endif /* HAVE_MOD_SUPHP_SUPPORT  */
 
-
-#ifdef HAVE_MPM_ITK_SUPPORT
-/*
- * This function will configure MPM-ITK
- */
-static int vhs_itk_post_read(request_rec *r)
-{
-	struct passwd  *p;
-
-	uid_t libhome_uid;
-	gid_t libhome_gid;
-	
-  	vhs_config_rec *vhr = (vhs_config_rec *) ap_get_module_config(r->server->module_config, &vhs_module);
-
-	p = vhs_get_home_stuff(r, vhr, (char *)r->hostname);
-
-	if (p == NULL) {
-		if (vhr->lamer_mode) {
-			#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
-			#endif
-			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) {
-				char           *lhost;
-				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
-				#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
-				#endif
-				p = vhs_get_home_stuff(r, vhr, lhost);
-				if (p != NULL) {
-					libhome_uid = p->pw_uid;
-					libhome_gid = p->pw_gid;
-					#ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: lamer for %s -> %s has itk uid='%d' itk gid='%d'", r->hostname, lhost, libhome_uid, libhome_gid);
-					#endif
-				} else {
-					libhome_uid = vhr->itk_defuid;
-					libhome_gid = vhr->itk_defgid;
-					#ifdef VH_DEBUG
-					ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
-					#endif
-				}
-			} else {
-				libhome_uid = vhr->itk_defuid;
-				libhome_gid = vhr->itk_defgid;
-				#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: no lamer found for %s set default itk uid='%d' itk gid='%d'", r->hostname, libhome_uid, libhome_gid);
-				#endif
-			}
-		} else {
-			libhome_uid = vhr->itk_defuid;
-			libhome_gid = vhr->itk_defgid;
-		}
-	} else {
-		libhome_uid = p->pw_uid;
-		libhome_gid = p->pw_gid;
-	}
-
-       /* If ITK support is not enabled, then don't process request */
-	if (vhr->itk_enable) {
-
-       	module *mpm_itk_module = ap_find_linked_module("itk.c");
-       
-		if (mpm_itk_module == NULL) {
-			ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_itk_post_read: itk.c is not loaded");
-			return HTTP_INTERNAL_SERVER_ERROR;
-		}
-
-       	itk_conf *cfg = (itk_conf *) ap_get_module_config(r->server->module_config, mpm_itk_module);
-
-       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' before change", cfg->uid, cfg->gid, cfg->username);
-		if ((libhome_uid == -1 || libhome_gid == -1)) { 
-			cfg->uid = vhr->itk_defuid;
-			cfg->gid = vhr->itk_defgid;
-			cfg->username = vhr->itk_defusername;
-		} else {
-       		cfg->uid = libhome_uid;
-       		cfg->gid = libhome_uid;
-			/* set the username - otherwise MPM-ITK will not work */
-			char *itk_username = NULL;
-			itk_username = apr_psprintf(r->pool, "#%d", libhome_uid);
-       	       cfg->username = itk_username;
-		}
-       	ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
-	}
-       return OK;
-}
-#endif /* HAVE_MPM_ITK_SUPPORT  */
-
 #ifdef HAVE_MOD_PHP_SUPPORT
 /*
  * This function will configure on the fly the php like php.ini will do
@@ -1361,14 +842,10 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 	 * vhs_PHPsafe_mode support
 	 */
 	if (vhr->safe_mode) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode engaged");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode engaged");
 		zend_alter_ini_entry("safe_mode", 10, "1", 1, 4, 16);
-#ifdef VH_DEBUG
 	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode inactive, defaulting to php.ini values");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode inactive, defaulting to php.ini values");
 	}
 
 	/*
@@ -1389,50 +866,36 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 				obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
 			}
 			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
-#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s (appending mode)", obasedir_path);
-#endif				/* VH_DEBUG */
+			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s (appending mode)", obasedir_path);
 		} else {
 			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
-#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s", path);
-#endif				/* VH_DEBUG */
+			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s", path);
 		}
-#ifdef VH_DEBUG
 	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir inactive defaulting to php.ini values");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir inactive defaulting to php.ini values");
 	}
 
 	/*
 	 * vhs_PHPdisplay_errors support
 	 */
 	if (vhr->display_errors) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors engaged");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors engaged");
 		zend_alter_ini_entry("display_errors", 10, "1", 1, 4, 16);
-#ifdef VH_DEBUG
 	} else {
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors inactive defaulting to php.ini values");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP display_errors inactive defaulting to php.ini values");
 	}
 
 	/*
 	 * vhs_PHPopt_fromdb
 	 */
 	if (vhr->phpopt_fromdb) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP from DB engaged");
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP from DB engaged");
 		char           *retval;
 		char           *state;
 		char           *myphpoptions;
 
 		myphpoptions = apr_pstrdup(r->pool, passwd);
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
-#endif				/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: DB => %s", myphpoptions);
 
 		if ((ap_strchr(myphpoptions, ';') != NULL) && (ap_strchr(myphpoptions, '=') != NULL)) {
 			/* Getting values for PHP there so we can proceed */
@@ -1445,29 +908,27 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 
 				key = apr_strtok(retval, "=", &strtokstate);
 				val = apr_strtok(NULL, "=", &strtokstate);
-#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
-#endif				/* VH_DEBUG */
+				VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
 				zend_alter_ini_entry(key, strlen(key) + 1, val, strlen(val), 4, 16);
 				retval = apr_strtok(NULL, ";", &state);
 			}
 		}
-#ifdef VH_DEBUG
 		else {
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: no PHP stuff found.");
+			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: no PHP stuff found.");
 		}
-#endif				/* VH_DEBUG */
 	}
 }
 #endif				/* HAVE_MOD_PHP_SUPPORT */
 
-#ifdef APR_HAS_LDAP
+
+
+#ifdef HAVE_LDAP_SUPPORT
 #define FILTER_LENGTH MAX_STRING_LEN
 
 /*
  *  Get the stuff from LDAP
  */
-char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
+int getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname, mod_vhs_request_t *reqc)
 {
 	/* LDAP associated variable and stuff */
 	const char 		**vals = NULL;
@@ -1477,21 +938,15 @@ char **getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname)
     	util_ldap_connection_t 	*ldc = NULL;
     	int 			failures = 0;
 	
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "getldaphome() called.");
-#endif	/* VH_DEBUG */
+  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "getldaphome() called.");
 
-start_over:
+ start_over:
 
 	if (vhr->ldap_host) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find(r,%s,%d,%s,%s,%d,%d);",vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn, vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
-#endif	/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find(r,%s,%d,%s,%s,%d,%d);",vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn, vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
     		ldc = util_ldap_connection_find(r, vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn,
 						vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find();");
-#endif	/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find();");
     	} else {
         	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
                       		"translate: no vhr->host - weird...?");
@@ -1501,9 +956,7 @@ start_over:
 	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "translating %s", r->uri);
 
     	apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
-#endif	/* VH_DEBUG */
+  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
     	result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
     	util_ldap_connection_close(ldc);
 
@@ -1518,7 +971,7 @@ start_over:
      	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
     		          "virtual host %s not found",
     		          hostname);
-    	return NULL;
+	return DECLINED;
     }
 
     /* handle bind failure */
@@ -1526,12 +979,41 @@ start_over:
        ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
                      "translate failed; virtual host %s; URI %s [%s]",
     		         hostname, r->uri, ldap_err2string(result));
-       return NULL;
+	return DECLINED;
     }
 
-	return vals;
+
+  int i = 0;
+  while (ldap_attributes[i]) {
+	if (strcasecmp (ldap_attributes[i], "apacheServerName") == 0) {
+	  reqc->name = apr_pstrdup (r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "apacheServerAdmin") == 0) {
+	  reqc->admin = apr_pstrdup (r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "apacheDocumentRoot") == 0) {
+	  reqc->docroot = apr_pstrdup (r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "apachePhpopts") == 0) {
+	  reqc->phpoptions = apr_pstrdup (r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "apacheSuexecUid") == 0) {
+	  reqc->uid = apr_pstrdup(r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "apacheSuexecGid") == 0) {
+	  reqc->gid = apr_pstrdup(r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "associatedDomain") == 0) {
+	  reqc->associateddomain = apr_pstrdup(r->pool, vals[i]);
+	}
+	i++;
+  }
+    
+  reqc->vhost_found = VH_VHOST_INFOS_FOUND;
+
+  return OK;
 }
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
 
 /*
  * Send the right path to the end user uppon a request.
@@ -1545,39 +1027,44 @@ static int vhs_translate_name(request_rec * r)
 	/* mod_alias like functions */
 	char           		*ret = 0;
 	int			   		status = 0;
+
 	/* Stuff */
-	const char 			**vals = NULL;
-	/* libhome */
 	char           *ptr = 0;
 
-#ifdef APR_HAS_LDAP
-	mod_vhs_ldap_request_t *reqc;
-    	reqc = (mod_vhs_ldap_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_ldap_request_t));
-    	ap_set_module_config(r->request_config, &vhs_module, reqc);
-#endif /* APR_HAS_LDAP */
+	mod_vhs_request_t *reqc;
+	int vhost_found_by_request = DECLINED;
+
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: BEGIN ***");
 
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled ");
-#endif	/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled ");
 		return DECLINED;
 	}
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled ");
-#endif	/* VH_DEBUG */
-#ifdef APR_HAS_LDAP
+
+	reqc = ap_get_module_config(r->request_config, &vhs_module);	
+	if (!reqc)
+	  {
+		/* VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: variable reqc does not already exists.... creating ! pid=%d request_rec=%d @request_config='%d'", getpid(), r, &(r->request_config)); */
+		reqc = (mod_vhs_request_t *)apr_pcalloc(r->pool, sizeof(mod_vhs_request_t));
+		reqc->vhost_found = VH_VHOST_INFOS_NOT_YET_REQUESTED;
+		ap_set_module_config(r->request_config, &vhs_module, reqc);
+	  }
+	/*else
+	  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: variable reqc already exists ! pid=%d request_rec=%d @request_config='%d'", getpid(), r, &(r->request_config));
+	*/
+#ifdef HAVE_LDAP_SUPPORT
 	/* If we don't have LDAP Url module is disabled */
 	if (!vhr->ldap_have_url) {
-#ifdef VH_DEBUG
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled - No LDAP URL ");
-#endif	/* VH_DEBUG */
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled - No LDAP URL ");
 		return DECLINED;
 	}
-#endif /* APR_HAS_LDAP */
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled (LDAP) ");
-#endif	/* VH_DEBUG */
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled (LDAP).");
+#endif /* HAVE_LDAP_SUPPORT */
+#ifdef HAVE_MOD_DBD_SUPPORT
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Enabled (Mod DBD).");
+#endif /* HAVE_MOD_DBD_SUPPORT */
+
 	/* Handle alias stuff */
 	if ((ret = try_alias_list(r, vhr->redirects, 1, &status)) != NULL) {
 		if (ap_is_HTTP_REDIRECT(status)) {
@@ -1604,31 +1091,38 @@ static int vhs_translate_name(request_rec * r)
 	if ((ptr = ap_strchr(host, ':'))) {
 		*ptr = '\0';
 	}
-#ifdef VH_DEBUG
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
-#endif				/* VH_DEBUG */
 
-#ifdef APR_HAS_LDAP
-	vals = getldaphome(r, vhr, (char *) host);
-#endif
-	if (!vals) {
+	if (reqc->vhost_found == VH_VHOST_INFOS_NOT_YET_REQUESTED)
+	  {
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: looking for %s", host);
 		/*
+		 * Trying to get vhost information
+		 */
+#ifdef HAVE_LDAP_SUPPORT
+		vhost_found_by_request = getldaphome(r, vhr, (char *) host, reqc);
+#endif
+#ifdef HAVE_MOD_DBD_SUPPORT
+		vhost_found_by_request = getmoddbdhome(r, vhr, (char *) host, reqc);
+#endif
+		
+		if (vhost_found_by_request != OK) { 
+		/*
+		   * The vhost has not been found
 		 * Trying to get lamer mode or not
 		 */
 		if (vhr->lamer_mode) {
-#ifdef VH_DEBUG
-			ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
-#endif
+			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
 			if ((strncasecmp(host, "www.", 4) == 0) && (strlen(host) > 4)) {
 				char           *lhost;
 				lhost = apr_pstrdup(r->pool, host + 5 - 1);
-#ifdef VH_DEBUG
-				ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
+			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
+#ifdef HAVE_LDAP_SUPPORT
+			  vhost_found_by_request = getldaphome(r, vhr, lhost, reqc);
 #endif
-#ifdef APR_HAS_LDAP
-				vals = getldaphome(r, vhr, lhost);
+#ifdef HAVE_MOD_DBD_SUPPORT
+			  vhost_found_by_request = getmoddbdhome(r, vhr, lhost, reqc);
 #endif
-				if (!vals) {
+			  if (vhost_found_by_request != OK) {
 					if (vhr->log_notfound) {
 						ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer %s)", host, lhost);
 					}
@@ -1637,54 +1131,29 @@ static int vhs_translate_name(request_rec * r)
 			}
 		} else {
 			if (vhr->log_notfound) {
-				ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer tested)", host);
+			  ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no host found in database for %s (lamer mode not eanbled)", host);
 			}
 			return vhs_redirect_stuff(r, vhr);
 		}
 	}
+	  }
+	else 
+	  {
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Request to backend has already be done (vhs_itk_post_read()) !");
+		if (reqc->vhost_found == VH_VHOST_INFOS_NOT_FOUND)
+		  vhost_found_by_request = DECLINED; /* the request has already be done and vhost was not found */
+		else
+		  vhost_found_by_request = OK; /* the request has already be done and vhost was found */
+	  }
 
-#ifdef VH_DEBUG
-		/* ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, path); */
-		ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is ..", host);
-#endif				/* VH_DEBUG */
-
-	if (vals == NULL) {
+	if (vhost_found_by_request == OK)
+	  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: path found in database for %s is %s", host, reqc->docroot);
+	else
+	  {
 		if (vhr->log_notfound) {
 			ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, r->server, "vhs_translate_name: no path found found in database for %s (normal)", host);
 		}
 		return vhs_redirect_stuff(r, vhr);
-	} else {
-		/* We have values so work with them */
-		//reqc->dn = apr_pstrdup(r->pool, dn);
-
-
-#ifdef APR_HAS_LDAP
-		int i = 0;
-		while (ldap_attributes[i]) {
-		    if (strcasecmp (ldap_attributes[i], "apacheServerName") == 0) {
-		    	reqc->name = apr_pstrdup (r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "apacheServerAdmin") == 0) {
-		    	reqc->admin = apr_pstrdup (r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "apacheDocumentRoot") == 0) {
-		    	reqc->docroot = apr_pstrdup (r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "apachePhpopts") == 0) {
-		    	reqc->phpoptions = apr_pstrdup (r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "apacheSuexecUid") == 0) {
-		    	reqc->uid = apr_pstrdup(r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "apacheSuexecGid") == 0) {
-		    	reqc->gid = apr_pstrdup(r->pool, vals[i]);
-		    }
-		    else if (strcasecmp (ldap_attributes[i], "associatedDomain") == 0) {
-		    	reqc->associateddomain = apr_pstrdup(r->pool, vals[i]);
-		    }
-		    i++;
-		}
-#endif
 	}
 
 #ifdef WANT_VH_HOST
@@ -1728,7 +1197,7 @@ static int vhs_translate_name(request_rec * r)
 	/* Avoid getting two // in filename */
 	ap_no2slash(r->filename);
 
-	ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: translated http://%s%s to file %s", host, r->uri, r->filename);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 	vhs_php_config(r, vhr, reqc->docroot, reqc->phpoptions);
@@ -1738,6 +1207,7 @@ static int vhs_translate_name(request_rec * r)
 	vhs_suphp_config(r, vhr, reqc->docroot, reqc->apachePhpopts, reqc->apachePhpopts, reqc->uid, reqc->gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: END ***");
 	return OK;
 }
 
@@ -1782,7 +1252,7 @@ static const command_rec vhs_commands[] = {
 						"a document to be redirected, then the destination URL"),
 	AP_INIT_TAKE2( "vhs_RedirectPermanent", add_redirect2, (void *)HTTP_MOVED_PERMANENTLY, OR_FILEINFO,
 						"a document to be redirected, then the destination URL"),
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
 	AP_INIT_TAKE1( "vhs_LDAPBindDN",set_field, (void *)4, RSRC_CONF,
 						"DN to use to bind to LDAP server. If not provided, will do an anonymous bind."),
 	AP_INIT_TAKE1( "vhs_LDAPBindPassword",set_field, (void *)5, RSRC_CONF,
@@ -1793,7 +1263,12 @@ static const command_rec vhs_commands[] = {
 						"Defaults to always."),
 	AP_INIT_TAKE1( "vhs_LDAPUrl",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
 						"URL to define LDAP connection in form ldap://host[:port]/basedn[?attrib[?scope[?filter]]]."),
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
+
+#ifdef HAVE_MOD_DBD_SUPPORT
+	AP_INIT_TAKE1("vhs_VhostDBDTable", set_field, (void *)0, RSRC_CONF, "Table name used to construct SQL request to fetch vhost for host"),
+#endif /* HAVE_MOD_DBD_SUPPORT */
+
 	{NULL}
 };
 
@@ -1818,9 +1293,9 @@ static void register_hooks(apr_pool_t * p)
 #ifdef HAVE_MOD_SUPHP_SUPPORT
 	ap_hook_handler(vhs_suphp_handler, NULL, aszSucc, APR_HOOK_FIRST);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
-#ifdef APR_HAS_LDAP
+#ifdef HAVE_LDAP_SUPPORT
 	ap_hook_optional_fn_retrieve(ImportULDAPOptFn,NULL,NULL,APR_HOOK_MIDDLE);
-#endif /* APR_HAS_LDAP */
+#endif /* HAVE_LDAP_SUPPORT */
 }
 
 AP_DECLARE_DATA module vhs_module = {

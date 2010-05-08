@@ -12,12 +12,12 @@
 ##
 
 # In general you can use apxs, but on debian you should use apxs2
-APXS = apxs
+APXS = /usr/local/apache2-itk/bin/apxs
 #APXS = apxs2
 
 NAME = mod_vhs
-SRCS = $(NAME).c
-OBJS = $(NAME).o
+SRCS = mod_vhs.c mod_vhs_alias.c
+OBJS = mod_vhs.o mod_vhs_alias.o
 APACHE_MODULE = $(NAME).so
 
 RM = rm -f
@@ -26,27 +26,24 @@ CP = cp -f
 INDENT = /usr/bin/indent
 
 # For debian users, you'll have to uncomment these of you will have
-# big errors under complilation. Don't ask me why, but debian apache2
+# big errors under complilation. Don't ask me why, but debian apache2-itk
 # is redefining strangely some headers.... :/
 
 #CFLAGS= -DDEBIAN -I/usr/include/apr-0
-CFLAGS= -DVH_DEBUG  -I/usr/include
+CFLAGS= -I/usr/include
 
-# If you want to enable mod_suphp support please uncomment the following
-# line :
-#CFLAGS+=	-DHAVE_MOD_SUPHP_SUPPORT
-
-# Uncomment only ONE of these CFLAGS according of what kind of compilation
-# you need with mod_vhs
-
-# Flags for compilation (Full PHP + Debug)
-#CFLAGS+= -I/usr/local/include -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -DVH_DEBUG -Wc,-Wall
+CFLAGS+= -I/usr/local/apache2-itk/include  -I/opt/local/include/php -I/opt/local/include/php/main -I/opt/local/include/php/TSRM -I/opt/local/include/php/Zend -Wc,-Wall
+CFLAGS+= -DVH_DEBUG 
+CFLAGS+= -DHAVE_MOD_PHP_SUPPORT 
+CFLAGS+= -DHAVE_MPM_ITK_SUPPORT
+CFLAGS+= -DHAVE_MOD_DBD_SUPPORT
+#CFLAGS+= -DHAVE_LDAP_SUPPORT
 
 # Flags for compilation (Full Debug)
 #CFLAGS+= -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation with PHP
-CFLAGS+= -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
+#CFLAGS+= -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall
 
 #LDFLAGS = 
 
@@ -62,7 +59,7 @@ install: $(SRCS)
 	$(APXS) -i -a -c $(LDFLAGS) $(CFLAGS) $(SRCS)
 
 clean:
-	$(RM) $(OBJS) $(APACHE_MODULE) $(NAME).slo $(NAME).lo $(NAME).la
+	$(RM) $(OBJS) $(APACHE_MODULE) mod_vhs.slo mod_vhs.lo mod_vhs.la  mod_vhs_alias.la mod_vhs_alias.lo mod_vhs_alias.slo
 	$(RM) -r .libs
 
 indent:
