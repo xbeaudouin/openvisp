@@ -2,12 +2,6 @@
 //
 // File: ajax/mail/domain_mail_overview.php
 //
-// Template File:
-//
-// Template Variables:
-//
-// 
-//
 // Form POST \ GET Variables:
 //
 // fDomain
@@ -72,22 +66,22 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
         if ( $CONF['quota'] == 'YES') {
           
           $json_data_array[] = array(
-            'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
-            'aliases' => $domain_info->used_quota['mail_alias'],
-            'mailboxes' => $domain_info->used_quota['mailbox'],
-            'maxquota' => $domain_info->quota['maxquota'],
-            'quota_aliases' => $domain_info->quota['mail_aliases'],
-            'quota_mailboxes' => $domain_info->quota['mailboxes'],
-            'diskspace_mailboxes' => $domain_info->data['total_diskspace_used_mailboxes'],                                                         
-            'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified']
-            );
+																		 'domain' => '<a href="/mail/overview.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'</a>',
+																		 'aliases' => $domain_info->used_quota['mail_alias'],
+																		 'mailboxes' => $domain_info->used_quota['mailbox'],
+																		 'maxquota' => $domain_info->quota['maxquota'],
+																		 'quota_aliases' => $domain_info->quota['mail_aliases'],
+																		 'quota_mailboxes' => $domain_info->quota['mailboxes'],
+																		 'diskspace_mailboxes' => $domain_info->data['total_diskspace_used_mailboxes'],                                                         
+																		 'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified']
+																		 );
         }
         else{
           $json_data_array[] = array(
-            'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
-            'aliases' => $domain_info->used_quota['mail_alias'],
-            'mailboxes' => $domain_info->used_quota['mailbox']
-            );
+																		 'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
+																		 'aliases' => $domain_info->used_quota['mail_alias'],
+																		 'mailboxes' => $domain_info->used_quota['mailbox']
+																		 );
         }
 
       }
