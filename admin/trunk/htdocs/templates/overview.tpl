@@ -1,29 +1,18 @@
-<form name="overview" method="post">
-<select name="fDomain" onChange="this.form.submit()";>
-
-<?php
-for ($i = 0; $i < sizeof ($user_info->data_managed_active_domain); $i++)
-{
-   if ($fDomain == $user_info->data_managed_active_domain[$i]['domain'])
-   {
-      print "<option value=\"".$user_info->data_managed_active_domain[$i]['domain']."\" selected>".$user_info->data_managed_active_domain[$i]['domain']."</option>\n";
-   }
-   else
-   {
-      print "<option value=\"".$user_info->data_managed_active_domain[$i]['domain']."\">".$user_info->data_managed_active_domain[$i]['domain']."</option>\n";
-   }
-}
-?>
-
-</select>
-<input type="hidden" name="limit" value="0">
-<input type="submit" name="go" value="<?php print $PALANG['pOverview_button']; ?>" />
-</form>
-<p />
-
 <?php 
 
-print "<b>". $PALANG['pOverview_welcome'] . $fDomain . "</b><br />\n";
+
+print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
+print load_js("../lib/yui/connection/connection-min.js");
+print load_js("../lib/yui/json/json-min.js");
+print load_js("../lib/yui/element/element-min.js");
+print load_js("../lib/yui/paginator/paginator-min.js");
+//print load_js("../lib/yui/autocomplete/autocomplete-debug.js");
+print load_js("../lib/yui/datasource/datasource-min.js");
+print load_js("../lib/yui/datatable/datatable-min.js");
+
+print load_css("../css/datatable.css");
+
+print "<b>". $PALANG['pOverview_welcome'] . "<div id='domain_name'>".$fDomain . "</div></b><br />\n";
 print $PALANG['pOverview_alias_alias_count'] . ": " . $domain_info->used_quota['mail_alias'] . " / "; 
 
 switch ($domain_info->quota['mail_aliases']) {
@@ -82,6 +71,110 @@ print "<form action=\"\" method=\"post\"> ";
 print "<input type=\"hidden\" name=\"fDomain\" value=\"".$fDomain."\">";
 print "Email : <input type=\"text\" name=\"fMail_Search\" value=\"".$fMail_Search."\"> <input type=\"submit\"> ";
 print "</form>";
+
+
+
+$ajax_yui->start("alias");
+
+?>
+
+
+<div id="aliases-nav"></div>
+<div id="aliases"></div>
+
+
+<?php
+
+  $item_list= array(
+										"alias" => array(
+																		 "label" => $PALANG['pOverview_alias_address'],
+																		 "parser" => "text"
+																		 ),
+										"goto" => array(
+																		"label" => $PALANG['pOverview_alias_goto'],
+																		"parser" => "text"
+																		),
+										"modified" => array(
+																				"label" => $PALANG['pOverview_alias_modified'],
+																				"parser" => "text",
+																				"sortable" => "false"
+																				),
+										"active" => array(
+																			"label" => "active",
+																			"parser" => "text",
+																			"radioOptions" => array (
+																															 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																															 "url" => "/ajax/mail/manage_alias.php",
+																															 "url_param" => "action=mod_status&domainName=$fDomain"
+																															 )
+																			),
+										"delete" => array(
+																			"label" => "delete",
+																			"sortable" => "false",
+																			"resizeable" => "false",
+																			"link" => "/ajax/mail/manage_alias.php",
+																			"url_param" => "action=delete&domainName=$fDomain",
+																			"key_item" => "alias"
+																			),
+										"edit" => array(
+																			"label" => "",
+																			"sortable" => "false",
+																			"resizeable" => "false"
+																			)
+										);
+
+/*
+																			"link" => "/ajax/mail/alias_activation.php?domainName=$fDomain",
+
+										"amavis" => array(
+																			"label" => $PALANG['pOverview_alias_amavisd'],
+																			"parser" => "text",
+																			"link" => "/mail/edit-security.php?domainName=$fDomain"
+																			),
+
+										"children" => array (
+																				 "label" => "",
+																				 array (
+																								"key" => "delete",
+																								"label" => "",
+																								"sortable" => "false",
+																								"resizeable" => "false",
+																								"parser" => "myBuildUrl"
+																								),
+																				 array ( 
+																								"key" => "edit",
+																								"label" => "",
+																								"sortable" => "false",
+																								"resizeable" => "false",
+																								"parser" => "myBuildUrl"
+																								 )
+																				 )
+
+ */
+
+$ajax_info = array(
+  "url" => "../ajax/mail/domain_alias_detail.php?domainName=$fDomain",
+  "method" => "post",
+  "params" => array ( "domain_name" => $fDomain )
+  );
+
+
+$ajax_yui->ajax_info($ajax_info);
+//$ajax_yui->attr_add('domain_name',$fDomain);
+$ajax_yui->attr_add('root','records');
+$ajax_yui->attr_add('sort','alias');
+$ajax_yui->attr_add('sortdir','asc');
+$ajax_yui->attr_add('startindex','0');
+$ajax_yui->attr_add('maxrows','10');
+$ajax_yui->attr_add('data_div','aliases');
+
+
+$ajax_yui->item_add($item_list);
+//$ajax_yui->create_celleditor();
+$ajax_yui->create_listener();
+//$ajax_yui->create_search();
+$ajax_yui->end();
+
 
 if (sizeof ($domain_info->list_mail_aliases) > 0)
 {
