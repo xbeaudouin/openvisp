@@ -2858,6 +2858,11 @@ Please check the documentation and website for more information.\n
 <a href=\"http://www.oav.net/projects/openvisp-admin/\">OpenVISP Admin</a>\n
 ";
 
+$DEBUG_TEXT_TXT = "
+Please check the documentation and website for more information.
+<a href=\"http://www.oav.net/projects/openvisp-admin/\">OpenVISP Admin</a>
+";
+
 //
 // db_connect
 // Action: Makes a connection to the database if it doesn't exist
