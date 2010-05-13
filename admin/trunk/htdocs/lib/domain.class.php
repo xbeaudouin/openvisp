@@ -117,8 +117,13 @@ class DOMAIN
 	{
 
 		$query = "SELECT COUNT(*) as total_alias
-		FROM alias
-		WHERE policy_id=".$this->data['policy_id'];
+    FROM policy, alias
+    LEFT JOIN mailbox ON alias.address=mailbox.username
+    WHERE policy.domain_id=".$this->data_domain['id']."
+    AND policy.id=alias.policy_id
+    AND mailbox.maildir IS NULL
+    AND alias.address NOT LIKE '@%'
+    ORDER BY alias.address ";
 
 		$result = $this->db_link->sql_query($query);
 		$this->used_quota['mail_alias'] = $result['result'][0]['total_alias'];
@@ -168,39 +173,39 @@ class DOMAIN
 	//
 	// en_disable
 	// Action: enable or disable a domain and the whole object of the domain
-	// Call: en_disable ( int value)
+	// Call: en_disable ()
 	//
-	function en_disable($value = "+1"){
+	function en_disable(){
 
 	  $query = "UPDATE domain 
-	  SET active=active$value
+	  SET active=1-active
 	  WHERE id = ".$this->data_domain['id'];
 
     $result = $this->db_link->sql_query($query);
     
 	  $query = "UPDATE domain_alias
-	  SET active=active$value
+	  SET active=1-active
 	  WHERE domain_id = ".$this->data_domain['id'];
     
     $result = $this->db_link->sql_query($query);
 
     // disable ftpaccount
     $query = "UPDATE ftpaccount
-    SET active=active$value
+    SET active=1-active
     WHERE domain_id = ".$this->data_domain['id'];
     
     $result = $this->db_link->sql_query($query);
     
     // disable ftpaccount
     $query = "UPDATE mailbox
-    SET active=active$value
+    SET active=1-active
     WHERE domain_id = ".$this->data_domain['id'];
 
     $result = $this->db_link->sql_query($query);
 
     // disable wwwhost
     $query = "UPDATE whost
-    SET active=active$value
+    SET active=1-active
     WHERE domain_id = ".$this->data_domain['id'];
 
     $result = $this->db_link->sql_query($query);
@@ -239,33 +244,34 @@ class DOMAIN
   //
 	// fetch_mail_aliases
 	// Action: Get the whole list of mailboxes aliases
-	// Call: fetch_mail_aliases (int start_number, int end_number)
+	// Call: fetch_mail_aliases (string search_param, string result_limit, string order_by_field, string order_dir)
 	//
-  function fetch_mail_aliases ($start_number = 0, $end_number = 0)
+  function fetch_mail_aliases ($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
   {
     global $CONF;
-    if ( $end_number == 0 ) $end_number = $CONF['page_size'];
     
     if ($CONF['alias_control'] == "YES")
     {
-      $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id
+      $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id, alias.active
       FROM alias
       WHERE alias.domain='".$this->data_domain['domain']."'
-      ORDER BY alias.address
-      LIMIT $start_number, $end_number";
+      ORDER BY alias.address ";
     }
     else
     {
-      $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id
+      $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id, alias.active
       FROM policy, alias
       LEFT JOIN mailbox ON alias.address=mailbox.username
       WHERE policy.domain_id=".$this->data_domain['id']."
       AND policy.id=alias.policy_id
       AND mailbox.maildir IS NULL
       AND alias.address NOT LIKE '@%'
-      ORDER BY alias.address
-      LIMIT $start_number, $end_number";
+      ORDER BY alias.address ";
     }
+
+		if ( $result_limit != NULL ){
+			$query .= "LIMIT $result_limit ";
+		}
     
     $result = $this->db_link->sql_query($query);
 		$this->list_mail_aliases = $result['result'];
@@ -275,12 +281,15 @@ class DOMAIN
   //
 	// fetch_mailboxes
 	// Action: Get the whole list of mailboxes aliases
-	// Call: fetch_mail_aliases (int start_number, int end_number)
+	// Call: fetch_mailboxes (string search_param, string result_limit, string order_by_field, string order_dir)
 	//
-  function fetch_mailboxes ($start_number = 0, $end_number = 0)
+  function fetch_mailboxes ($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
   {
-    global $CONF;
-    if ( $end_number == 0 ) $end_number = $CONF['page_size'];
+
+		GLOBAL $CONF;
+
+		if ( $order_by_field == NULL ) { $order_by_field = $CONF['order_display']; }
+		if ( $order_dir == NULL ) { $order_dir = "ASC"; }
 
     $query = "SELECT mailbox.*, alias.policy_id, spamreport.*, vacation.active as vacation_active
     FROM alias, mailbox
@@ -288,8 +297,12 @@ class DOMAIN
     LEFT OUTER JOIN vacation ON ( mailbox.id = vacation.mailbox_id )
     WHERE mailbox.domain_id=".$this->data_domain['id']."
     AND mailbox.username=alias.address
-    ORDER BY ".$CONF['order_display']." ASC
-    LIMIT $start_number, $end_number";
+    ORDER BY ".$order_by_field." $order_dir ";
+
+		if ( $result_limit != NULL ){
+			$query .= "LIMIT $result_limit ";
+		}
+
 
     $result = $this->db_link->sql_query($query);
 		$this->list_mailboxes = $result['result'];
@@ -324,94 +337,6 @@ class DOMAIN
       return FALSE;
   }
   
-  //
-	// add_mail_alias
-	// Action: create a new mail alias
-	// Call: add_mail_alias (string alias, string email_to, int greylisting)
-	//
-  function add_mail_alias($alias, $email_to, $greylisting=2){
-    
-    GLOBAL $CONF;
-    GLOBAL $PALANG;
-
-    $domain_policy = get_domain_policy($domain);
-    $message = "";
-    
-    if ( check_policyhosting() ){
-      
-      if ( $greylisting == 2 && $CONF['greylisting'] == 'YES' )
-        { $greylisting = 1;}
-      else 
-			{ $greylisting = 0;}
-		}
-		
-		$error = 0;
-		
-
-    if (!preg_match ('/@/',$to)) $to = $to . "@" . $domain;
-    if (!preg_match ('/@/',$from)) $from = $from . "@" . $domain;
-    
-    if (empty ($from) or !check_email ($from))
-    {
-      $error = 1;
-      $message .= $PALANG['pCreate_alias_address_text_error1']." $from";
-    }
-    
-    if (preg_match ('/^\*@(.*)$/', $to, $match)) $to = "@" . $match[1];
-    
-    
-    if (empty ($to) or !check_email ($to))
-    {
-      $error = 1;
-      $message .= $PALANG['pCreate_alias_goto_text_error']. " $to";
-    }
-    
-    
-    
-    if ( $error == 0 ){
-      
-      if ( check_policyhosting() &&  (!preg_match ('/^@/',$from)) ){
-        $result = db_query("INSERT INTO policy(_rcpt,_optin,_priority) VALUES ('".$from."','".$greylisting."','50')","1","policyd");
-        if ($result['rows'] != 1){
-          $message .= $PALANG['pCreate_alias_policy_fail'] . "<br />($from)<br />\n";
-        }
-        else{
-          $message .= $PALANG['pCreate_alias_policy_ok'] . "<br />($from)<br />\n";
-        }
-        
-      }
-      
-      
-      $result = db_query ("SELECT * FROM alias WHERE address='$from' AND goto='$to' AND policy_id='".$domain_policy['id']."'");
-      if ($result['rows'] == 0 )
-      {
-        
-        $result = db_query ("INSERT INTO alias (address,goto,policy_id,created,active) VALUES ('$from','$to','".$domain_policy['id']."',NOW(),'1')");
-        if ($result['rows'] != 1)
-        {
-          $error = 1;
-          $message .= "<br />" . $PALANG['pCreate_alias_result_error'] . "<br />($from -> $to)</br />";
-        }
-        else
-        {
-          $error = 0;
-          $message .= "<br />" . $PALANG['pCreate_alias_result_succes'] . "<br />($from -> $to)</br />";
-          db_log ($SESSID_USERNAME, "$domain", "create alias", "$from -> $to");
-        }
-      }
-      else
-      {
-        $error = 1;
-        $message .= "<br />" . $PALANG['pCreate_alias_result_error_exist'] . "<br />($from -> $to)</br />";
-      }
-      
-    }
-    $array['status'] = $error;
-    $array['message'] = $message;
-    
-    return $array;
-
-  }
 
 }
 
