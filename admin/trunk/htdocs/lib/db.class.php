@@ -19,8 +19,11 @@ class DB
 
 		global $CONF;
 		global $DEBUG_TEXT;
+		global $DEBUG_TEXT_TXT;
 
 		$this->debug_text = $DEBUG_TEXT;
+		$this->debug_text_txt = $DEBUG_TEXT_TXT;
+
 		$this->debug = $CONF['SQL_DEBUG'];
 
 		if ( $db_host == "" ) { $db_host = $CONF['database_host']; }
@@ -66,6 +69,7 @@ class DB
 		$result = "";
 		$number_rows = "";
 		$row_results = "";
+		$return_code = "200";
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA \n\n$query \n\n"); }
 
@@ -77,7 +81,11 @@ class DB
 			}
 
 		if ( $die_on_error == 2 && PEAR::isError($result) )
-			{	print ("<p />SQL Query Failed <br /> query: " . PEAR_Error::getMessage () . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );}
+			{
+				$return_code = "500"; 
+				//print ("<p />SQL Query Failed <br /> query: " . PEAR_Error::getMessage () . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+				$sql_log = "SQL Query Failed\n" . PEAR_Error::getMessage () . "\nQuery :\n\"$query\"\n".$this->debug_text_txt;
+			}
 
 		if (eregi ("^select", $query))
 			{ 
@@ -96,7 +104,9 @@ class DB
 		
 		$return = array (
 										 "result" => $row_results,
-										 "rows" => $number_rows
+										 "rows" => $number_rows,
+										 "sql_log" => $sql_log, 
+										 "return_code" => $return_code
 										 );
 		return $return;
 
