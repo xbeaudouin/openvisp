@@ -3,78 +3,93 @@
   print $PALANG['pOverview_welcome_text'];
 ?>
 
-<select name="fDomain" onChange="this.form.submit()";>
-<?php
+<script type="text/javascript">
+	var myBuildUrl = function(record) {
+		var url = '';
+		var cols = this.getColumnSet().keys;
+		for (var i = 0; i < cols.length; i++) {
+			url += '&' + cols[i].key + '=' + escape(record.getData(cols[i].key));
+		}
+		return url;
+	};
+</script>
 
-for ($i = 0; $i < sizeof ($user_info->data_managed_active_domain); $i++)
-{
-
-  $domain_info->fetch_by_domainid($user_info->data_managed_active_domain[$i]['id']);
-
-  if ( $domain_info->quota['mail_aliases'] != 0 && $domain_info->quota['mailboxes'] != 0 ){  
-    
-    if ($fDomain == $user_info->data_managed_active_domain[$i]['domain'])
-    {
-      print "<option value=\"".$user_info->data_managed_active_domain[$i]['domain']."\" selected>".$user_info->data_managed_active_domain[$i]['domain']."</option>\n";
-    }
-    else
-    {
-      print "<option value=\"".$user_info->data_managed_active_domain[$i]['domain']."\">".$user_info->data_managed_active_domain[$i]['domain']."</option>\n";
-    }
-  }
-}
-
-?>
-</select>
-<input type="submit" name="go" value="<?php print $PALANG['pOverview_button']; ?>" />
-</form>
-<p />
 <?php
 
 
 print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
 print load_js("../lib/yui/connection/connection-min.js");
-//print load_js("../lib/yui/autocomplete/autocomplete-min.js");
 print load_js("../lib/yui/json/json-min.js");
 print load_js("../lib/yui/element/element-min.js");
 print load_js("../lib/yui/paginator/paginator-min.js");
+//print load_js("../lib/yui/autocomplete/autocomplete-debug.js");
 print load_js("../lib/yui/datasource/datasource-min.js");
 print load_js("../lib/yui/datatable/datatable-min.js");
 
 
 print load_css("../css/datatable.css");
 
+$ajax_yui->start();
+
+/* $search_form = array(); */
+/* $search_form[] = array( */
+/*   "name" => "domain_name", */
+/*   "minQueryLength" => "3", */
+/*   "form_inputname" => "Domain: "  */
+/*   ); */
+/* $ajax_yui->add_search_form($search_form); */
+
+
 ?>
 <style type="text/css">
 
 </style>
+
 <div id="dt-pag-nav"></div> 
-<div id="xml"></div>
+<div id="data"></div>
+
+
 
 <?php
 
-$ajax_yui->start();
+	// 																			"link" => "/mail/overview.php?domain=" 
+
 if ( $CONF['quota'] == 'YES') {
   $item_list= array(
-    "domain" => 'sortable:true, parser:"text"',
-    "aliases" => 'sortable:false, parser:"number"',
-    "quota_aliases" => 'sortable:false, parser:"number"',
-    "mailboxes" => 'sortable:false, parser:"number"',
-    "quota_mailboxes" => 'sortable:false, parser:"number"',
-    "maxquota" => 'sortable:false, parser:"number"',
-    "diskspace_mailboxes" => 'sortable:false, editor:"textarea", parser:"number"'
+										"domain" => array(
+																			"sortable" => "true",
+																			"parser" => "text"
+																			),
+										"aliases" => array ( "sortable" => "false", "parser" => "number" ),
+										"quota_aliases" => array (
+																							"sortable" => "false",
+																							"parser" => "number",
+																							"editor" => "textarea"
+																							),
+										"mailboxes" => array ( "sortable" => "false", "parser" => "number"),
+										"quota_mailboxes" => array (
+																								"sortable" => "false",
+																								"parser" => "number",
+																								"editor" => "textarea"
+																								),
+										"maxquota" => array ( 
+																				 "sortable" => "false",
+																				 "parser" => "number",
+																				 "editor" => "textarea"
+																					),
+										"diskspace_mailboxes" => array("sortable" => "false", "parser" =>  "number")
 
     );
   //    "delete" => "../images/ico-exit.png|delete row|Are you sure to delete ?|./manage-app.php|action=delete"
 }
 else{
-  $item_list= array(
-    "name" => "sortable:true",
-    "aliases" => "sortable:false",
-    "mailboxes" => "sortable:false",
-    "maxquota" => "sortable:false",
-    "diskspace_mailboxes" => 'sortable:false, editor:"textarea"'
-    );
+  $item_list = array(
+										 "name" => array( "sortable" => "true", "link" => "/mail/overview.php?domain="),
+										 "aliases" => array ( "sortable" => "false"),
+										 "mailboxes" => array ("sortable" => "false"),
+										 "maxquota" => array ("sortable" => "false"),
+										 "diskspace_mailboxes" => array("sortable" => "false", "editor" =>  "textarea")
+										 );
 }
 
 $ajax_info = array(
@@ -82,45 +97,24 @@ $ajax_info = array(
   "method" => "post"
   );
 
-$search_form = array();
-$search_form[] = array(
-  "name" => "domain_name",
-  "minQueryLength" => "3",
-  "form_inputname" => "Domain: " 
-  );
 
 $ajax_yui->ajax_info($ajax_info);
 $ajax_yui->attr_add('root','records');
 $ajax_yui->attr_add('sort','domain');
 $ajax_yui->attr_add('sortdir','asc');
 $ajax_yui->attr_add('startindex','0');
-$ajax_yui->attr_add('results','10');
 $ajax_yui->attr_add('maxrows','10');
+$ajax_yui->attr_add('data_div','data');
 
-$ajax_yui->add_search_form($search_form);
+
 $ajax_yui->item_add($item_list);
-//$ajax_yui->create_celleditor();
+$ajax_yui->create_celleditor();
 $ajax_yui->create_listener();
+//$ajax_yui->create_search();
 $ajax_yui->end();
 ?>
 
-<table>
-  <tr>
 
-<?php $ajax_yui->generate_search_form('18%'); ?>
-    </td>
-
-    <td width="18%px">
-    </td>
-
-    <td width="18%px">
-    </td>
-
-    <td width="18%px">
-    </td>
-
-  </tr>
-<table>
 
 
 <?php
