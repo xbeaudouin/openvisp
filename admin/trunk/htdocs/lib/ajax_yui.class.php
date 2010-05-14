@@ -10,15 +10,14 @@ class AJAX_YUI
 		$this->db_link = $db_link;
 	}
 	
-	function start($primary_key){
+	function start($primary_key = NULL){
 	  $this->buffer = "
     <script type=\"text/javascript\">    
-    var myBuildUrl = function(datatable,record) {
+    var myBuildUrl".$this->info['data_div']." = function(datatable,record) {
       var url = '';
       var cols = datatable.getColumnSet().keys;
       for (var i = 0; i < cols.length; i++) {
         if (cols[i].key == '".$primary_key."') {
-
           url += '&' + cols[i].key + '=' + escape(record.getData(cols[i].key));
         }
       }
@@ -96,10 +95,10 @@ class AJAX_YUI
 
 	function create_listener(){
 
-		$this->buffer .= ' DynamicData = function() {';
+		$this->buffer .= ' DynamicData'.$this->info['data_div'].' = function() {';
 
 	 	$this->buffer .= "
-	 	  var myColumnDefs = [";
+	 	  var myColumnDefs".$this->info['data_div']." = [";
 	 	  $boucle=1;
 	 	  $editable_item = array();
 	 	  $deletable_item = array();
@@ -184,7 +183,7 @@ class AJAX_YUI
                       },
                    'column=' + column.key + '&newValue=' + 
                    escape(newValue) + '&oldValue=' + escape(oldValue) + '&".$attributes['radioOptions']['url_param']."' +
-                   myBuildUrl(datatable,record)
+                   myBuildUrl".$this->info['data_div']."(datatable,record)
                    );                                              
                  }
                })";
@@ -206,18 +205,18 @@ class AJAX_YUI
 	 	  $this->buffer .= "];
 	 	  
 	 	  
-	 	  myDataSource = new YAHOO.util.DataSource(\"".$this->ajax_info['url']."\");";
+	 	  myDataSource".$this->info['data_div']." = new YAHOO.util.DataSource(\"".$this->ajax_info['url']."\");";
 	 	    if ( $this->ajax_info['method'] == "post" ){
-	 	      $this->buffer.="myDataSource.connMethodPost = true;";
+	 	      $this->buffer.="myDataSource".$this->info['data_div'].".connMethodPost = true;";
 	 	    }
 	 	    else{
-	 	      $this->buffer.="myDataSource.connMethodPost = false;";
+	 	      $this->buffer.="myDataSource".$this->info['data_div'].".connMethodPost = false;";
 	 	    }
 	 	    
 	 	    $this->buffer.='
-	 	    myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	 	    myDataSource'.$this->info['data_div'].'.responseType = YAHOO.util.DataSource.TYPE_JSON;
 	 	    
-	 	    myDataSource.responseSchema = {
+	 	    myDataSource'.$this->info['data_div'].'.responseSchema = {
 	 	    resultsList: "'.$this->info['root'].'",
 	 	    fields: ['."\n";
 	 	    
@@ -273,11 +272,11 @@ class AJAX_YUI
 	 	    
 	 	    $this->buffer .= "
 	 	    
-	 	    var myConfigs = {
+	 	    var myConfigs".$this->info['data_div']." = {
           dynamicData: true,
           sortedBy : {key:\"".$this->info['sort']."\", dir:YAHOO.widget.DataTable.CLASS_ASC},
           paginator: new YAHOO.widget.Paginator({
-            containers : [\"aliases-nav\"],
+            containers : [\"".$this->info['nav_div']."\"],
             template : \"{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}\",
             pageReportTemplate : \"Showing items {startIndex} - {endIndex} of {totalRecords}\",
             rowsPerPageOptions : [5,10,25,50,100],
@@ -290,11 +289,13 @@ class AJAX_YUI
 				$buffer_add .= "&dir=".$this->info['sortdir'];
 				$buffer_add .= "&startIndex=".$this->info['startindex']."&results=".$this->info['maxrows'];
 
-	 	    foreach ($this->ajax_info['params'] as $param => $value) {
+				if ( isset($this->ajax_info['params']) ) {
+						foreach ($this->ajax_info['params'] as $param => $value) {
 
-					$buffer_add .= "&".$param."=".$value;
-	 	      $boucle++;
-	 	    } 
+							$buffer_add .= "&".$param."=".$value;
+							$boucle++;
+						} 
+					}
 				$buffer_add .= "\"";
 
 
@@ -306,9 +307,9 @@ class AJAX_YUI
 
 				$this->buffer .= "
           
-        myDataTable = new YAHOO.widget.DataTable(\"".$this->info['data_div']."\", myColumnDefs, myDataSource, myConfigs);
+        myDataTable".$this->info['data_div']." = new YAHOO.widget.DataTable(\"".$this->info['data_div']."\", myColumnDefs".$this->info['data_div'].", myDataSource".$this->info['data_div'].", myConfigs".$this->info['data_div'].");
 
-        myDataTable.subscribe('cellClickEvent', function(oArgs){
+        myDataTable".$this->info['data_div'].".subscribe('cellClickEvent', function(oArgs){
 					var target = oArgs.target;
 					var column = myDataTable.getColumn(target);
 
@@ -367,18 +368,18 @@ class AJAX_YUI
 				$this->buffer.="
         });
 
+//this
+        myDataTable".$this->info['data_div'].".subscribe('cellClickEvent', myDataTable".$this->info['data_div'].".onEventShowCellEditor);
 
-        this.myDataTable.subscribe('cellClickEvent', myDataTable.onEventShowCellEditor);
 
-
-	 	    myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
+	 	    myDataTable".$this->info['data_div'].".handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
 	 	      oPayload.totalRecords = oResponse.meta.totalRecords;
 	 	      return oPayload;
 	 	    }
 	 	    
 	 	    return {
-          ds: myDataSource,
-          dt: myDataTable
+          ds: myDataSource".$this->info['data_div'].",
+          dt: myDataTable".$this->info['data_div']."
         };
 
 	 	    ";
