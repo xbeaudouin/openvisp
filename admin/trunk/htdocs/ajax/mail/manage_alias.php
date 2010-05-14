@@ -38,7 +38,7 @@ $json_array = array();
 if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 	$fDomain_name = get_post("domainName");
-	$fAlias = get_post("alias");
+	$fAlias = get_post("address");
 	$fActive = get_post("active");
 	$fAction = get_post("action");
 	$fNewvalue = (get_post("newValue") == $PALANG['NO'] ) ? 0 : 1;
@@ -53,18 +53,23 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	switch ($fAction) {
 
 	case "mod_status" :
-		$alias_info->change_active_status($fNewvalue);
+		$alias_info->alias_change_active_status($fNewvalue);
 		$json_array['replyCode'] = $alias_info->sql_result['return_code'] + 1;
 		break;
 
 	case "delete" :
-		$alias_info->delete();
+		$alias_info->alias_delete();
+		$json_array['replyCode'] = $alias_info->sql_result['return_code'] + 1;
+		break;
+
+	case "mod_antispam" :
+		$alias_info->antispam_en_disable($domain_info->data['policy_id']);
 		$json_array['replyCode'] = $alias_info->sql_result['return_code'] + 1;
 		break;
 
 
 	default:
-		$alias_info->en_disable();
+		$alias_info->alias_en_disable();
 		$json_array['replyCode'] = $alias_info->sql_result['return_code'];
 	}
 
@@ -79,11 +84,8 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$alias_info->fetch_alias_info($fAlias);
 	$json_array['log'] = $alias_info->sql_result['sql_log'];
 
-
-
-	//	print "OK";
-
 	$alias_info->data_alias['active'] = ($alias_info->data_alias['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'];
+	$alias_info->data_alias['policy_id'] = ($alias_info->data_alias['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'];
 
   header('Content-type: application/x-json');
   $json_array['records'] = $alias_info->data_alias;
