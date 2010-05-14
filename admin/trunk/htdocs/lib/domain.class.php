@@ -117,10 +117,9 @@ class DOMAIN
 	{
 
 		$query = "SELECT COUNT(*) as total_alias
-    FROM policy, alias
+    FROM  alias
     LEFT JOIN mailbox ON alias.address=mailbox.username
-    WHERE policy.domain_id=".$this->data_domain['id']."
-    AND policy.id=alias.policy_id
+    WHERE alias.domain_id=".$this->data_domain['id']."
     AND mailbox.maildir IS NULL
     AND alias.address NOT LIKE '@%'
     ORDER BY alias.address ";
@@ -260,10 +259,9 @@ class DOMAIN
     else
     {
       $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id, alias.active
-      FROM policy, alias
+      FROM  alias
       LEFT JOIN mailbox ON alias.address=mailbox.username
-      WHERE policy.domain_id=".$this->data_domain['id']."
-      AND policy.id=alias.policy_id
+      WHERE alias.domain_id=".$this->data_domain['id']."
       AND mailbox.maildir IS NULL
       AND alias.address NOT LIKE '@%'
       ORDER BY alias.address ";
