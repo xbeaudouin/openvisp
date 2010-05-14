@@ -69,6 +69,7 @@ class DB
 		$result = "";
 		$number_rows = "";
 		$row_results = "";
+		$sql_log = "";
 		$return_code = "200";
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA \n\n$query \n\n"); }
