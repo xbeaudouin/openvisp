@@ -17,7 +17,7 @@ class MAIL
 		$this->data_alias = $result['result'][0];
 	}
 
-	function en_disable(){
+	function alias_en_disable(){
 		$query = "UPDATE alias
     SET active=1-active
     WHERE address='".$this->data_alias['address']."'";
@@ -25,18 +25,91 @@ class MAIL
 	}
 
 
-	function change_active_status($value){
+	function alias_change_active_status($value){
 		$query = "UPDATE alias
     SET active=$value
     WHERE address='".$this->data_alias['address']."'";
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
-	function delete(){
+	function alias_delete(){
 		$query = "DELETE FROM alias
     WHERE address='".$this->data_alias['address']."'";
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
+
+	//
+	// antispam_en_disable
+	// Action: enable or disable antispam on mail alias
+	// Call: antispam_en_disable (int domain_policy_id)
+	//
+	function antispam_en_disable($domain_policy_id){
+
+		if ( isset($this->data_alias['policy_id']) && ($this->data_alias['policy_id'] == $domain_policy_id) ){
+			
+			$policy_id_value = 1;
+		}
+		else{
+			$policy_id_value = $domain_policy_id;
+		}
+
+		if ( isset($this->data_alias['address']) ){
+			$alias_id = $this->data_alias['address'];
+		}
+		else{
+			$alias_id = $this->data_mailbox['username'];
+		}
+
+		$query = "UPDATE alias
+    SET policy_id = $policy_id_value
+    WHERE address='".$alias_id."'";
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
+
+
+	function fetch_mailbox_info($mailbox){
+		$query = "
+SELECT mailbox.*, alias.policy_id as policy_id
+FROM mailbox, alias
+WHERE username='$mailbox'
+AND mailbox.username=alias.address
+";
+		debug_info ("SQL : $query");
+		$result = $this->db_link->sql_query($query,2);
+		$this->data_mailbox = $result['result'][0];
+	}
+
+	function mailbox_en_disable(){
+		$query = "UPDATE mailbox
+    SET active=1-active
+    WHERE username='".$this->data_mailbox['username']."'";
+		debug_info ("SQL mailbox_en_disable : $query");
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
+	function mailbox_paid(){
+		$query = "UPDATE mailbox
+    SET paid=1-paid
+    WHERE username='".$this->data_mailbox['username']."'";
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
+
+	function mailbox_change_active_status($value){
+		$query = "UPDATE mailbox
+    SET active=$value
+    WHERE username='".$this->data_mailbox['username']."'";
+		debug_info ("PFF SQL mailbox_change_active_status : $query");
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
+	function mailbox_delete(){
+		$query = "DELETE FROM maibox
+    WHERE username='".$this->data_mailbox['username']."'";
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
 
 
   //
