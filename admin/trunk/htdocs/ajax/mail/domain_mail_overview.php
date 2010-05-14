@@ -46,12 +46,12 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
   if ( (is_array($user_info->data_managed_active_domain_with_mail)) and sizeof ($user_info->data_managed_active_domain_with_mail > 0))
   {
     
-    $json_array['totalRecords'] = $total_domain_with_mail;
-    $json_array['startIndex'] = $fStartIndex;
+    $json_array['totalRecords'] = intval($total_domain_with_mail);
+    $json_array['startIndex'] = intval($fStartIndex);
     $json_array['recordsReturned'] = sizeof($user_info->data_managed_active_domain_with_mail);
     $json_array['sort'] = $fSort;
     $json_array['dir'] = $fDir;
-    $json_array['pageSize'] = $fResults;
+    $json_array['pageSize'] = intval($fResults);
 
 		debug_info( "JS : ".$json_array['totalRecords'] );
     
