@@ -4,14 +4,14 @@
 ?>
 
 <script type="text/javascript">
-	var myBuildUrl = function(record) {
-		var url = '';
-		var cols = this.getColumnSet().keys;
-		for (var i = 0; i < cols.length; i++) {
-			url += '&' + cols[i].key + '=' + escape(record.getData(cols[i].key));
-		}
-		return url;
-	};
+/* 	var myBuildUrl = function(record) { */
+/* 		var url = ''; */
+/* 		var cols = this.getColumnSet().keys; */
+/* 		for (var i = 0; i < cols.length; i++) { */
+/* 			url += '&' + cols[i].key + '=' + escape(record.getData(cols[i].key)); */
+/* 		} */
+/* 		return url; */
+/* 	}; */
 </script>
 
 <?php
@@ -29,7 +29,7 @@ print load_js("../lib/yui/datatable/datatable-min.js");
 
 print load_css("../css/datatable.css");
 
-$ajax_yui->start();
+$ajax_domain->start("domain");
 
 /* $search_form = array(); */
 /* $search_form[] = array( */
@@ -37,7 +37,7 @@ $ajax_yui->start();
 /*   "minQueryLength" => "3", */
 /*   "form_inputname" => "Domain: "  */
 /*   ); */
-/* $ajax_yui->add_search_form($search_form); */
+/* $ajax_domain->add_search_form($search_form); */
 
 
 ?>
@@ -45,8 +45,8 @@ $ajax_yui->start();
 
 </style>
 
-<div id="dt-pag-nav"></div> 
-<div id="data"></div>
+<div id="domain-nav"></div>
+<div id="domain"></div>
 
 
 
@@ -57,38 +57,74 @@ $ajax_yui->start();
 if ( $CONF['quota'] == 'YES') {
   $item_list= array(
 										"domain" => array(
+																			"label" => $PALANG['pOverview_get_domain'],
 																			"sortable" => "true",
 																			"parser" => "text"
 																			),
-										"aliases" => array ( "sortable" => "false", "parser" => "number" ),
+										"aliases" => array (
+																				"label" => $PALANG['pOverview_get_aliases'],
+																				"sortable" => "false",
+																				"parser" => "number"
+																				),
 										"quota_aliases" => array (
 																							"sortable" => "false",
 																							"parser" => "number",
 																							"editor" => "textarea"
 																							),
-										"mailboxes" => array ( "sortable" => "false", "parser" => "number"),
+										"mailboxes" => array (
+																					"label" => $PALANG['pOverview_get_mailboxes'],
+																					"sortable" => "false",
+																					"parser" => "number"
+																					),
 										"quota_mailboxes" => array (
 																								"sortable" => "false",
 																								"parser" => "number",
 																								"editor" => "textarea"
 																								),
 										"maxquota" => array ( 
+																				 "label" => $PALANG['pOverview_get_quota'],
 																				 "sortable" => "false",
 																				 "parser" => "number",
 																				 "editor" => "textarea"
 																					),
-										"diskspace_mailboxes" => array("sortable" => "false", "parser" =>  "number")
+										"diskspace_mailboxes" => array(
+																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
+																									 "sortable" => "false",
+																									 "parser" =>  "number"
+																									 )
 
     );
   //    "delete" => "../images/ico-exit.png|delete row|Are you sure to delete ?|./manage-app.php|action=delete"
 }
 else{
   $item_list = array(
-										 "name" => array( "sortable" => "true", "link" => "/mail/overview.php?domain="),
-										 "aliases" => array ( "sortable" => "false"),
-										 "mailboxes" => array ("sortable" => "false"),
-										 "maxquota" => array ("sortable" => "false"),
-										 "diskspace_mailboxes" => array("sortable" => "false", "editor" =>  "textarea")
+										"domain" => array(
+																			"label" => $PALANG['pOverview_get_domain'],
+																			"sortable" => "true",
+																			"parser" => "text"
+																			),
+										"aliases" => array (
+																				"label" => $PALANG['pOverview_get_aliases'],
+																				"sortable" => "false",
+																				"parser" => "number"
+																				),
+										"mailboxes" => array (
+																					"label" => $PALANG['pOverview_get_mailboxes'],
+																					"sortable" => "false",
+																					"parser" => "number"
+																					),
+
+										"maxquota" => array ( 
+																				 "label" => $PALANG['pOverview_get_quota'],
+																				 "sortable" => "false",
+																				 "parser" => "number",
+																				 "editor" => "textarea"
+																					),
+										"diskspace_mailboxes" => array(
+																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
+																									 "sortable" => "false",
+																									 "parser" =>  "number"
+																									 )
 										 );
 }
 
@@ -98,20 +134,21 @@ $ajax_info = array(
   );
 
 
-$ajax_yui->ajax_info($ajax_info);
-$ajax_yui->attr_add('root','records');
-$ajax_yui->attr_add('sort','domain');
-$ajax_yui->attr_add('sortdir','asc');
-$ajax_yui->attr_add('startindex','0');
-$ajax_yui->attr_add('maxrows','10');
-$ajax_yui->attr_add('data_div','data');
+$ajax_domain->ajax_info($ajax_info);
+$ajax_domain->attr_add('root','records');
+$ajax_domain->attr_add('sort','domain');
+$ajax_domain->attr_add('sortdir','asc');
+$ajax_domain->attr_add('startindex','0');
+$ajax_domain->attr_add('maxrows','10');
+$ajax_domain->attr_add('data_div','domain');
+$ajax_domain->attr_add('nav_div','domain-nav');
 
 
-$ajax_yui->item_add($item_list);
-$ajax_yui->create_celleditor();
-$ajax_yui->create_listener();
-//$ajax_yui->create_search();
-$ajax_yui->end();
+$ajax_domain->item_add($item_list);
+//$ajax_domain->create_celleditor();
+$ajax_domain->create_listener();
+//$ajax_domain->create_search();
+$ajax_domain->end();
 ?>
 
 
