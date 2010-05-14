@@ -41,7 +41,9 @@ $domain_info = new DOMAIN($ovadb);
 
 $user_info->fetch_quota_status();
 
-$ajax_yui = new AJAX_YUI($ovadb);
+$ajax_alias = new AJAX_YUI($ovadb);
+
+$ajax_mailbox = new AJAX_YUI($ovadb);
 
 //$list_domains = list_domains_for_admin ($SESSID_USERNAME);
 
