@@ -41,10 +41,6 @@ $domain_info = new DOMAIN($ovadb);
 
 $user_info->fetch_quota_status();
 
-$ajax_alias = new AJAX_YUI($ovadb);
-
-$ajax_mailbox = new AJAX_YUI($ovadb);
-
 //$list_domains = list_domains_for_admin ($SESSID_USERNAME);
 
 //$account_information = get_account_info($SESSID_USERNAME);
@@ -108,11 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
       */
       
       $domain_info->fetch_mailboxes();
+			$ajax_alias = new AJAX_YUI($ovadb);
+			$ajax_mailbox = new AJAX_YUI($ovadb);
       
       $template = "overview.tpl";
    }
    else
    {
+		 $ajax_domain = new AJAX_YUI($ovadb);
       $template = "overview-get.tpl";
    }
 
