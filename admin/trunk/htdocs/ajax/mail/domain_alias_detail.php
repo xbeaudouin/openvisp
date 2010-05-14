@@ -1,6 +1,6 @@
 <?php
 //
-// File: ajax/mail/domain_mail_overview.php
+// File: ajax/mail/domain_alias_detail.php
 //
 // Form POST \ GET Variables:
 //
@@ -56,23 +56,21 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
     $json_array['totalRecords'] = intval($domain_info->used_quota['mail_alias']);
     $json_array['startIndex'] = intval($fStartIndex);
     $json_array['recordsReturned'] = sizeof($domain_info->list_mail_aliases);
-    $json_array['sort'] = intval($fSort);
-    $json_array['dir'] = intval($fDir);
+    $json_array['sort'] = $fSort;
+    $json_array['dir'] = $fDir;
     $json_array['pageSize'] = intval($fResults);
     $json_array['domainName'] = $fDomain_name;
 
-		//		debug_info( "JS : ".$json_array['totalRecords'] );
-        
     for ( $i=0; $i < sizeof($domain_info->list_mail_aliases); $i++)
     {
 			
           
 			$json_data_array[] = array(
-																 'alias' => $domain_info->list_mail_aliases[$i]['address'],
+																 'address' => $domain_info->list_mail_aliases[$i]['address'],
 																 'goto' => $domain_info->list_mail_aliases[$i]['goto'], 
 																 'modified' => $domain_info->list_mail_aliases[$i]['modified'],
 																 'active' => ($domain_info->list_mail_aliases[$i]['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-																 'amavis' => ($domain_info->list_mail_aliases[$i]['policy_id'] == 1) ? $PALANG['NO'] : $PALANG['YES'],
+																 'policy_id' => ($domain_info->list_mail_aliases[$i]['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'],
 																 'delete' => "delete",
 																 'edit' => "<a href=\"edit-alias.php?address=".urlencode($domain_info->list_mail_aliases[$i]['address'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
 																 );
