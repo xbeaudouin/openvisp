@@ -72,10 +72,6 @@ print "<input type=\"hidden\" name=\"fDomain\" value=\"".$fDomain."\">";
 print "Email : <input type=\"text\" name=\"fMail_Search\" value=\"".$fMail_Search."\"> <input type=\"submit\"> ";
 print "</form>";
 
-
-
-$ajax_yui->start("alias");
-
 ?>
 
 
@@ -83,74 +79,61 @@ $ajax_yui->start("alias");
 <div id="aliases"></div>
 
 
+
+<div id="mailboxes-nav"></div>
+<div id="mailboxes"></div>
+
+
 <?php
 
-  $item_list= array(
-										"alias" => array(
-																		 "label" => $PALANG['pOverview_alias_address'],
-																		 "parser" => "text"
-																		 ),
-										"goto" => array(
-																		"label" => $PALANG['pOverview_alias_goto'],
-																		"parser" => "text"
-																		),
-										"modified" => array(
-																				"label" => $PALANG['pOverview_alias_modified'],
-																				"parser" => "text",
+$item_list = array(
+									"address" => array(
+																	 "label" => $PALANG['pOverview_alias_address'],
+																	 "parser" => "text"
+																	 ),
+									"goto" => array(
+																	"label" => $PALANG['pOverview_alias_goto'],
+																	"parser" => "text"
+																	),
+									"modified" => array(
+																			"label" => $PALANG['pOverview_alias_modified'],
+																			"parser" => "text",
 																				"sortable" => "false"
-																				),
-										"active" => array(
-																			"label" => "active",
-																			"parser" => "text",
-																			"radioOptions" => array (
-																															 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
-																															 "url" => "/ajax/mail/manage_alias.php",
-																															 "url_param" => "action=mod_status&domainName=$fDomain"
-																															 )
 																			),
-										"delete" => array(
-																			"label" => "delete",
-																			"sortable" => "false",
-																			"resizeable" => "false",
-																			"link" => "/ajax/mail/manage_alias.php",
-																			"url_param" => "action=delete&domainName=$fDomain",
-																			"key_item" => "alias"
-																			),
-										"edit" => array(
-																			"label" => "",
-																			"sortable" => "false",
-																			"resizeable" => "false"
-																			)
-										);
+									"active" => array(
+																		"label" => "active",
+																		"parser" => "text",
+																		"radioOptions" => array (
+																														 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																														 "url" => "/ajax/mail/manage_alias.php",
+																														 "url_param" => "action=mod_status&domainName=$fDomain"
+																														 )
+																		),
+									"policy_id" => array(
+																			 "label" => $PALANG['pOverview_alias_amavisd'],
+																			 "parser" => "text",
+																			 "radioOptions" => array (
+																																"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																"url" => "/ajax/mail/manage_alias.php",
+																																"url_param" => "action=mod_antispam&domainName=$fDomain"
+																																)
+																			 ),
+									
+									"delete" => array(
+																		"label" => "delete",
+																		"sortable" => "false",
+																		"resizeable" => "false",
+																		"link" => "/ajax/mail/manage_alias.php",
+																		"url_param" => "action=delete&domainName=$fDomain",
+																		"key_item" => "alias"
+																		),
+									"edit" => array(
+																	"label" => "",
+																	"sortable" => "false",
+																	"resizeable" => "false"
+																	)
+									);
 
-/*
-																			"link" => "/ajax/mail/alias_activation.php?domainName=$fDomain",
-
-										"amavis" => array(
-																			"label" => $PALANG['pOverview_alias_amavisd'],
-																			"parser" => "text",
-																			"link" => "/mail/edit-security.php?domainName=$fDomain"
-																			),
-
-										"children" => array (
-																				 "label" => "",
-																				 array (
-																								"key" => "delete",
-																								"label" => "",
-																								"sortable" => "false",
-																								"resizeable" => "false",
-																								"parser" => "myBuildUrl"
-																								),
-																				 array ( 
-																								"key" => "edit",
-																								"label" => "",
-																								"sortable" => "false",
-																								"resizeable" => "false",
-																								"parser" => "myBuildUrl"
-																								 )
-																				 )
-
- */
 
 $ajax_info = array(
   "url" => "../ajax/mail/domain_alias_detail.php?domainName=$fDomain",
@@ -159,54 +142,141 @@ $ajax_info = array(
   );
 
 
-$ajax_yui->ajax_info($ajax_info);
+$ajax_alias->ajax_info($ajax_info);
+$ajax_alias->attr_add('root','records');
+$ajax_alias->attr_add('sort','address');
+$ajax_alias->attr_add('sortdir','asc');
+$ajax_alias->attr_add('startindex','0');
+$ajax_alias->attr_add('maxrows','10');
+$ajax_alias->attr_add('data_div','aliases');
+$ajax_alias->attr_add('nav_div','aliases-nav');
+$ajax_alias->item_add($item_list);
+
+$ajax_alias->start("address");
+$ajax_alias->create_listener();
+$ajax_alias->end();
+
+
+
+// Create mailbox list
+
+
+$item_list = array(
+									"username" => array(
+																	 "label" => $PALANG['pOverview_mailbox_username'],
+																	 "parser" => "text"
+																	 ),
+									"name" => array(
+																	"label" => $PALANG['pOverview_mailbox_name'],
+																	"parser" => "text"
+																	),
+									"quota" => array(
+																	 "label" => $PALANG['pOverview_mailbox_quota'],
+																	 "parser" => "text",
+																	 "sortable" => "false"
+																	 ),
+									"paid" => array(
+																			 "label" => "paid",
+																			 "parser" => "text",
+																			 "radioOptions" => array (
+																																"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																"url" => "/ajax/mail/manage_mailbox.php",
+																																"url_param" => "action=mod_paid&domainName=$fDomain"
+																																)
+																			 ),
+									"policy_id" => array(
+																			 "label" => "active",
+																			 "parser" => "text",
+																			 "radioOptions" => array (
+																																"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																"url" => "/ajax/mail/manage_mailbox.php",
+																																"url_param" => "action=mod_antispam&domainName=$fDomain"
+																																)
+																			 ),
+									"active" => array(
+																		"label" => $PALANG['pOverview_alias_amavisd'],
+																		"parser" => "text",
+																		"radioOptions" => array (
+																														 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																														 "url" => "/ajax/mail/manage_mailbox.php",
+																														 "url_param" => "action=mod_status&domainName=$fDomain"
+																														 )
+																		),
+									"modified" => array(
+																			"label" => "modified",
+																			"parser" => "text",
+																			),
+									"delete" => array(
+																		"label" => "delete",
+																		"sortable" => "false",
+																		"resizeable" => "false",
+																		"link" => "/ajax/mail/manage_mailbox.php",
+																		"url_param" => "action=delete&domainName=$fDomain",
+																		"key_item" => "alias"
+																		),
+									"edit" => array(
+																	"label" => "",
+																	"sortable" => "false",
+																	"resizeable" => "false"
+																	)
+									);
+
+
+$ajax_info = array(
+  "url" => "../ajax/mail/domain_mailbox_detail.php?domainName=$fDomain",
+  "method" => "post",
+  "params" => array ( "domain_name" => $fDomain )
+  );
+
+
+$ajax_mailbox->ajax_info($ajax_info);
 //$ajax_yui->attr_add('domain_name',$fDomain);
-$ajax_yui->attr_add('root','records');
-$ajax_yui->attr_add('sort','alias');
-$ajax_yui->attr_add('sortdir','asc');
-$ajax_yui->attr_add('startindex','0');
-$ajax_yui->attr_add('maxrows','10');
-$ajax_yui->attr_add('data_div','aliases');
+$ajax_mailbox->attr_add('root','records');
+$ajax_mailbox->attr_add('sort','username');
+$ajax_mailbox->attr_add('sortdir','asc');
+$ajax_mailbox->attr_add('startindex','0');
+$ajax_mailbox->attr_add('maxrows','10');
+$ajax_mailbox->attr_add('data_div','mailboxes');
+$ajax_mailbox->attr_add('nav_div','mailboxes-nav');
+$ajax_mailbox->item_add($item_list);
+
+$ajax_mailbox->start("username");
+$ajax_mailbox->create_listener();
+$ajax_mailbox->end();
 
 
-$ajax_yui->item_add($item_list);
-//$ajax_yui->create_celleditor();
-$ajax_yui->create_listener();
-//$ajax_yui->create_search();
-$ajax_yui->end();
+/* if (sizeof ($domain_info->list_mail_aliases) > 0) */
+/* { */
+/*    print "<table>\n"; */
+/*    print "   <tr class=\"header\">\n"; */
+/*    print "      <td>" . $PALANG['pOverview_alias_address'] . "</td>\n"; */
+/*    print "      <td>" . $PALANG['pOverview_alias_goto'] . "</td>\n"; */
+/*    print "      <td>" . $PALANG['pOverview_alias_modified'] . "</td>\n"; */
+/*    print "	<td>" . $PALANG['pOverview_alias_amavisd'] . "</td>\n"; */
+/*    print "      <td colspan=\"2\">&nbsp;</td>\n"; */
+/*    print "   </tr>\n"; */
 
+/*    for ($i = 0; $i < sizeof ($domain_info->list_mail_aliases); $i++) */
+/*    { */
+/*       if ((is_array ($domain_info->list_mail_aliases) and sizeof ($domain_info->list_mail_aliases) > 0)) */
+/*       { */
+/*          print "   <tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">\n"; */
+/*          print "      <td>" . $domain_info->list_mail_aliases[$i]['address'] . "</td>\n"; */
+/*          print "      <td>" . ereg_replace (",", "<br>", $domain_info->list_mail_aliases[$i]['goto']) . "</td>\n"; */
+/*          print "      <td>" . $domain_info->list_mail_aliases[$i]['modified'] . "</td>\n"; */
+/* 	 //print " <td> " . $tAlias[$i]['policy_id'] . "</td>\n"; */
+/* 	 $policy_id = ($domain_info->list_mail_aliases[$i]['policy_id'] == 1) ? $PALANG['NO'] : $PALANG['YES']; */
+/* 	 print " <td><a href=\"edit-security.php?address=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\">" . $policy_id . "</a></td>\n"; */
+/*          print "      <td><a href=\"edit-alias.php?address=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\">" . $PALANG['edit'] . "</a></td>\n"; */
+/*          print "      <td><a href=\"delete.php?delete=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\"onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>\n"; */
+/*          print "   </tr>\n"; */
+/*       } */
+/*    } */
 
-if (sizeof ($domain_info->list_mail_aliases) > 0)
-{
-   print "<table>\n";
-   print "   <tr class=\"header\">\n";
-   print "      <td>" . $PALANG['pOverview_alias_address'] . "</td>\n";
-   print "      <td>" . $PALANG['pOverview_alias_goto'] . "</td>\n";
-   print "      <td>" . $PALANG['pOverview_alias_modified'] . "</td>\n";
-   print "	<td>" . $PALANG['pOverview_alias_amavisd'] . "</td>\n";
-   print "      <td colspan=\"2\">&nbsp;</td>\n";
-   print "   </tr>\n";
+/*    print "</table>\n"; */
+/*    print "<p />\n"; */
+/* } */
 
-   for ($i = 0; $i < sizeof ($domain_info->list_mail_aliases); $i++)
-   {
-      if ((is_array ($domain_info->list_mail_aliases) and sizeof ($domain_info->list_mail_aliases) > 0))
-      {
-         print "   <tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">\n";
-         print "      <td>" . $domain_info->list_mail_aliases[$i]['address'] . "</td>\n";
-         print "      <td>" . ereg_replace (",", "<br>", $domain_info->list_mail_aliases[$i]['goto']) . "</td>\n";
-         print "      <td>" . $domain_info->list_mail_aliases[$i]['modified'] . "</td>\n";
-	 #print " <td> " . $tAlias[$i]['policy_id'] . "</td>\n";
-	 $policy_id = ($domain_info->list_mail_aliases[$i]['policy_id'] == 1) ? $PALANG['NO'] : $PALANG['YES'];
-	 print " <td><a href=\"edit-security.php?address=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\">" . $policy_id . "</a></td>\n";
-         print "      <td><a href=\"edit-alias.php?address=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\">" . $PALANG['edit'] . "</a></td>\n";
-         print "      <td><a href=\"delete.php?delete=" . urlencode ($domain_info->list_mail_aliases[$i]['address']) . "&domain=$fDomain" . "\"onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>\n";
-         print "   </tr>\n";
-      }
-   }
-
-   print "</table>\n";
-   print "<p />\n";
-}
 
 if (sizeof ($domain_info->list_mailboxes) > 0)
 {
