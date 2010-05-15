@@ -41,22 +41,6 @@ $domain_info = new DOMAIN($ovadb);
 
 $user_info->fetch_quota_status();
 
-//$list_domains = list_domains_for_admin ($SESSID_USERNAME);
-
-//$account_information = get_account_info($SESSID_USERNAME);
-// replaced by fetch_info method
-
-//$account_quota = get_account_quota($account_information['id']);
-// replaced by fetch_quota method
-
-//$account_rights = get_account_right($account_information['id']);
-// replaced by fetch_rights
-
-//$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
-
-
-//$tAlias = array();
-//$tMailbox = array();
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
@@ -68,72 +52,292 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 
    if ( $fDomain != NULL)
    {
-      //$limit = get_domain_properties ($fDomain);
 
       $domain_info->fetch_by_domainname($fDomain);
       $user_info->check_domain_access($domain_info->data_domain['id']);
       $domain_info->fetch_mail_aliases();
-
-      /*
-      $result = db_query ($sql_query);
-      
-      if ($result['rows'] > 0)
-      {
-      while ($row = db_array ($result['result']))
-      {
-      $tAlias[] = $row;
-      }
-      }
-      */
-
-			//$result = db_query ("SELECT mailbox.*, alias.policy_id, spamreport.* FROM mailbox,alias,spamreport WHERE mailbox.domain='$fDomain' and mailbox.username=spamreport.email and mailbox.username=alias.address ORDER BY ".$CONF['order_display']." ASC LIMIT $fDisplay, $page_size");
-			//$tMailbox = list_mailbox($fDomain);
-
-			/*
-			$result = db_query ($sql_query);
-
-
-      if ($result['rows'] > 0)
-      {
-         while ($row = db_array ($result['result']))
-         {
-            $tMailbox[] = $row;
-         }
-      }
-      
-      */
       
       $domain_info->fetch_mailboxes();
 			$ajax_alias = new AJAX_YUI($ovadb);
 			$ajax_mailbox = new AJAX_YUI($ovadb);
-      
+
+
+			$item_list = array(
+												 "address" => array(
+																						"label" => $PALANG['pOverview_alias_address'],
+																						"parser" => "text"
+																						),
+												 "goto" => array(
+																				 "label" => $PALANG['pOverview_alias_goto'],
+																				 "parser" => "text"
+																				 ),
+												 "modified" => array(
+																						 "label" => $PALANG['pOverview_alias_modified'],
+																						 "parser" => "text",
+																						 "sortable" => "false"
+																						 ),
+												 "active" => array(
+																					 "label" => "active",
+																					 "parser" => "text",
+																					 "radioOptions" => array (
+																																		"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																		"url" => "/ajax/mail/manage_alias.php",
+																																		"url_param" => "action=mod_status&domainName=$fDomain"
+																																		)
+																					 ),
+												 "policy_id" => array(
+																							"label" => $PALANG['pOverview_alias_amavisd'],
+																							"parser" => "text",
+																							"radioOptions" => array (
+																																			 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																			 "url" => "/ajax/mail/manage_alias.php",
+																																			 "url_param" => "action=mod_antispam&domainName=$fDomain"
+																																			 )
+																							),
+												 "delete" => array(
+																					 "label" => "delete",
+																					 "sortable" => "false",
+																					 "resizeable" => "false",
+																					 "link" => "/ajax/mail/manage_alias.php",
+																					 "url_param" => "action=delete&domainName=$fDomain",
+																					 "key_item" => "alias"
+																					 ),
+												 "edit" => array(
+																				 "label" => "",
+																				 "sortable" => "false",
+																				 "resizeable" => "false"
+																				 )
+												 );
+
+
+			$ajax_info = array(
+												 "url" => "../ajax/mail/domain_alias_detail.php?domainName=$fDomain",
+												 "method" => "post",
+												 "params" => array ( "domain_name" => $fDomain )
+												 );
+
+
+			$ajax_alias->ajax_info($ajax_info);
+			$ajax_alias->attr_add('root','records');
+			$ajax_alias->attr_add('sort','address');
+			$ajax_alias->attr_add('sortdir','asc');
+			$ajax_alias->attr_add('startindex','0');
+			$ajax_alias->attr_add('maxrows','10');
+			$ajax_alias->attr_add('data_div','aliases');
+			$ajax_alias->attr_add('nav_div','aliases-nav');
+			$ajax_alias->item_add($item_list);
+
+			$ajax_alias->start("address");
+			$ajax_alias->create_listener();
+
+
+			// Create mailbox list
+
+
+			$item_list = array(
+												 "username" => array(
+																						 "label" => $PALANG['pOverview_mailbox_username'],
+																						 "parser" => "text"
+																						 ),
+												 "name" => array(
+																				 "label" => $PALANG['pOverview_mailbox_name'],
+																				 "parser" => "text"
+																				 ),
+												 "quota" => array(
+																					"label" => $PALANG['pOverview_mailbox_quota'],
+																					"parser" => "text",
+																					"sortable" => "false"
+																					),
+												 "paid" => array(
+																				 "label" => "paid",
+																				 "parser" => "text",
+																				 "radioOptions" => array (
+																																	"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																	"url" => "/ajax/mail/manage_mailbox.php",
+																																	"url_param" => "action=mod_paid&domainName=$fDomain"
+																																	)
+																				 ),
+												 "policy_id" => array(
+																							"label" => "active",
+																							"parser" => "text",
+																							"radioOptions" => array (
+																																			 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																			 "url" => "/ajax/mail/manage_mailbox.php",
+																																			 "url_param" => "action=mod_antispam&domainName=$fDomain"
+																																			 )
+																							),
+												 "active" => array(
+																					 "label" => $PALANG['pOverview_alias_amavisd'],
+																					 "parser" => "text",
+																					 "radioOptions" => array (
+																																		"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
+																																		"url" => "/ajax/mail/manage_mailbox.php",
+																																		"url_param" => "action=mod_status&domainName=$fDomain"
+																																		)
+																					 ),
+												 "modified" => array(
+																						 "label" => "modified",
+																						 "parser" => "text",
+																						 ),
+												 "pdf" => array(
+																			"label" => "PDF",
+																			"parser" => "text",
+																				),
+												 "delete" => array(
+																					 "label" => "delete",
+																					 "sortable" => "false",
+																					 "resizeable" => "false",
+																					 "link" => "/ajax/mail/manage_mailbox.php",
+																					 "url_param" => "action=delete&domainName=$fDomain",
+																					 "key_item" => "alias"
+																					 ),
+												 "edit" => array(
+																				 "label" => "",
+																				 "sortable" => "false",
+																				 "resizeable" => "false"
+																				 )
+												 );
+
+
+			$ajax_info = array(
+												 "url" => "../ajax/mail/domain_mailbox_detail.php?domainName=$fDomain",
+												 "method" => "post",
+												 "params" => array ( "domain_name" => $fDomain )
+												 );
+
+
+			$ajax_mailbox->ajax_info($ajax_info);
+			//$ajax_yui->attr_add('domain_name',$fDomain);
+			$ajax_mailbox->attr_add('root','records');
+			$ajax_mailbox->attr_add('sort','username');
+			$ajax_mailbox->attr_add('sortdir','asc');
+			$ajax_mailbox->attr_add('startindex','0');
+			$ajax_mailbox->attr_add('maxrows','10');
+			$ajax_mailbox->attr_add('data_div','mailboxes');
+			$ajax_mailbox->attr_add('nav_div','mailboxes-nav');
+			$ajax_mailbox->item_add($item_list);
+
+			$ajax_mailbox->start("username");
+			$ajax_mailbox->create_listener();
+
       $template = "overview.tpl";
+
    }
    else
    {
 		 $ajax_domain = new AJAX_YUI($ovadb);
-      $template = "overview-get.tpl";
+
+		 if ( $CONF['quota'] == 'YES') {
+			 $item_list= array(
+												 "domain" => array(
+																					 "label" => $PALANG['pOverview_get_domain'],
+																					 "sortable" => "true",
+																					 "parser" => "text"
+																					 ),
+												 "aliases" => array (
+																						 "label" => $PALANG['pOverview_get_aliases'],
+																						 "sortable" => "false",
+																						 "parser" => "number"
+																						 ),
+												 "quota_aliases" => array (
+																									 "sortable" => "false",
+																									 "parser" => "number",
+																									 "editor" => "textarea"
+																									 ),
+												 "mailboxes" => array (
+																							 "label" => $PALANG['pOverview_get_mailboxes'],
+																							 "sortable" => "false",
+																							 "parser" => "number"
+																							 ),
+												 "quota_mailboxes" => array (
+																										 "sortable" => "false",
+																										 "parser" => "number",
+																										 "editor" => "textarea"
+																										 ),
+												 "maxquota" => array ( 
+																							"label" => $PALANG['pOverview_get_quota'],
+																							"sortable" => "false",
+																							"parser" => "number",
+																							"editor" => "textarea"
+																							 ),
+												 "diskspace_mailboxes" => array(
+																												"label" => $PALANG['pOverview_get_total_mailbox_size'],
+																												"sortable" => "false",
+																												"parser" =>  "number"
+																												),
+												 "security" => array (
+																							"label" => $PALANG['pOverview_get_security'],
+																							"sortable" => "false",
+																							"parser" => "text",
+																							)
+
+												 );
+
+		 }
+		 else{
+			 $item_list = array(
+													"domain" => array(
+																						"label" => $PALANG['pOverview_get_domain'],
+																						"sortable" => "true",
+																						"parser" => "text"
+																						),
+													"aliases" => array (
+																							"label" => $PALANG['pOverview_get_aliases'],
+																							"sortable" => "false",
+																							"parser" => "number"
+																							),
+													"mailboxes" => array (
+																								"label" => $PALANG['pOverview_get_mailboxes'],
+																								"sortable" => "false",
+																								"parser" => "number"
+																								),
+													
+													"maxquota" => array ( 
+																							 "label" => $PALANG['pOverview_get_quota'],
+																							 "sortable" => "false",
+																							 "parser" => "number",
+																							 "editor" => "textarea"
+																								),
+													"diskspace_mailboxes" => array(
+																												 "label" => $PALANG['pOverview_get_total_mailbox_size'],
+																												 "sortable" => "false",
+																												 "parser" =>  "number"
+																												 ),
+													"security" => array (
+																							 "label" => $PALANG['pOverview_get_security'],
+																							 "sortable" => "false",
+																							 "parser" => "number",
+																							 )
+													);
+		 }
+		 
+		 $ajax_info = array(
+												"url" => "../ajax/mail/domain_mail_overview.php?",
+												"method" => "post"
+												);
+
+
+		 $ajax_domain->ajax_info($ajax_info);
+		 $ajax_domain->attr_add('root','records');
+		 $ajax_domain->attr_add('sort','domain');
+		 $ajax_domain->attr_add('sortdir','asc');
+		 $ajax_domain->attr_add('startindex','0');
+		 $ajax_domain->attr_add('maxrows','10');
+		 $ajax_domain->attr_add('data_div','domain');
+		 $ajax_domain->attr_add('nav_div','domain-nav');
+
+		 $ajax_domain->item_add($item_list);
+
+		 $ajax_domain->start("domain");
+		 //$ajax_domain->create_celleditor();
+		 $ajax_domain->create_listener();
+		 //$ajax_domain->create_search();
+
+
+		 $template = "overview-get.tpl";
    }
 
    $tDomain = $fDomain;
-   
-   /*
-   if ($fDisplay >= $page_size)
-   {
-     $tDisplay_back_show = 1;
-     $tDisplay_back = $fDisplay - $page_size;
-   }  
-   if (($domain_info->used_quota['mail_alias'] > $page_size) or ($domain_info->used_quota['mailbox'] > $page_size))
-   {
-     $tDisplay_up_show = 1;
-   }      
-   if ((($fDisplay + $page_size) < $domain_info->used_quota['mail_alias']) or (($fDisplay + $page_size) < $domain_info->used_quota['mailbox']))
-   {
-     $tDisplay_next_show = 1;
-     $tDisplay_next = $fDisplay + $page_size;
-   }
-
-   */
    
    include ("../templates/header.tpl");
    include ("../templates/mail/menu.tpl");
@@ -156,15 +360,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
       $user_info->check_domain_access($domain_info->data_domain['id']);
       $domain_info->fetch_mail_aliases();
       $domain_info->fetch_mailboxes();
-      
-      //$limit = get_domain_properties ($fDomain);
-      //$domain_policy = get_domain_policy ($fDomain);
 
       if ( $fMail_Search != NULL ) $pSearch_Data="AND alias.address LIKE '%$fMail_Search%'";
 
-      //$domain_info->list_mail_aliases();
-
-#         $query = "SELECT alias.address,alias.goto,alias.modified,alias.policy_id FROM alias LEFT JOIN mailbox ON alias.address=mailbox.username WHERE alias.domain='$fDomain' AND mailbox.maildir IS NULL $pSearch_Data ORDER BY alias.address LIMIT $fDisplay, $page_size";
 
    }
 

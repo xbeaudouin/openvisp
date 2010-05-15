@@ -1,42 +1,16 @@
 <form name="overview" method="post">
 <?php
   print $PALANG['pOverview_welcome_text'];
-?>
-
-<script type="text/javascript">
-/* 	var myBuildUrl = function(record) { */
-/* 		var url = ''; */
-/* 		var cols = this.getColumnSet().keys; */
-/* 		for (var i = 0; i < cols.length; i++) { */
-/* 			url += '&' + cols[i].key + '=' + escape(record.getData(cols[i].key)); */
-/* 		} */
-/* 		return url; */
-/* 	}; */
-</script>
-
-<?php
-
 
 print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
 print load_js("../lib/yui/connection/connection-min.js");
 print load_js("../lib/yui/json/json-min.js");
 print load_js("../lib/yui/element/element-min.js");
 print load_js("../lib/yui/paginator/paginator-min.js");
-//print load_js("../lib/yui/autocomplete/autocomplete-debug.js");
 print load_js("../lib/yui/datasource/datasource-min.js");
 print load_js("../lib/yui/datatable/datatable-min.js");
 
-
 print load_css("../css/datatable.css");
-
-
-/* $search_form = array(); */
-/* $search_form[] = array( */
-/*   "name" => "domain_name", */
-/*   "minQueryLength" => "3", */
-/*   "form_inputname" => "Domain: "  */
-/*   ); */
-/* $ajax_domain->add_search_form($search_form); */
 
 
 ?>
@@ -48,123 +22,10 @@ print load_css("../css/datatable.css");
 <div id="domain"></div>
 
 
-
 <?php
 
-	// 																			"link" => "/mail/overview.php?domain=" 
+	$ajax_domain->end();
 
-if ( $CONF['quota'] == 'YES') {
-  $item_list= array(
-										"domain" => array(
-																			"label" => $PALANG['pOverview_get_domain'],
-																			"sortable" => "true",
-																			"parser" => "text"
-																			),
-										"aliases" => array (
-																				"label" => $PALANG['pOverview_get_aliases'],
-																				"sortable" => "false",
-																				"parser" => "number"
-																				),
-										"quota_aliases" => array (
-																							"sortable" => "false",
-																							"parser" => "number",
-																							"editor" => "textarea"
-																							),
-										"mailboxes" => array (
-																					"label" => $PALANG['pOverview_get_mailboxes'],
-																					"sortable" => "false",
-																					"parser" => "number"
-																					),
-										"quota_mailboxes" => array (
-																								"sortable" => "false",
-																								"parser" => "number",
-																								"editor" => "textarea"
-																								),
-										"maxquota" => array ( 
-																				 "label" => $PALANG['pOverview_get_quota'],
-																				 "sortable" => "false",
-																				 "parser" => "number",
-																				 "editor" => "textarea"
-																					),
-										"diskspace_mailboxes" => array(
-																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
-																									 "sortable" => "false",
-																									 "parser" =>  "number"
-																									 ),
-										"security" => array (
-																				 "label" => $PALANG['pOverview_get_security'],
-																				 "sortable" => "false",
-																				 "parser" => "text",
-																				 )
-
-    );
-  //    "delete" => "../images/ico-exit.png|delete row|Are you sure to delete ?|./manage-app.php|action=delete"
-}
-else{
-  $item_list = array(
-										"domain" => array(
-																			"label" => $PALANG['pOverview_get_domain'],
-																			"sortable" => "true",
-																			"parser" => "text"
-																			),
-										"aliases" => array (
-																				"label" => $PALANG['pOverview_get_aliases'],
-																				"sortable" => "false",
-																				"parser" => "number"
-																				),
-										"mailboxes" => array (
-																					"label" => $PALANG['pOverview_get_mailboxes'],
-																					"sortable" => "false",
-																					"parser" => "number"
-																					),
-
-										"maxquota" => array ( 
-																				 "label" => $PALANG['pOverview_get_quota'],
-																				 "sortable" => "false",
-																				 "parser" => "number",
-																				 "editor" => "textarea"
-																					),
-										"diskspace_mailboxes" => array(
-																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
-																									 "sortable" => "false",
-																									 "parser" =>  "number"
-																									 ),
-										"security" => array (
-																				 "label" => $PALANG['pOverview_get_security'],
-																				 "sortable" => "false",
-																				 "parser" => "number",
-																				 )
-										 );
-}
-
-$ajax_info = array(
-  "url" => "../ajax/mail/domain_mail_overview.php?",
-  "method" => "post"
-  );
-
-
-$ajax_domain->ajax_info($ajax_info);
-$ajax_domain->attr_add('root','records');
-$ajax_domain->attr_add('sort','domain');
-$ajax_domain->attr_add('sortdir','asc');
-$ajax_domain->attr_add('startindex','0');
-$ajax_domain->attr_add('maxrows','10');
-$ajax_domain->attr_add('data_div','domain');
-$ajax_domain->attr_add('nav_div','domain-nav');
-
-$ajax_domain->item_add($item_list);
-
-$ajax_domain->start("domain");
-//$ajax_domain->create_celleditor();
-$ajax_domain->create_listener();
-//$ajax_domain->create_search();
-$ajax_domain->end();
-?>
-
-
-
-
-<?php
 print "<table>\n";
 print "   <tr class=\"header\">\n";
 print "      <td>" . $PALANG['pOverview_get_domain'] . "</td>\n";
