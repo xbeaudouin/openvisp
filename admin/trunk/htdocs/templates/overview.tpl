@@ -206,6 +206,10 @@ $item_list = array(
 																			"label" => "modified",
 																			"parser" => "text",
 																			),
+									"pdf" => array(
+																			"label" => "PDF",
+																			"parser" => "text",
+																			),
 									"delete" => array(
 																		"label" => "delete",
 																		"sortable" => "false",

@@ -75,10 +75,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 																 'active' => ($domain_info->list_mailboxes[$i]['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 																 'paid'  => ($domain_info->list_mailboxes[$i]['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 																 'delete' => "delete",
+																 'pdf' => "<a href=\"../gen-pdf.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name&type=email>PDF</a>",
 																 'edit' => "<a href=\"edit-alias.php?address=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
 																 );
-			//																 'edit' => "mail/edit-alias.php?address".urlencode($domain_info->list_mailboxes[$i]['address'])."&domain=$fDomain"
-			//																 'active' => $domain_info->list_mailboxes[$i]['active'],
     }
 		
 	}
