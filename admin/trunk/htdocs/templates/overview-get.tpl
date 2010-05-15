@@ -29,7 +29,6 @@ print load_js("../lib/yui/datatable/datatable-min.js");
 
 print load_css("../css/datatable.css");
 
-$ajax_domain->start("domain");
 
 /* $search_form = array(); */
 /* $search_form[] = array( */
@@ -143,8 +142,9 @@ $ajax_domain->attr_add('maxrows','10');
 $ajax_domain->attr_add('data_div','domain');
 $ajax_domain->attr_add('nav_div','domain-nav');
 
-
 $ajax_domain->item_add($item_list);
+
+$ajax_domain->start("domain");
 //$ajax_domain->create_celleditor();
 $ajax_domain->create_listener();
 //$ajax_domain->create_search();
