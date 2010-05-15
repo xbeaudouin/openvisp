@@ -90,7 +90,12 @@ if ( $CONF['quota'] == 'YES') {
 																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
 																									 "sortable" => "false",
 																									 "parser" =>  "number"
-																									 )
+																									 ),
+										"security" => array (
+																				 "label" => $PALANG['pOverview_get_security'],
+																				 "sortable" => "false",
+																				 "parser" => "text",
+																				 )
 
     );
   //    "delete" => "../images/ico-exit.png|delete row|Are you sure to delete ?|./manage-app.php|action=delete"
@@ -123,7 +128,12 @@ else{
 																									 "label" => $PALANG['pOverview_get_total_mailbox_size'],
 																									 "sortable" => "false",
 																									 "parser" =>  "number"
-																									 )
+																									 ),
+										"security" => array (
+																				 "label" => $PALANG['pOverview_get_security'],
+																				 "sortable" => "false",
+																				 "parser" => "number",
+																				 )
 										 );
 }
 
