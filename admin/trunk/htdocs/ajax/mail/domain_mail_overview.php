@@ -53,8 +53,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
     $json_array['dir'] = $fDir;
     $json_array['pageSize'] = intval($fResults);
 
-		debug_info( "JS : ".$json_array['totalRecords'] );
-    
     
     for ( $i=0; $i < sizeof($user_info->data_managed_active_domain_with_mail); $i++)
     {
@@ -73,14 +71,16 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 																		 'quota_aliases' => $domain_info->quota['mail_aliases'],
 																		 'quota_mailboxes' => $domain_info->quota['mailboxes'],
 																		 'diskspace_mailboxes' => $domain_info->data['total_diskspace_used_mailboxes'],                                                         
-																		 'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified']
+																		 'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified'],
+																		 'security' => '<a href="edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$PALANG['pOverview_get_security_edit'].'</a>',
 																		 );
         }
         else{
           $json_data_array[] = array(
 																		 'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 'aliases' => $domain_info->used_quota['mail_alias'],
-																		 'mailboxes' => $domain_info->used_quota['mailbox']
+																		 'mailboxes' => $domain_info->used_quota['mailbox'],
+																		 'security' => '<a href="edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$PALANG['pOverview_get_security_edit'].'</a>',
 																		 );
         }
 
