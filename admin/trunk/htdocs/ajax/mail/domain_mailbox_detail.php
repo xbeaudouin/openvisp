@@ -17,6 +17,7 @@ require_once ("MDB2.php");
 require_once ("../../lib/db.class.php");
 require_once ("../../lib/user.class.php");
 require_once ("../../lib/domain.class.php");
+require_once ("../../lib/mail.class.php");
 
 $SESSID_USERNAME = check_user_session ();
 
@@ -24,6 +25,7 @@ $ovadb = new DB();
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
 $domain_info = new DOMAIN($ovadb);
+$mail_info = new MAIL($ovadb);
 
 $fDomain_name = $_GET["domainName"];
 
@@ -65,18 +67,37 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
         
     for ( $i=0; $i < sizeof($domain_info->list_mailboxes); $i++)
     {
-          
+
+			$mail_info->fetch_mailbox_info($domain_info->list_mailboxes[$i]['username']);
+			$mail_info->mailbox_fetch_quota_used();
+			$mail_info->fetch_spam_key();
+			$mail_info->fetch_vacation_info();
+			$mail_info->fetch_forward_state();
+
+			$vacation = ($mail_info->data_mailbox['vacation_status'] == 0) ? $PALANG['pOverview_mailbox_responder_inactive'] : $PALANG['pOverview_mailbox_responder_active'];
+			$vacation .= " <a href=\"edit-vacation.php?username=".$domain_info->list_mailboxes[$i]['username']."&domain=$fDomain_name\">".$PALANG['edit']."</a>";
+			$forward = ($mail_info->data_mailbox['forwarded'] == 0) ? $PALANG['pOverview_mailbox_forward_inactive'] : $PALANG['pOverview_mailbox_responder_active'];
+			$forward .= " <a href=\"edit-alias.php?address=".$domain_info->list_mailboxes[$i]['username']."&domain=$fDomain_name\">".$PALANG['edit']."</a>";
+			$quarantine = "";
+			if ( $mail_info->data_mailbox['spam_key'] != NULL ){
+				$quarantine = "<a href=\"".$CONF['release_url']."?key=".$mail_info->data_mailbox['spam_key'].'&key2='.$mail_info->data_mailbox['spam_key2']."\">Quarantine</a>";
+			}
+
 			$json_data_array[] = array(
 																 'username' => $domain_info->list_mailboxes[$i]['username'],
 																 'name' => $domain_info->list_mailboxes[$i]['name'], 
-																 'quota' => $domain_info->list_mailboxes[$i]['quota'],
+																 'quota_used' => $mail_info->mailbox_quota_used,
+																 'quota' => ($domain_info->list_mailboxes[$i]['quota'] == "-1024000" ) ? "&infin;" : $domain_info->list_mailboxes[$i]['quota'] / (1024),
 																 'modified' => $domain_info->list_mailboxes[$i]['modified'],
 																 'policy_id' => ($domain_info->list_mailboxes[$i]['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'],
 																 'active' => ($domain_info->list_mailboxes[$i]['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+																 'vacation' => $vacation,
+																 'forward' => $forward,
 																 'paid'  => ($domain_info->list_mailboxes[$i]['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-																 'delete' => "delete",
+																 'quarantine' => $quarantine,
 																 'pdf' => "<a href=\"../gen-pdf.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name&type=email>PDF</a>",
-																 'edit' => "<a href=\"edit-alias.php?address=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
+																 'delete' => "delete",
+																 'edit' => "<a href=\"edit-mailbox.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
 																 );
     }
 		
