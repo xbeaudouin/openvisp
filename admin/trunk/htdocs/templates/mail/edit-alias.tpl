@@ -25,36 +25,33 @@
          <?php print $PALANG['pEdit_alias_goto'] . ":\n"; ?>
       </td>
 			<td>
-<?php
-$result = db_query ("SELECT username FROM mailbox, domain WHERE domain.domain='$fDomain' AND domain.id=mailbox.domain_id ORDER BY username");
 
-$tGoto = ereg_replace(',,',',', $tGoto);
-$tGoto = ereg_replace(',',' ', $tGoto);
+<?php
 
 $end_input = '';
 
-while ($row = db_array ($result['result']))
-{
+for ( $i = 0; $i < sizeof($domain_info->list_mailboxes); $i++){
   $checked = "";
-  if ( ereg( $row[0], $tGoto ) )
+  if ( ereg( $domain_info->list_mailboxes[$i]['username'], $mail_info->data_alias['goto'] ) )
 	{
 		$checked = "checked";
-		$tGoto = ereg_replace($row[0],'',$tGoto);
+		$mail_info->data_alias['goto'] = ereg_replace($domain_info->list_mailboxes[$i]['username'],'',$mail_info->data_alias['goto']);
 	}
-	if ( $row[0] == $fAddress ) {
-		$end_input = '<span id="invisible" style="visibility: hidden"> <input type="checkbox" name="check_alias[]" value="'.$row[0].'" '.$checked.'>'.$row[0]."</span><br/>";
+	if ( $domain_info->list_mailboxes[$i]['username'] == $fAddress ) {
+		$end_input = '<span id="invisible" style="visibility: hidden"> <input type="checkbox" name="check_alias[]" value="'.$domain_info->list_mailboxes[$i]['username'].'" '.$checked.'>'.$domain_info->list_mailboxes[$i]['username']."</span><br/>";
 	}
 	else{
-		print '<input type="checkbox" name="check_alias[]" value="'.$row[0].'" '.$checked.'>'.$row[0]."<br />";
+		print '<input type="checkbox" name="check_alias[]" value="'.$domain_info->list_mailboxes[$i]['username'].'" '.$checked.'>'.$domain_info->list_mailboxes[$i]['username']."<br />";
 	}
 }
-$tGoto = ereg_replace(' ',',', $tGoto);
+
+$mail_info->data_alias['goto'] = ereg_replace(' ',',', $mail_info->data_alias['goto']);
 print $end_input;
 ?>
 
 <textarea rows="10" cols="80" name="fGoto">
 <?php
-$array = preg_split ('/,/', $tGoto);
+$array = preg_split ('/,/', $mail_info->data_alias['goto']);
 for ($i = 0 ; $i < sizeof ($array) ; $i++)
 {
    if (empty ($array[$i])) continue;
@@ -71,6 +68,7 @@ for ($i = 0 ; $i < sizeof ($array) ; $i++)
          <input type="hidden" name="fDomain" value="<?php print $fDomain; ?>" />
          <input type="hidden" name="fAddress" value="<?php print $fAddress; ?>" />
          <input type="submit" name="submit" value="<?php print $PALANG['pEdit_alias_button']; ?>" />
+         <input type="reset" name="cancel"/>
          </form>
       </td>
    </tr>

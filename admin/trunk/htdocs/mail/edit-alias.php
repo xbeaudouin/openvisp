@@ -20,7 +20,21 @@ require ("../config.inc.php");
 require ("../lib/functions.inc.php");
 include ("../languages/" . check_language () . ".lang");
 
+require_once ("MDB2.php");
+require_once ("../lib/db.class.php");
+require_once ("../lib/user.class.php");
+require_once ("../lib/domain.class.php");
+require_once ("../lib/mail.class.php");
+
+
 $SESSID_USERNAME = check_user_session ();
+
+$ovadb = new DB();
+$user_info = new USER($ovadb);
+$user_info->fetch_info($SESSID_USERNAME);
+
+$domain_info = new DOMAIN($ovadb);
+
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
@@ -29,20 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
    $tDomain  = $fDomain;
 	 $overview2 = "YES";
 
-   if (check_owner ($SESSID_USERNAME, $fDomain))
+   if ( $fDomain != NULL)
    {
-		 $overview2 = 1;
-      $result = db_query ("SELECT alias.* FROM alias WHERE address='$fAddress'");
-      if ($result['rows'] == 1)
-      {
-         $row = db_array ($result['result']);
-         $tGoto = $row['goto'];
-      }
-   }
-   else
-   {
-      $tMessage = $PALANG['pEdit_alias_address_error'];
-   }
+		 
+      $domain_info->fetch_by_domainname($fDomain);
+      $user_info->check_domain_access($domain_info->data_domain['id']);
+      $domain_info->fetch_mail_aliases();
+
+
+			$overview2 = 1;
+			$mail_info = new MAIL($ovadb);
+			$mail_info->fetch_alias_info($fAddress);
+			$mail_info->data_alias['goto'] = ereg_replace(',,',',', $mail_info->data_alias['goto']);
+			$mail_info->data_alias['goto'] = ereg_replace(',',' ', $mail_info->data_alias['goto']);
+			$domain_info->fetch_mailboxes();
+			
+	 }
    
    include ("../templates/header.tpl");
    include ("../templates/mail/menu.tpl");
@@ -59,23 +75,25 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
    $fDomain  = get_post('fDomain');
    $tDomain  = $fDomain;
    $fGoto    = get_post('fGoto');
+	 $fCheckalias = get_post('check_alias');
 
-   if ( isset($_POST['check_alias'] ) )
+	 if ( $fDomain != NULL ){
+
+      $domain_info->fetch_by_domainname($fDomain);
+      $user_info->check_domain_access($domain_info->data_domain['id']);
+      $domain_info->fetch_mail_aliases();
+
+	 }
+
+
+
+   if ( $fCheckalias != NULL )
    {
-		 $fGoto = preg_replace('/^,/', '', $fGoto ."," .implode(",", get_post('check_alias')) );
+		 $fGoto = preg_replace('/^,/', '', $fGoto ."," .implode(",", $fCheckalias) );
    }
-
-	 
 
    $fGoto    = strtolower ($fGoto);
 
-   if (!check_owner ($SESSID_USERNAME, $fDomain))
-   {
-		  $overview2 = 1;
-      $error = 1;
-      $tGoto = $fGoto;
-      $tMessage = $PALANG['pEdit_alias_domain_error'] . "$fDomain</font>";
-   }   
    
    if (empty ($fGoto))
    {
@@ -88,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
    $goto = preg_replace ('/[\s]+/i', '', $goto);
    $goto = preg_replace ('/\,*$/', '', $goto);
    $goto = ereg_replace (',,', ',', $goto);
+   $goto = ereg_replace ('/^,/', '', $goto);
    $array = preg_split ('/,/', $goto);
 
 
