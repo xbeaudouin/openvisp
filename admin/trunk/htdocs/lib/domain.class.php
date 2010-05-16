@@ -327,12 +327,31 @@ class DOMAIN
 	// Call: can_add_mailbox ()
 	//
   function can_add_mailbox(){
+
     if( 
-        ( ($this->used_quota['mailbox'] - $this->quota['mailboxes']) > 0 )
+        ( ($this->quota['mailboxes'] - $this->used_quota['mailbox']) > 0 )
       ||
         ( $this->quota['mailboxes'] == -1 )
       ){return TRUE;}
       return FALSE;
+  }
+
+  //
+	// fetch_policy
+	// Action: fetch the policy of the domain
+	// Call: fetch_policy ()
+	//
+  function fetch_policy(){
+
+    $query = "
+SELECT policy.id
+FROM policy
+WHERE id=".$this->policy_id;
+
+    $result = $this->db_link->sql_query($query);
+		$this->policy = $result['result'];
+
+
   }
   
 
