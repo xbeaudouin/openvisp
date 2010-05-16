@@ -93,8 +93,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$mailbox_info->data_mailbox['active'] = ($mailbox_info->data_mailbox['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'];
 	$mailbox_info->data_mailbox['policy_id'] = ($mailbox_info->data_mailbox['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'];
 
-	debug_info ("PFFFF ".$mailbox_info->data_mailbox['policy_id']);
-
   header('Content-type: application/x-json');
   $json_array['records'] = $mailbox_info->data_mailbox;
   echo json_encode($json_array);
