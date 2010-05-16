@@ -41,6 +41,7 @@ $domain_info = new DOMAIN($ovadb);
 
 $user_info->fetch_quota_status();
 
+$body_class = 'class=" yui-skin-sam"';
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
@@ -143,13 +144,18 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																				 "label" => $PALANG['pOverview_mailbox_name'],
 																				 "parser" => "text"
 																				 ),
+												 "quota_used" => array(
+																							 "label" => $PALANG['pOverview_mailbox_size'],
+																							 "parser" => "number",
+																							 "sortable" => "false"
+																							 ),
 												 "quota" => array(
 																					"label" => $PALANG['pOverview_mailbox_quota'],
 																					"parser" => "text",
 																					"sortable" => "false"
 																					),
 												 "paid" => array(
-																				 "label" => "paid",
+																				 "label" => $PALANG['pOverview_mailbox_paid'],
 																				 "parser" => "text",
 																				 "radioOptions" => array (
 																																	"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
@@ -157,8 +163,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																																	"url_param" => "action=mod_paid&domainName=$fDomain"
 																																	)
 																				 ),
+												 "vacation" => array(
+																						 "label" => $PALANG['pOverview_mailbox_responder'],
+																						 "parser" => "text"
+																						 ),
+												 "forward" => array(
+																						 "label" => $PALANG['pOverview_mailbox_forward'],
+																						 "parser" => "text"
+																						 ),
 												 "policy_id" => array(
-																							"label" => "active",
+																							"label" => $PALANG['pOverview_mailbox_amavisd'],
 																							"parser" => "text",
 																							"radioOptions" => array (
 																																			 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
@@ -167,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																																			 )
 																							),
 												 "active" => array(
-																					 "label" => $PALANG['pOverview_alias_amavisd'],
+																					 "label" => $PALANG['pOverview_mailbox_active'],
 																					 "parser" => "text",
 																					 "radioOptions" => array (
 																																		"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
@@ -175,12 +189,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																																		"url_param" => "action=mod_status&domainName=$fDomain"
 																																		)
 																					 ),
+												 "quarantine" => array(
+																							 "label" => $PALANG['pOverview_mailbox_quarantine'],
+																							 "parser" => "text",
+																							 ),
 												 "modified" => array(
-																						 "label" => "modified",
+																						 "label" => $PALANG['pOverview_alias_modified'],
 																						 "parser" => "text",
 																						 ),
 												 "pdf" => array(
-																			"label" => "PDF",
+																			"label" => "",
 																			"parser" => "text",
 																				),
 												 "delete" => array(
@@ -225,6 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
    }
    else
    {
+
 		 $ajax_domain = new AJAX_YUI($ovadb);
 
 		 if ( $CONF['quota'] == 'YES') {
