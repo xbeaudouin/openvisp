@@ -1,3 +1,12 @@
+<style type="text/css">
+
+.yui-dt-editor {
+position:absolute;
+z-index:9000;
+}
+
+</style>
+
 <?php 
 
 
@@ -78,6 +87,8 @@ print "</form>";
 <div id="aliases-nav"></div>
 <div id="aliases"></div>
 
+<br/>
+<br/>
 
 
 <div id="mailboxes-nav"></div>
@@ -90,98 +101,8 @@ $ajax_alias->end();
 
 $ajax_mailbox->end();
 
-
-if (sizeof ($domain_info->list_mailboxes) > 0)
-{
-   print "<table>\n";
-   print "   <tr class=\"header\">\n";
-   print "      <td>" . $PALANG['pOverview_mailbox_username'] . "</td>\n";
-   print "      <td>" . $PALANG['pOverview_mailbox_name'] . "</td>\n";
-   if ($CONF['quota'] == 'YES') print "      <td>" . $PALANG['pOverview_mailbox_quota'] . "</td>\n";
-   print "      <td>" . $PALANG['pOverview_mailbox_modified'] . "</td>\n";
-   print "      <td>" . $PALANG['pOverview_mailbox_active'] . "</td>\n";
-   print "	    <td>" . $PALANG['pOverview_mailbox_amavisd'] . "</td>\n";
-   print "	    <td>" . $PALANG['pOverview_mailbox_responder'] . "</td>\n";
-   print "	    <td>" . $PALANG['pOverview_mailbox_forward'] . "</td>\n";
-   print "	    <td>" . $PALANG['pOverview_mailbox_quarantine'] . "</td>\n";
-   print "	    <td>" . $PALANG['pOverview_mailbox_size'] . "</td>\n";
-   print "      <td colspan=\"3\">&nbsp;</td>\n";
-   print "   </tr>\n";
-      
-   for ($i = 0; $i < sizeof ($domain_info->list_mailboxes); $i++)
-   {
-      if ((is_array ($domain_info->list_mailboxes) and sizeof ($domain_info->list_mailboxes) > 0))
-      {
-
-				 $classoff="hilightoff";
-				 $classon="hilighton";
-				 if ( $domain_info->list_mailboxes[$i]['paid'] == 0 ){
-					 $classon="lockhilighton";
-					 $classoff="lockhilightoff";
-				 }
-
-         print "   <tr class=\"$classoff\" onMouseOver=\"className='$classon';\" onMouseOut=\"className='$classoff';\">\n";
-         print "      <td>" . $domain_info->list_mailboxes[$i]['username'] . "</td>\n";
-         print "      <td>" . $domain_info->list_mailboxes[$i]['name'] . "</td>\n";
-         if ($CONF['quota'] == 'YES') {
-            print "<td>";
-            if($domain_info->list_mailboxes[$i]['quota'] <= "0") {
-              print "&infin;";
-            } else {
-              print $domain_info->list_mailboxes[$i]['quota'] / $CONF['quota_multiplier'];
-            }
-            print "</td>";
-         }
-         print "      <td>" . $domain_info->list_mailboxes[$i]['modified'] . "</td>\n";
-         $active = ($domain_info->list_mailboxes[$i]['active'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
-         print "      <td><a href=\"edit-active.php?username=" . urlencode ($domain_info->list_mailboxes[$i]['username']) . "&domain=$fDomain" . "\">" . $active . "</a></td>\n";
-				 $policy_id = ($domain_info->list_mailboxes[$i]['policy_id'] == 1) ? $PALANG['NO'] : $PALANG['YES'];
-				 print " <td><a href=\"edit-security.php?username=" . urlencode ($domain_info->list_mailboxes[$i]['username']) . "&domain=$fDomain" . "\">" . $policy_id . "</a></td>\n";
-
-				 //				 $responder_status = is_in_vacation();
-
-				 if ($domain_info->list_mailboxes[$i]['vacation_active'] == 1){
-					 $responder_status = $PALANG['pOverview_mailbox_responder_active'];
-				 }
-				 else{
-					 $responder_status = $PALANG['pOverview_mailbox_responder_inactive'];
-				 }
-
-				// XXX: Fix this !!!
-				 print '      <td>'.$responder_status.'&nbsp;&nbsp;&nbsp;<a href="edit-vacation.php?username='. urlencode ($domain_info->list_mailboxes[$i]['username']) .'&domain='.$fDomain.'">'.$PALANG['edit'].'</a></td>';
-
-				 $result = db_query("SELECT * FROM alias WHERE address='".$domain_info->list_mailboxes[$i]['username']."' AND goto='".$domain_info->list_mailboxes[$i]['username']."' AND active='1'");
-				 if ($result['rows'] == 1){
-					 $forward_status = $PALANG['pOverview_mailbox_forward_inactive'];
-				 }
-				 else{
-					 $forward_status = $PALANG['pOverview_mailbox_forward_active'];
-				 }
-
-				 print '      <td>'.$forward_status.'&nbsp;&nbsp;&nbsp;<a href="edit-alias.php?address='. urlencode ($domain_info->list_mailboxes[$i]['username']) .'&domain='.$fDomain.'">'.$PALANG['edit'].'</a></td>';
-				 print '      <td>';
-				 if ( $domain_info->list_mailboxes[$i]['id'] != '' ){
-					 print '        <a href="'.$CONF['release_url'].'?key='.$domain_info->list_mailboxes[$i]['id'].'&key2='.$domain_info->list_mailboxes[$i]['key2'].'">Quarantine</a>';
-				 }
-				 print '      </td>';
-				 print '      <td>'.check_quota_user($domain_info->list_mailboxes[$i]['username']);
-				 $date_overquota = check_overquota_user($domain_info->list_mailboxes[$i]['username']);
-				 if ( $date_overquota != NULL ){
-					 print ' | Overquota : '.$date_overquota;
-				 }
-				 print '</td>';
-
-         if ($CONF['encrypt'] == "cleartext")
-         {
-				    print '      <td><a href="../gen-pdf.php?username='. urlencode ($domain_info->list_mailboxes[$i]['username']) .'&domain='.$fDomain.'&type=email">PDF</a></td>';
-         }
-         print "      <td><a href=\"edit-mailbox.php?username=" . urlencode ($domain_info->list_mailboxes[$i]['username']) . "&domain=$fDomain" . "\">" . $PALANG['edit'] . "</a></td>\n";
-
-         print "      <td><a href=\"delete.php?delete=" . urlencode ($domain_info->list_mailboxes[$i]['username']) . "&domain=$fDomain" . "\"onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>\n";
-         print "   </tr>\n";
-      }
-   }
-   print "</table>\n";
-   print "<p />\n";
-}
 ?>
+
+
+<br/>
+<br/>
