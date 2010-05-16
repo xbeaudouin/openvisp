@@ -63,28 +63,27 @@ class MAIL
 		$query = "UPDATE alias
     SET policy_id = $policy_id_value
     WHERE address='".$alias_id."'";
+		debug_info("AS MB : $query");
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
 
 
 	function fetch_mailbox_info($mailbox){
-		$query = "
-SELECT mailbox.*, alias.policy_id as policy_id
+		$query = "SELECT mailbox.*, alias.policy_id as policy_id
 FROM mailbox, alias
 WHERE username='$mailbox'
 AND mailbox.username=alias.address
 ";
-		debug_info ("SQL : $query");
-		$result = $this->db_link->sql_query($query,2);
+		$result = $this->db_link->sql_query($query);
 		$this->data_mailbox = $result['result'][0];
+	
 	}
 
 	function mailbox_en_disable(){
 		$query = "UPDATE mailbox
     SET active=1-active
     WHERE username='".$this->data_mailbox['username']."'";
-		debug_info ("SQL mailbox_en_disable : $query");
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
@@ -100,7 +99,6 @@ AND mailbox.username=alias.address
 		$query = "UPDATE mailbox
     SET active=$value
     WHERE username='".$this->data_mailbox['username']."'";
-		debug_info ("PFF SQL mailbox_change_active_status : $query");
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
@@ -110,6 +108,77 @@ AND mailbox.username=alias.address
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
+	function mailbox_fetch_quota_used(){
+
+		$query = "SELECT * FROM stats_mailbox
+    WHERE mailbox_id=".$this->data_mailbox['id']."
+    ORDER BY date DESC
+    LIMIT 1";
+		$result = $this->db_link->sql_query($query,2);
+		$this->mailbox_quota_used = 0;
+		if ( $result['rows'] > 0 ){
+			$this->mailbox_quota_used = $result['result'][0]['size'];
+		}
+
+	}
+
+
+	function fetch_spam_key(){
+		$query = "SELECT spamreport.id, spamreport.key2, spamreport.created
+    FROM spamreport
+    WHERE spamreport.mailbox_id='".$this->data_mailbox['id']."'";
+		$result = $this->db_link->sql_query($query);
+		if ( $result['rows'] == 1 ){
+			$this->data_mailbox['spam_key'] = $result['result'][0]['id'];
+			$this->data_mailbox['spam_key2'] = $result['result'][0]['key2'];
+		}
+		else{
+			$this->data_mailbox['spam_key'] = NULL;
+			$this->data_mailbox['spam_key2'] = NULL; 
+		}
+	}
+
+	function fetch_vacation_info(){
+		$query = "SELECT vacation.*
+    FROM vacation, mailbox
+    WHERE vacation.mailbox_id=".$this->data_mailbox['id']." AND vacation.active = 1 ";
+		$result = $this->db_link->sql_query($query);
+		if ( $result['rows'] == 1 ){
+			$this->data_mailbox['vacation_status'] = $result['result'][0]['active'];
+			$this->data_mailbox['vacation_date_modified'] = $result['result'][0]['modified'];
+			$this->data_mailbox['vacation_subject'] = $result['result'][0]['subject'];
+			$this->data_mailbox['vacation_body'] = $result['result'][0]['body'];
+		}
+		else{
+			$this->data_mailbox['vacation_status'] = "";
+			$this->data_mailbox['vacation_date_modified'] = "";
+			$this->data_mailbox['vacation_subject'] = "";
+			$this->data_mailbox['vacation_body'] = "";
+		}
+	}
+
+	function vacation_en_disable(){
+		$query = "UPDATE vacation
+    SET active=1-active
+    WHERE vacation.mailbox_id=".$this->data_mailbox['id']."";
+		$this->sql_result = $this->db_link->sql_query($query,2);
+	}
+
+	function fetch_forward_state(){
+		$query = 	"SELECT *
+    FROM alias
+    WHERE address='".$this->data_mailbox['username']."'
+    AND goto='".$this->data_mailbox['username']."'
+    AND active='1'";
+		$result = $this->db_link->sql_query($query);
+		if ($result['rows'] == 1){
+			$this->data_mailbox['forwarded'] = 0;
+		}
+		else{
+			$this->data_mailbox['forwarded'] = 1;
+		}
+
+	}
 
 
   //
