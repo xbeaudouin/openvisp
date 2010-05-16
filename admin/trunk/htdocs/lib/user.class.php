@@ -264,6 +264,33 @@ class USER
 	    }
 	  }
 	}
+
+	function check_domain_admin()
+	{
+	  if ( ($this->rights['manage'] != 1) || ($this->rights['domain'] != 1) ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+	    
+	  }
+	}
+
+
+	function all_user_mailbox_size(){
+
+		$sql_query = "SELECT SUM(stats_mailbox.size) as total_mbox_size
+    FROM stats_mailbox, mailbox, domain_admins
+    WHERE domain_admins.accounts_id = ".$this->accounts_id."
+    AND domain_admins.domain_id = mailbox.domain_id
+    AND mailbox.id=stats_mailbox.mailbox_id
+    GROUP BY date, mailbox.id
+    ORDER BY date DESC
+    LIMIT 1";
+
+
+	}
+
 	
 }
 
