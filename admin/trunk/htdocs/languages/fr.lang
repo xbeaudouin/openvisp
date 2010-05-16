@@ -94,13 +94,14 @@ $PALANG['pOverview_alias_mailbox_count'] = 'Comptes mails';
 $PALANG['pOverview_alias_address'] = 'De';
 $PALANG['pOverview_alias_goto'] = '&Agrave;';
 $PALANG['pOverview_alias_modified'] = 'Derni&egrave;re Modification';
-$PALANG['pOverview_alias_amavisd'] = 'Antispam';
+$PALANG['pOverview_alias_amavisd'] = 'Securit&eacute';
 $PALANG['pOverview_mailbox_username'] = 'Mail';
 $PALANG['pOverview_mailbox_name'] = 'Nom';
 $PALANG['pOverview_mailbox_quota'] = 'Limite (MB)';
 $PALANG['pOverview_mailbox_modified'] = 'Derni&egrave;re Modification';
 $PALANG['pOverview_mailbox_active'] = 'Actif';
-$PALANG['pOverview_mailbox_amavisd'] = 'Antivirus';
+$PALANG['pOverview_mailbox_amavisd'] = 's&eacute;curit&eacute;';
+$PALANG['pOverview_mailbox_paid'] = 'Pay&eacute;';
 $PALANG['pOverview_mailbox_responder'] = 'R&eacute;pondeur';
 $PALANG['pOverview_mailbox_responder_inactive'] = 'Inactif';
 $PALANG['pOverview_mailbox_responder_active'] = 'Actif';
@@ -115,7 +116,7 @@ $PALANG['pOverview_mailbox_size'] = 'Taille de la BAL en Ko';
 $PALANG['pOverview_mailbox_quarantine'] = 'Voir la quarantaine';
 $PALANG['pOverview_statistics'] = 'Statistiques';
 $PALANG['pOverview_mailbox_quota_used'] = 'Utilisation du quota';
-$PALANG['pOverview_get_security'] = 'Securit&eacute;e';
+$PALANG['pOverview_get_security'] = 's&eacute;curit&eacute;e';
 
 $PALANG['pStats_welcome'] = 'Statistiques pour ';
 
@@ -172,7 +173,7 @@ $PALANG['pOverview_get_antivirus'] = 'Antivirus';
 $PALANG['pOverview_get_spamass'] = 'Antispam';
 $PALANG['pOverview_get_modified'] = 'Derni&egrave;re Modification';
 $PALANG['pOverview_get_total_mailbox_size'] = 'Utilisation disque total de la boite mail.';
-$PALANG['pOverview_get_security'] = 'Securit&eacute;';
+$PALANG['pOverview_get_security'] = 's&eacute;curit&eacute;';
 $PALANG['pOverview_get_security_edit'] = 'Editer';
 
 $PALANG['pDelete_delete_error'] = '<div class="standout">Impossible d\'&eacute;ffacer cette entr&eacute;e ';
@@ -261,9 +262,9 @@ $PALANG['pEdit_mailbox_domain_error'] = '<div class="standout">Ce domaine n\'est
 $PALANG['pEdit_mailbox_button'] = 'Modifier un compte mail';
 $PALANG['pEdit_mailbox_result_error'] = '<div class="standout">Impossible de changer votre mot de passe!</div>';
 
-$PALANG['pEdit_security_mailbox_error'] = 'Erreur lors de la mise &agrave; jour de la securit&eacute; sur la boite mail';
-$PALANG['pEdit_security_mailbox_error1'] = 'Erreur lors de la mise &agrave; jour de la securit&eacute; sur la boite mail (1)';
-$PALANG['pEdit_security_mailbox_error2'] = 'Erreur lors de la mise &agrave; jour de la securit&eacute; sur la boite mail (2)';
+$PALANG['pEdit_security_mailbox_error'] = 'Erreur lors de la mise &agrave; jour de la s&eacute;curit&eacute; sur la boite mail';
+$PALANG['pEdit_security_mailbox_error1'] = 'Erreur lors de la mise &agrave; jour de la s&eacute;curit&eacute; sur la boite mail (1)';
+$PALANG['pEdit_security_mailbox_error2'] = 'Erreur lors de la mise &agrave; jour de la s&eacute;curit&eacute; sur la boite mail (2)';
 $PALANG['pEdit_security_alias_error'] = 'Erreur lors de la mise &agrave; jour de la s&eacute;curit&eacute; sur l\'alias';
 
 $PALANG['pPassword_welcome'] = 'Changer votre mot de passe.';
@@ -404,13 +405,13 @@ $PALANG['pAdminList_virtual_alias_mailbox_count'] = 'Comptes mails';
 $PALANG['pAdminList_virtual_alias_address'] = 'De';
 $PALANG['pAdminList_virtual_alias_goto'] = 'A';
 $PALANG['pAdminList_virtual_alias_modified'] = 'Derni&egrave;re modification';
-$PALANG['pAdminList_virtual_alias_amavisd'] = 'Amavisd';
+$PALANG['pAdminList_virtual_alias_amavisd'] = 'S&Eacute;Curit&Eacute';
 $PALANG['pAdminList_virtual_mailbox_username'] = 'Mail';
 $PALANG['pAdminList_virtual_mailbox_name'] = 'Nom';
 $PALANG['pAdminList_virtual_mailbox_quota'] = 'Limite (MB)';
 $PALANG['pAdminList_virtual_mailbox_modified'] = 'Derni&egrave;re modification';
 $PALANG['pAdminList_virtual_mailbox_active'] = 'Actif';
-$PALANG['pAdminList_virtual_mailbox_amavisd'] = 'Antivirus';
+$PALANG['pAdminList_virtual_mailbox_amavisd'] = 'S&Eacute;Curit&Eacute';
 $PALANG['pAdminList_virtual_ftp_welcome'] = 'Vue g&eacute;n&eacute;rale pour ';
 $PALANG['pAdminList_virtual_ftp_count'] = 'Compte ';
 $PALANG['pAdminList_virtual_ftp_login'] = 'utilisateur';
