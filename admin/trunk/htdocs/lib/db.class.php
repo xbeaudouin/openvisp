@@ -27,6 +27,7 @@ class DB
 		$this->debug = $CONF['SQL_DEBUG'];
 
 		if ( $db_host == "" ) { $db_host = $CONF['database_host']; }
+		if ( $db_port == "" ) { $database = $CONF['database_port']; }
 		if ( $db_user == "" ) { $db_user = $CONF['database_user']; }
 		if ( $db_pass == "" ) { $db_pass = $CONF['database_password']; }
 		if ( $db_type == "" ) { $db_type = $CONF['database_type']; }
@@ -41,7 +42,7 @@ class DB
 				$db_type = $CONF['database_type'];
 			}
 
-		$this->connect =& MDB2::connect($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_host."/".$database);
+		$this->connect =& MDB2::factory($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_port."/".$database);
 		$this->connect->setFetchMode(MDB2_FETCHMODE_ASSOC);
 
 		if (PEAR::isError($this->connect))
@@ -78,14 +79,14 @@ class DB
 
 		if ( $die_on_error == 1 && PEAR::isError($result) )
 			{
-			 die ("<p />DEBUG INFORMATION:<br />Invalid query: " . PEAR_Error::getMessage () . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+			 die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
 			}
 
 		if ( $die_on_error == 2 && PEAR::isError($result) )
 			{
 				$return_code = "500"; 
-				//print ("<p />SQL Query Failed <br /> query: " . PEAR_Error::getMessage () . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
-				$sql_log = "SQL Query Failed\n" . PEAR_Error::getMessage () . "\nQuery :\n\"$query\"\n".$this->debug_text_txt;
+				//print ("<p />SQL Query Failed <br /> query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+				$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\nQuery :\n\"$query\"\n".$this->debug_text_txt;
 			}
 
 		if (eregi ("^select", $query))
