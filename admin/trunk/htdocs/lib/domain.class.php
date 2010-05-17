@@ -131,7 +131,7 @@ class DOMAIN
 		$query = "SELECT COUNT(*) as total_mailbox
 		FROM mailbox
 		WHERE mailbox.domain_id = ".$this->data_domain['id']."
-    AND mailbox.status < 9
+    AND mailbox.active < 9
     ";
 
 		$result = $this->db_link->sql_query($query);
