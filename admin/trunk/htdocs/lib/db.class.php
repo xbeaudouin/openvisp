@@ -27,7 +27,7 @@ class DB
 		$this->debug = $CONF['SQL_DEBUG'];
 
 		if ( $db_host == "" ) { $db_host = $CONF['database_host']; }
-		if ( $db_port == "" ) { $database = $CONF['database_port']; }
+		if ( $db_port == "" ) { $db_port = $CONF['database_port']; }
 		if ( $db_user == "" ) { $db_user = $CONF['database_user']; }
 		if ( $db_pass == "" ) { $db_pass = $CONF['database_password']; }
 		if ( $db_type == "" ) { $db_type = $CONF['database_type']; }
