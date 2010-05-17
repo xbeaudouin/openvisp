@@ -309,15 +309,17 @@ class AJAX_YUI
           
         myDataTable".$this->info['data_div']." = new YAHOO.widget.DataTable(\"".$this->info['data_div']."\", myColumnDefs".$this->info['data_div'].", myDataSource".$this->info['data_div'].", myConfigs".$this->info['data_div'].");
 
+        myDataTable".$this->info['data_div'].".subscribe('cellClickEvent', myDataTable".$this->info['data_div'].".onEventShowCellEditor);
+
         myDataTable".$this->info['data_div'].".subscribe('cellClickEvent', function(oArgs){
 					var target = oArgs.target;
-					var column = myDataTable.getColumn(target);
-
+					var column = myDataTable".$this->info['data_div'].".getColumn(target);
         ";
 
 	 	    foreach ($this->item_list as $item => $attributes) {
 	 	      if ( isset($attributes['link']) ){
 						$this->buffer .= "
+
 						if ( column.key == '$item') {
 							var record = this.getRecord(target);
 ";
@@ -367,9 +369,6 @@ class AJAX_YUI
 
 				$this->buffer.="
         });
-
-//this
-        myDataTable".$this->info['data_div'].".subscribe('cellClickEvent', myDataTable".$this->info['data_div'].".onEventShowCellEditor);
 
 
 	 	    myDataTable".$this->info['data_div'].".handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
