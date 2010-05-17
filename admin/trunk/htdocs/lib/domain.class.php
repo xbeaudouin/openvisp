@@ -130,7 +130,9 @@ class DOMAIN
 
 		$query = "SELECT COUNT(*) as total_mailbox
 		FROM mailbox
-		WHERE mailbox.domain_id = ".$this->data_domain['id'];
+		WHERE mailbox.domain_id = ".$this->data_domain['id']."
+    AND mailbox.status < 9
+    ";
 
 		$result = $this->db_link->sql_query($query);
 		$this->used_quota['mailbox'] = $result['result'][0]['total_mailbox'];
@@ -195,10 +197,12 @@ class DOMAIN
     
     $result = $this->db_link->sql_query($query);
     
-    // disable ftpaccount
+    // disable mailbox
     $query = "UPDATE mailbox
     SET active=1-active
-    WHERE domain_id = ".$this->data_domain['id'];
+    WHERE domain_id = ".$this->data_domain['id']."
+    AND active < 9
+    ";
 
     $result = $this->db_link->sql_query($query);
 
@@ -226,6 +230,7 @@ class DOMAIN
     FROM stats_mailbox, mailbox
     WHERE mailbox.domain_id = ".$this->data_domain['id']."
     AND mailbox.id=stats_mailbox.mailbox_id
+    AND mailbox.active < 9
     GROUP BY date, mailbox.id
     ORDER BY date DESC
     LIMIT 1";
@@ -278,7 +283,7 @@ class DOMAIN
 
   //
 	// fetch_mailboxes
-	// Action: Get the whole list of mailboxes aliases
+	// Action: Get the whole list of mailboxes 
 	// Call: fetch_mailboxes (string search_param, string result_limit, string order_by_field, string order_dir)
 	//
   function fetch_mailboxes ($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
@@ -295,6 +300,7 @@ class DOMAIN
     LEFT OUTER JOIN vacation ON ( mailbox.id = vacation.mailbox_id )
     WHERE mailbox.domain_id=".$this->data_domain['id']."
     AND mailbox.username=alias.address
+    AND mailbox.active < 9
     ORDER BY ".$order_by_field." $order_dir ";
 
 		if ( $result_limit != NULL ){
