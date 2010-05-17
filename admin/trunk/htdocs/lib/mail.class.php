@@ -103,7 +103,7 @@ AND mailbox.username=alias.address
 	}
 
 	function mailbox_delete(){
-		$query = "DELETE FROM maibox
+		$query = "UPDATE mailbox SET active = 9
     WHERE username='".$this->data_mailbox['username']."'";
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
