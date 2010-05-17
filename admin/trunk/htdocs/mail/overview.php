@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																					 "resizeable" => "false",
 																					 "link" => "/ajax/mail/manage_mailbox.php",
 																					 "url_param" => "action=delete&domainName=$fDomain",
-																					 "key_item" => "alias"
+																					 "key_item" => "username"
 																					 ),
 												 "edit" => array(
 																				 "label" => "",
