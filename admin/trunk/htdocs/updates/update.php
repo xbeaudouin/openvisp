@@ -29,6 +29,8 @@ if ( $ova->latest_version == $ova->running_version ){
 
 $ova->fetch_latest_sql();
 
+//$ova->show_latest_sql();
+
 $ova->apply_latest_sql();
 
 print "Allright, everything is up to date<br/>";
