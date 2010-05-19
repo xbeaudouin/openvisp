@@ -62,9 +62,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
         $domain_info->total_diskspace_used_mailboxes();
         
         if ( $CONF['quota'] == 'YES') {
-          
+
+					// 'domain' => '<a href=".'</a>',          
           $json_data_array[] = array(
-																		 'domain' => '<a href="/mail/overview.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'</a>',
+																		 'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
+																		 'domain_url' => '/mail/overview.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 'aliases' => $domain_info->used_quota['mail_alias'],
 																		 'mailboxes' => $domain_info->used_quota['mailbox'],
 																		 'maxquota' => $domain_info->quota['maxquota'],
@@ -72,15 +74,18 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 																		 'quota_mailboxes' => $domain_info->quota['mailboxes'],
 																		 'diskspace_mailboxes' => $domain_info->data['total_diskspace_used_mailboxes'],                                                         
 																		 'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified'],
-																		 'security' => '<a href="edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$PALANG['pOverview_get_security_edit'].'</a>',
+																		 'security' => $PALANG['pOverview_get_security_edit'],
+																		 'security_url' => 'edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 );
         }
         else{
           $json_data_array[] = array(
 																		 'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
+																		 'domain_url' => '/mail/overview.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 'aliases' => $domain_info->used_quota['mail_alias'],
 																		 'mailboxes' => $domain_info->used_quota['mailbox'],
-																		 'security' => '<a href="edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'].'>'.$PALANG['pOverview_get_security_edit'].'</a>',
+																		 'security' => $PALANG['pOverview_get_security_edit'],
+																		 'security_url' => 'edit-active-domain-policy.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 );
         }
 
