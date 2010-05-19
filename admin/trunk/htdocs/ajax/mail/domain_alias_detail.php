@@ -72,7 +72,8 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 																 'active' => ($domain_info->list_mail_aliases[$i]['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 																 'policy_id' => ($domain_info->list_mail_aliases[$i]['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'],
 																 'delete' => "delete",
-																 'edit' => "<a href=\"edit-alias.php?address=".urlencode($domain_info->list_mail_aliases[$i]['address'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
+																 'edit' => $PALANG['edit'],
+																 'edit_url' => "edit-alias.php?address=".urlencode($domain_info->list_mail_aliases[$i]['address'])."&domain=$fDomain_name"
 																 );
 			//																 'edit' => "mail/edit-alias.php?address".urlencode($domain_info->list_mail_aliases[$i]['address'])."&domain=$fDomain"
 			//																 'active' => $domain_info->list_mail_aliases[$i]['active'],

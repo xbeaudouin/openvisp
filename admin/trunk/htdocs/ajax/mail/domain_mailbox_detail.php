@@ -78,9 +78,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 			$vacation .= " <a href=\"edit-vacation.php?username=".$domain_info->list_mailboxes[$i]['username']."&domain=$fDomain_name\">".$PALANG['edit']."</a>";
 			$forward = ($mail_info->data_mailbox['forwarded'] == 0) ? $PALANG['pOverview_mailbox_forward_inactive'] : $PALANG['pOverview_mailbox_responder_active'];
 			$forward .= " <a href=\"edit-alias.php?address=".$domain_info->list_mailboxes[$i]['username']."&domain=$fDomain_name\">".$PALANG['edit']."</a>";
-			$quarantine = "";
+			$quarantine_url = "";
 			if ( $mail_info->data_mailbox['spam_key'] != NULL ){
-				$quarantine = "<a href=\"".$CONF['release_url']."?key=".$mail_info->data_mailbox['spam_key'].'&key2='.$mail_info->data_mailbox['spam_key2']."\">Quarantine</a>";
+				$quarantine_url = $CONF['release_url']."?key=".$mail_info->data_mailbox['spam_key'].'&key2='.$mail_info->data_mailbox['spam_key2'];
 			}
 
 			$json_data_array[] = array(
@@ -94,10 +94,13 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 																 'vacation' => $vacation,
 																 'forward' => $forward,
 																 'paid'  => ($domain_info->list_mailboxes[$i]['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-																 'quarantine' => $quarantine,
-																 'pdf' => "<a href=\"../gen-pdf.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name&type=email>PDF</a>",
+																 'quarantine' => $PALANG['pOverview_mailbox_quarantine'],
+																 'quarantine_url' => $quarantine_url,
+																 'pdf' => "PDF",
+																 'pdf_url' => "../gen-pdf.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name&type=email",
 																 'delete' => "delete",
-																 'edit' => "<a href=\"edit-mailbox.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name>".$PALANG['edit']."</a>"
+																 'edit' => $PALANG['edit'],
+																 'edit_url' => "edit-mailbox.php?username=".urlencode($domain_info->list_mailboxes[$i]['username'])."&domain=$fDomain_name"
 																 );
     }
 		
