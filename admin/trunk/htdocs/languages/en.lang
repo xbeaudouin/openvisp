@@ -3,8 +3,8 @@
 // Language file English
 //
 $PALANG['LOCALE'] = 'C';
-$PALANG['YES'] = 'YES';
-$PALANG['NO'] = 'NO';
+$PALANG['YES'] = 'Yes';
+$PALANG['NO'] = 'No';
 $PALANG['edit'] = 'edit';
 $PALANG['del'] = 'del';
 $PALANG['manage'] = 'manage';
