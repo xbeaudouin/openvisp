@@ -106,8 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "edit" => array(
 																				 "label" => "",
 																				 "sortable" => "false",
-																				 "resizeable" => "false"
-																				 )
+																				 "resizeable" => "false",
+																				 "formatter" => "this.formatUrl"
+																				 ),
+												 "edit_url" => array (
+																									"label" => "",
+																									"display" => FALSE
+																									)
 												 );
 
 
@@ -129,6 +134,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 			$ajax_alias->item_add($item_list);
 
 			$ajax_alias->start("address");
+
+
+			$function_name = "formatUrl";
+			$function_content = 'function(elCell, oRecord, oColumn, sData) { 
+              var column_name = oColumn.key + "_url";
+	            elCell.innerHTML = "<a href=" + oRecord.getData(column_name) + ">" + sData + "</a>"; 
+	        };';
+
+			$ajax_alias->add_function($function_name, $function_content);
+
 			$ajax_alias->create_listener();
 
 
@@ -192,15 +207,25 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "quarantine" => array(
 																							 "label" => $PALANG['pOverview_mailbox_quarantine'],
 																							 "parser" => "text",
+																							 "formatter" => "this.formatUrl"
 																							 ),
+												 "quarantine_url" => array (
+																									"label" => "",
+																									"display" => FALSE
+																									),
 												 "modified" => array(
 																						 "label" => $PALANG['pOverview_alias_modified'],
-																						 "parser" => "text",
+																						 "parser" => "text"
 																						 ),
 												 "pdf" => array(
-																			"label" => "",
-																			"parser" => "text",
-																				),
+																				"label" => "",
+																				"parser" => "text",
+																				"formatter" => "this.formatUrl"
+																				 ),
+												 "pdf_url" => array (
+																							"label" => "",
+																							"display" => FALSE
+																							),
 												 "delete" => array(
 																					 "label" => "delete",
 																					 "sortable" => "false",
@@ -212,8 +237,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "edit" => array(
 																				 "label" => "",
 																				 "sortable" => "false",
-																				 "resizeable" => "false"
-																				 )
+																				 "resizeable" => "false",
+																				 "formatter" => "this.formatUrl"
+																				 ),
+												 "edit_url" => array (
+																									"label" => "",
+																									"display" => FALSE
+																									)
 												 );
 
 
@@ -236,6 +266,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 			$ajax_mailbox->item_add($item_list);
 
 			$ajax_mailbox->start("username");
+
+
+			$function_name = "formatUrl";
+			$function_content = 'function(elCell, oRecord, oColumn, sData) { 
+              var column_name = oColumn.key + "_url";
+	            elCell.innerHTML = "<a href=" + oRecord.getData(column_name) + ">" + sData + "</a>"; 
+	        };';
+
+			$ajax_mailbox->add_function($function_name, $function_content);
+
 			$ajax_mailbox->create_listener();
 
       $template = "overview.tpl";
@@ -251,8 +291,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "domain" => array(
 																					 "label" => $PALANG['pOverview_get_domain'],
 																					 "sortable" => "true",
-																					 "parser" => "text"
+																					 "parser" => "text",
+																					 "formatter" => "this.formatUrl"
 																					 ),
+												 "domain_url" => array (
+																								"label" => "",
+																								"display" => FALSE
+																								),
 												 "aliases" => array (
 																						 "label" => $PALANG['pOverview_get_aliases'],
 																						 "sortable" => "false",
@@ -284,12 +329,16 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																												"sortable" => "false",
 																												"parser" =>  "number"
 																												),
-												 "security" => array (
-																							"label" => $PALANG['pOverview_get_security'],
-																							"sortable" => "false",
-																							"parser" => "text",
-																							)
-
+													"security" => array (
+																							 "label" => $PALANG['pOverview_get_security'],
+																							 "sortable" => "false",
+																							 "parser" => "text",
+																							 "formatter" => "this.formatUrl"
+																							 ),
+													"security_url" => array (
+																									 "label" => "",
+																									 "display" => FALSE
+																									 )
 												 );
 
 		 }
@@ -300,6 +349,10 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																						"sortable" => "true",
 																						"parser" => "text"
 																						),
+												 "domain_url" => array (
+																								"label" => "",
+																								"display" => FALSE
+																								),
 													"aliases" => array (
 																							"label" => $PALANG['pOverview_get_aliases'],
 																							"sortable" => "false",
@@ -309,8 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																								"label" => $PALANG['pOverview_get_mailboxes'],
 																								"sortable" => "false",
 																								"parser" => "number"
-																								),
-													
+																								),													
 													"maxquota" => array ( 
 																							 "label" => $PALANG['pOverview_get_quota'],
 																							 "sortable" => "false",
@@ -325,8 +377,13 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 													"security" => array (
 																							 "label" => $PALANG['pOverview_get_security'],
 																							 "sortable" => "false",
-																							 "parser" => "number",
-																							 )
+																							 "parser" => "text",
+																							 "formatter" => "this.formatUrl"
+																							 ),
+													"security_url" => array (
+																									 "label" => "",
+																									 "display" => FALSE
+																									 )
 													);
 		 }
 		 
@@ -345,9 +402,19 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 		 $ajax_domain->attr_add('data_div','domain');
 		 $ajax_domain->attr_add('nav_div','domain-nav');
 
+
 		 $ajax_domain->item_add($item_list);
 
 		 $ajax_domain->start("domain");
+
+		 $function_name = "formatUrl";
+		 $function_content = 'function(elCell, oRecord, oColumn, sData) { 
+              var column_name = oColumn.key + "_url";
+	            elCell.innerHTML = "<a href=" + oRecord.getData(column_name) + ">" + sData + "</a>"; 
+	        };';
+
+		 $ajax_domain->add_function($function_name, $function_content);
+
 		 //$ajax_domain->create_celleditor();
 		 $ajax_domain->create_listener();
 		 //$ajax_domain->create_search();
