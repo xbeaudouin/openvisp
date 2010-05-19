@@ -64,8 +64,8 @@ class MAIL
 		$query = "UPDATE alias
     SET policy_id = $policy_id_value
     WHERE address='".$alias_id."'";
-		debug_info("AS MB /$domain_policy_id :: ".$this->data_alias['policy_id']."/ : $query");
-		$this->sql_result = $this->db_link->sql_query($query,2);
+		debug_info("AS MB : $query");
+		$this->sql_result = $this->db_link->sql_query($query);
 	}
 
 
@@ -116,14 +116,14 @@ AND mailbox.username=alias.address
 
 	function mailbox_fetch_quota_used(){
 
-		$query = "SELECT * FROM stats_mailbox
+		$query = "SELECT mailbox_size FROM stats_mail_user
     WHERE mailbox_id=".$this->data_mailbox['id']."
-    ORDER BY date DESC
+    ORDER BY last_date DESC
     LIMIT 1";
 		$result = $this->db_link->sql_query($query,2);
 		$this->mailbox_quota_used = 0;
 		if ( $result['rows'] > 0 ){
-			$this->mailbox_quota_used = $result['result'][0]['size'];
+			$this->mailbox_quota_used = $result['result'][0]['mailbox_size'];
 		}
 
 	}
