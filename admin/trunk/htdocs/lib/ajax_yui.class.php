@@ -105,55 +105,60 @@ class AJAX_YUI
 	 	  
 	 	  foreach ($this->item_list as $item => $attributes) {
 
+				if ( !isset($attributes['display']) ) { $attributes['display'] = TRUE;}
 
-				switch ($item){
+				if ( $attributes['display'] == TRUE ){
 
-				case "delete":
-					//$delete_items = explode("|", $attributes);
-					$this->buffer .="{key:'delete', label:'', formatter:function(elCell){
-	 	        elCell.innerHTML = '<img src=\"../images/ico-exit.png\" title=\"delete item\" height=\"20\" width=\"20\"/>';
-	 	        elCell.style.cursor = 'pointer';
-	 	        }
-	 	      }";
-					//	 	      $deletable_item[] = $attributes;
-					break;
 
-				case "children":
+					switch ($item){
 
-					$this->buffer .= '{ ';
-					if ( isset($attributes['label']) ) { $this->buffer .= 'label:"'.$attributes['label'].'",'; }
-					$this->buffer .= "children: [ \n";
+					case "delete":
+						//$delete_items = explode("|", $attributes);
+						$this->buffer .="{key:'delete', label:'', formatter:function(elCell){
+  	 	        elCell.innerHTML = '<img src=\"../images/ico-exit.png\" title=\"delete item\" height=\"20\" width=\"20\"/>';
+	   	        elCell.style.cursor = 'pointer';
+	 	          }
+	 	        }";
+						//	 	      $deletable_item[] = $attributes;
+						break;
 
-					$total_child = sizeof($attributes);
-					$boucle_child = 0;
-					foreach ($attributes as $child_array){
-						if ( is_array($child_array) ){
-							$this->buffer .= '  { key:"'.$child_array['key'].'", sortable:'.$child_array['sortable'].', resizeable:'.$child_array['resizeable'];
-							if ( ! empty($child_array['label']) ) { $child_array['label'];}
-							$this->buffer .= ', label:"'.$child_array['label'].'"';
-							$this->buffer .= '} ';
+					case "children":
+						
+						$this->buffer .= '{ ';
+						if ( isset($attributes['label']) ) { $this->buffer .= 'label:"'.$attributes['label'].'",'; }
+						$this->buffer .= "children: [ \n";
+						
+						$total_child = sizeof($attributes);
+						$boucle_child = 0;
+						foreach ($attributes as $child_array){
+							if ( is_array($child_array) ){
+								$this->buffer .= '  { key:"'.$child_array['key'].'", sortable:'.$child_array['sortable'].', resizeable:'.$child_array['resizeable'];
+								if ( ! empty($child_array['label']) ) { $child_array['label'];}
+								$this->buffer .= ', label:"'.$child_array['label'].'"';
+								$this->buffer .= '} ';
 
-							if ( $boucle_child < $total_child ) { $this->buffer .= ","; }
-							$boucle_child++;
+								if ( $boucle_child < $total_child ) { $this->buffer .= ","; }
+								$boucle_child++;
+							}
 						}
-					}
 
-					$this->buffer .= '
+						$this->buffer .= '
 	                    ] 
 	 
 	                } 
             ';
-					break;
+						break;
 
-				default:
-					if ( empty($attributes['label']) ) { $attributes['label']="";}
-					$this->buffer .= '{key:"'.$item.'", label:"'.$attributes['label'].'"';
-					if ( isset($attributes['editor']) ) {$editable_item[] = $item; $this->buffer .= ", editor:\"".$attributes['editor']."\"";}
-					if ( isset($attributes['dropdownOptions']) ) {
-								$this->buffer .= ', editor: new YAHOO.widget.DropdownCellEditor({ dropdownOptions: '.$attributes['dropdownOptions'].' })';
-					}
-					if ( isset($attributes['radioOptions']) ) {
-								$this->buffer .= ", editor: new YAHOO.widget.RadioCellEditor({
+					default:
+						if ( empty($attributes['label']) ) { $attributes['label']="";}
+						$this->buffer .= '{key:"'.$item.'", label:"'.$attributes['label'].'"';
+						if ( isset($attributes['formatter']) ) {$this->buffer .= ", formatter:".$attributes['formatter'];}
+						if ( isset($attributes['editor']) ) {$editable_item[] = $item; $this->buffer .= ", editor:\"".$attributes['editor']."\"";}
+						if ( isset($attributes['dropdownOptions']) ) {
+							$this->buffer .= ', editor: new YAHOO.widget.DropdownCellEditor({ dropdownOptions: '.$attributes['dropdownOptions'].' })';
+						}
+						if ( isset($attributes['radioOptions']) ) {
+							$this->buffer .= ", editor: new YAHOO.widget.RadioCellEditor({
                  radioOptions: ".$attributes['radioOptions']['items'].",disableBtns:true,
                  asyncSubmitter: function (callback, newValue) {
                    var record = this.getRecord(),
@@ -188,17 +193,20 @@ class AJAX_YUI
                  }
                })";
 
+						}
+						if ( isset($attributes['sortable']) ) {$this->buffer .= ", sortable:".$attributes['sortable'];}
+
+						$this->buffer .= '} ';
+
 					}
-					if ( isset($attributes['sortable']) ) {$this->buffer .= ", sortable:".$attributes['sortable'];}
 
-					$this->buffer .= '} ';
-
-				}
+					if ( $boucle < sizeof($this->item_list)){
+						$this->buffer .= ",\n";
+					}
 				
+				}
 
-	 	    if ( $boucle < sizeof($this->item_list)){
-	 	      $this->buffer .= ",\n";
-	 	    }
+
 	 	    $boucle++;
 	 	  }
 	 	  
@@ -450,6 +458,12 @@ class AJAX_YUI
 	
 	function add_search_form($item_list){
 	  $this->search_form=$item_list;
+	}
+
+	function add_function($function_name, $function_content){
+
+		$this->buffer .= 'this.'.$function_name.' = '.$function_content."\n\n"; 
+
 	}
 	
 	function generate_search_form($size){
