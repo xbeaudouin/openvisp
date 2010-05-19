@@ -33,8 +33,9 @@ class MAIL
 	}
 
 	function alias_delete(){
-		$query = "DELETE FROM alias
+		$query = "UPDATE alias SET active = 9
     WHERE address='".$this->data_alias['address']."'";
+		debug_info("$query");
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
@@ -45,7 +46,7 @@ class MAIL
 	//
 	function antispam_en_disable($domain_policy_id){
 
-		if ( isset($this->data_alias['policy_id']) && ($this->data_alias['policy_id'] == $domain_policy_id) ){
+		if ( $this->data_alias['policy_id'] == $domain_policy_id) {
 			
 			$policy_id_value = 1;
 		}
@@ -63,7 +64,7 @@ class MAIL
 		$query = "UPDATE alias
     SET policy_id = $policy_id_value
     WHERE address='".$alias_id."'";
-		debug_info("AS MB : $query");
+		debug_info("AS MB /$domain_policy_id :: ".$this->data_alias['policy_id']."/ : $query");
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
@@ -103,6 +104,11 @@ AND mailbox.username=alias.address
 	}
 
 	function mailbox_delete(){
+
+		// Deletion of the associated alias
+		$this->fetch_alias_info($this->data_mailbox['username']);
+		$this->alias_delete();
+
 		$query = "UPDATE mailbox SET active = 9
     WHERE username='".$this->data_mailbox['username']."'";
 		$this->sql_result = $this->db_link->sql_query($query,2);
