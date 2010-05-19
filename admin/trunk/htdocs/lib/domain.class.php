@@ -122,6 +122,7 @@ class DOMAIN
     WHERE alias.domain_id=".$this->data_domain['id']."
     AND mailbox.maildir IS NULL
     AND alias.address NOT LIKE '@%'
+    AND alias.active < 9
     ORDER BY alias.address ";
 
 		$result = $this->db_link->sql_query($query);
@@ -259,6 +260,7 @@ class DOMAIN
       $query = "SELECT alias.address, alias.goto, alias.modified, alias.policy_id, alias.active
       FROM alias
       WHERE alias.domain='".$this->data_domain['domain']."'
+      AND active < 9
       ORDER BY alias.address ";
     }
     else
@@ -269,6 +271,7 @@ class DOMAIN
       WHERE alias.domain_id=".$this->data_domain['id']."
       AND mailbox.maildir IS NULL
       AND alias.address NOT LIKE '@%'
+      AND alias.active < 9
       ORDER BY alias.address ";
     }
 
