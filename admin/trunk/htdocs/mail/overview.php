@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																					 "resizeable" => "false",
 																					 "link" => "/ajax/mail/manage_alias.php",
 																					 "url_param" => "action=delete&domainName=$fDomain",
-																					 "key_item" => "alias"
+																					 "key_item" => "address"
 																					 ),
 												 "edit" => array(
 																				 "label" => "",
@@ -167,11 +167,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "quota" => array(
 																					"label" => $PALANG['pOverview_mailbox_quota'],
 																					"parser" => "text",
-																					"sortable" => "false"
+																					"sortable" => "true"
 																					),
 												 "paid" => array(
 																				 "label" => $PALANG['pOverview_mailbox_paid'],
 																				 "parser" => "text",
+																				 "sortable" => "true",
 																				 "radioOptions" => array (
 																																	"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
 																																	"url" => "/ajax/mail/manage_mailbox.php",
@@ -180,15 +181,18 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																				 ),
 												 "vacation" => array(
 																						 "label" => $PALANG['pOverview_mailbox_responder'],
-																						 "parser" => "text"
+																						 "parser" => "text",
+																						 "sortable" => "true"
 																						 ),
 												 "forward" => array(
 																						 "label" => $PALANG['pOverview_mailbox_forward'],
-																						 "parser" => "text"
+																						 "parser" => "text",
+																						 "sortable" => "false"
 																						 ),
 												 "policy_id" => array(
 																							"label" => $PALANG['pOverview_mailbox_amavisd'],
 																							"parser" => "text",
+																							"sortable" => "true",
 																							"radioOptions" => array (
 																																			 "items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
 																																			 "url" => "/ajax/mail/manage_mailbox.php",
@@ -198,6 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 												 "active" => array(
 																					 "label" => $PALANG['pOverview_mailbox_active'],
 																					 "parser" => "text",
+																					 "sortable" => "true",
 																					 "radioOptions" => array (
 																																		"items" => '["'.$PALANG['YES'].'", "'.$PALANG['NO'].'"]',
 																																		"url" => "/ajax/mail/manage_mailbox.php",
