@@ -45,6 +45,19 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
 
+	switch ($fSort){
+
+	case "vacation":
+		$fSort = "vacation.active";
+		break;
+
+	case "quota_used":
+		$fSort = "";
+		break;
+
+	default: $fSort = $fSort;
+
+	}
 
 	$domain_info->fetch_by_domainname($fDomain_name);
 	$user_info->check_domain_access($domain_info->data_domain['id']);
