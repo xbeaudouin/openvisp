@@ -68,6 +68,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 		break;
 
 	case "mod_antispam" :
+		$mailbox_info->fetch_alias_info($fUsername);
 		$mailbox_info->antispam_en_disable($domain_info->data['policy_id']);
 		$json_array['replyCode'] = $mailbox_info->sql_result['return_code'] + 1;
 		break;
