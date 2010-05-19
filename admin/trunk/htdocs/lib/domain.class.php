@@ -227,13 +227,13 @@ class DOMAIN
 	//
   function total_diskspace_used_mailboxes ()
   {
-    $sql_query = "SELECT SUM(stats_mailbox.size) as total_mbox_size
-    FROM stats_mailbox, mailbox
+    $sql_query = "SELECT SUM(stats_mail_user.mailbox_size) as total_mbox_size
+    FROM stats_mail_user, mailbox
     WHERE mailbox.domain_id = ".$this->data_domain['id']."
-    AND mailbox.id=stats_mailbox.mailbox_id
+    AND mailbox.id=stats_mail_user.mailbox_id
     AND mailbox.active < 9
-    GROUP BY date, mailbox.id
-    ORDER BY date DESC
+    GROUP BY stats_mail_user.last_date, mailbox.id
+    ORDER BY stats_mail_user.last_date DESC
     LIMIT 1";
 
     $result = $this->db_link->sql_query($sql_query);
