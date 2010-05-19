@@ -50,11 +50,20 @@ class OVA
 		while (($file = readdir($handle)) !== false) 
 			{
 				
-				if ( (eregi ('\.sql$',$file)) && (preg_replace("/.sql/","",$file) > $this->running_db) ) $this->sql_files[]=$file;
+				if ( (preg_match('/([0-9]*)\.sql$/',$file,$result_match)) && (preg_replace("/.sql/","",$result_match[0]) > $this->running_db) ) $this->sql_files[]=$result_match[0];
 
 			}
 		sort($this->sql_files);
+		$this->sql_files[]="fk.sql";
 
+	}
+
+	function show_latest_sql(){
+
+		foreach($this->sql_files as $file)
+			{
+				print 'File : '.$file.'<br/>';
+			}
 
 	}
 
