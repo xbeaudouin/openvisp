@@ -42,6 +42,10 @@ class DB
 				$db_type = $CONF['database_type'];
 			}
 
+		$this->sql_param['db_type'] = $db_type;
+		$this->sql_param['db_host'] = $db_host;
+		$this->sql_param['db_name'] = $database;
+
 		$this->connect =& MDB2::factory($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_port."/".$database);
 		$this->connect->setFetchMode(MDB2_FETCHMODE_ASSOC);
 
@@ -75,7 +79,12 @@ class DB
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA \n\n$query \n\n"); }
 
-		$result = $this->connect->query($query);
+		if (eregi ("^select", $query)){
+			$result =& $this->connect->query($query);
+		}
+		else{
+			$result =& $this->connect->exec($query);
+		}
 
 		if ( $die_on_error == 1 && PEAR::isError($result) )
 			{
@@ -86,7 +95,11 @@ class DB
 			{
 				$return_code = "500"; 
 				//print ("<p />SQL Query Failed <br /> query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
-				$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\nQuery :\n\"$query\"\n".$this->debug_text_txt;
+				$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\n<br/>Query :\n\"$query\"\n<br/>".$this->debug_text_txt."<br/>";
+				$sql_log .= "DB TYPE : ".$this->sql_param['db_type']."<br/>";
+				$sql_log .= "DB HOST : ".$this->sql_param['db_host']."<br/>";
+				$sql_log .= "DB NAME : ".$this->sql_param['db_name']."<br/>";
+
 			}
 
 		if (eregi ("^select", $query))
@@ -98,7 +111,7 @@ class DB
 		else
 			{ 
 				$row_results[] = "";
-				$number_rows = $this->connect->_affectedRows($this->connect);
+				$number_rows = $result;
 			}
 		
 
