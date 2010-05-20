@@ -126,4 +126,25 @@ class OVA
 	}
 
 
+	function do_log ($domain_id,$action,$data, $domain2="")
+	{
+		global $CONF;
+		global $user_info;
+
+		$REMOTE_ADDR = $_SERVER['REMOTE_ADDR'];
+
+
+		if ( $CONF['logging'] == 'YES' ) {
+
+				$query = "INSERT INTO log (accounts_id, domain_id, domain_name, ip, action, data)
+        VALUES ('".$user_info->data['id']."','".$domain_id."', '$domain2', '$REMOTE_ADDR','$action','$data')";
+				$result = $this->db_link->sql_query($query);
+	 
+		}
+
+}
+
+
+
+
 }
