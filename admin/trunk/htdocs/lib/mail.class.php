@@ -8,6 +8,7 @@ class MAIL
 	function __construct ($db_link)
 	{
 		$this->db_link = $db_link;
+		$this->message = "";
 	}
 
 
@@ -24,6 +25,15 @@ class MAIL
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
+	function check_alias_not_exist($alias){
+		$query = "SELECT * FROM alias WHERE address='$alias'";
+		$result = $this->db_link->sql_query($query,2);
+		if ( $result['rows'] == 0){
+			return TRUE;
+		}
+		return FALSE;
+	}
+
 
 	function alias_change_active_status($value){
 		$query = "UPDATE alias
@@ -33,10 +43,67 @@ class MAIL
 	}
 
 	function alias_delete(){
+
+    global $CONF;
+    global $PALANG;
+		global $user_info;
+		global $domain_info;
+		global $ova;
+		global $server_info;
+
+
 		$query = "UPDATE alias SET active = 9
     WHERE address='".$this->data_alias['address']."'";
-		debug_info("$query");
-		$this->sql_result = $this->db_link->sql_query($query,2);
+		$result = $this->db_link->sql_query($query,2);
+
+		$array['status'] = $result['rows'];
+		$array['message']="";
+
+		if ($result['rows'] == 0){
+			$array['message'] .= $PALANG['pDelete_alias_fail'];
+
+		}
+		else{
+			$array['message'] .= $PALANG['pDelete_alias_ok'];
+			
+					if ( $CONF['greylisting'] == "YES" ){
+ 
+						if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$this->data_alias['address'])) ){
+
+							$server_info->fetch_server_role_list('policy');
+
+							for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
+
+								$db_name = $server_info->list_server_role[$i]['instance'];
+								$db_user = $server_info->list_server_role[$i]['login'];
+								$db_pass = $server_info->list_server_role[$i]['password'];
+								$db_port = $server_info->list_server_role[$i]['port'];
+								$db_type = "mysql";
+								$db_host = $server_info->list_server_role[$i]['ip_public'];
+								if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
+
+								$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
+								$policy_server = new POLICYD($policydb);
+								$policy_search_result = $policy_server->search_policy($this->data_alias['address']);
+
+								if ( $policy_search_result['rows'] == 1 ){
+									$policy_result = $policy_server->remove_policy($this->data_alias['address']);
+									if ( $policy_result['status'] == 0 ){
+										$array['status'] = $policy_result['status'];
+										$array['message'] .= $policy_result['message'];
+										return $array;
+									}
+
+									$array['message'] .= $policy_result['message'];
+								}
+							}
+
+						}
+
+					}
+
+		}
+
 	}
 
 	//
@@ -186,87 +253,133 @@ AND mailbox.username=alias.address
 
 	}
 
+	//
+	// check_email_struct
+	// Action: check if email is valid and returns TRUE if this is the case.
+	// Call: check_email (string email)
+	//
+	function check_email_struct ($email)
+	{
+
+		GLOBAL $PALANG;
+
+		$regexp  = '/';
+		$regexp .= '^[-!#$%&\'*+\\.\/0-9=?A-Z^_{|}~]+' . '@' . '([-0-9A-Z]+\.)+' . '([0-9A-Z]){2,4}$';
+		$regexp .= '|';
+		$regexp .= '^[-!#$%&\'*+\\.\/0-9=?A-Z^_{|}~]+' . '@' . '([-0-9A-Z]+\.)+' . '([0-9A-Z]){2,4}';
+		$regexp .= '(, [-!#$%&\'*+\\.\/0-9=?A-Z^_{|}~]+' . '@' . '([-0-9A-Z]+\.)+' . '([0-9A-Z]){2,4})+';
+		$regexp .= '$';
+		$regexp .= '/i';
+		if (preg_match ( $regexp, trim ($email)))
+			{
+				return TRUE;
+			}
+		else
+			{
+				return FALSE;
+			}
+	}
+
 
   //
 	// add_mail_alias
 	// Action: create a new mail alias
 	// Call: add_mail_alias (string alias, string email_to, int greylisting)
 	//
-  function add_mail_alias($alias, $email_to, $greylisting=2){
+  function add_mail_alias($alias, $email_to, $greylisting=1){
     
-    GLOBAL $CONF;
-    GLOBAL $PALANG;
+    global $CONF;
+    global $PALANG;
+		global $user_info;
+		global $domain_info;
+		global $ova;
+		global $server_info;
 
-    $domain_policy = get_domain_policy($domain);
     $message = "";
     
-    if ( check_policyhosting() ){
-      
-      if ( $greylisting == 2 && $CONF['greylisting'] == 'YES' )
-        { $greylisting = 1;}
-      else 
-			{ $greylisting = 0;}
-		}
-		
 		$error = 0;
 		
 
-    if (!preg_match ('/@/',$to)) $to = $to . "@" . $domain;
-    if (!preg_match ('/@/',$from)) $from = $from . "@" . $domain;
+    if (!preg_match ('/@/',$email_to)) $email_to = $email_to . "@" . $domain_info->data_domain['domain'];
+    if (!preg_match ('/@/',$alias)) $alias = $alias . "@" . $domain_info->data_domain['domain'];
     
-    if (empty ($from) or !check_email ($from))
+    if (empty ($alias) or !($this->check_email_struct ($alias)) )
     {
       $error = 1;
-      $message .= $PALANG['pCreate_alias_address_text_error1']." $from";
+      $array['message'] .= $PALANG['pCreate_alias_address_text_error1']." $alias";
     }
     
-    if (preg_match ('/^\*@(.*)$/', $to, $match)) $to = "@" . $match[1];
+    if (preg_match ('/^\*@(.*)$/', $email_to, $match)) $email_to = "@" . $match[1];
     
     
-    if (empty ($to) or !check_email ($to))
+    if (empty ($email_to) or !($this->check_email_struct ($email_to)) )
     {
       $error = 1;
-      $message .= $PALANG['pCreate_alias_goto_text_error']. " $to";
+      $array['message'] .= $PALANG['pCreate_alias_goto_text_error']. " $email_to";
     }
-    
-    
-    
+
+
     if ( $error == 0 ){
-      
-      if ( check_policyhosting() &&  (!preg_match ('/^@/',$from)) ){
-        $result = db_query("INSERT INTO policy(_rcpt,_optin,_priority) VALUES ('".$from."','".$greylisting."','50')","1","policyd");
+
+			if ( $this->check_alias_not_exist($alias) ){
+
+				$query = "INSERT INTO alias(address,goto,policy_id,domain_id,created,active)
+        VALUES ('$alias','$email_to','".$domain_info->data['policy_id']."',".$domain_info->data_domain['id'].",NOW(),'1')";
+				$result = $this->db_link->sql_query($query);
+
         if ($result['rows'] != 1){
-          $message .= $PALANG['pCreate_alias_policy_fail'] . "<br />($from)<br />\n";
-        }
-        else{
-          $message .= $PALANG['pCreate_alias_policy_ok'] . "<br />($from)<br />\n";
-        }
-        
-      }
-      
-      
-      $result = db_query ("SELECT * FROM alias WHERE address='$from' AND goto='$to' AND policy_id='".$domain_policy['id']."'");
-      if ($result['rows'] == 0 )
-      {
-        
-        $result = db_query ("INSERT INTO alias (address,goto,policy_id,created,active) VALUES ('$from','$to','".$domain_policy['id']."',NOW(),'1')");
-        if ($result['rows'] != 1)
-        {
           $error = 1;
-          $message .= "<br />" . $PALANG['pCreate_alias_result_error'] . "<br />($from -> $to)</br />";
+          $array['message'] .= "<br/>" . $PALANG['pCreate_alias_result_error'] . "<br/>($alias -> $email_to)</br/>";
+          $array['message'] .= "SQL : ".$result['sql_log']."// ".$result['rows']."</br/>";
         }
-        else
-        {
-          $error = 0;
-          $message .= "<br />" . $PALANG['pCreate_alias_result_succes'] . "<br />($from -> $to)</br />";
-          db_log ($SESSID_USERNAME, "$domain", "create alias", "$from -> $to");
+        else {
+
+					$array['message'] .= "<br/>" . $PALANG['pCreate_alias_result_succes'] . "<br />($alias -> $email_to)</br />";
+          $ova->do_log ($domain_info->data_domain['id'], "create alias", "$alias -> $email_to");
+
+					if ( $CONF['greylisting'] == "YES" ){
+ 
+						if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$alias)) ){
+
+							$server_info->fetch_server_role_list('policy');
+
+							for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
+
+								$db_name = $server_info->list_server_role[$i]['instance'];
+								$db_user = $server_info->list_server_role[$i]['login'];
+								$db_pass = $server_info->list_server_role[$i]['password'];
+								$db_port = $server_info->list_server_role[$i]['port'];
+								$db_type = "mysql";
+								$db_host = $server_info->list_server_role[$i]['ip_public'];
+								if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
+
+								$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
+								$policy_server = new POLICYD($policydb);
+								$policy_result = $policy_server->add_new_policy($alias, $greylisting);
+
+								if ( $policy_result['status'] == 1 ){
+									$array['status'] = $policy_result['status'];
+									$array['message'] .= $policy_result['message'];
+									return $array;
+								}
+
+								$array['message'] .= $policy_result['message'];
+
+							}
+
+						}
+
+					}
+
         }
-      }
-      else
-      {
+
+			}
+			else{
         $error = 1;
-        $message .= "<br />" . $PALANG['pCreate_alias_result_error_exist'] . "<br />($from -> $to)</br />";
-      }
+        $array['message'] .= "<br />" . $PALANG['pCreate_alias_result_error_exist'] . "<br />($alias -> $email_to)</br />";
+			}
+      
+
       
     }
     $array['status'] = $error;
