@@ -51,13 +51,14 @@ class DOMAIN
 	//
 	function fetch_policy_id()
 	{
-	  	
+
 		$query = "SELECT id as id
 		FROM policy
 		WHERE policy.domain_id = ".$this->data_domain['id'];
-
+			
 		$result = $this->db_link->sql_query($query);
 		$this->data['policy_id'] = $result['result'][0]['id'];
+
 		
 	}
 
@@ -319,11 +320,11 @@ class DOMAIN
   //
 	// can_add_mail_alias
 	// Action: Check if a domain can have new mail aliases
-	// Call: can_add_mail_alias ()
+	// Call: can_add_mail_alias (int number_to_add)
 	//
-  function can_add_mail_alias(){
+  function can_add_mail_alias($number_to_add = 1){
     if( 
-        ( ($this->used_quota['mail_alias'] - $this->quota['mail_aliases']) > 0 )
+        ( ( $this->quota['mail_aliases'] - $this->used_quota['mail_alias'] ) >= $number_to_add )
       ||
         ( $this->quota['mail_aliases'] == -1 )
       ){return TRUE;}
