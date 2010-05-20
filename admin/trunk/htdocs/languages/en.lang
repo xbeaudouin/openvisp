@@ -196,6 +196,9 @@ $PALANG['pCreate_alias_policy_ok'] = 'New alias in policyd inserted';
 $PALANG['pDelete_alias_policy_fail'] = '<div class="standout">Failed to delete alias in policyd</div>';
 $PALANG['pDelete_alias_policy_ok'] = 'Deleted alias in policyd</div>';
 
+$PALANG['pDelete_alias_fail'] = '<div class="standout">Failed to delete alias</div>';
+$PALANG['pDelete_alias_ok'] = 'Deleted alias</div>';
+
 $PALANG['pCreate_domain_alias_goto_text'] = 'Where the domain needs to be aliased to.';
 $PALANG['pCreate_domain_alias_welcome'] = 'Create a new domain alias';
 $PALANG['pCreate_domain_alias_new_domain'] = 'New domain';
@@ -766,6 +769,12 @@ $PALANG['pImport_Alias_file'] = 'Alias file';
 $PALANG['pImport_Alias_help'] = 'The file must contains the informations like the following exemple :';
 $PALANG['pImport_Alias_help2'] = 'Email from ; Email to';
 $PALANG['pImport_Alias_help3'] = 'Example : <br/>webmaster ; user1@domain.tld, user2@domain.tld; 1<br/>postmaster ; admin@domain.tld<br/><br/>';
+$PALANG['pImport_Alias_file_overquota'] = 'Sorry the import process of your file will overfill your allocated quota.<br/>Please contact your administrator to resize your domain alias quota or remove some alias from your file.';
+$PALANG['pImport_Alias_file_quota_status_1'] = 'Your are allowed to add ';
+$PALANG['pImport_Alias_file_quota_status_2'] = ' alias';
+$PALANG['pImport_Alias_file_quota_request_1'] = 'Your have request to add ';
+$PALANG['pImport_Alias_file_quota_request_2'] = ' alias';
+
 
 //
 // Accounts part
