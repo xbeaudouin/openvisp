@@ -14,3 +14,7 @@ ALTER TABLE  `whost_alias` DROP PRIMARY KEY ,
 ADD PRIMARY KEY (  `id` );
 
 ALTER TABLE  `whost_alias` ENGINE = INNODB;
+
+ALTER TABLE  `server_job` ADD  `instance` VARCHAR( 50 ) NOT NULL AFTER  `password`;
+
+ALTER TABLE  `alias` CHANGE  `domain_id`  `domain_id` INT( 11 ) UNSIGNED NOT NULL;
