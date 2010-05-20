@@ -24,6 +24,9 @@ require_once ("../../lib/db.class.php");
 require_once ("../../lib/user.class.php");
 require_once ("../../lib/domain.class.php");
 require_once ("../../lib/mail.class.php");
+require_once ("../../lib/server.class.php");
+require_once ("../../lib/policyd.class.php");
+require_once ("../../lib/ova.class.php");
 
 $SESSID_USERNAME = check_user_session ();
 
@@ -45,6 +48,10 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 	$domain_info->fetch_by_domainname($fDomain_name);
 	$user_info->check_domain_access($domain_info->data_domain['id']);
+
+	$ova = new OVA($ovadb);
+	$server_info = new SERVER($ovadb);
+
 
 	$alias_info = new MAIL($ovadb);
 	$alias_info->fetch_alias_info($fAlias);
