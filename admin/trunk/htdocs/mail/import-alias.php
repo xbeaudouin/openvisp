@@ -84,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
 	$ova = new OVA($ovadb);
 	$server_info = new SERVER($ovadb);
+	$tMessage = "";
 
 	$uploadfile = $CONF['uploaddir'] ."/". basename($_FILES['user_file']['name']);
 
@@ -111,12 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
 			$mail_info = new MAIL($ovadb);
 
-			$result = $mail_info->add_mail_alias("toto@goralski.fr", "nicolas@goralski.fr");
-
-			print $result['status']."<br/>";
-			print $result['message']."<br/>";
-
-
 			foreach ($lines as $line_num => $line) {
 				$line = chop ($line);
 
@@ -125,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
 					$alias_from = $info[0];
 					$alias_table_to = preg_split ('/,/', $info[1]);
+					$alias_active=1;
 					if ( isset($info[2]) ){
 						$alias_active = $info[2];
 					}
@@ -144,6 +140,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 						}
 					$alias_to = implode(",", $alias_table_to);
 
+					$result = $mail_info->add_mail_alias($alias_from, $alias_to, $alias_active);
+					//print $result['status']."<br/>";
+					$tMessage .= $result['message']."<br/>";
 
 					//$add_alias =  add_mailbox_alias( $fDomain, $alias_from, $alias_to );
 					//$tMessage .= $add_alias['message'];
