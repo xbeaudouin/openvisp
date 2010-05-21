@@ -56,53 +56,56 @@ class MAIL
     WHERE address='".$this->data_alias['address']."'";
 		$result = $this->db_link->sql_query($query,2);
 
-		$array['status'] = $result['rows'];
-		$array['message']="";
+		$array['message'] = "";
 
 		if ($result['rows'] == 0){
-			$array['message'] .= $PALANG['pDelete_alias_fail'];
-
+			$array['message'] = $PALANG['pDelete_alias_fail'];
+			$array['status_code'] = 500;
 		}
 		else{
 			$array['message'] .= $PALANG['pDelete_alias_ok'];
 			
-					if ( $CONF['greylisting'] == "YES" ){
+			if ( $CONF['greylisting'] == "YES" ){
  
-						if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$this->data_alias['address'])) ){
+				if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$this->data_alias['address'])) ){
 
-							$server_info->fetch_server_role_list('policy');
+					$server_info->fetch_server_role_list('policy');
 
-							for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
+					for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
 
-								$db_name = $server_info->list_server_role[$i]['instance'];
-								$db_user = $server_info->list_server_role[$i]['login'];
-								$db_pass = $server_info->list_server_role[$i]['password'];
-								$db_port = $server_info->list_server_role[$i]['port'];
-								$db_type = "mysql";
-								$db_host = $server_info->list_server_role[$i]['ip_public'];
-								if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
+						$db_name = $server_info->list_server_role[$i]['instance'];
+						$db_user = $server_info->list_server_role[$i]['login'];
+						$db_pass = $server_info->list_server_role[$i]['password'];
+						$db_port = $server_info->list_server_role[$i]['port'];
+						$db_type = "mysql";
+						$db_host = $server_info->list_server_role[$i]['ip_public'];
+						if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
 
-								$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-								$policy_server = new POLICYD($policydb);
-								$policy_search_result = $policy_server->search_policy($this->data_alias['address']);
+						$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
+						$policy_server = new POLICYD($policydb);
+						$policy_search_result = $policy_server->search_policy($this->data_alias['address']);
 
-								if ( $policy_search_result['rows'] == 1 ){
-									$policy_result = $policy_server->remove_policy($this->data_alias['address']);
-									if ( $policy_result['status'] == 0 ){
-										$array['status'] = $policy_result['status'];
-										$array['message'] .= $policy_result['message'];
-										return $array;
-									}
-
-									$array['message'] .= $policy_result['message'];
-								}
+						if ( $policy_search_result['rows'] == 1 ){
+							$policy_result = $policy_server->remove_policy($this->data_alias['address']);
+							if ( $policy_result['status'] == 1 ){
+								$array['status_code'] = 500;
+								$array['message'] .= $policy_result['message'];
+								return $array;
 							}
 
+							$array['message'] .= $policy_result['message'];
 						}
-
 					}
 
+				}
+
+			}
+
+			$array['status_code'] = 201;
+
 		}
+
+		return $array;
 
 	}
 
@@ -284,9 +287,9 @@ AND mailbox.username=alias.address
   //
 	// add_mail_alias
 	// Action: create a new mail alias
-	// Call: add_mail_alias (string alias, string email_to, int greylisting)
+	// Call: add_mail_alias (string alias, string email_to, int active, int greylisting)
 	//
-  function add_mail_alias($alias, $email_to, $greylisting=1){
+  function add_mail_alias($alias, $email_to, $active=1, $greylisting=1){
     
     global $CONF;
     global $PALANG;
@@ -324,20 +327,22 @@ AND mailbox.username=alias.address
 			if ( $this->check_alias_not_exist($alias) ){
 
 				$query = "INSERT INTO alias(address,goto,policy_id,domain_id,created,active)
-        VALUES ('$alias','$email_to','".$domain_info->data['policy_id']."',".$domain_info->data_domain['id'].",NOW(),'1')";
+        VALUES ('$alias','$email_to','".$domain_info->data['policy_id']."',".$domain_info->data_domain['id'].",NOW(),'".$active."')";
 				$result = $this->db_link->sql_query($query);
+
+				if ( !isset($array['message'])){ $array['message']="";}
 
         if ($result['rows'] != 1){
           $error = 1;
-          $array['message'] .= "<br/>" . $PALANG['pCreate_alias_result_error'] . "<br/>($alias -> $email_to)</br/>";
-          $array['message'] .= "SQL : ".$result['sql_log']."// ".$result['rows']."</br/>";
+          $array['message'] .= $PALANG['pCreate_alias_result_error'] . " <b>($alias -> $email_to)</b></br/>";
+          $array['message'] .= "SQL : ".$result['sql_log']."</br/>";
         }
         else {
 
-					$array['message'] .= "<br/>" . $PALANG['pCreate_alias_result_succes'] . "<br />($alias -> $email_to)</br />";
+					$array['message'] .= $PALANG['pCreate_alias_result_succes'] . " <b>($alias -> $email_to)</b><br/>";
           $ova->do_log ($domain_info->data_domain['id'], "create alias", "$alias -> $email_to");
 
-					if ( $CONF['greylisting'] == "YES" ){
+					if ( $CONF['greylisting'] == "YES" && $greylisting == 1){
  
 						if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$alias)) ){
 
@@ -363,7 +368,7 @@ AND mailbox.username=alias.address
 									return $array;
 								}
 
-								$array['message'] .= $policy_result['message'];
+								$array['message'] .= $server_info->list_server_role[$i]['name'] . " : ".$policy_result['message'];
 
 							}
 
@@ -376,14 +381,12 @@ AND mailbox.username=alias.address
 			}
 			else{
         $error = 1;
-        $array['message'] .= "<br />" . $PALANG['pCreate_alias_result_error_exist'] . "<br />($alias -> $email_to)</br />";
+        $array['message'] .= $PALANG['pCreate_alias_result_error_exist'] . "<br />($alias -> $email_to)</br />";
 			}
       
-
       
     }
     $array['status'] = $error;
-    $array['message'] = $message;
     
     return $array;
 
