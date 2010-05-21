@@ -41,12 +41,12 @@ VALUES ('".$alias."','".$greylisting."','".$priority."')";
 
 		if ( $result['rows'] != 1){
 			$array['status'] = 1;
-			$array['message'] = $PALANG['pDelete_alias_policy_fail'] . "($alias) ".$result['sql_log']."<br/><br/>\n";
+			$array['message'] = $PALANG['pDelete_alias_policy_fail'] . "($alias) ".$result['sql_log']."<br/>\n";
 			return $array;
 		}
 
 		$array['status'] = 0;
-		$array['message'] = $PALANG['pDelete_alias_policy_ok'] . "($alias)<br/><br/>\n";
+		$array['message'] = $PALANG['pDelete_alias_policy_ok'] . "($alias)<br/>\n";
 		return $array;
 
 	}
