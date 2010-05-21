@@ -65,8 +65,10 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 		break;
 
 	case "delete" :
-		$alias_info->alias_delete();
-		$json_array['replyCode'] = $alias_info->sql_result['return_code'] + 1;
+		$return = $alias_info->alias_delete();
+		$json_array['replyCode'] = $return['status_code'];
+		$json_array['replyText'] = $return['message'];
+		//$json_array['replyCode'] = $alias_info->sql_result['return_code'] + 1;
 		break;
 
 	case "mod_antispam" :
@@ -89,7 +91,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 
 	$alias_info->fetch_alias_info($fAlias);
-	$json_array['log'] = $alias_info->sql_result['sql_log'];
+	if ( isset($alias_info->sql_result['sql_log']) ){
+		$json_array['log'] = $alias_info->sql_result['sql_log'];
+	}
 
 	$alias_info->data_alias['active'] = ($alias_info->data_alias['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'];
 	$alias_info->data_alias['policy_id'] = ($alias_info->data_alias['policy_id'] > 1) ? $PALANG['YES'] : $PALANG['NO'];
