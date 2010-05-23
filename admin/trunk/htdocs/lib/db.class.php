@@ -7,6 +7,12 @@ class DB
 	private $data;
 	private $debug_text;
 	private $debug;
+	private $db_host;
+	private $db_port;
+	private $db_user;
+	private $db_pass;
+	private $database;
+
 
 	//
 	// DB
@@ -14,7 +20,7 @@ class DB
 	// Action make a connection to the database with information supplied in config.inc.php
 	// if other information are supplied in parameter, it will override defaults one.
 	//
-	function DB ($database="", $db_type="", $db_host="", $db_user="", $db_pass="", $db_port="")
+	function __construct ($database="", $db_type="", $db_host="", $db_user="", $db_pass="", $db_port="")
 	{
 
 		global $CONF;
@@ -46,7 +52,7 @@ class DB
 		$this->sql_param['db_host'] = $db_host;
 		$this->sql_param['db_name'] = $database;
 
-		$this->connect =& MDB2::factory($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_port."/".$database);
+		$this->connect =& MDB2::factory($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_port."/".$database."?new_link=true");
 		$this->connect->setFetchMode(MDB2_FETCHMODE_ASSOC);
 
 		if (PEAR::isError($this->connect))
@@ -88,7 +94,7 @@ class DB
 
 		if ( $die_on_error == 1 && PEAR::isError($result) )
 			{
-			 die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+			 die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . " // " . $result->getDebugInfo() . "<br/>Query on (".$this->sql_param['db_name']."/".$this->sql_param['db_host'].")<b>\"$query\"</b><br/>".$this->debug_text );
 			}
 
 		if ( $die_on_error == 2 && PEAR::isError($result) )
@@ -183,6 +189,9 @@ VALUES ('".$userinfo->data['id']."','$domain_id', '$domain', '".$userinfo->remot
 
 		$result = $this->connect->query($update_query);
 
+	}
+
+	function __destruct() {
 	}
 
 
