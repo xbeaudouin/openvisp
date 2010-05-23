@@ -349,11 +349,11 @@ function check_language ()
    }
    if ($CONF['default_language_forced'] == 'NO')
    {
-	return $lang;
+		 return $lang;
    }
    else
    {
-	return $CONF['default_language'];
+		 return $CONF['default_language'];
    }
 }
 
@@ -3869,6 +3869,20 @@ function debug_info ($string)
 {
 
 	file_put_contents('php://stderr', "DEBUG OVA DEV : $string\n");
+
+}
+
+function clean_empty_line ($filename){
+
+	$lines = file($filename);
+
+	foreach ($lines as $line_num => $line) {
+		$line = chop ($line);
+		if (eregi("^$|^#",$line)){
+			unset($lines[$line_num]);
+		}
+	}
+	return $lines;
 
 }
 
