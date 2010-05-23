@@ -50,6 +50,13 @@
    </tr>
 
    <tr>
+      <td>Diskspace</td>
+      <td align="right">&nbsp;</td>
+      <td align="right">
+        <input type="text" name="fDiskspace" value="" size="7">
+			</td>
+   </tr>
+   <tr>
       <td>Email</td>
       <td align="right">
         <input type="checkbox" name="fMail">
