@@ -42,9 +42,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$user_info->fetch_domains(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
 
 
-	$json_array['totalRecords'] = intval($user_info->data_managed['domain']);
+	$json_array['totalRecords'] = intval($user_info->data_managed['domains']);
 	$json_array['startIndex'] = intval($fStartIndex);
-	$json_array['recordsReturned'] = sizeof($domain_info->list_mailboxes);
+	$json_array['recordsReturned'] = sizeof($user_info->data_managed_domain);
 	$json_array['sort'] = $fSort;
 	$json_array['dir'] = $fDir;
 	$json_array['pageSize'] = intval($fResults);
@@ -58,9 +58,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 		$json_data_array[] = array(
 															 'domain' => $domain_info->data_domain['domain'],
 															 'description' => $domain_info->data_domain['description'], 
-															 'aliases' => $domain_info->used_quota['mail_alias'],
-															 'quota_aliases' => ($domain_info->quota['mail_aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['mail_aliases'],
-															 'mails' => $domain_info->used_quota['mailbox'],
+															 'aliases' => $domain_info->used_quota['email_alias'],
+															 'quota_aliases' => ($domain_info->quota['email_alias'] == "-1" ) ? "&infin;" : $domain_info->quota['mail_aliases'],
+															 'mails' => $domain_info->used_quota['mailboxes'],
 															 'quota_mails' => ($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes'],
 															 'backupmx' => ($domain_info->data_domain['backupmx'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 															 'ftp' => $domain_info->used_quota['ftpaccount'],
