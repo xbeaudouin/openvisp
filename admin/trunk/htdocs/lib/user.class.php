@@ -11,15 +11,11 @@ class USER
 		$this->remote_host = $_SERVER['REMOTE_ADDR'];
 	}
 
+
 	function fetch_info($username)
 	{
 
-		GLOBAL $PALANG;
-
-		if ( $username == "" )
-			{
-				throw new Exception ($PALANG['pRights_no_webhosting']);
-			}
+		global $PALANG;
 
 		$query = "SELECT * FROM accounts WHERE username='$username'";
 		$result = $this->db_link->sql_query($query);
@@ -53,7 +49,12 @@ class USER
 			}
 	}
 
-	function fetch_domains()
+	//
+	// function fetch_domains
+	// This function list the domain associated with the user account
+	// Call fetch_domains()
+
+	function fetch_domains($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
 	{
 		if ( $this->rights['manage'] == 1 )
 			{
@@ -70,7 +71,21 @@ class USER
 				AND domain_admins.domain_id=domain.id
 				";
 			}
-		$query .= "ORDER BY domain.domain";
+
+		if ( $search_param != NULL ){
+		  $query .= "AND domain.domain like '".$search_param."%' ";
+		}
+		
+		if ( $order_by_field == NULL ){
+			$query .= "ORDER BY domain.domain ";
+		}
+		else {
+			$query .= "ORDER BY $order_by_field $order_dir ";
+		}
+
+		if ( $result_limit != NULL ){
+			$query .= "LIMIT $result_limit ";
+		}
 
 
 		$result = $this->db_link->sql_query($query);
@@ -170,9 +185,15 @@ class USER
 
 	}
 
+	// function check_quota
+	// This function to feth a status of a speficied quota like total mailbox used per user
+	// Return True if user can add a new type of data, an exception in the other case.
+	// Call check_quota(string type)
 
 	function check_quota($type)
 	{
+
+		global $domain_info;
 
 		if ( ! isset($this->data_quota_used[$type]) )
 			{
@@ -182,23 +203,25 @@ class USER
 
 				for ( $i = 0; $i < $this->total_managed_domain; $i++ )
 					{
-						$domain = new DOMAIN($this->db_link);
-						$domain->fetch_by_domainname($this->data_managed_domain[$i]['domain']);
-						$this->data_quota_used[$type] =+ $domain->used_quota[$type];
+						$domain_info->fetch_by_domainname($this->data_managed_domain[$i]['domain']);
+						$this->data_quota_used[$type] =+ $domain_info->used_quota[$type];
 					}
 
 			}
+		 
+		$array['quota'] = $this->data_quota[$type];
+		$array['used_quota'] = $this->data_quota_used[$type];
+		$array['available_quota'] = $this->data_quota[$type] - $this->data_quota_used[$type];
 
-
-		if ( $this->data_quota_used[$type] < $this->data_quota[$type] || $this->data_quota[$type] == "-1" )
-			{
-				return TRUE;
-			}
+		if ( $this->data_quota_used[$type] < $this->data_quota[$type] || $this->data_quota[$type] == "-1" ){
+			$array['result'] = TRUE;
+		}
 		else {
-				throw new Exception ("DSL vous n'avez pas assez de quota disponible sur $type");
+			//throw new Exception ("DSL vous n'avez pas assez de quota disponible sur $type");
+			$array['result'] = FALSE;
 		}
 
-
+		return $array;
 	}
 
 	//
@@ -213,37 +236,45 @@ class USER
 
 	    $query = "SELECT COUNT(username) AS total_mailbox FROM mailbox";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_mailbox = $result['result'][0]['total_mailbox'];
+	    $this->data_managed['mailbox'] = $result['result'][0]['total_mailbox'];
 	    
 	    $query = "SELECT COUNT(address) AS total_alias FROM alias";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_mail_alias = $result['result'][0]['total_alias'];
+	    $this->data_managed['mail_alias'] = $result['result'][0]['total_alias'];
 
 	    $query = "SELECT COUNT(vhost) AS total_vhost FROM whost";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_web_host = $result['result'][0]['total_vhost'];
+	    $this->data_managed['web_host'] = $result['result'][0]['total_vhost'];
 
 	    $query = "SELECT COUNT(login) AS total_ftp_account FROM ftpaccount";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_ftp_account = $result['result'][0]['total_ftp_account'];
+	    $this->data_managed['ftp_account'] = $result['result'][0]['total_ftp_account'];
 
 	    $query = "SELECT COUNT(dbname.id) AS total_db FROM dbname, dbtype WHERE dbname.dbtype_id=dbtype.id AND dbtype.name='mysql'";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_mysql_db = $result['result'][0]['total_db'];
+	    $this->data_managed['mysql_db'] = $result['result'][0]['total_db'];
 
 	    $query = "SELECT COUNT(dbusers.id) AS count_users FROM dbusers,dbtype WHERE dbusers.dbtype_id=dbtype.id AND dbtype.name='mysql'";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_mysql_user = $result['result'][0]['count_users'];
+	    $this->data_managed['mysql_user'] = $result['result'][0]['count_users'];
 	    
 	    $query = "SELECT COUNT(dbname.id) AS total_db FROM dbname, dbtype WHERE dbname.dbtype_id=dbtype.id AND dbtype.name='mysql'";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_pgsql_db = $result['result'][0]['total_db'];
+	    $this->data_managed['pgsql_db'] = $result['result'][0]['total_db'];
 
 	    $query = "SELECT COUNT(dbusers.id) AS count_users FROM dbusers,dbtype WHERE dbusers.dbtype_id=dbtype.id AND dbtype.name='mysql'";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed_pgsql_user = $result['result'][0]['count_users'];
+	    $this->data_managed['pgsql_user'] = $result['result'][0]['count_users'];
+
+	    $query = "SELECT COUNT(domain.id) AS count_domain FROM domain";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed['domain'] = $result['result'][0]['count_domain'];
 	    
 	  }
+		else{
+			$domain_info = $this->check_quota('domain');
+			$this->data_managed['domain'] = $domain_info['used_quota'];
+		}
 	}
 
 
