@@ -41,7 +41,9 @@ $list_domains = list_domains_local ();
 $ovadb = new DB();
 $userinfo = new USER($ovadb);
 $userinfo->fetch_info ($SESSID_USERNAME);
-$userinfo->check_access("http");
+$userinfo->check_access("domain");
+
+$domain_info = new DOMAIN($ovadb);
 $userinfo->check_quota("domains");
 
 
