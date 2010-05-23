@@ -47,6 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 	 $fDomains   = get_post('fDomains');
 	 $fMysql     = get_post('fMysql');
 	 $fPostgresql = get_post('fPostgresql');
+	 $fDiskspace  = get_post('fDiskspace');
 
 //    if (!check_email ($fUsername))
 // 		 {
@@ -118,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 						 }
 					 
 					 $tMessage = $PALANG['pAccountCreate_account_result_success'] . "<br />($fUsername)</br />";
-					 add_quota_admin( $admin_id, $fNmysql, $fNmysql, $fNpostgresql, $fNpostgresql, $fNdomains, $fNwebsite,$fNwebsite, $fNftpaccount, $fNbmail, $fNbaliasmail);
+					 add_quota_admin( $admin_id, $fNmysql, $fNmysql, $fNpostgresql, $fNpostgresql, $fNdomains, $fNwebsite,$fNwebsite, $fNftpaccount, $fNbmail, $fNbaliasmail,$fDiskspace);
 					 
 				 } 
 		 }	
