@@ -97,7 +97,7 @@ class DOMAIN
 	  WHERE id = ".$this->data_domain['id'];
 	  
 	  $result = $this->db_link->sql_query($query);
-	  $this->quota['mail_aliases'] = $result['result'][0]['aliases'];
+	  $this->quota['aliases'] = $result['result'][0]['aliases'];
 	  $this->quota['mailboxes'] = $result['result'][0]['mailboxes'];
 	  $this->quota['ftp_account'] = $result['result'][0]['ftp_account'];
 	  $this->quota['db_count'] = $result['result'][0]['db_count'];
@@ -125,7 +125,7 @@ class DOMAIN
     ORDER BY alias.address ";
 
 		$result = $this->db_link->sql_query($query);
-		$this->used_quota['mail_alias'] = $result['result'][0]['total_alias'];
+		$this->used_quota['aliases'] = $result['result'][0]['total_alias'];
 
 
 		$query = "SELECT COUNT(*) as total_mailbox
@@ -135,7 +135,7 @@ class DOMAIN
     ";
 
 		$result = $this->db_link->sql_query($query);
-		$this->used_quota['mailbox'] = $result['result'][0]['total_mailbox'];
+		$this->used_quota['mailboxes'] = $result['result'][0]['total_mailbox'];
 
 		$query = "SELECT COUNT(*) as total_ftpaccount
 		FROM ftpaccount
@@ -322,9 +322,9 @@ class DOMAIN
 	//
   function can_add_mail_alias($number_to_add = 1){
     if( 
-        ( ( $this->quota['mail_aliases'] - $this->used_quota['mail_alias'] ) >= $number_to_add )
+        ( ( $this->quota['aliases'] - $this->used_quota['aliases'] ) >= $number_to_add )
       ||
-        ( $this->quota['mail_aliases'] == -1 )
+        ( $this->quota['aliases'] == -1 )
       ){return TRUE;}
       return FALSE;
   }
@@ -337,7 +337,7 @@ class DOMAIN
   function can_add_mailbox(){
 
     if( 
-        ( ($this->quota['mailboxes'] - $this->used_quota['mailbox']) > 0 )
+        ( ($this->quota['mailboxes'] - $this->used_quota['mailboxes']) > 0 )
       ||
         ( $this->quota['mailboxes'] == -1 )
       ){return TRUE;}
@@ -387,6 +387,7 @@ VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domai
 
 		$result = $this->db_link->sql_query($query);
 
+
 		if ($result['rows'] != 1){
 			$array['result'] = 1;
 			$array['message'] = $PALANG['pAdminCreate_domain_result_error'] . " <b>".$domain_array['name']."</b></br/>";
@@ -396,6 +397,8 @@ VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domai
 			$array['result'] = 0;
 			$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$domain_array['name']."</b></br/>";
 		}
+
+		debug_info("CREATION DOM : " .$array['result']);
 
 		$this->fetch_by_domainname($domain_array['name']);
 		$this->associate_domain_admin();
@@ -424,7 +427,7 @@ VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domai
 					if ( $policy_info_rcpt['result'] != 1){
 						$array['message'] .= $policy_info_rcpt['message'];
 					}
-					$array['result'] = $policy_info_rcpt['result'];
+					$array['result'] += $policy_info_rcpt['result'];
 		
 		
 					$policy_info_helo = $policy_info->add_forbidden_helo($this->data_domain['domain']);
@@ -438,7 +441,7 @@ VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domai
 			}
 
 		}
-
+		debug_info("FIN CREATION DOM : " .$array['result']);
 		return $array;
 
 	}
@@ -446,26 +449,22 @@ VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domai
 	function create_domain_policy($policy_array){
 		
 		global $CONF;
+		global $PALANG;
 
-		debug_info("DB : " . $query ." // " . $result['rows']);		
 		$query = "INSERT INTO policy (domain_id, virus_lover, spam_lover, banned_files_lover, bad_header_lover, bypass_virus_checks, bypass_spam_checks, bypass_banned_checks, bypass_header_checks, spam_modifies_subj, virus_quarantine_to, spam_quarantine_to, banned_quarantine_to, bad_header_quarantine_to, spam_tag_level, spam_tag2_level, spam_kill_level, spam_dsn_cutoff_level, addr_extension_virus, addr_extension_spam, addr_extension_banned, addr_extension_bad_header, warnvirusrecip, warnbannedrecip, warnbadhrecip, newvirus_admin, virus_admin, banned_admin, bad_header_admin, spam_admin, spam_subject_tag, spam_subject_tag2, message_size_limit, banned_rulenames)
 VALUES ('".$this->data_domain['id']."','".$policy_array['virus_lover']."','".$policy_array['spam_lover']."','".$policy_array['banned_files_lover']."','".$policy_array['bad_header_lover']."','".$policy_array['antivirus']."','".$policy_array['spam_lover']."','".$policy_array['bypass_banned_checks']."','".$policy_array['bypass_header_checks']."','Y','".$CONF['virus_quarantine_to']."','".$CONF['spam_quarantine_to']."','".$CONF['banned_quarantine_to']."','','".$CONF['sa_tag_level']."','".$CONF['sa_tag2_level'] ."','".$CONF['sa_kill_level'] ."','','','','','','N','N','N','','','','','','".$CONF['spam_subject_tag']."','".$CONF['spam_subject_tag2']."','','')";
 
 		$result = $this->db_link->sql_query($query);
 
-		debug_info("DB : " . $query ." // " . $result['rows']);
-
 		if ($result['rows'] != 1){
 			$array['result'] = 1;
-			$array['message'] = $PALANG['pAdminCreate_domain_result_error2'] . " <b>".$array['name']."</b></br/>";
+			$array['message'] = $PALANG['pAdminCreate_domain_result_error2'] . " <b>".$this->data_domain['domain']."</b></br/>";
 			$array['message'] .= "SQL : ".$result['sql_log']."</br/>";
 		}
 		else{
 			$array['result'] = 0;
-			$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$array['name']."</b></br/>";
+			$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$this->data_domain['domain']."</b></br/>";
 		}
-
-		debug_info("DB : " . $query ." // " . $result['rows']);
 
 		return $array;
 
@@ -480,14 +479,15 @@ VALUES ('".$this->data_domain['id']."','".$policy_array['virus_lover']."','".$po
 
 		global $CONF;
 		global $PALANG;
+		global $mail_info;
+		global $user_info;
 
 		$array['message'] = "";
 
 		foreach ($new_domains as $line_num => $line) {
 			$info = explode(";", $line);
-			$newDomain['name'] = chop($info[0]);
-			// ($domain_info->list_mail_aliases[$i]['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 
+			$newDomain['name'] = chop($info[0]);
 			$newDomain['backupmx'] = ( isset($info[1]) ) ? $info[1] : 0;
 			$newDomain['mailboxes'] = ( isset($info[2]) ) ? $info[2] : $CONF['mailboxes'];
 			$newDomain['mailbox_aliases'] = ( isset($info[3]) ) ? $info[3] : $CONF['aliases'];
@@ -504,7 +504,7 @@ VALUES ('".$this->data_domain['id']."','".$policy_array['virus_lover']."','".$po
 
 			if ( $this->domain_exist($newDomain['name']) ){
 				$array['result'] = 1;
-				$array['message'] = $newDomain['name'] . " : " . $PALANG['pAdminCreate_domain_domain_text_error'] . "<br/>";
+				$array['message'] .= $newDomain['name'] . " : " . $PALANG['pAdminCreate_domain_domain_text_error'] . "<br/>";
 				return $array;
 			}
 			else {
@@ -549,7 +549,7 @@ VALUES ('".$this->data_domain['id']."','".$policy_array['virus_lover']."','".$po
 				$array['message'] .= $result['message'];
 
 				if ($result['result'] > 0){
-					$array['result'] = $result['result'];
+					$array['result'] += $result['result'];
 					return $array;
 				}
 				else
@@ -572,9 +572,10 @@ VALUES ('".$this->data_domain['id']."','".$policy_array['virus_lover']."','".$po
 						$tMessage = $PALANG['pAdminCreate_domain_result_succes'] . "<br/>(".$newDomain['name'].")<br/>";
 					}
 			}
-			print $tMessage."<br />";
+
 		}
 
+		print $tMessage."<br />";
 		return $array;
 
 
@@ -595,7 +596,7 @@ VALUES (".$user_info->data['id'].", ".$this->data_domain['id']." , 1 )
 
 		if ($result['result'] > 0){
 			$array['message'] = $PALANG['pAssociate_domain_admin_failed'];
-			$array['message'] .= $result['message'];
+			$array['message'] .= $result['sql_log'];
 		}
 		$array['result'] = $result['result'];
 
@@ -612,12 +613,8 @@ VALUES (".$user_info->data['id'].", ".$this->data_domain['id']." , 1 )
 
 		$array['message'] = "";
 
-		debug_info("Start delete domain ".$this->data_domain['domain']);
-
 		if ( $CONF['greylisting'] == "YES" ){
  
-			debug_info("Greylisting ON ");
-
 			if ( $server_info->check_server_role_exist('policy') ){
 
 				$server_info->fetch_server_role_list('policy');
