@@ -732,7 +732,7 @@ $PALANG['pGenerate_new_password'] = 'G&eacute;n&eacute;rer un nouveau mot de pas
 
 $PALANG['pAdminImport_file'] = 'Fichier des domaines';
 $PALANG['pAdminImport_help'] = 'Le fichier doit contenir les informations sous la forme suivante :';
-$PALANG['pAdminImport_help2'] = 'domaine ; backup_mx ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; v&eacute;rification email exp&eacute;diteur* ; v&eacute;rification du domaine exp&eacute;diteur* ; greylisting* ; SPF*';
+$PALANG['pAdminImport_help2'] = 'domaine ; backup_mx ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; v&eacute;rification email exp&eacute;diteur* ; v&eacute;rification du domaine exp&eacute;diteur* ; greylisting* ; SPF* ; Create Default Mail Aliases* ';
 $PALANG['pAdminImport_help3'] = 'Les options marqu&eacute;es d\'une * ont pour seule valeur possible 0 ou 1 ';
 
 $PALANG['pImport_Users_file'] = 'fichier utilisateur';
