@@ -129,9 +129,9 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  )
 																					 "label" => "delete",
 																					 "sortable" => "false",
 																					 "resizeable" => "false",
-																					 "link" => "/ajax/mail/manage_alias.php",
-																					 "url_param" => "action=delete&domainName=$fDomain",
-																					 "key_item" => "alias"
+																					 "link" => "/ajax/domain/manage_domain.php",
+																					 "url_param" => "action=delete",
+																					 "key_item" => "domain"
 																					 ),
 												 "edit" => array(
 																				 "label" => "",
