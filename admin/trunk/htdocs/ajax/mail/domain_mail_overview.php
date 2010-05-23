@@ -58,7 +58,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
     {
       $domain_info->fetch_by_domainid($user_info->data_managed_active_domain_with_mail[$i]['id']);
       
-      if ( $domain_info->quota['mail_aliases'] != 0 && $domain_info->quota['mailboxes'] != 0 ){
+      if ( $domain_info->quota['aliases'] != 0 && $domain_info->quota['mailboxes'] != 0 ){
         $domain_info->total_diskspace_used_mailboxes();
         
         if ( $CONF['quota'] == 'YES') {
@@ -67,10 +67,10 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
           $json_data_array[] = array(
 																		 'domain' => $user_info->data_managed_active_domain_with_mail[$i]['domain'],
 																		 'domain_url' => '/mail/overview.php?domain='.$user_info->data_managed_active_domain_with_mail[$i]['domain'],
-																		 'aliases' => $domain_info->used_quota['mail_alias'],
-																		 'mailboxes' => $domain_info->used_quota['mailbox'],
+																		 'aliases' => $domain_info->used_quota['aliases'],
+																		 'mailboxes' => $domain_info->used_quota['mailboxes'],
 																		 'maxquota' => $domain_info->quota['maxquota'],
-																		 'quota_aliases' => $domain_info->quota['mail_aliases'],
+																		 'quota_aliases' => $domain_info->quota['aliases'],
 																		 'quota_mailboxes' => $domain_info->quota['mailboxes'],
 																		 'diskspace_mailboxes' => $domain_info->data['total_diskspace_used_mailboxes'],                                                         
 																		 'modified' => $user_info->data_managed_active_domain_with_mail[$i]['modified'],
