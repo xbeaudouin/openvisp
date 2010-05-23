@@ -2,11 +2,11 @@
 
 
 if ( $user_info->rights['manage'] == 0 ){
-print $PALANG['pOverview_alias_mailbox_count'] . ": " . $user_info->data_managed['mailbox'] . " / ". $user_info->data_quota['emails'];
+print $PALANG['pOverview_alias_mailbox_count'] . ": " . $user_info->data_managed['mailboxes'] . " / ". $user_info->data_quota['mailboxes'];
 print "<br/>";
-print $PALANG['pOverview_alias_alias_count'] . ": " . $user_info->data_managed['mail_alias'] . " / ". $user_info->data_quota['emails_alias'];
+print $PALANG['pOverview_alias_alias_count'] . ": " . $user_info->data_managed['aliases'] . " / ". $user_info->data_quota['aliases'];
 print "<br/>";
-print $PALANG['pAdminList_admin_domain'] . ": " . $user_info->data_managed_ . " / ". $user_info->data_quota['emails_alias'];
+print $PALANG['pAdminList_admin_domain'] . ": " . $user_info->data_managed['domains'] . " / ". $user_info->data_quota['domains'];
 }
 ?>
 
@@ -15,7 +15,7 @@ print $PALANG['pAdminList_admin_domain'] . ": " . $user_info->data_managed_ . " 
   <form enctype="multipart/form-data" name="import_file_alias" method="post">
   <?php print $PALANG['pImport_Alias_file'] . ":\n<br>"; ?>
   <input type="hidden" name="massive_type" value="mail_alias">
-  <input type="file" name="user_file">
+  <input type="file" name="alias_file">
 	<br>
   <input type="submit">
   </form>
