@@ -198,13 +198,15 @@ class USER
 		if ( ! isset($this->data_quota_used[$type]) )
 			{
 
-				$this->fetch_domains();
+				if ( ! isset($this->total_managed_domain)){
+					$this->fetch_domains();
+				}
 				$this->data_quota_used[$type] = 0;
 
 				for ( $i = 0; $i < $this->total_managed_domain; $i++ )
 					{
 						$domain_info->fetch_by_domainname($this->data_managed_domain[$i]['domain']);
-						$this->data_quota_used[$type] =+ $domain_info->used_quota[$type];
+						$this->data_quota_used[$type] += $domain_info->used_quota[$type];
 					}
 
 			}
@@ -212,6 +214,9 @@ class USER
 		$array['quota'] = $this->data_quota[$type];
 		$array['used_quota'] = $this->data_quota_used[$type];
 		$array['available_quota'] = $this->data_quota[$type] - $this->data_quota_used[$type];
+
+		$this->data_managed[$type] = $this->data_quota_used[$type];
+
 
 		if ( $this->data_quota_used[$type] < $this->data_quota[$type] || $this->data_quota[$type] == "-1" ){
 			$array['result'] = TRUE;
@@ -236,11 +241,11 @@ class USER
 
 	    $query = "SELECT COUNT(username) AS total_mailbox FROM mailbox";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed['mailbox'] = $result['result'][0]['total_mailbox'];
+	    $this->data_managed['mailboxes'] = $result['result'][0]['total_mailbox'];
 	    
 	    $query = "SELECT COUNT(address) AS total_alias FROM alias";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed['mail_alias'] = $result['result'][0]['total_alias'];
+	    $this->data_managed['aliases'] = $result['result'][0]['total_alias'];
 
 	    $query = "SELECT COUNT(vhost) AS total_vhost FROM whost";
 	    $result = $this->db_link->sql_query($query);
@@ -266,19 +271,27 @@ class USER
 	    $result = $this->db_link->sql_query($query);
 	    $this->data_managed['pgsql_user'] = $result['result'][0]['count_users'];
 
-	    $query = "SELECT COUNT(domain.id) AS count_domain FROM domain";
+	    $query = "SELECT COUNT(domain.id) AS count_domain FROM domain WHERE domain != 'ova.local'";
 	    $result = $this->db_link->sql_query($query);
-	    $this->data_managed['domain'] = $result['result'][0]['count_domain'];
+	    $this->data_managed['domains'] = $result['result'][0]['count_domain'];
 	    
 	  }
 		else{
-			$domain_info = $this->check_quota('domain');
-			$this->data_managed['domain'] = $domain_info['used_quota'];
+			if ( ! isset($this->total_managed_domain)){
+				$this->fetch_domains();
+			}
+
+			$this->data_managed['domains'] = sizeof($this->total_managed_domain) + 1;
+			
+			$domain_info = $this->check_quota('aliases');
+			$domain_info = $this->check_quota('mailboxes');
+
+			
 		}
 	}
 
 
-	function check_domain_access($domain_id)
+	function check_domain_access($domain_id, $destroy=1)
 	{
 	  if ($this->rights['manage'] != 1){
 	    $query = "SELECT domain_id
@@ -287,12 +300,16 @@ class USER
 	    AND domain_admins.domain_id=$domain_id";
 	    
 	    $result = $this->db_link->sql_query($query);
-	    if ( $result['rows'] == 0 ){
-	      session_unset ();
-	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+	    if ( $result['rows'] == 0){
+				if ( $destroy == 1 ){
+					session_unset ();
+					session_destroy ();
+					header ("Location: ../login.php");
+					exit;
+				}
+				return FALSE;
 	    }
+			return TRUE;
 	  }
 	}
 
@@ -321,6 +338,38 @@ class USER
 
 
 	}
+
+
+  //
+	// can_add_domain
+	// Action: Check if an admin can have new domain
+	// Call: can_add_domain (int number_to_add)
+	//
+  function can_add_domain($number_to_add = 1){
+    if( 
+        ( ( $this->data_quota['domain'] - $this->data_managed['domain'] ) >= $number_to_add )
+      ||
+        ( $this->data_quota['domain'] == -1 )
+      ){return TRUE;}
+      return FALSE;
+  }
+
+
+  //
+	// can_add_item
+	// Action: Check if an admin can have new item (mailboexe, domain, aliases...)
+	// Call: can_add_item (int number_to_add)
+	//
+  function can_add_item($number_to_add = 1,$item){
+    if( 
+        ( ( $this->data_quota[$item] - $this->data_managed[$item] ) >= $number_to_add )
+      ||
+        ( $this->data_quota[$item] == -1 )
+      ){return TRUE;}
+      return FALSE;
+  }
+
+
 
 	
 }
