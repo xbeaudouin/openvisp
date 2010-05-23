@@ -393,7 +393,7 @@ $PALANG['pAdminList_domain_sql'] = 'Databases';
 $PALANG['pAdminList_domain_status'] = 'Status';
 $PALANG['pAdminList_domain_ftp'] = 'Ftp Accounts';
 $PALANG['pAdminList_domain_http'] = 'Web Sites';
-$PALANG['pAdminList_domain_overquota'] = 'Sorry your have no more possibilities to add a new domain, please contact the administrator to increase your domain quota limit. ';
+$PALANG['pAdminList_domain_overquota'] = 'Sorry you have no more possibilities to add a new domain, please contact the administrator to increase your domain quota limit. ';
 
 $PALANG['pAdminList_policy_id'] = 'ID';
 $PALANG['pAdminList_policy_name'] = 'Description';
@@ -1049,5 +1049,23 @@ $PALANG['pModify_server_name_ok'] = "Modify server";
 $PALANG['pCreate_Admin_Account_Not_Email'] = "The";
 
 $PALANG['pAssociate_domain_admin_failed'] = "Sorry can't attach the domain to your account.";
+
+$PALANG['pMassive_import_domain_overquota'] = 'Sorry you tried to import too much domain, please contact the administrator to increase your quota limit.';
+$PALANG['pMassive_import_domain_overquota_part'] = '<div class="standout">You request to add %s domain and your available quota is %s</div>';
+
+$PALANG['pMassive_import_mailbox_allocation_overquota'] = 'Sorry you tried to allocate too much mailboxes, please contact the administrator to increase your quota limit.';
+$PALANG['pMassive_import_mailbox_allocation_overquota_part'] = '<div class="standout">You request to allocate %s mailboxes and your available quota is %s</div>';
+
+$PALANG['pMassive_import_aliases_allocation_overquota'] = 'Sorry you tried to allocate too much aliases, please contact the administrator to increase your quota limit.';
+$PALANG['pMassive_import_aliases_allocation_overquota_part'] = '<div class="standout">You request to allocate %s aliases and your available quota is %s</div>';
+$PALANG['pMassive_import_aliases_bad_format'] = '<div class="standout">Sorry you tried to insert an alias (%s) that does not contain any domain, you must specify the domain of an alias.</div>';
+$PALANG['pMassive_import_aliases_unknown_domain'] = '<div class="standout">Sorry you tried to insert an alias (%s) that does not below to any domain managed by OVA, you must insert aliases of domain managed by OVA.</div>';
+$PALANG['pMassive_import_aliases_domain_not_managed'] = '<div class="standout">Sorry you tried to insert an alias (%s) that does not below to any domain managed by you.</div>';
+
+
+$PALANG['pMassive_import_disk_allocation_overquota'] = 'Sorry you tried to allocate too much diskspace, please contact the administrator to increase your quota limit.';
+$PALANG['pMassive_import_disk_allocation_overquota_part'] = '<div class="standout">You request to allocate %s MB and your available quota is %s MB</div>';
+
+
 
 ?>
