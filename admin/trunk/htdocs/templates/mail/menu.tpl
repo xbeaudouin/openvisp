@@ -9,6 +9,11 @@ print_menu("users/list-filter.php",$PALANG['pMenu_listfilter']);
 print_dot();
 
 	 }
+
+	 if ( isset($template) && ($template == "overview-get.tpl") ){
+		 print_menu("users/massive_import.php",$PALANG['pMenu_massive_import']);
+	 }
+
 	 if ( check_mail_admin($SESSID_USERNAME,"nologout") == false )
 {
 
