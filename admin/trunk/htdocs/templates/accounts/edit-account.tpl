@@ -194,20 +194,27 @@
       <td align="right">Nb / Max :</td>
    </tr>
    <tr>
+      <td>Disk Space</td>
+		  <td align="right">&nbsp;</td>
+      <td align="right">
+        UNK / <input type="text" name="fDiskspace" value="<?php print $account_quota['diskspace'];?>" size="7">
+			</td>
+   </tr>
+   <tr>
       <td>Email Mailbox</td>
       <td align="right">
         <?php $checked = (!empty ($account_rights['mail'])) ? 'checked' : ''; ?>
         <input type="checkbox" name="fMail" <?php print $checked;?> />
       </td>
       <td align="right">
-        <?php print $total_used['emails'];?> / <input type="text" name="fNbmail" value="<?php print $account_quota['emails'];?>" size="7">
+        <?php print $total_used['emails'];?> / <input type="text" name="fNbmail" value="<?php print $account_quota['mailboxes'];?>" size="7">
 			</td>
    </tr>
    <tr>
       <td>Email Aliases</td>
       <td>&nbsp;</td>
       <td align="right">
-        <?php print $total_used['emailsaliases'];?> / <input type="text" name="fNbmailalias" value="<?php print $account_quota['emails_alias'];?>" size="7">
+        <?php print $total_used['emailsaliases'];?> / <input type="text" name="fNbmailalias" value="<?php print $account_quota['aliases'];?>" size="7">
 			</td>
    </tr>
    <tr>
