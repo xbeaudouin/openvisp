@@ -307,7 +307,7 @@ WHERE accounts_id='$id'";
 	$result = db_query ($query);
 
 	$query = "UPDATE quota SET diskspace='-1', ftp='-1', mysqldb='-1', mysqlusers='-1', postgresqldb='-1',postgresqlusers='-1', domains='-1',
-emails='-1', emails_alias='-1', http='-1', http_alias='-1'
+mailboxes='-1', aliases='-1', http='-1', http_alias='-1'
 WHERE accounts_id='$id'";
 	$result = db_query ($query);
 }
@@ -343,10 +343,10 @@ WHERE accounts_id='$id'";
 // int nbftpaccount, int nbemail, int nbemailalias)
 //
 function add_quota_admin($id, $fNmysqlusers, $fNmysqldb, $fNposgresqlusers, $fNposgresqldb, $fNdomains,
-						 $fNwebsite,$fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias)
+												 $fNwebsite,$fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias,$fDiskspace)
 {
 
-	$query = "INSERT INTO quota VALUES('$id','-1', '$fNftpaccount', '$fNmysqldb', '$fNmysqlusers', '$fNposgresqldb', '$fNposgresqlusers',
+	$query = "INSERT INTO quota VALUES('$id','$fDiskspace', '$fNftpaccount', '$fNmysqldb', '$fNmysqlusers', '$fNposgresqldb', '$fNposgresqlusers',
 '$fNdomains', '$fNbemail', '$fNbemailalias', '$fNwebsite', '$fNwebsitealias',NOW(),NOW())";
 	$result = db_query ($query);
 }
@@ -359,11 +359,11 @@ function add_quota_admin($id, $fNmysqlusers, $fNmysqldb, $fNposgresqlusers, $fNp
 // int nbftpaccount, int nbemail, int nbemailalias)
 //
 function update_quota_admin(	$id, $fNmysqlusers, $fNmysqldb, $fNposgresqlusers, $fNposgresqldb, $fNdomains,
-				$fNwebsite,$fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias)
+															$fNwebsite,$fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias, $fDiskspace)
 {
 
-	$query = "UPDATE quota SET diskspace='-1', ftp='$fNftpaccount', mysqldb='$fNmysqldb', mysqlusers='$fNmysqlusers', postgresqldb='$fNposgresqldb',
-	postgresqlusers='$fNposgresqlusers', domains='$fNdomains', emails='$fNbemail', emails_alias='$fNbemailalias', http='$fNwebsite', http_alias='$fNwebsitealias'
+	$query = "UPDATE quota SET diskspace='$fDiskspace', ftp='$fNftpaccount', mysqldb='$fNmysqldb', mysqlusers='$fNmysqlusers', postgresqldb='$fNposgresqldb',
+	postgresqlusers='$fNposgresqlusers', domains='$fNdomains', mailboxes='$fNbemail', aliases='$fNbemailalias', http='$fNwebsite', http_alias='$fNwebsitealias'
 WHERE accounts_id='$id'";
 	$result = db_query ($query);
 }
