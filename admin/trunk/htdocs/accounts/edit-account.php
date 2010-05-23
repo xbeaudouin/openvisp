@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
    $fNwebsitealias     = get_post('fNwebsitealias');
    $fNftpaccount       = get_post('fNftpaccount');
    $fNbemail           = get_post('fNbmail');
+   $fDiskspace         = get_post('fDiskspace');
    $fNbemailalias      = get_post('fNbmailalias');
 
    if($fDatacenter == NULL) $fDatacenter = "off";
@@ -141,7 +142,7 @@ WHERE username='$username'");
       } else {
 	update_right_admin($account_information['id'],	$fMail,$fDomains,$fDatacenter,$fFTP,$fHTTP,$fMysql,$fPostgresql);
 	update_quota_admin($account_information['id'],	$fNmysqlusers, $fNmysqldb, $fNpostgresqlusers, $fNpostgresqldb, $fNdomains,
-			 				$fNwebsite, $fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias);
+										 $fNwebsite, $fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias, $fDiskspace);
       }
       if ( $fDCManage == "on" ) {
 	transform_datacenter_sadmin($account_information['id'],1);
