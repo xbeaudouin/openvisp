@@ -47,9 +47,10 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$fNewvalue = (get_post("newValue") == $PALANG['NO'] ) ? 0 : 1;
 
 	$domain_info->fetch_by_domainname($fDomain_name);
+	$domain_info->fetch_policy_id();
 	$user_info->check_domain_access($domain_info->data_domain['id']);
 
-	$ova = new OVA($ovadb);
+	$ova_info = new OVA($ovadb);
 	$server_info = new SERVER($ovadb);
 
 
