@@ -22,16 +22,16 @@ print load_js("../lib/yui/datatable/datatable-min.js");
 print load_css("../css/datatable.css");
 
 print "<b>". $PALANG['pOverview_welcome'] . "<div id='domain_name'>".$fDomain . "</div></b><br />\n";
-print $PALANG['pOverview_alias_alias_count'] . ": " . $domain_info->used_quota['mail_alias'] . " / "; 
+print $PALANG['pOverview_alias_alias_count'] . ": " . $domain_info->used_quota['aliases'] . " / "; 
 
-switch ($domain_info->quota['mail_aliases']) {
+switch ($domain_info->quota['aliases']) {
   case "0" : print $PALANG['pOverview_limit_none']; break;
   case "-1": print "&infin;"; break;
-  default  : print $domain_info->quota['mail_aliases']; break;
+  default  : print $domain_info->quota['aliases']; break;
 }
 
 print " &nbsp; ";
-print $PALANG['pOverview_alias_mailbox_count'] . ": " . $domain_info->used_quota['mailbox'] . " / ";
+print $PALANG['pOverview_alias_mailbox_count'] . ": " . $domain_info->used_quota['mailboxes'] . " / ";
 
 switch ($domain_info->quota['mailboxes']) {
  case "0" : print $PALANG['pOverview_limit_none']; break;
