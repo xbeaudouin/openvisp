@@ -44,6 +44,7 @@ $PALANG['pMenu_server_list'] = 'Server List';
 $PALANG['pMenu_server_add'] = 'Add a new Server';
 $PALANG['pMenu_server_add_model'] = 'Add a new Server Model';
 $PALANG['pMenu_server_add_app'] = 'Add a new application';
+$PALANG['pMenu_massive_import'] = 'Massive Import tool';
 
 $PALANG['pTools_reset_quarantine'] = 'Reset the quarantine of the following users'; 
 $PALANG['pTools_reset_begindate'] = 'Begin to reset <br/>From ';
@@ -195,6 +196,12 @@ $PALANG['pCreate_alias_policy_ok'] = 'New alias in policyd inserted';
 
 $PALANG['pDelete_alias_policy_fail'] = '<div class="standout">Failed to delete alias in policyd</div>';
 $PALANG['pDelete_alias_policy_ok'] = 'Deleted alias in policyd</div>';
+
+$PALANG['pDelete_domain_policy_fail'] = '<div class="standout">Failed to delete domain info in policyd</div>';
+$PALANG['pDelete_domain_policy_ok'] = 'Deleted domain info in policyd</div>';
+$PALANG['pCreate_domain_policy_fail'] = '<div class="standout">Failed to create domain info in policyd</div>';
+$PALANG['pCreate_domain_policy_ok'] = 'Inserted domain info in policyd</div>';
+
 
 $PALANG['pDelete_alias_fail'] = '<div class="standout">Failed to delete alias</div>';
 $PALANG['pDelete_alias_ok'] = 'Deleted alias</div>';
@@ -471,6 +478,7 @@ $PALANG['pAdminCreate_domain_result_error'] = '<div class="standout">Unable to a
 $PALANG['pAdminCreate_domain_result_error2'] = '<div class="standout">Unable to add domain(2)!</div>';
 $PALANG['pAdminCreate_domain_result_error3'] = '<div class="standout">Unable to add domain(3)!</div>';
 $PALANG['pAdminCreate_domain_result_succes'] = 'Domain has been added!';
+$PALANG['pAdminDelete_domain_result_succes'] = 'Domain has been deleted!';
 
 $PALANG['pAdminEdit_domain_welcome'] = 'Edit a domain';
 $PALANG['pAdminEdit_domain_domain'] = 'Domain';
@@ -756,7 +764,7 @@ $PALANG['pGenerate_new_password'] = 'Generate a new password';
 
 $PALANG['pAdminImport_file'] = 'domains file';
 $PALANG['pAdminImport_help'] = 'The file must contains the informations like the following exemple :';
-$PALANG['pAdminImport_help2'] = 'domain ; backup_mx* ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*; Active*';
+$PALANG['pAdminImport_help2'] = 'domain ; backup_mx* ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*; Active* ; Create Default Mail Aliases*';
 $PALANG['pAdminImport_help3'] = 'the options followed by  a  * can be 0 or 1 ';
 
 $PALANG['pImport_Users_file'] = 'users file';
@@ -768,7 +776,9 @@ $PALANG['pImport_Users_return'] = 'Return to the domain details';
 $PALANG['pImport_Alias_file'] = 'Alias file';
 $PALANG['pImport_Alias_help'] = 'The file must contains the informations like the following exemple :';
 $PALANG['pImport_Alias_help2'] = 'Email from ; Email to';
-$PALANG['pImport_Alias_help3'] = 'Example : <br/>webmaster ; user1@domain.tld, user2@domain.tld; 1<br/>postmaster ; admin@domain.tld<br/><br/>';
+$PALANG['pImport_Alias_help3'] = 'Example : <br/>webmaster ; user1@domain.tld, user2@domain.tld; 1<br/>postmaster ; admin@domain.tld';
+$PALANG['pGlobalImport_Alias_help3'] = 'Example : <br/>webmaster@domain.tld ; user1@domain.tld, user2@domain.tld; 1<br/>postmaster@domain.tld ; admin@domain.tld';
+$PALANG['pGlobalImport_Alias_help4'] = 'Do not forget the domain in each email';
 $PALANG['pImport_Alias_file_overquota'] = 'Sorry the import process of your file will overfill your allocated quota.<br/>Please contact your administrator to resize your domain alias quota or remove some alias from your file.';
 $PALANG['pImport_Alias_file_quota_status_1'] = 'Your are allowed to add ';
 $PALANG['pImport_Alias_file_quota_status_2'] = ' alias';
@@ -899,6 +909,12 @@ $PALANG['pPolicyd_manage_ip_bl'] = 'Manage blacklisted IP';
 $PALANG['pPolicyd_manage_helo'] = 'Manage forbidden EHLO';
 $PALANG['pPolicyd_manage_sender_bl'] = 'Manage blacklisted Sender';
 $PALANG['pPolicyd_manage_ip_wl'] = 'Manage whitelisted IP';
+
+$PALANG['pPolicyd_remove_helo_failed'] = 'Can\'t remove helo blacklist from policyd';
+$PALANG['pPolicyd_remove_helo_success'] = 'Removed helo blacklist from policyd';
+$PALANG['pPolicyd_insert_helo_failed'] = 'Can\'t insert helo blacklist from policyd';
+$PALANG['pPolicyd_insert_helo_success'] = 'Inserted helo blacklist from policyd';
+
 
 $PALANG['pPolicyd_form_ip'] = 'IP Address';
 $PALANG['pPolicyd_form_desc'] = 'Description';
@@ -1032,5 +1048,6 @@ $PALANG['pModify_server_name_ok'] = "Modify server";
 
 $PALANG['pCreate_Admin_Account_Not_Email'] = "The";
 
+$PALANG['pAssociate_domain_admin_failed'] = "Sorry can't attach the domain to your account.";
 
 ?>
