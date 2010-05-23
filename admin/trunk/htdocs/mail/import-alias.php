@@ -33,7 +33,7 @@ $user_info->fetch_info($SESSID_USERNAME);
 
 $domain_info = new DOMAIN($ovadb);
 
-$list_domains = list_local_domains_for_admin ($SESSID_USERNAME);
+//$list_domains = list_local_domains_for_admin ($SESSID_USERNAME);
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	}
 
 
-	$ova = new OVA($ovadb);
+	$ova_info = new OVA($ovadb);
 	$server_info = new SERVER($ovadb);
 	$tMessage = "";
 
