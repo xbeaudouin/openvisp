@@ -48,7 +48,7 @@ class MAIL
     global $PALANG;
 		global $user_info;
 		global $domain_info;
-		global $ova;
+		global $ova_info;
 		global $server_info;
 
 
@@ -102,7 +102,7 @@ class MAIL
 			}
 
 			$array['status_code'] = 201;
-
+			$ova_info->do_log ($domain_info->data_domain['id'], "delete alias", $this->data_alias['address'] . " -> " . $this->data_alias['goto']);
 		}
 
 		return $array;
@@ -295,7 +295,7 @@ AND mailbox.username=alias.address
     global $PALANG;
 		global $user_info;
 		global $domain_info;
-		global $ova;
+		global $ova_info;
 		global $server_info;
 
     $message = "";
@@ -340,7 +340,7 @@ AND mailbox.username=alias.address
         else {
 
 					$array['message'] .= $PALANG['pCreate_alias_result_succes'] . " <b>($alias -> $email_to)</b><br/>";
-          $ova->do_log ($domain_info->data_domain['id'], "create alias", "$alias -> $email_to");
+          $ova_info->do_log ($domain_info->data_domain['id'], "create alias", "$alias -> $email_to");
 
 					if ( $CONF['greylisting'] == "YES" && $greylisting == 1){
  
