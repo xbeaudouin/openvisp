@@ -38,9 +38,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
 
-	$user_info->fetch_domains();
+	$user_info->fetch_quota_status();
+	$user_info->fetch_domains(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
 
-	$json_array['totalRecords'] = intval(sizeof($user_info->data_managed_domain));
+
+	$json_array['totalRecords'] = intval($user_info->data_managed['domain']);
 	$json_array['startIndex'] = intval($fStartIndex);
 	$json_array['recordsReturned'] = sizeof($domain_info->list_mailboxes);
 	$json_array['sort'] = $fSort;
