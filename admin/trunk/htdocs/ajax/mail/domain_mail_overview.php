@@ -58,7 +58,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
     {
       $domain_info->fetch_by_domainid($user_info->data_managed_active_domain_with_mail[$i]['id']);
       
-      if ( $domain_info->quota['aliases'] != 0 && $domain_info->quota['mailboxes'] != 0 ){
+      if ( $domain_info->quota['aliases'] != 0 || $domain_info->quota['mailboxes'] != 0 ){
         $domain_info->total_diskspace_used_mailboxes();
         
         if ( $CONF['quota'] == 'YES') {
