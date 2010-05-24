@@ -31,16 +31,18 @@ $ovadb = new DB();
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
 
+$domain_info = new DOMAIN($ovadb);
 
 $user_info->check_domain_admin();
+$user_info->fetch_quota_status();
 
 // A controler ici .
 
-$list_admins = list_admins();
+//$list_admins = list_admins();
 
-$account_information = get_account_info($SESSID_USERNAME);
-$account_quota = get_account_quota($account_information['id']);
-$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
+//$account_information = get_account_info($SESSID_USERNAME);
+//$account_quota = get_account_quota($account_information['id']);
+//$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
 
 
 if ( $_SERVER['REQUEST_METHOD'] == "GET"  )
@@ -119,6 +121,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  )
 																						 "parser" => "text",
 																						 "sortable" => "false"
 																						 ),
+												 "paid" => array(
+																				 "label" => $PALANG['pGeneric_paid'],
+																				 "parser" => "text",
+																				 "sortable" => "false"
+																				 ),
 												 "modified" => array(
 																						 "label" => $PALANG['pAdminList_domain_modified'],
 																						 "parser" => "text",
