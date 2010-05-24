@@ -39,8 +39,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$fStartIndex =  get_post('startIndex');
 
 	$user_info->fetch_quota_status();
-	$user_info->fetch_domains(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
-
 
 	$json_array['totalRecords'] = intval($user_info->data_managed['domains']);
 	$json_array['startIndex'] = intval($fStartIndex);
@@ -48,18 +46,19 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$json_array['sort'] = $fSort;
 	$json_array['dir'] = $fDir;
 	$json_array['pageSize'] = intval($fResults);
-		
+
+	$user_info->fetch_domains(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);		
 
 	for ( $i=0; $i < sizeof($user_info->data_managed_domain); $i++){
 
 		$domain_info->fetch_by_domainname($user_info->data_managed_domain[$i]['domain']);
-		$mail_alias = 
+		//$mail_alias = 
 
 		$json_data_array[] = array(
 															 'domain' => $domain_info->data_domain['domain'],
 															 'description' => $domain_info->data_domain['description'], 
-															 'aliases' => $domain_info->used_quota['email_alias'],
-															 'quota_aliases' => ($domain_info->quota['email_alias'] == "-1" ) ? "&infin;" : $domain_info->quota['mail_aliases'],
+															 'aliases' => $domain_info->used_quota['aliases'],
+															 'quota_aliases' => ($domain_info->quota['aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['aliases'],
 															 'mails' => $domain_info->used_quota['mailboxes'],
 															 'quota_mails' => ($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes'],
 															 'backupmx' => ($domain_info->data_domain['backupmx'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
@@ -70,7 +69,8 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 															 'databases' => $domain_info->used_quota['http'],
 															 'quota_databases' => ($domain_info->quota['db_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['db_quota'],
 															 'state' => $domain_info->data_domain['status'],
-															 'active'  => ($domain_info->data_domain['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+															 'active'  => ($domain_info->data_domain['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+															 'paid'  => ($domain_info->data_domain['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
 															 'modified' => $domain_info->data_domain['modified'],
 															 'delete' => "delete",
 															 'edit' => "<a href=\"edit-domain.php?domain=".urlencode($domain_info->data_domain['domain']).">".$PALANG['edit']."</a>"
