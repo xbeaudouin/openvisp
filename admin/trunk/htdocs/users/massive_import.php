@@ -43,7 +43,7 @@ require_once ("../lib/policyd.class.php");
 $domain_info = new DOMAIN($ovadb);
 $server_info = new SERVER($ovadb);
 $mail_info = new MAIL($ovadb);
-
+$ova_info = new OVA($ovadb);
 
 $user_info->fetch_quota_status();
 
@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 		if ( $user_info->rights['manage'] == 0 ){
 
+			// Check if the user can add as much aliases as he want.
 			if ( $user_info->can_add_item(sizeof($new_aliases),"aliases") == FALSE ){
 				$result['message'] .= sprintf($PALANG['pMassive_import_aliases_allocation_overquota_part'], $new['aliases'], $user_info->data_quota['aliases'] - $user_info->data_managed['aliases'] );
 				$result['message'] .= $PALANG['pMassive_import_aliases_allocation_overquota']."<br/>";
@@ -79,34 +80,82 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 			}
 
 			foreach ($new_aliases as $line_num => $line) {
-				$info = explode(";", $line);
-				if ( !eregi("@", $info[0]) ){
+				
+				$info = explode(";", chop($line));
+				// Check if the alias contain a valid email alias
+				if ( !eregi('@', $info[0]) ){
 					$error++;
 					$result['message'] .= sprintf($PALANG['pMassive_import_aliases_bad_format'], $info[0]);
 				}
 				else{
 
 					$alias = explode("@", $info[0]);
-					if ( $domain_info->domain_exist($alias[1]) ){
-						if ( $user_info->check_domain_access($alias[1],0) == FALSE ){
-							$error++;
-							$result['message'] .= $PALANG['pMassive_import_aliases_domain_not_managed'];
-						}
-						debug_info("DBG $alias is good");
-					}
-					else{
+					if ( $domain_info->domain_exist($alias[1]) == FALSE ){
 						$error++;
 						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_unknown_domain'], $alias[1]);
+					}
+					else{
+
+						if ( ! isset($total_alias[$alias[1]]) ){
+							$total_alias[$alias[1]] = 0;
+						}
+						$total_alias[$alias[1]]++;
+						$newAliases[$alias[1]][] = array ($info[0], $info[1]);
+
 					}
 
 				}
 
 			}
 
+			foreach ($total_alias as $domain => $number_new_aliases){
+
+				$domain_info->fetch_by_domainname($domain);
+				if ( $user_info->check_domain_access($domain_info->data_domain['id'],0) == FALSE ){
+					$error++;
+					$result['message'] .= $PALANG['pMassive_import_aliases_domain_not_managed'];
+				}
+				else{
+					// Don't add info to domain that are inactive.
+					if ( $domain_info->data_domain['active'] == 0 ){
+						$error++;
+						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_inactive_domain'], $alias[1]);
+					}
+					else{
+						if ( $domain_info->can_add_mail_alias($number_new_aliases) == FALSE ){
+							$error++;
+							$result['message'] .= sprintf($PALANG['pMassive_import_aliases_domain_overquota'], $domain);
+						}
+					}
+				}
+
+			}
+
+
 
 		}
+
 		if ( $error == 0 ){
+			
 			$result['message'] = "YES you can";
+			foreach ($newAliases as $domain => $item){
+				$domain_info->fetch_by_domainname($domain);
+				$domain_info->fetch_policy_id();
+				foreach( $item as $line => $alias_to){
+					$alias_from = $item[$line][0];
+					$alias_to = $item[$line][1];
+					$result_create = $mail_info->add_mail_alias($alias_from, $alias_to);
+					if ($result_create['status'] != 0){
+						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_error'], $alias_from);
+					}
+					else{
+						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_ok'], $alias_from);
+					}
+					$result['message'] .= $result_create['message'];
+				}
+
+			}
+
 		}
 
 		break;
