@@ -87,7 +87,6 @@ class USER
 			$query .= "LIMIT $result_limit ";
 		}
 
-
 		$result = $this->db_link->sql_query($query);
 
 		$this->data_managed_domain = $result['result'];
@@ -147,7 +146,7 @@ class USER
 		  FROM domain
 		  WHERE domain.domain != 'ova.local'
 		  AND domain.active = 1
-		  AND domain.mailboxes <> 0
+		  AND ( domain.mailboxes <> 0 OR domain.aliases <> 0 )
 		  ";
 		}
 		else
@@ -157,7 +156,7 @@ class USER
 		  WHERE domain_admins.accounts_id = ".$this->data['id']."
 		  AND domain_admins.domain_id = domain.id
 		  AND domain.active = 1
-		  AND domain.mailboxes <> 0
+      AND ( domain.mailboxes <> 0 OR domain.aliases <> 0 )
 		  ";
 		}
 		
@@ -177,8 +176,6 @@ class USER
 		}
 
 		$result = $this->db_link->sql_query($query);
-
-		debug_info($query);
 
 		$this->data_managed_active_domain_with_mail = $result['result'];
 		$this->total_managed_active_domain_with_mail = $result['rows'];
@@ -236,8 +233,8 @@ class USER
 
 	function fetch_quota_status()
 	{
-	  if ( $this->rights['manage'] == 1 )
-	  {
+
+	  if ( $this->rights['manage'] == 1 ) {
 
 	    $query = "SELECT COUNT(username) AS total_mailbox FROM mailbox";
 	    $result = $this->db_link->sql_query($query);
@@ -277,11 +274,12 @@ class USER
 	    
 	  }
 		else{
-			if ( ! isset($this->total_managed_domain)){
+
+			if ( !isset($this->total_managed_domain)) {
 				$this->fetch_domains();
 			}
 
-			$this->data_managed['domains'] = sizeof($this->total_managed_domain) + 1;
+			$this->data_managed['domains'] = $this->total_managed_domain;
 			
 			$domain_info = $this->check_quota('aliases');
 			$domain_info = $this->check_quota('mailboxes');
@@ -297,7 +295,7 @@ class USER
 	    $query = "SELECT domain_id
 	    FROM domain_admins
 	    WHERE domain_admins.accounts_id = ".$this->data['id']."
-	    AND domain_admins.domain_id=$domain_id";
+	    AND domain_admins.domain_id='$domain_id'";
 	    
 	    $result = $this->db_link->sql_query($query);
 	    if ( $result['rows'] == 0){
@@ -315,7 +313,7 @@ class USER
 
 	function check_domain_admin()
 	{
-	  if ( ($this->rights['manage'] != 1) || ($this->rights['domain'] != 1) ){
+	  if ( $this->rights['domain'] != 1) {
 	      session_unset ();
 	      session_destroy ();
 	      header ("Location: ../login.php");
