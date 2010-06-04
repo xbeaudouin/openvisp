@@ -2,7 +2,7 @@
 //
 // File: config.inc.php
 //
-if (ereg ("config.inc.php", $_SERVER['PHP_SELF']))
+if (preg_match ("/config\.inc'.php/", $_SERVER['PHP_SELF']))
 {
    header ("Location: login.php");
    exit;
@@ -25,20 +25,26 @@ $CONF['slapd_perl'] = 1;
 // pgsql  = PostGresSQL
 $CONF['database_type'] = 'mysql';
 $CONF['database_host'] = 'localhost';
-$CONF['database_user'] = 'openvispadmin';
-$CONF['database_password'] = 'openvispadmin';
-$CONF['database_name'] = 'openvispadmin';
+$CONF['database_port'] = '8889';
+$CONF['database_user'] = 'root';
+$CONF['database_password'] = 'root';
+$CONF['database_name'] = 'dbopenvisp_prod';
 
 // Site Admin
 // Define the Site Admins email address below.
 // This will be used to send emails from to create mailboxes.
-$CONF['admin_email'] = 'kiwi@oav.net';
+$CONF['admin_email'] = 'nicolas@goralski.fr';
+
+$CONF['cryptograph'] = 'NO';
+
+$CONF['SQL_DEBUG'] = 'NO';
+$CONF['greylisting'] = 'YES';
 
 // Mail Server
 // Hostname (FQDN) of your mail server.
 // This is used to send email to Postfix in order to create mailboxes.
-$CONF['smtp_server'] = "localhost";
-$CONF['smtp_port'] = "25";
+$CONF['smtp_server'] = "mail.goralski.fr";
+$CONF['smtp_port'] = "2525";
 
 // Encrypt
 // In what way do you want the passwords to be crypted?
@@ -53,8 +59,9 @@ $CONF['encrypt'] = 'cleartext';
 $CONF['generate_password'] = 'YES';
 
 // Alternative password generator
-#$CONF['password_generator'] = '/usr/local/bin/mkpwd -t 6 -l -n 10 -m 10';
-$CONF['password_generator'] = '/usr/local/bin/pwgen -acn 11 1';
+//$CONF['password_generator'] = '/usr/local/bin/mkpwd -t 6 -l -n 10 -m 10';
+//$CONF['password_generator'] = '/usr/local/bin/pwgen -acn 11 1';
+$CONF['password_generator'] = '';
 
 // Page Size
 // Set the number of entries that you would like to see
@@ -73,10 +80,10 @@ $CONF['default_aliases'] = array (
 // Mailboxes
 // If you want to store the mailboxes per domain set this to 'YES'.
 // Example: /usr/local/virtual/domain.tld/username@domain.tld
-$CONF['domain_path'] = 'NO';
+$CONF['domain_path'] = 'YES';
 // If you don't want to have the domain in your mailbox set this to 'NO'.
 // Example: /usr/local/virtual/domain.tld/username
-$CONF['domain_in_mailbox'] = 'YES';
+$CONF['domain_in_mailbox'] = 'NO';
 
 // Default Domain Values
 // Specify your default values below. Quota in MB.
@@ -88,11 +95,11 @@ $CONF['maxquota'] = '150';
 // Here the level required to put spam header information
 $CONF['sa_tag_level'] = '-999';      
 // Here the Subject added when the sa_tag_level is reached
-$CONF['spam_subject_tag'] = '*** SPAM ***';
+$CONF['spam_subject_tag'] = '***SPAM***';
 // Here the 2nd level required to modify the subject
 $CONF['sa_tag2_level'] = '6.9';
 // Here the Subject added when the sa_tag_level2 is reached
-$CONF['spam_subject_tag2'] = '*** SPAM ***';
+$CONF['spam_subject_tag2'] = '***SPAM***';
 // Here the level required to put in quarantine the mail
 $CONF['sa_kill_level'] = '999';
 
@@ -140,6 +147,7 @@ $CONF['logging'] = 'YES';
 // SMTPAUTH
 $CONF['smtpauth'] = 'YES';
 
+$CONF['manage_server'] = 'YES';
 
 // This two parameter can be in the database.
 // Allow the user to manage his password
@@ -187,6 +195,8 @@ $CONF['ftp_ratio'] = 'NO';
 
 // Datacenter functionality
 $CONF['datacenter'] = 'YES';
+
+$CONF['greylisting'] = 'YES';
 
 // Email to send datacenter requests
 $CONF['datacenter_request_to'] = 'postmaster@nowhere.com';
