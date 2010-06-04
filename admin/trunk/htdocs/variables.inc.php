@@ -2,7 +2,7 @@
 //
 // File: variables.inc.php
 //
-if (ereg ("variables.inc.php", $_SERVER['PHP_SELF']))
+if (preg_match ("/variables\.inc\.php/", $_SERVER['PHP_SELF']))
 {
    header ("Location: login.php");
    exit;
