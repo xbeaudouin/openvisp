@@ -769,7 +769,7 @@ $PALANG['pAdminImport_help3'] = 'the options followed by  a  * can be 0 or 1 ';
 
 $PALANG['pImport_Users_file'] = 'users file';
 $PALANG['pImport_Users_help'] = 'The file must contains the informations like the following exemple :';
-$PALANG['pImport_Users_help2'] = 'FirstName ; LastName ; password ; email ; Mb quota ; active* ; create mailbox* ; smtpauth activated*';
+$PALANG['pImport_Users_help2'] = 'mailbox ; FirstName LastName or Description ; password ; Mb quota';
 $PALANG['pImport_Users_help3'] = 'the options followed by  a  * can be 0 or 1<br/>The email can contain or not the @domain.tld';
 $PALANG['pImport_Users_return'] = 'Return to the domain details';
 
@@ -1063,8 +1063,19 @@ $PALANG['pMassive_import_aliases_unknown_domain'] = '<div class="standout">Sorry
 $PALANG['pMassive_import_aliases_inactive_domain'] = '<div class="standout">Sorry you tried to insert an alias (%s) into a desactivated domain.</div>';
 $PALANG['pMassive_import_aliases_domain_not_managed'] = '<div class="standout">Sorry you tried to insert an alias (%s) that does not below to any domain managed by you.</div>';
 $PALANG['pMassive_import_aliases_domain_overquota'] = '<div class="standout">Sorry you tried to insert some aliases into a domain (%s) that have reach his alias quota.</div>';
-$PALANG['pMassive_import_aliases_error'] = '<div class="standout">Sorry an error occured when tried to add  aliases %s, please contact the administrator.</div>';
+$PALANG['pMassive_import_aliases_error'] = '<div class="standout">Sorry an error occured when tried to add aliases %s, please contact the administrator.</div>';
 $PALANG['pMassive_import_aliases_ok'] = '<div class="standout">aliases %s created.</div>';
+
+
+$PALANG['pMassive_import_mailboxes_allocation_overquota'] = 'Sorry you tried to allocate too much mailboxes, please contact the administrator to increase your quota limit.';
+$PALANG['pMassive_import_mailboxes_allocation_overquota_part'] = '<div class="standout">You request to allocate %s mailboxes and your available quota is %s</div>';
+$PALANG['pMassive_import_mailboxes_bad_format'] = '<div class="standout">Sorry you tried to insert a mailbox (%s) that does not contain any domain, you must specify the domain of a mailbox.</div>';
+$PALANG['pMassive_import_mailboxes_unknown_domain'] = '<div class="standout">Sorry you tried to insert an mailbox (%s) that does not below to any domain managed by OVA, you must insert mailboxes of domain managed by OVA.</div>';
+$PALANG['pMassive_import_mailboxes_inactive_domain'] = '<div class="standout">Sorry you tried to insert an mailbox (%s) into a desactivated domain.</div>';
+$PALANG['pMassive_import_mailboxes_domain_not_managed'] = '<div class="standout">Sorry you tried to insert an mailbox (%s) that does not below to any domain managed by you.</div>';
+$PALANG['pMassive_import_mailboxes_domain_overquota'] = '<div class="standout">Sorry you tried to insert some mailboxes into a domain (%s) that have reach his mailboxes quota.</div>';
+$PALANG['pMassive_import_mailboxes_error'] = '<div class="standout">Sorry an error occured when tried to add mailboxes %s, please contact the administrator.</div>';
+$PALANG['pMassive_import_mailboxes_ok'] = '<div class="standout">mailboxes %s created.</div>';
 
 
 $PALANG['pMassive_import_disk_allocation_overquota'] = 'Sorry you tried to allocate too much diskspace, please contact the administrator to increase your quota limit.';
@@ -1072,5 +1083,7 @@ $PALANG['pMassive_import_disk_allocation_overquota_part'] = '<div class="standou
 
 
 $PALANG['pGeneric_paid'] = 'Paid';
+$PALANG['pGeneric_used'] = 'Used';
+$PALANG['pGeneric_left'] = 'Left';
 
 ?>
