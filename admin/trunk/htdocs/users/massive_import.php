@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 			// Check if the user can add as much aliases as he want.
 			if ( $user_info->can_add_item(sizeof($new_aliases),"aliases") == FALSE ){
-				$result['message'] .= sprintf($PALANG['pMassive_import_aliases_allocation_overquota_part'], $new['aliases'], $user_info->data_quota['aliases'] - $user_info->data_managed['aliases'] );
+				$result['message'] .= sprintf($PALANG['pMassive_import_aliases_allocation_overquota_part'], sizeof($new_aliases), $user_info->data_quota['aliases'] - $user_info->data_managed['aliases'] );
 				$result['message'] .= $PALANG['pMassive_import_aliases_allocation_overquota']."<br/>";
 				$error++;
 			}
@@ -159,7 +159,110 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 		}
 
 		break;
-		
+
+	case "mailboxes":
+		$uploadfile = $CONF['uploaddir'] ."/". basename($_FILES['mailbox_file']['name']);
+		move_uploaded_file($_FILES['mailbox_file']['tmp_name'], $uploadfile);
+		$new_mailboxes=clean_empty_line($uploadfile);
+
+		$error = 0;
+
+		if ( $user_info->rights['manage'] == 0 ){
+
+			// Check if the user can add as much aliases as he want.
+			if ( $user_info->can_add_item(sizeof($new_mailboxes),"mailboxes") == FALSE ){
+				$result['message'] .= sprintf($PALANG['pMassive_import_mailbox_allocation_overquota_part'], $new_mailboxes, $user_info->data_quota['mailboxes'] - $user_info->data_managed['mailboxes'] );
+				$result['message'] .= $PALANG['pMassive_import_mailboxes_allocation_overquota']."<br/>";
+				$error++;
+			}
+
+			foreach ($new_mailboxes as $line_num => $line) {
+				
+				//$info = explode(";", chop($line));
+				list($new_mailbox['mailbox'], $new_mailbox['description'], $new_mailbox['password']; $new_mailbox['quota']) = explode(";", chop($line));
+
+
+				// Check if the alias contain a valid email alias
+				if ( !eregi('@', $new_mailbox['mailbox']) ){
+					$error++;
+					$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_bad_format'], $info[0]);
+				}
+				else{
+
+					$mailbox = explode("@", $new_mailbox['mailbox']);
+					if ( $domain_info->domain_exist($mailbox[1]) == FALSE ){
+						$error++;
+						$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_unknown_domain'], $mailbox[1]);
+					}
+					else{
+
+						if ( ! isset($total_mailbox[$mailbox[1]]) ){
+							$total_mailbox[$mailbox[1]] = 0;
+						}
+						$total_mailbox[$mailbox[1]]++;
+						$newMailbox[$mailbox[1]][] = explode(";", chop($line);
+
+					}
+
+				}
+
+			}
+
+			foreach ($total_mailbox as $domain => $number_new_mailboxes){
+
+				$domain_info->fetch_by_domainname($domain);
+				if ( $user_info->check_domain_access($domain_info->data_domain['id'],0) == FALSE ){
+					$error++;
+					$result['message'] .= $PALANG['pMassive_import_mailboxes_domain_not_managed'];
+				}
+				else{
+					// Don't add info to domain that are inactive.
+					if ( $domain_info->data_domain['active'] == 0 ){
+						$error++;
+						$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_inactive_domain'], $alias[1]);
+					}
+					else{
+						if ( $domain_info->can_add_mail_alias($number_new_mailboxes) == FALSE ){
+							$error++;
+							$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_domain_overquota'], $domain);
+						}
+					}
+				}
+
+			}
+
+
+
+		}
+
+		if ( $error == 0 ){
+			
+			$result['message'] = "YES you can";
+			foreach ($newMailbox as $domain => $mailbox){
+				$domain_info->fetch_by_domainname($domain);
+				$domain_info->fetch_policy_id();
+				foreach( $mailbox as $line => $item){
+					$mbx_name = $mailbox[$line][0];
+					$mbx_info = $mailbox[$line][1];
+					$mbx_pass = $mailbox[$line][2];
+					$mbx_quota = $mailbox[$line][3];
+
+					$result_create = $mail_info->add_mailbox($mbx_name, $mbx_info, $mbx_pass, $mbx_quota);
+					if ($result_create['status'] != 0){
+						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_error'], $alias_from);
+					}
+					else{
+						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_ok'], $alias_from);
+					}
+					$result['message'] .= $result_create['message'];
+				}
+
+			}
+
+		}
+
+		break;
+
 	case "domains":
 		$uploadfile = $CONF['uploaddir'] ."/". basename($_FILES['domain_file']['name']);                                                                                                
 		move_uploaded_file($_FILES['domain_file']['tmp_name'], $uploadfile);
