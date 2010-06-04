@@ -109,6 +109,9 @@ class AJAX_YUI
 
 				if ( $attributes['display'] == TRUE ){
 
+					if ( preg_match("/children.*/", $item) ){
+						$item = "children";
+					}
 
 					switch ($item){
 
@@ -128,17 +131,30 @@ class AJAX_YUI
 						if ( isset($attributes['label']) ) { $this->buffer .= 'label:"'.$attributes['label'].'",'; }
 						$this->buffer .= "children: [ \n";
 						
-						$total_child = sizeof($attributes);
+						$total_child = sizeof($attributes) - 3;
 						$boucle_child = 0;
 						foreach ($attributes as $child_array){
 							if ( is_array($child_array) ){
-								$this->buffer .= '  { key:"'.$child_array['key'].'", sortable:'.$child_array['sortable'].', resizeable:'.$child_array['resizeable'];
-								if ( ! empty($child_array['label']) ) { $child_array['label'];}
-								$this->buffer .= ', label:"'.$child_array['label'].'"';
+								$this->buffer .= '  { key:"'.$child_array['key'].'"';
+
+								if ( ! empty($child_array['sortable']) ){
+									$this->buffer .= ', sortable:'.$child_array['sortable'];
+								}
+
+								if ( ! empty($child_array['resizeable']) ){
+									$this->buffer .= ', resizeable:'.$child_array['resizeable'];
+								}
+								
+								if ( ! empty($child_array['label']) ) {
+									//$child_array['label'];
+									$this->buffer .= ', label:"'.$child_array['label'].'"';
+								}
+
 								$this->buffer .= '} ';
 
 								if ( $boucle_child < $total_child ) { $this->buffer .= ","; }
 								$boucle_child++;
+
 							}
 						}
 
@@ -230,6 +246,11 @@ class AJAX_YUI
 	 	    
 	 	    $boucle=1;
 	 	    foreach ($this->item_list as $item => $attributes) {
+
+					if ( preg_match("/children.*/", $item) ){
+						$item = "children";
+					}
+
 
 					switch ($item){
 
