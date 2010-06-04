@@ -12,22 +12,6 @@ print $PALANG['pAdminList_admin_domain'] . ": " . $user_info->data_managed['doma
 
 <center>
 
-  <form enctype="multipart/form-data" name="import_file_alias" method="post">
-  <?php print $PALANG['pImport_Alias_file'] . ":\n<br>"; ?>
-  <input type="hidden" name="massive_type" value="mail_alias">
-  <input type="file" name="alias_file">
-	<br>
-  <input type="submit">
-  </form>
-	<br>
-
-  <?php print $PALANG['pImport_Alias_help'] . "\n<br/>"; ?>
-  <?php print $PALANG['pImport_Alias_help2'] . "\n<br/><br/>"; ?>
-  <?php print $PALANG['pGlobalImport_Alias_help3'] . "\n<br/>"; ?>
-  <?php print $PALANG['pGlobalImport_Alias_help4'] . "\n<br/><br/>"; ?>
-
-<hr width="50%">
-
   <form enctype="multipart/form-data" name="import_file_domain" method="post">
   <?php print $PALANG['pAdminImport_file'] . ":\n<br>"; ?>
   <input type="hidden" name="massive_type" value="domains">
@@ -43,6 +27,37 @@ print $PALANG['pAdminList_admin_domain'] . ": " . $user_info->data_managed['doma
 
 
 <hr width="50%">
+
+  <form enctype="multipart/form-data" name="import_file_user" method="post">
+  <?php print $PALANG['pImport_Users_file'] . ":\n<br>"; ?>
+  <input type="hidden" name="massive_type" value="mailboxes">
+  <input type="file" name="mailbox_file">
+	<br>
+  <input type="submit">
+  </form>
+	<br>
+
+  <?php print $PALANG['pImport_Users_help'] . "\n<br /><br />"; ?>
+  <?php print $PALANG['pImport_Users_help2'] . "\n<br /><br />"; ?>
+  <?php print $PALANG['pImport_Users_help3'] . "\n"; ?>
+
+
+<hr width="50%">
+
+  <form enctype="multipart/form-data" name="import_file_alias" method="post">
+  <?php print $PALANG['pImport_Alias_file'] . ":\n<br>"; ?>
+  <input type="hidden" name="massive_type" value="mail_alias">
+  <input type="file" name="alias_file">
+	<br>
+  <input type="submit">
+  </form>
+	<br>
+
+  <?php print $PALANG['pImport_Alias_help'] . "\n<br/>"; ?>
+  <?php print $PALANG['pImport_Alias_help2'] . "\n<br/><br/>"; ?>
+  <?php print $PALANG['pGlobalImport_Alias_help3'] . "\n<br/>"; ?>
+  <?php print $PALANG['pGlobalImport_Alias_help4'] . "\n<br/><br/>"; ?>
+
 
 
 </center>
