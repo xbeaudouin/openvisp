@@ -303,26 +303,38 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 																								"label" => "",
 																								"display" => FALSE
 																								),
-												 "aliases" => array (
-																						 "label" => $PALANG['pOverview_get_aliases'],
-																						 "sortable" => "false",
-																						 "parser" => "number"
-																						 ),
-												 "quota_aliases" => array (
-																									 "sortable" => "false",
-																									 "parser" => "number",
-																									 "editor" => "textarea"
-																									 ),
-												 "mailboxes" => array (
-																							 "label" => $PALANG['pOverview_get_mailboxes'],
-																							 "sortable" => "false",
-																							 "parser" => "number"
-																							 ),
-												 "quota_mailboxes" => array (
-																										 "sortable" => "false",
-																										 "parser" => "number",
-																										 "editor" => "textarea"
-																										 ),
+												 "children" => array (
+																							"label" => $PALANG['pOverview_get_aliases'],
+																							"aliases" => array (
+																																	"key" => "aliases",
+																																	"label" => $PALANG['pGeneric_used'],
+																																	"sortable" => "false",
+																																	"parser" => "number"
+																																	),
+																							"quota_aliases" => array (
+																																				"key" => "quota_aliases",
+																																				"label" => $PALANG['pGeneric_left'],
+																																				"sortable" => "false",
+																																				"parser" => "number",
+																																				"editor" => "textarea"
+																																				)
+																							),
+												 "children2" => array (
+																							"label" => $PALANG['pOverview_get_mailboxes'],
+																							"mailboxes" => array (
+																																		"key" => "mailboxes",
+																																		"label" => $PALANG['pGeneric_used'],
+																																		"sortable" => "false",
+																																		"parser" => "number"
+																																		),
+																							"quota_mailboxes" => array (
+																																					"key" => "quota_mailboxes",
+																																					"label" => $PALANG['pGeneric_left'],
+																																					"sortable" => "false",
+																																					"parser" => "number",
+																																					"editor" => "textarea"
+																																					)
+																							),
 												 "maxquota" => array ( 
 																							"label" => $PALANG['pOverview_get_quota'],
 																							"sortable" => "false",
