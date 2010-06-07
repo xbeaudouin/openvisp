@@ -392,6 +392,91 @@ AND mailbox.username=alias.address
 
   }
 
+  //
+	// add_mailbox
+	// Action: create a new mailbox
+	// Call: add_mailbox (string mbx_name, string mbx_info, string mbx_pass, int mbx_quota, int mbx_smtpauth, int mbx_pop3, int mbx_imap)
+	//
+  function add_mailbox($mbx_name, $mbx_info, $mbx_pass = NULL, $mbx_quota, $mbx_smtpauth = 0, $mbx_pop3 = 1, $mbx_imap = 0){
+
+    global $CONF;
+    global $PALANG;
+		global $user_info;
+		global $domain_info;
+		global $ova_info;
+		global $server_info;
+
+    $message = "";
+    
+		$error = 0;
+
+		if (!preg_match ('/@/',$mbx_name)) $mbx_name = $mbx_name . "@" . $domain_info->data_domain['domain'];
+
+    if (empty ($mbx_name) or !($this->check_email_struct ($mbx_name)) )
+    {
+      $error = 1;
+      $array['message'] .= $PALANG['pCreate_mailbox_address_text_error1']." ".$mbx_name;
+    }
+
+		//TOTO CHECK PASS
+		if ( $mbx_pass == NULL or $mbx_pass == "" ){
+			$mbx_pass = $ova_info->generate_password();
+		}
+
+
+		//TODO call to mdir generator
+		$mbx_mdir = $domain_info->generate_path() . "/$mbx_name/";
+		debug_info("$mbx_mdir");
+
+		if ( $error == 0 ){
+
+
+			if ( $this->check_mailbox_not_exist($mbx_name) ){
+				$query = "INSERT INTO mailbox(username,domain_id,password,maildir,quota, smtp_enabled,pop3_enabled, imap_enabled,created,active)
+        VALUES ('$mbx_name',".$domain_info->data_domain['id'].",'$mbx_pass','$mbx_mdir','$mbx_quota','$mbx_smtpauth','$mbx_pop3','$mbx_imap',NOW(),'1')";
+				$result = $this->db_link->sql_query($query);
+
+				debug_info("NG : $query");
+				debug_info("NG : ".$result['sql_log']);
+
+				if ( !isset($array['message'])){ $array['message']="";}
+
+        if ($result['rows'] != 1){
+          $error = 1;
+          $array['message'] .= $PALANG['pCreate_mailbox_result_error'] . " <b>($mbx_name)</b></br/>";
+          $array['message'] .= "SQL : ".$result['sql_log']."</br/>";
+        }
+				else{
+					$create_alias = $this->add_mail_alias($mbx_name, $mbx_name);
+					if ($create_alias['status'] > 0 ){
+						$error++;
+						$array['message'] .= "### TO CHANGE un soucis a la creation de l'alias est apparu";
+						$this->fetch_mailbox_info($mbx_name);
+						$this->mailbox_delete();
+					}
+				}
+				
+
+			}
+			else{
+				$error = 1;
+				$array['message'] .= $PALANG['pCreate_mailbox_username_text_error2'] . " <b>($mbx_name)</b></br/>";
+			}
+
+		}
+	}
+
+	function check_mailbox_not_exist($mailbox){
+		$query = "SELECT * FROM mailbox WHERE username='$mailbox'";
+		$result = $this->db_link->sql_query($query,2);
+		debug_info("NG MB EXist : ".$result['rows']);
+		if ( $result['rows'] == 0){
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+
 
 }
 
