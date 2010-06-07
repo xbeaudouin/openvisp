@@ -78,6 +78,7 @@ $CONF['cryptoconf'] = 'ova.cfg.php';
 // Generate a random password for a mailbox and display it.
 // If you want to automagically generate paswords set this to 'YES'.
 $CONF['generate_password'] = 'NO';
+$CONF['generate_password_length'] = '8';
 
 // Alternative password generator
 //$CONF['password_generator'] = '/usr/local/bin/pwgen -acn 11 1';
