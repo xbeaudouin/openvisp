@@ -1,0 +1,40 @@
+digraph create_domains {
+	rankdir=TB;
+	size="auto"
+//	node [shape = doublecircle]; LR_0 LR_3 LR_4 LR_8;
+// color scheme : http://www.graphviz.org/doc/info/colors.html
+
+	node [shape = rect];
+	start -> check_ova_admin;
+	check_ova_admin -> check_domain_admin [ color="firebrick1" ];
+	check_ova_admin -> create_domain [ color="cornflowerblue" ];
+	check_domain_admin -> check_user_domain_quota [ color="cornflowerblue" ];
+	check_domain_admin -> go_away [ color="firebrick1" ];
+	check_user_domain_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_domain_quota -> check_user_disk_quota [ color="cornflowerblue" ];
+	check_user_disk_quota -> check_user_alias_quota [ color="cornflowerblue" ];
+	check_user_disk_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_alias_quota -> check_user_mailbox_quota [ color="cornflowerblue" ];
+	check_user_alias_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_mailbox_quota -> check_user_database_quota [ color="cornflowerblue" ];
+	check_user_mailbox_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_database_quota -> check_user_database_user_quota [ color="cornflowerblue" ];
+	check_user_database_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_database_user_quota -> check_user_ftpaccount_quota [ color="cornflowerblue" ];
+	check_user_database_user_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_ftpaccount_quota -> check_user_webhosting_quota [ color="cornflowerblue" ];
+	check_user_ftpaccount_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_webhosting_quota -> ask_quota_resize [ color="firebrick1" ];
+	check_user_webhosting_quota -> create_domain [ color="cornflowerblue" ];
+
+	check_domain_admin -> create_domain [ color="cornflowerblue" ];
+	create_domain -> greylisting_active [ color="cornflowerblue" ];
+	create_domain -> error_message [ color="firebrick1" ];
+	greylisting_active -> add_greylisting_data [ label="Yes" ];
+ 	add_greylisting_data -> add_greylisting_data [label="for each policyd server"]
+ 	add_greylisting_data -> end [ color="cornflowerblue" ];
+
+
+	error_message -> end;
+
+}
