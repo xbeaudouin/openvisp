@@ -661,6 +661,21 @@ VALUES (".$user_info->data['id'].", ".$this->data_domain['id']." , 1 )
 
 	}
 
+	//
+	// generate_path
+	// Action: Generates the path to mailbox, ftp...
+	// Call: generate_path ()
+	//
+	function generate_path (){
+		global $CONF;
+
+		$directory = $this->data_domain['domain'][0] . "/" . $this->data_domain['domain'][1] . "/" . $this->data_domain['domain'][2];
+
+			
+		return $directory;
+
+	}
+
 
 }
 
