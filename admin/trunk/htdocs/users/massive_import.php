@@ -169,26 +169,39 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 		if ( $user_info->rights['manage'] == 0 ){
 
-			// Check if the user can add as much aliases as he want.
+			// Check if the user can add as much email accont as he want.
 			if ( $user_info->can_add_item(sizeof($new_mailboxes),"mailboxes") == FALSE ){
 				$result['message'] .= sprintf($PALANG['pMassive_import_mailbox_allocation_overquota_part'], $new_mailboxes, $user_info->data_quota['mailboxes'] - $user_info->data_managed['mailboxes'] );
 				$result['message'] .= $PALANG['pMassive_import_mailboxes_allocation_overquota']."<br/>";
 				$error++;
 			}
 
-			foreach ($new_mailboxes as $line_num => $line) {
+		}
+		
+		debug_info("COUCOU");
+
+		$consumed_quota = 0;
+		$consumed_quota_domain = array();
+
+		foreach ($new_mailboxes as $line_num => $line) {
 				
-				//$info = explode(";", chop($line));
-				list($new_mailbox['mailbox'], $new_mailbox['description'], $new_mailbox['password']; $new_mailbox['quota']) = explode(";", chop($line));
+			//$info = explode(";", chop($line));
+			list($new_mailbox['mailbox'], $new_mailbox['description'], $new_mailbox['password'], $new_mailbox['quota'], $new_mailbox['smtpauth'], $new_mailbox['pop'], $new_mailbox['imap']) = explode(";", chop($line));
 
+			$consumed_quota += $new_mailbox['quota'];
 
-				// Check if the alias contain a valid email alias
-				if ( !eregi('@', $new_mailbox['mailbox']) ){
+			// Check if the email contain a valid email alias
+			if ( !eregi('@', $new_mailbox['mailbox']) ){
+				$error++;
+				$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_bad_format'], $info[0]);
+			}
+			else{
+
+				if ( $mail_info->check_mailbox_not_exist($new_mailbox['mailbox']) == FALSE ){
 					$error++;
-					$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_bad_format'], $info[0]);
+					$result['message'] .= $PALANG['pCreate_mailbox_username_text_error2'] . " <b>(".$new_mailbox['mailbox'].")</b></br/>";
 				}
 				else{
-
 					$mailbox = explode("@", $new_mailbox['mailbox']);
 					if ( $domain_info->domain_exist($mailbox[1]) == FALSE ){
 						$error++;
@@ -200,7 +213,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 							$total_mailbox[$mailbox[1]] = 0;
 						}
 						$total_mailbox[$mailbox[1]]++;
-						$newMailbox[$mailbox[1]][] = explode(";", chop($line);
+						// Create an array per domain of new mailbox
+						$newMailboxList[$mailbox[1]][] = explode(";", chop($line));
+						$consumed_quota_domain[$mailbox[1]] += $new_mailbox['quota'];
 
 					}
 
@@ -208,7 +223,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 			}
 
-			foreach ($total_mailbox as $domain => $number_new_mailboxes){
+		}
+
+		//		if ( ) 
+
+
+		foreach ($total_mailbox as $domain => $number_new_mailboxes){
 
 				$domain_info->fetch_by_domainname($domain);
 				if ( $user_info->check_domain_access($domain_info->data_domain['id'],0) == FALSE ){
@@ -222,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 						$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_inactive_domain'], $alias[1]);
 					}
 					else{
-						if ( $domain_info->can_add_mail_alias($number_new_mailboxes) == FALSE ){
+						if ( $domain_info->can_add_mailbox($number_new_mailboxes) == FALSE ){
 							$error++;
 							$result['message'] .= sprintf($PALANG['pMassive_import_mailboxes_domain_overquota'], $domain);
 						}
@@ -233,26 +253,27 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
 
 
-		}
-
 		if ( $error == 0 ){
 			
 			$result['message'] = "YES you can";
-			foreach ($newMailbox as $domain => $mailbox){
+			foreach ($newMailboxList as $domain => $mailbox){
 				$domain_info->fetch_by_domainname($domain);
 				$domain_info->fetch_policy_id();
 				foreach( $mailbox as $line => $item){
 					$mbx_name = $mailbox[$line][0];
 					$mbx_info = $mailbox[$line][1];
 					$mbx_pass = $mailbox[$line][2];
-					$mbx_quota = $mailbox[$line][3];
+					$mbx_quota = $mailbox[$line][3] * 1000 * 1000;
+					$mbx_smtpauth = ($mailbox[$line][4] == "") ? 0 : $mailbox[$line][4];
+					$mbx_pop3 = ($mailbox[$line][5] == "") ? 0 : $mailbox[$line][5];
+					$mbx_imap = ($mailbox[$line][6] == "") ? 0 : $mailbox[$line][6];
 
-					$result_create = $mail_info->add_mailbox($mbx_name, $mbx_info, $mbx_pass, $mbx_quota);
+					$result_create = $mail_info->add_mailbox($mbx_name, $mbx_info, $mbx_pass, $mbx_quota, $mbx_smtpauth, $mbx_pop3, $mbx_imap);
 					if ($result_create['status'] != 0){
-						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_error'], $alias_from);
+						$result['message'] .= sprintf($PALANG['pMassive_import_mailbox_error'], $alias_from);
 					}
 					else{
-						$result['message'] .= sprintf($PALANG['pMassive_import_aliases_ok'], $alias_from);
+						$result['message'] .= sprintf($PALANG['pMassive_import_mailbox_ok'], $alias_from);
 					}
 					$result['message'] .= $result_create['message'];
 				}
