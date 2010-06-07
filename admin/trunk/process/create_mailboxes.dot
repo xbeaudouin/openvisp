@@ -5,9 +5,9 @@ digraph create_mailboxes {
 // color scheme : http://www.graphviz.org/doc/info/colors.html
 
 	node [shape = rect];
-	start -> check_admin;
-	check_admin -> check_mail_admin [ color="firebrick1" ];
-	check_admin -> check_domain_mailbox_quota [ color="cornflowerblue" ];
+	start -> check_ova_admin;
+	check_ova_admin -> check_mail_admin [ color="firebrick1" ];
+	check_ova_admin -> check_domain_mailbox_quota [ color="cornflowerblue" ];
 	check_domain_disk_quota -> create_mailbox [ color="cornflowerblue" ];
 	check_mail_admin -> go_away [ color="firebrick1" ];
 	check_mail_admin -> check_domain_access [ color="cornflowerblue"];
@@ -20,6 +20,8 @@ digraph create_mailboxes {
 	check_domain_mailbox_quota -> check_domain_disk_quota [ color="cornflowerblue"];
 	check_domain_mailbox_quota -> resize_quota [ color="firebrick1"];
 	check_domain_disk_quota -> resize_quota[ color="firebrick1"];
+	create_mailbox -> create_aliases [ color="cornflowerblue" ];
+	create_mailbox -> error_message [ color="firebrick1" ];
 	create_aliases -> send_mail_to_mailbox [ color="cornflowerblue" ];
 	send_mail_to_mailbox -> end [ color="cornflowerblue" ];
 	create_aliases -> rollback [ color="firebrick1" ];
