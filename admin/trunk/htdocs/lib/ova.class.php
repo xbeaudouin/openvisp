@@ -142,9 +142,25 @@ class OVA
 	 
 		}
 
-}
+	}
 
 
+	//
+	// generate_password
+	// Action: Generates a random password
+	// Call: generate_password ()
+	//
+	function generate_password (){
+		global $CONF;
+
+		if ($CONF['generate_password'] == "YES"){
+			if ($CONF['password_generator'] == ""){	$password = substr (md5 (mt_rand ()), 0, $CONF['generate_password_length']);	}
+			else {	$password = exec($CONF['password_generator']); }
+		}
+
+		return $password;
+
+	}
 
 
 }
