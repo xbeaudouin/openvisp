@@ -12,7 +12,7 @@
 ##
 
 # In general you can use apxs, but on debian you should use apxs2
-APXS = /usr/local/apache2-itk/bin/apxs
+APXS = apxs
 #APXS = apxs2
 
 NAME = mod_vhs
@@ -30,14 +30,14 @@ INDENT = /usr/bin/indent
 # is redefining strangely some headers.... :/
 
 #CFLAGS= -DDEBIAN -I/usr/include/apr-0
-CFLAGS= -I/usr/include
+CFLAGS= -I/usr/include -I/usr/local/include/php -I/usr/local/include/php/Zend -I/usr/local/include/php/main -I/usr/local/include/php/TSRM
 
 CFLAGS+= -I/usr/local/apache2-itk/include  -I/opt/local/include/php -I/opt/local/include/php/main -I/opt/local/include/php/TSRM -I/opt/local/include/php/Zend -Wc,-Wall
 CFLAGS+= -DVH_DEBUG 
 CFLAGS+= -DHAVE_MOD_PHP_SUPPORT 
-CFLAGS+= -DHAVE_MPM_ITK_SUPPORT
-CFLAGS+= -DHAVE_MOD_DBD_SUPPORT
-#CFLAGS+= -DHAVE_LDAP_SUPPORT
+#CFLAGS+= -DHAVE_MPM_ITK_SUPPORT
+#CFLAGS+= -DHAVE_MOD_DBD_SUPPORT
+CFLAGS+= -DHAVE_LDAP_SUPPORT
 
 # Flags for compilation (Full Debug)
 #CFLAGS+= -DVH_DEBUG -Wc,-Wall
