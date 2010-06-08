@@ -40,7 +40,7 @@ CFLAGS+= -DHAVE_MOD_PHP_SUPPORT
 CFLAGS+= -DHAVE_LDAP_SUPPORT
 
 # Flags for compilation (Full Debug)
-#CFLAGS+= -DVH_DEBUG -Wc,-Wall
+CFLAGS+= -DVH_DEBUG -Wc,-Wall
 
 # Flags for compilation with PHP
 #CFLAGS+= -I/usr/local/include/php -I/usr/local/include/php/main -I/usr/local/include/php/TSRM -I/usr/local/include/php/Zend -DHAVE_MOD_PHP_SUPPORT -Wc,-Wall

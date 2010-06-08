@@ -204,31 +204,6 @@ typedef struct mod_vhs_request_t {
     int vhost_found;			/* set to 1 if the struct is field with vhost information, 0 if not, -1 if the vhost does not exist  */
 } mod_vhs_request_t;
 
-#ifdef HAVE_LDAP_SUPPORT
-/* TODO: make KazarPerson stuff */
-char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
-
-/* TODO: cca marche ? */
-static APR_OPTIONAL_FN_TYPE(uldap_connection_close) *util_ldap_connection_close;
-static APR_OPTIONAL_FN_TYPE(uldap_connection_find) *util_ldap_connection_find;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn) *util_ldap_cache_comparedn;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_compare) *util_ldap_cache_compare;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_checkuserid) *util_ldap_cache_checkuserid;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn) *util_ldap_cache_getuserdn;
-static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported) *util_ldap_ssl_supported;
-
-static void ImportULDAPOptFn(void)
-{
-    util_ldap_connection_close  = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_close);
-    util_ldap_connection_find   = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_find);
-    util_ldap_cache_comparedn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_comparedn);
-    util_ldap_cache_compare     = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_compare);
-    util_ldap_cache_checkuserid = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_checkuserid);
-    util_ldap_cache_getuserdn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_getuserdn);
-    util_ldap_ssl_supported     = APR_RETRIEVE_OPTIONAL_FN(uldap_ssl_supported);
-}
-#endif /* HAVE_LDAP_SUPPORT */
-
 /*
  * From mod_alias.c
  */

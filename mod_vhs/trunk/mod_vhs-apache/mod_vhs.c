@@ -75,6 +75,39 @@ static void (*vhost_dbd_prepare_fn)(server_rec*, const char*, const char*) = NUL
 module AP_MODULE_DECLARE_DATA vhs_module;
 
 /*
+ * For some Ugly reason this has to be here.
+ * Don't know why... Maybe some brain damage inside core ?
+ * DON'T EVEN THINK to move that into mod_vhs.h
+ */
+#ifdef HAVE_LDAP_SUPPORT
+/* TODO: make KazarPerson stuff */
+char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
+
+/* TODO: cca marche ? */
+static APR_OPTIONAL_FN_TYPE(uldap_connection_close) *util_ldap_connection_close;
+static APR_OPTIONAL_FN_TYPE(uldap_connection_find) *util_ldap_connection_find;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn) *util_ldap_cache_comparedn;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_compare) *util_ldap_cache_compare;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_checkuserid) *util_ldap_cache_checkuserid;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn) *util_ldap_cache_getuserdn;
+static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported) *util_ldap_ssl_supported;
+
+static void ImportULDAPOptFn(void)
+{
+    util_ldap_connection_close  = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_close);
+    util_ldap_connection_find   = APR_RETRIEVE_OPTIONAL_FN(uldap_connection_find);
+    util_ldap_cache_comparedn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_comparedn);
+    util_ldap_cache_compare     = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_compare);
+    util_ldap_cache_checkuserid = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_checkuserid);
+    util_ldap_cache_getuserdn   = APR_RETRIEVE_OPTIONAL_FN(uldap_cache_getuserdn);
+    util_ldap_ssl_supported     = APR_RETRIEVE_OPTIONAL_FN(uldap_ssl_supported);
+}
+#endif /* HAVE_LDAP_SUPPORT */
+/*
+ * END OF UGLY REASON 
+ */
+
+/*
  * Apache per server config structure
  */
 static void    *
@@ -97,18 +130,18 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	vhr->ldap_binddn	= NULL;
 	vhr->ldap_bindpw	= NULL;
 	vhr->ldap_have_url	= 0;
-	vhr->ldap_have_deref= 0;
+	vhr->ldap_have_deref	= 0;
 	vhr->ldap_deref		= always;
 #endif /* HAVE_LDAP_SUPPORT */
 
 #ifdef HAVE_MPM_ITK_SUPPORT
-	vhr->itk_enable = 0;
+	vhr->itk_enable 	= 0;
 #endif /* HAVE_MPM_ITK_SUPPORT */
 
 #ifdef HAVE_MOD_DBD_SUPPORT
 	vhr->dbd_table_name	= NULL;
-	vhr->query			= NULL;
-	vhr->label			= NULL;
+	vhr->query		= NULL;
+	vhr->label		= NULL;
 #endif
 
 	return (void *)vhr;
@@ -124,15 +157,15 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	vhs_config_rec *child	= (vhs_config_rec *) childv;
 	vhs_config_rec *conf	= (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 
-	conf->enable 			= (child->enable ? child->enable : parent->enable);
-	conf->path_prefix 		= (child->path_prefix ? child->path_prefix : parent->path_prefix);
-	conf->default_host 		= (child->default_host ? child->default_host : parent->default_host);
-	conf->lamer_mode 		= (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
-	conf->log_notfound 		= (child->log_notfound ? child->log_notfound : parent->log_notfound);
+	conf->enable 		= (child->enable ? child->enable : parent->enable);
+	conf->path_prefix 	= (child->path_prefix ? child->path_prefix : parent->path_prefix);
+	conf->default_host 	= (child->default_host ? child->default_host : parent->default_host);
+	conf->lamer_mode 	= (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
+	conf->log_notfound 	= (child->log_notfound ? child->log_notfound : parent->log_notfound);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
-	conf->safe_mode 		= (child->safe_mode ? child->safe_mode : parent->safe_mode);
-	conf->open_basedir 		= (child->open_basedir ? child->open_basedir : parent->open_basedir);
+	conf->safe_mode 	= (child->safe_mode ? child->safe_mode : parent->safe_mode);
+	conf->open_basedir 	= (child->open_basedir ? child->open_basedir : parent->open_basedir);
 	conf->display_errors 	= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->append_basedir 	= (child->append_basedir ? child->append_basedir : parent->append_basedir);
 	conf->openbdir_path 	= (child->openbdir_path ? child->openbdir_path : parent->openbdir_path);
@@ -172,7 +205,7 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
     	conf->ldap_deref      = child->ldap_deref;
     } else {
     	conf->ldap_have_deref = parent->ldap_have_deref;
-    	conf->ldap_deref           = parent->ldap_deref;
+    	conf->ldap_deref      = parent->ldap_deref;
     }
 
     conf->ldap_binddn = (child->ldap_binddn ? child->ldap_binddn : parent->ldap_binddn);
@@ -181,8 +214,8 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	
 #ifdef HAVE_MOD_DBD_SUPPORT
 	conf->dbd_table_name = (child->dbd_table_name ? child->dbd_table_name : parent->dbd_table_name);
-	conf->query			 = (child->query ? child->query : parent->query);
-	conf->label			 = (child->label ? child->label : parent->label);
+	conf->query	     = (child->query ? child->query : parent->query);
+	conf->label	      = (child->label ? child->label : parent->label);
 #endif /* HAVE_MOD_DBD_SUPPORT */
 
 	conf->aliases   = apr_array_append(p, child->aliases, parent->aliases);
@@ -197,7 +230,7 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
  */
 static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 {
-	int		pos = (int)parms->info;
+	int		pos = (int) parms->info;
 
 #ifdef HAVE_MOD_DBD_SUPPORT
 	static unsigned int label_num = 0;
@@ -938,9 +971,9 @@ int getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname, mod_vhs_req
     	util_ldap_connection_t 	*ldc = NULL;
     	int 			failures = 0;
 	
-  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "getldaphome() called.");
+  	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "getldaphome() called.");
 
- start_over:
+start_over:
 
 	if (vhr->ldap_host) {
 	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "util_ldap_connection_find(r,%s,%d,%s,%s,%d,%d);",vhr->ldap_host, vhr->ldap_port, vhr->ldap_binddn, vhr->ldap_bindpw, vhr->ldap_deref, vhr->ldap_secure);
@@ -956,16 +989,16 @@ int getldaphome(request_rec *r, vhs_config_rec *vhr, char *hostname, mod_vhs_req
 	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "translating %s", r->uri);
 
     	apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
-  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
+	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
     	result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
     	util_ldap_connection_close(ldc);
 
-    /* sanity check - if server is down, retry it up to 5 times */
-    if (result == LDAP_SERVER_DOWN) {
-    	if (failures++ <= 5) {
-    		goto start_over;
-        }
-    }
+    	/* sanity check - if server is down, retry it up to 5 times */
+	if (result == LDAP_SERVER_DOWN) {
+    		if (failures++ <= 5) {
+    			goto start_over;
+        	}
+    	}
 
     if ((result == LDAP_NO_SUCH_OBJECT)) {
      	ap_log_rerror(APLOG_MARK, APLOG_WARNING|APLOG_NOERRNO, 0, r,
