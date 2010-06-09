@@ -1,0 +1,13 @@
+Warning about threaded PHP
+--------------------------
+
+This software has been tested and developped ONLY on prefork apache 2.
+
+I have added mutex against libhome accesses. So this module _should_ be
+thread safe. Anyway I don't have to opportunity to test mod_vhs and
+apache2 in NPM=worker. So please submit bugs reports and patches to
+mod_vhs@lists.oav.net.
+
+Thanks for you attention.
+
+Xavier

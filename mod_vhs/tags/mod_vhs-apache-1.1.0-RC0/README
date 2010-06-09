@@ -1,0 +1,292 @@
+mod_vhs 1.1 - Virtual Hosting module
+
+mod_vhs is an Apache 2.0 Web Server module allowing mass virtual hosting without
+the need for file based configuration. The virtual host paths are translated
+from a any database supported by libhome at request time.
+
+Building and Installing Apache with mod_vh
+
+mod_vhs is configured using the Apache 2.0 apxs system. Normaly all Apache 2.0
+system should have this tool installed, so if you don't have it, you'll have
+a problem :)
+
+You will need a installed libhome into your system. Please fetch it at
+http://pll.sourceforge.net/ before.
+
+mod_vhs can be installed and configured using provided Makefile. Please
+edit the Makefile and update it as your convience.
+
+This will, as root, install mod_vhs into Apache 2.0 module directory and 
+enable it in the configuration file. This is the prefered way to do it.
+mod_vhs is enabled by default once the Apache configuration has been rebuilt.
+
+Note: you can use a "slow" way to install it (eg: add the files into 
+      apache 2 source tree and remake the configuration file, but I have
+      never try that... so use a your own risk !).
+
+Configuring mod_vhs in Apache Configure Files
+
+In order to use mod_vhs with Apache Web Server server configuration blocks
+will need to be configured with mod_vh configuration directives described
+in the table below. mod_vhs configuration directives must be located in a
+server configuration block (ie <VirtualHost></VirtualHost>).
+
+EnableVHS:		Enable or Disable mod_vhs. Per default VHS is NOT
+			enabled.
+vhs_LogNotFound:	Enable or Disable logging into error log when
+			mod_vhs cannot find the hostname in database.
+			Per default this option is disabled.
+vhs_Path_Prefix :	Sets an optional location to prefix translations by.
+			This option is not required.
+vhs_Default_Host :	Sets the default host to use if a non-HTTP/1.1 request
+			was received. This option is not required and usually
+			won't do anything because the Apache Web Server by
+			default catches these errors.
+			Since we use internaly HTTP Rediect you MUST use 
+			an URI.
+vhs_Lamer :		boolean (On / Off), default to Off.
+			If set, this will enable "lamer mode" option to
+			allow people that always add an "www." to web
+			addresses to be magicaly handled by this module.
+vhs_PHPsafe_mode :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support it will set safe_mode to on for the 
+			virtual host otherwise php.ini defaults will be
+			used.
+vhs_PHPopen_basedir :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will set open_basedir to the home 
+			directory given by libhome/mod_vhs otherwise php.ini
+			defaults will be used.
+vhs_open_basedir_path :	string. The open_basedir path that will be used to
+			be set when vhs_PHPopen_basedir is set AND 
+			vhs_append_open_basedir.
+vhs_append_open_basedir:boolean (On / Off), default Off.
+			Is set, mod_vhs will append the homedir path into
+			vhs_open_basedir_path.
+			NOTE :	mod_vhs open_basedir option will OVERIDE
+				php.ini settings.
+vhs_PHPdisplay_errors :	boolean (On / Off), default Off.
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will enable display_errors to be shown,
+			otherwise php.ini defaults will be used.
+vhs_PHPopt_fromdb :	boolean (On / Off), default Off,
+			If set, and if you have compiled mod_vhs with PHP
+			support, it will alter PHP configuration using
+			libhome passwd unused field. See README.phpopt
+			for more detailed example.
+vhs_Alias, vhs_ScriptAlias, vhs_ScriptAliasMatch, vhs_RedirectTemp and
+vhs_RedirectPermanent :	mod_alias 100% compatible options inside mod_vhs.
+			Please see http://httpd.apache.org/docs-2.0/mod_alias.html
+			for more informations.
+
+mod_ldap and mod_dbd stuff
+			Since version 1.0.33 or newer, we stop tu use libhome as backend
+			and we use internal Apache stuff.
+			For LDAP we use mod_ldap that have internal caching system
+			For SQL  we use mod_dbd
+			Because of these change, mod_vhs 1.0.33 is compatible ONLY
+			with Apache 2.2.x
+vhs_source	: LDAP / DBD (default LDAP)
+			When used as LDAP, mod_vhs will use mod_ldap as source provider 
+			for data.
+			When used as DBD, mod_vhs will use mod_dbd as source provider
+
+			LDAP Only directives (only readed when vhs_source=LDAP)
+vhs_LDAPBindDN
+			An optional DN used to bind to the server when searching for
+			entries. If not provied, mod_vhs will use an anonymous bind.
+ 
+			An bind password to use in conjonction with the bind DN. Note
+			that the bind password is probably sensitive data, and should be
+			properly protected. You should only use the vhs_LDAPBindDN and
+			vhs_LDAPBindPassword if you absolutely need them to search the 
+			directory
+vhs_LDAPDereferenceAliases
+			This directive specifies when mod_vhs will de-references aliases
+			during LDAP operations. The default is always.
+vhs_LDAPUrl
+			A RFC 2255 URL which specifies the LDAP search parameters to use.
+			The syntax of the URL is :
+				ldap://host:port/basedn?attribute?scope?filter
+				
+			ldap
+				For regular ldap, use the string ldap. For secure LDAP, use
+				ldaps instead. Secure LDAP is only available is Apache was
+				linked to an LDAP library with SSL support
+				
+			host:port
+				The name/port of the LDAP server (default to localhost:389 for
+				ldap, and localhost:636 for ldaps). To specify multiple, redundant 
+				LDAP server, just list all servers, separated by spaces. mod_vhs
+				will try connecting to each servers in turn, until it make a 
+				successfull connection.
+				
+				Once a connection has been made to server, that connection remains
+				active for the life of the httpd process, or until the LDAP server
+				goes down.
+				
+				If the LDAP server goes down and break the existing connection,
+				mod_vhs will attends to re-connect, starting with the primary 
+				server, and trying each redundant server in turn. Note that is
+				different than a true round-robin search.
+				
+			basedn
+				The DN of the branch of the directory where all searches start from.
+				At the very last, this must be the top of you directory tree, but
+				could also specifiy a subtree in the directory.
+				
+			attribue
+				The attribute to search for. Don't change search attribute in
+				mod_vhs or you will break the module.
+				
+			scope
+				The scope of the search. Can be either "one" or "sub". Not that
+				scope of "base" is also supported by RFC 2255, but not supported
+				in this module. If the scope is not provided, or if "base" scope
+				is specified, the default is to use a scope of "sub".
+				
+			filter
+				A valid LDAP search filer. If not provided, default to 
+				(|(apacheServername=vhost)(apacheServerAlias=vhost)). Filter are
+				limited to approximately 8000 caracters (the definition of
+				MAX_STRING_LEN in the Apache source code). This should be
+				more than sufficient for any application. Don't changer filter
+				unless you know what your are doing.
+
+Notes about vhs_PHP* values :
+
+	All this options *will* override the default PHP values you have
+	set into php.ini. For example if you have in php.ini safe_mode = On,
+	and in a <VirtualHost></> you get a vhs_PHPsafe_mode Off then the
+	value of php.ini will be safe_mode = Off. 
+
+Example :
+
+You have set home.conf with such data :
+
+mode ldap
+ld_hosts 127.0.0.1
+ld_base . ou=whosting,dc=kazar,dc=net
+ld_version 3
+ld_timeout 5
+
+[mod_vhs]
+log.stderr y
+where wwwDomain
+user wwwDomain
+home homeDirectory
+uid uidNumber
+gid gidNumber
+gecos description
+passwd "*"
+shell /dev/null
+quota FTPQuotaMBytes
+class admin@foo.com
+
+You get such ldap entry :
+
+#
+# LDAPv3
+# base <ou=whosting,dc=kazar,dc=net> with scope sub
+# filter: wwwDomain=jb.kazar.net
+# requesting: ALL
+#
+
+# 'jb.kazar.net', whosting, kazar.net
+dn: wwwDomain='jb.kazar.net',ou=whosting,dc=kazar,dc=net
+objectClass: top
+objectClass: kazarPerson
+objectClass: PureFTPdUser
+uid: jb
+description: JB Home page
+uidNumber: 65534
+gidNumber: 65534
+FTPuid: 65534
+FTPgid: 65534
+FTPStatus: enabled
+userPassword:: xxxxxxxxxxxxx
+homeDirectory: /hosting/http/j/b/k/jb.kazar.net/
+FTPQuotaMBytes: 50
+
+A simple test to see if your libhome map will work :
+
+$ home_finger -t mod_vhs jb.kazar.net
+login: jb.kazar.net
+passwd: *
+uid: 65534
+gid: 65534
+gecos: JB Home page
+home: /hosting/http/j/b/k/jb.kazar.net/
+shell: 
+expire: 0
+quota: 50
+class: admin@foo.com
+
+Note that class will be used for server admin mail inside Apache (usualy 
+diplayed for webmasters, and/or errors).
+
+Then if you set the DNS entry for jb.kazar.net to 10.1.2.3, the following 
+apache2 configuration file will look for jb.kazar.net files in 
+/hosting/http/j/b/k/jb.kazar.net/ :-)
+
+NameVirtualHost 10.1.2.3
+
+<VirtualHost 10.1.2.3>
+    vhs_Default_Host http://devnull.oav.net
+</VirtualHost>
+
+Other handlers should still work accordingly.  mod_vhs declares its
+translate_name phase as AP_HOOK_FIRST so it can run before other translations.
+An example configuration allowing mod_tcl in specific directories follows.
+
+<VirtualHost 10.2.3.4>
+    vhs_Default_Host http://devnull.oav.net
+
+    <Directory /hosting/http/j/b/k/jb.kazar.net>
+        AddHandler tcl-handler tm
+
+        Tcl_ContentHandler content_handler
+    </Directory>
+</VirtualHost>
+
+With PHP support you can do also :
+
+<VirtualHost 1.2.3.4>
+   vhs_Default_Host http://www.mydomain.com
+   vhs_PHPsafe_mode On
+   vhs_PHPopen_basedir On
+</VirtualHost>
+
+
+<VirtualHost 1.2.3.5>
+   vhs_Default_Host http://www.mydomain.com
+   vhs_PHPsafe_mode Off
+   vhs_PHPopen_basedir Off
+</VirtualHost>
+
+
+Additional Information
+
+mod_vhs will check on every connection if data exist or not. If you don't want
+to hammer your LDAP/MySQL server please use cache_file and cache_ttl values in
+home.conf(5).
+
+References
+
+mod_vhs is an Apache 2.0 module using libhome library, more about 
+Apache Web Server can be found at http://www.apache.org/.
+Documentation regarding libhome can be found at http://pll.sourceforge.net/
+This module was highly inspired from mod_vdbh, I wishe to send many thanks
+to Michael K Link <mlink@apache.org> that helped me a lot to give me a 
+good start to make my module work, mod_vdbh homepage : http://www.synthemesc.com/mod_vdbh/.
+
+
+Author
+
+Send bugs, ideas, fixes, patches, and food to :
+Xavier Beaudouin <kiwi@oav.net>
+
+Home page of this module 
+
+http://www.oav.net/projects/mod_vhs/
