@@ -1,4 +1,4 @@
-mod_vhs 1.0 - Virtual Hosting module
+mod_vhs 1.1 - Virtual Hosting module
 
 mod_vhs is an Apache 2.0 Web Server module allowing mass virtual hosting without
 the need for file based configuration. The virtual host paths are translated

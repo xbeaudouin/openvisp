@@ -1,7 +1,7 @@
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.0.33-expiremental"
+#define VH_VERSION	"mod_vhs/1.1.0-RC0"
 
 
 /*
