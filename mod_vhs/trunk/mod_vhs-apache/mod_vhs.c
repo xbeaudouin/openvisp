@@ -818,7 +818,8 @@ static int vhs_suphp_handler(request_rec *r)
 	return DECLINED;
 }
 
-static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *passwd, char *username)
+// XXX: to test
+static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *uid, char *uid)
 {
   /* Path to the suPHP config file per user */
 	char *transformedPath = NULL;
@@ -1239,7 +1240,7 @@ static int vhs_translate_name(request_rec * r)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-	vhs_suphp_config(r, vhr, reqc->docroot, reqc->apachePhpopts, reqc->apachePhpopts, reqc->uid, reqc->gid);
+	vhs_suphp_config(r, vhr, reqc->docroot, reqc->uid, reqc->gid);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: END ***");
