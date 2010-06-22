@@ -358,7 +358,7 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
 
     /* Set all the values, or at least some sane defaults */
     if (vhr->ldap_host) {
-        char *p = apr_palloc(cmd->pool, ap_strlen(vhr->ldap_host) + ap_strlen(urld->lud_host) + 2);
+        char *p = apr_palloc(cmd->pool, strlen(vhr->ldap_host) + strlen(urld->lud_host) + 2);
         strcpy(p, urld->lud_host);
         strcat(p, " ");
         strcat(p, vhr->ldap_host);
@@ -378,7 +378,7 @@ static const char *mod_vhs_ldap_parse_url(cmd_parms *cmd, void *dummy, const cha
              * filter, they'll be put back.
              */
             vhr->ldap_filter = apr_pstrdup(cmd->pool, urld->lud_filter+1);
-            vhr->ldap_filter[ap_strlen(vhr->ldap_filter)-1] = '\0';
+            vhr->ldap_filter[strlen(vhr->ldap_filter)-1] = '\0';
         }
         else {
             vhr->ldap_filter = apr_pstrdup(cmd->pool, urld->lud_filter);
@@ -715,7 +715,7 @@ static int vhs_itk_post_read(request_rec *r)
 		if (vhr->lamer_mode) 
 		  {
 			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Lamer friendly mode engaged");
-			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (ap_strlen(r->hostname) > 4)) {
+			if ((strncasecmp(r->hostname, "www.", 4) == 0) && (strlen(r->hostname) > 4)) {
 				char           *lhost;
 				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
 			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
@@ -848,13 +848,15 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	if ( cfg == NULL )
 		ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir is NULL");
 
-	cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
+	// TODO: is this used ? 
+	//       warning passwd var doesn't exist anymore
+	//cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
 
-	transformedUid    = apr_psprintf(r->pool, "#%d", uid);
+	transformedUid    = apr_psprintf(r->pool, "#%d", (int) uid);
 	cfg->target_user  = apr_pstrdup(r->pool,transformedUid);
 
-	transformedGid    = apr_psprintf(r->pool, "#%d", gid);
+	transformedGid    = apr_psprintf(r->pool, "#%d", (int) gid);
 	cfg->target_group = apr_pstrdup(r->pool,transformedGid);
 
 	ap_set_module_config(r->server->module_config, suphp_module, cfg);
@@ -871,7 +873,7 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 	 * Some Basic PHP stuff, thank to Igor Popov module
 	 */
 	apr_table_set(r->subprocess_env, "PHP_DOCUMENT_ROOT", path);
-	zend_alter_ini_entry("doc_root", sizeof("doc_root"), path, ap_strlen(path), 4, 1);
+	zend_alter_ini_entry("doc_root", sizeof("doc_root"), path, strlen(path), 4, 1);
 	/*
 	 * vhs_PHPsafe_mode support
 	 */
@@ -899,10 +901,10 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 			} else {
 				obasedir_path = apr_pstrcat(r->pool, vhr->openbdir_path, ":", path, NULL);
 			}
-			zend_alter_ini_entry("open_basedir", 13, obasedir_path, ap_strlen(obasedir_path), 4, 16);
+			zend_alter_ini_entry("open_basedir", 13, obasedir_path, strlen(obasedir_path), 4, 16);
 			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s (appending mode)", obasedir_path);
 		} else {
-			zend_alter_ini_entry("open_basedir", 13, path, ap_strlen(path), 4, 16);
+			zend_alter_ini_entry("open_basedir", 13, path, strlen(path), 4, 16);
 			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP open_basedir set to %s", path);
 		}
 	} else {
@@ -943,7 +945,7 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 				key = apr_strtok(retval, "=", &strtokstate);
 				val = apr_strtok(NULL, "=", &strtokstate);
 				VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: Zend PHP Stuff => %s => %s", key, val);
-				zend_alter_ini_entry(key, ap_strlen(key) + 1, val, ap_strlen(val), 4, 16);
+				zend_alter_ini_entry(key, strlen(key) + 1, val, strlen(val), 4, 16);
 				retval = apr_strtok(NULL, ";", &state);
 			}
 		}
@@ -1146,7 +1148,7 @@ static int vhs_translate_name(request_rec * r)
 		 */
 		if (vhr->lamer_mode) {
 			VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Lamer friendly mode engaged");
-			if ((strncasecmp(host, "www.", 4) == 0) && (ap_strlen(host) > 4)) {
+			if ((strncasecmp(host, "www.", 4) == 0) && (strlen(host) > 4)) {
 				char           *lhost;
 				lhost = apr_pstrdup(r->pool, host + 5 - 1);
 			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
