@@ -819,7 +819,7 @@ static int vhs_suphp_handler(request_rec *r)
 }
 
 // XXX: to test
-static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *uid, char *uid)
+static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, char *uid, char *gid)
 {
   /* Path to the suPHP config file per user */
 	char *transformedPath = NULL;
@@ -827,9 +827,8 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	char *transformedGid = NULL;
 
 	if (vhr->suphp_config_path) {
-		//if ((apr_strstr(r->pool,vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL))
-		if ((strstr(vhr->suphp_config_path,"%s")!=NULL) && (username!=NULL))
-			transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, username);
+		if ((strstr(vhr->suphp_config_path,"%s")!=NULL) && (uid!=NULL) && (gid!=NULL))
+			transformedPath = apr_psprintf(r->pool, vhr->suphp_config_path, uid);
 		else
 			transformedPath = vhr->suphp_config_path;
 	} else {
@@ -850,7 +849,6 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 		ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "vhs_suphp_config: suPHP_config_dir is NULL");
 
 	cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
-	//cfg->engine       = (apr_strstr(r->pool,passwd,"engine=Off") == NULL);
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
 
 	transformedUid    = apr_psprintf(r->pool, "#%d", uid);
