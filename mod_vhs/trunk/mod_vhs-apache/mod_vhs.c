@@ -596,8 +596,8 @@ int getmoddbdhome(request_rec *r, vhs_config_rec *vhr, const char *hostname, mod
 	  ap_log_error(APLOG_MARK, APLOG_ERR, 0, r->server, "getmoddbdhome: No VhostDBDQuery has been specified");
 	  return DECLINED;
 	}
-	/*    host = r->hostname; */
-	  host = ap_get_server_name(r);
+	  host = r->hostname; 
+	  /* host = ap_get_server_name(r); */
 	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "getmoddbdhome: search for vhost: '%s'", host);
 
 	  dbd = vhost_dbd_acquire_fn(r);

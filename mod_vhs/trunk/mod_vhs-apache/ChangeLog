@@ -1,5 +1,6 @@
 Since mod_vhs 1.0.3x
 --------------------
+o Fix bug in lamers mode (Guillaume de Lafond, Dinde, ....)
 o mod_dbd support merged into mod_vhs (Thanks to Guillaume de Lafond to
   port MySolo module into mod_vhs).
   Current SQL query is now :
