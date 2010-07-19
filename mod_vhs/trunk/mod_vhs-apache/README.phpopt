@@ -13,7 +13,6 @@ mod_vhs apache configuration directives
 
 There is several directives (see README file from more) :
 
-	vhs_PHPsafe_mode
 	vhs_PHPopen_basedir
 	with :	vhs_open_basedir_path
 		vhs_append_open_basedir
@@ -29,10 +28,9 @@ How are evaluated php configuration directives ?
 
 They are evaluated in this order (if they are enabled) :
 
-1- vhs_PHPsafe_mode
-2- vhs_PHPopen_basedir (and also vhs_open_basedir_path / vhs_append_open_basedir)
-3- vhs_PHPdisplay_errors
-4- vhs_PHPopt_fromdb
+1- vhs_PHPopen_basedir (and also vhs_open_basedir_path / vhs_append_open_basedir)
+2- vhs_PHPdisplay_errors
+3- vhs_PHPopt_fromdb
 
 You have to know this order of evaluation if you don't have brain damage when 
 you use vhs_PHPopt_fromdb and security problems that you can have because
@@ -42,13 +40,10 @@ of this order of evaluation.
 Why there can be a security problem ?
 -------------------------------------
 
-vhs_PHPopt_fromdb is evaluated at the end of PHP autoconfiguration. If you
-set : 
- vhs_PHPsafe_mode On
+vhs_PHPopt_fromdb is evaluated at the end of PHP autoconfiguration.
 
-And in the field used by vhs_PHPopt_fromdb : safe_mode=Off;
-
-Then the configuration of PHP will be safe_mode=Off. 
+So if you set an open_basedir and change it from PHPopt_fromdb, then 
+the values used will be from vhs_PHPopt_fromdb.
 
 vhs_PHPopt_fromdb will ALLWAYS HAVE THE LAST WORD in terms of PHP configuration.
 
@@ -113,45 +108,6 @@ We have a virtual host 'mrjack.oav.net' with php values :
 memory_limit=32M
 upload_max_files=8M
 
-libhome configuration :
-
-# more /usr/local/etc/home.conf
-mode mysql
-myhosts localhost
-myuser vhostuser
-mypasswd vhostpasswd
-mydatabase hosting
-
-[mod_vhs]
-log.stderr y
-where ServerName
-user ServerName
-home DocumentRoot
-uid "80"
-gid "80"
-gecos PointTo
-passwd SetEnv
-shell owner
-quota "1000"
-table vhost
-class ServerAdmin
-
-Apache2 configuration :
-
-Listen 8000
-<VirtualHost 1.2.3.4:8000>
-  EnableVHS On
-  vhs_LogNotFound On
-  vhs_Default_Host http://oav.net/
-  vhs_Lamer On
-  vhs_PHPsafe_mode On
-  vhs_PHPopen_basedir On
-  vhs_open_basedir_path /tmp:/var/tmp
-  vhs_append_open_basedir On
-  vhs_PHPdisplay_errors On
-  vhs_PHPopt_fromdb On
-</VirtualHost>
-
 IMPORTANT NOTE
 --------------
 
@@ -169,4 +125,3 @@ vhs_PHPopt_fromdb can only configure php.ini values like foo=value, but it
 cannot configure specific section of php.ini (eg [mysql] for example). So
 you'll have to keep that in mind when designing your system.
 
-$Id: README.phpopt,v 1.4 2005-12-14 13:22:52 kiwi Exp $

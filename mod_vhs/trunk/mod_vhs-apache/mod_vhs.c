@@ -83,14 +83,13 @@ module AP_MODULE_DECLARE_DATA vhs_module;
 /* TODO: make KazarPerson stuff */
 char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain", 0 };
 
-/* TODO: cca marche ? */
-static APR_OPTIONAL_FN_TYPE(uldap_connection_close) *util_ldap_connection_close;
-static APR_OPTIONAL_FN_TYPE(uldap_connection_find) *util_ldap_connection_find;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn) *util_ldap_cache_comparedn;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_compare) *util_ldap_cache_compare;
+static APR_OPTIONAL_FN_TYPE(uldap_connection_close)  *util_ldap_connection_close;
+static APR_OPTIONAL_FN_TYPE(uldap_connection_find)   *util_ldap_connection_find;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_comparedn)   *util_ldap_cache_comparedn;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_compare)     *util_ldap_cache_compare;
 static APR_OPTIONAL_FN_TYPE(uldap_cache_checkuserid) *util_ldap_cache_checkuserid;
-static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn) *util_ldap_cache_getuserdn;
-static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported) *util_ldap_ssl_supported;
+static APR_OPTIONAL_FN_TYPE(uldap_cache_getuserdn)   *util_ldap_cache_getuserdn;
+static APR_OPTIONAL_FN_TYPE(uldap_ssl_supported)     *util_ldap_ssl_supported;
 
 static void ImportULDAPOptFn(void)
 {
@@ -164,7 +163,9 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	conf->log_notfound 	= (child->log_notfound ? child->log_notfound : parent->log_notfound);
 
 #ifdef HAVE_MOD_PHP_SUPPORT
+#ifdef OLD_PHP
 	conf->safe_mode 	= (child->safe_mode ? child->safe_mode : parent->safe_mode);
+#endif /* OLD_PHP */
 	conf->open_basedir 	= (child->open_basedir ? child->open_basedir : parent->open_basedir);
 	conf->display_errors 	= (child->display_errors ? child->display_errors : parent->display_errors);
 	conf->append_basedir 	= (child->append_basedir ? child->append_basedir : parent->append_basedir);
@@ -432,6 +433,7 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 		}
 		break;
 #ifdef HAVE_MOD_PHP_SUPPORT
+#ifdef OLD_PHP
 	case 1:
 		if (flag) {
 			vhr->safe_mode = 1;
@@ -439,6 +441,7 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 			vhr->safe_mode = 0;
 		}
 		break;
+#endif /* OLD_PHP */
 	case 2:
 		if (flag) {
 			vhr->open_basedir = 1;
@@ -874,6 +877,7 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 	 */
 	apr_table_set(r->subprocess_env, "PHP_DOCUMENT_ROOT", path);
 	zend_alter_ini_entry("doc_root", sizeof("doc_root"), path, strlen(path), 4, 1);
+#ifdef OLD_PHP
 	/*
 	 * vhs_PHPsafe_mode support
 	 */
@@ -883,6 +887,7 @@ static void vhs_php_config(request_rec * r, vhs_config_rec * vhr, char *path, ch
 	} else {
 		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_php_config: PHP safe_mode inactive, defaulting to php.ini values");
 	}
+#endif /* OLD_PHP */
 
 	/*
 	 * vhs_PHPopen_baserdir    \ vhs_append_open_basedir |  support
@@ -1259,7 +1264,9 @@ static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG( "vhs_LogNotFound", set_flag, (void *)7, RSRC_CONF, "Log on error log when host or path is not found."),
 
 #ifdef HAVE_MOD_PHP_SUPPORT
+#ifdef OLD_PHP
 	AP_INIT_FLAG( "vhs_PHPsafe_mode", set_flag, (void *)1, RSRC_CONF, "Enable PHP Safe Mode"),
+#endif /* OLD_PHP */
 	AP_INIT_FLAG( "vhs_PHPopen_basedir", set_flag, (void *)2, RSRC_CONF, "Set PHP open_basedir to path"),
 	AP_INIT_FLAG( "vhs_PHPopt_fromdb", set_flag, (void *)3, RSRC_CONF, "Gets PHP options from db/libhome"),
 	AP_INIT_FLAG( "vhs_PHPdisplay_errors", set_flag, (void *)4, RSRC_CONF, "Enable PHP display_errors"),

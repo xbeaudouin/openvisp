@@ -53,6 +53,9 @@ vhs_PHPsafe_mode :	boolean (On / Off), default Off.
 			support it will set safe_mode to on for the 
 			virtual host otherwise php.ini defaults will be
 			used.
+			Notice this code is added only uppon compilation 
+			the -DOLD_PHP.
+			This code is not maintained anymore.
 vhs_PHPopen_basedir :	boolean (On / Off), default Off.
 			If set, and if you have compiled mod_vhs with PHP
 			support, it will set open_basedir to the home 

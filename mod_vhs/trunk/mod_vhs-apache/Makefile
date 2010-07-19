@@ -38,6 +38,10 @@ CFLAGS+= -DHAVE_MOD_PHP_SUPPORT
 #CFLAGS+= -DHAVE_MPM_ITK_SUPPORT
 #CFLAGS+= -DHAVE_MOD_DBD_SUPPORT
 CFLAGS+= -DHAVE_LDAP_SUPPORT
+# If you have an old PHP (eg < 5.3.x), then you can enable safe_mode tricks
+# on your OWN risk
+CFLAGS+= -DOLD_PHP
+
 
 # Flags for compilation (Full Debug)
 CFLAGS+= -DVH_DEBUG -Wc,-Wall

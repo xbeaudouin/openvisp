@@ -1,7 +1,7 @@
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.1.0-RC0"
+#define VH_VERSION	"mod_vhs/1.1.0"
 
 
 /*
@@ -24,6 +24,15 @@
  */
 /*
  * #define HAVE_LDAP_SUPPORT
+ */
+
+/*
+ * Activate PHP < 5.3.x support
+ *
+ * WARNING: this code is not maintained anymore since vers 1.1.0-RC0
+ */
+/*
+ * #define OLD_PHP
  */
 
 /* Original Author: Michael Link <mlink@apache.org> */
@@ -142,7 +151,9 @@ typedef struct {
 
 #ifdef HAVE_MOD_PHP_SUPPORT
 	char           		*openbdir_path;		/* PHP open_basedir default path */
+#ifdef OLD_PHP
 	unsigned short int 	safe_mode;		/* PHP Safe mode */
+#endif /* OLD_PHP */
 	unsigned short int 	open_basedir;		/* PHP open_basedir */
 	unsigned short int 	append_basedir;		/* PHP append current directory to open_basedir */
 	unsigned short int 	display_errors;		/* PHP display_error */

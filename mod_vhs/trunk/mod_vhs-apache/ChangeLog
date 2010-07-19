@@ -1,5 +1,9 @@
-Since mod_vhs 1.0.3x
---------------------
+Since mod_vhs 1.1.0
+-------------------
+o Since PHP 5.3 doesn't use safe_mode, we don't need it. If you 
+  still need it because you use an old PHP, please set -DOLD_PHP.
+  Notice this code will NOT be maintained anymore
+  (Xavier Beaudouin)
 o Fix bug in lamers mode (Guillaume de Lafond, Dinde, ....)
 o mod_dbd support merged into mod_vhs (Thanks to Guillaume de Lafond to
   port MySolo module into mod_vhs).
