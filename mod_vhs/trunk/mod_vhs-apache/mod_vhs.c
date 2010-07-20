@@ -131,6 +131,7 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	vhr->ldap_have_url	= 0;
 	vhr->ldap_have_deref	= 0;
 	vhr->ldap_deref		= always;
+	vhr->ldap_set_filter	= 0;
 #endif /* HAVE_LDAP_SUPPORT */
 
 #ifdef HAVE_MPM_ITK_SUPPORT
@@ -183,23 +184,25 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 
 #ifdef HAVE_LDAP_SUPPORT
     if (child->ldap_have_url) {
-    	conf->ldap_have_url = child->ldap_have_url;
-    	conf->ldap_url      = child->ldap_url;
-    	conf->ldap_host     = child->ldap_host;
-    	conf->ldap_port     = child->ldap_port;
-    	conf->ldap_basedn   = child->ldap_basedn;
-    	conf->ldap_scope    = child->ldap_scope;
-    	conf->ldap_filter   = child->ldap_filter;
-    	conf->ldap_secure   = child->ldap_secure;
+    	conf->ldap_have_url   = child->ldap_have_url;
+    	conf->ldap_url        = child->ldap_url;
+    	conf->ldap_host       = child->ldap_host;
+    	conf->ldap_port       = child->ldap_port;
+    	conf->ldap_basedn     = child->ldap_basedn;
+    	conf->ldap_scope      = child->ldap_scope;
+    	conf->ldap_filter     = child->ldap_filter;
+    	conf->ldap_secure     = child->ldap_secure;
+	conf->ldap_set_filter = child->ldap_set_filter;
     } else {
-		conf->ldap_have_url = parent->ldap_have_url;
-		conf->ldap_url      = parent->ldap_url;
-		conf->ldap_host     = parent->ldap_host;
-		conf->ldap_port     = parent->ldap_port;
-		conf->ldap_basedn   = parent->ldap_basedn;
-		conf->ldap_scope    = parent->ldap_scope;
-		conf->ldap_filter   = parent->ldap_filter;
-		conf->ldap_secure   = parent->ldap_secure;
+		conf->ldap_have_url   = parent->ldap_have_url;
+		conf->ldap_url        = parent->ldap_url;
+		conf->ldap_host       = parent->ldap_host;
+		conf->ldap_port       = parent->ldap_port;
+		conf->ldap_basedn     = parent->ldap_basedn;
+		conf->ldap_scope      = parent->ldap_scope;
+		conf->ldap_filter     = parent->ldap_filter;
+		conf->ldap_secure     = parent->ldap_secure;
+		conf->ldap_set_filter = parent->ldap_set_filter;
     }
     if (child->ldap_have_deref) {
     	conf->ldap_have_deref = child->ldap_have_deref;
@@ -496,6 +499,15 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 		}
 		break;
 #endif /* HAVE_MPM_ITK_SUPPORT  */
+#ifdef HAVE_LDAP_SUPPORT
+	case 9:
+		if (flag) {
+			vhr->ldap_set_filter = 1;
+		} else {
+			vhr->ldap_set_filter = 0;
+		}
+		break;
+#endif /* HAVE_LDAP_SUPPORT */
 	}
 	return NULL;
 }
@@ -996,7 +1008,11 @@ start_over:
 
 	ap_log_rerror(APLOG_MARK, APLOG_DEBUG|APLOG_NOERRNO, 0, r, "translating %s", r->uri);
 
-    	apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
+	if (vhr->ldap_set_filter) {
+    		apr_snprintf(filtbuf, FILTER_LENGTH, "%s=%s", vhr->ldap_filter, hostname);
+	} else {
+    		apr_snprintf(filtbuf, FILTER_LENGTH, "(&(%s)(|(apacheServerName=%s)(apacheServerAlias=%s)))", vhr->ldap_filter, hostname, hostname);
+	}
 	VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "filtbuf = %s",filtbuf);
     	result = util_ldap_cache_getuserdn(r, ldc, vhr->ldap_url, vhr->ldap_basedn, vhr->ldap_scope, ldap_attributes, filtbuf, &dn, &vals);
     	util_ldap_connection_close(ldc);
@@ -1304,6 +1320,9 @@ static const command_rec vhs_commands[] = {
 						"Determines how aliases are handled during a search. Can be one of the"
 			            		"values \"never\", \"searching\", \"finding\", or \"always\"."
 						"Defaults to always."),
+	
+	AP_INIT_FLAG(  "vhs_LDAPSetFilter", set_flag, (void *)9, RSRC_CONF, "Use filter given in LDAPUrl"),
+
 	AP_INIT_TAKE1( "vhs_LDAPUrl",mod_vhs_ldap_parse_url, NULL, RSRC_CONF,
 						"URL to define LDAP connection in form ldap://host[:port]/basedn[?attrib[?scope[?filter]]]."),
 #endif /* HAVE_LDAP_SUPPORT */

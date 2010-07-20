@@ -177,6 +177,7 @@ typedef struct {
 	int				ldap_port;		/* Port of the LDAP server */
 	char				*ldap_basedn;		/* Base DN */
 	int				ldap_scope;		/* Scope of search */
+	int				ldap_set_filter;	/* Set custom filter */
 	char				*ldap_filter;		/* LDAP Filter */
 	deref_options			ldap_deref;		/* How to handle alias dereferening */
 	char				*ldap_binddn;		/* DN to bind to server (can be NULL) */
