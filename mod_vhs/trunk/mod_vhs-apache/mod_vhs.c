@@ -1071,6 +1071,12 @@ start_over:
     
   reqc->vhost_found = VH_VHOST_INFOS_FOUND;
 
+  /* If we have a document root then we can honnor the resquest */
+  if (reqc->docroot == NULL) {
+	return DECLINED;
+  }
+
+  /* We have a document root so, this is ok */
   return OK;
 }
 #endif /* HAVE_LDAP_SUPPORT */

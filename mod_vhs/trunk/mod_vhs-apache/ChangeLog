@@ -1,5 +1,9 @@
 Since mod_vhs 1.1.0
 -------------------
+o Add documentation about LDAP setup.
+  (Xavier Beaudouin)
+o Fix LDAP search.
+  (Xavier Beaudouin)
 o For LDAP, allow DocumentRoot give from LDAP Posix attribute 
   homeDirectory. 
   (Xavier Beaudouin)
