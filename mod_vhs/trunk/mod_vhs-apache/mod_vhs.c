@@ -81,7 +81,7 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  */
 #ifdef HAVE_LDAP_SUPPORT
 /* TODO: make KazarPerson stuff */
-char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain","homeDirectory" 0 };
+char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain","homeDirectory", 0 };
 
 static APR_OPTIONAL_FN_TYPE(uldap_connection_close)  *util_ldap_connection_close;
 static APR_OPTIONAL_FN_TYPE(uldap_connection_find)   *util_ldap_connection_find;
