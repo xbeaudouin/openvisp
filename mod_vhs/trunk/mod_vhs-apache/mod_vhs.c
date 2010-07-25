@@ -81,7 +81,7 @@ module AP_MODULE_DECLARE_DATA vhs_module;
  */
 #ifdef HAVE_LDAP_SUPPORT
 /* TODO: make KazarPerson stuff */
-char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain","homeDirectory", 0 };
+char *ldap_attributes[] = { "apacheServerName", "apacheDocumentRoot", "apacheScriptAlias", "apacheSuexecUid", "apacheSuexecGid", "apacheServerAdmin","apachePhpopts","associatedDomain","homeDirectory","uidNumber","gidNumber" 0 };
 
 static APR_OPTIONAL_FN_TYPE(uldap_connection_close)  *util_ldap_connection_close;
 static APR_OPTIONAL_FN_TYPE(uldap_connection_find)   *util_ldap_connection_find;
@@ -118,6 +118,11 @@ vhs_create_server_config(apr_pool_t * p, server_rec * s)
 	 * Pre default the module is not enabled
 	 */
 	vhr->enable 		= 0;
+
+	/*
+	 * We don't know what mode we need so default is 0 (disabled);
+	 */
+	vhr->db_mode		= 0;
 
 	/*
 	 * From mod_alias.c
@@ -158,6 +163,7 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 	vhs_config_rec *conf	= (vhs_config_rec *) apr_pcalloc(p, sizeof(vhs_config_rec));
 
 	conf->enable 		= (child->enable ? child->enable : parent->enable);
+	conf->db_mode 		= (child->db_mode ? child->db_mode : parent->db_mode);
 	conf->path_prefix 	= (child->path_prefix ? child->path_prefix : parent->path_prefix);
 	conf->default_host 	= (child->default_host ? child->default_host : parent->default_host);
 	conf->lamer_mode 	= (child->lamer_mode ? child->lamer_mode : parent->lamer_mode);
@@ -175,7 +181,7 @@ vhs_merge_server_config(apr_pool_t * p, void *parentv, void *childv)
 #endif /* HAVE_MOD_PHP_SUPPORT */
 
 #ifdef HAVE_MOD_SUPHP_SUPPORT
-    conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
+	conf->suphp_config_path = (child->suphp_config_path ? child->suphp_config_path : parent->suphp_config_path);
 #endif /* HAVE_MOD_SUPHP_SUPPORT */
 
 #ifdef HAVE_MPM_ITK_SUPPORT
@@ -313,6 +319,19 @@ static const char * set_field(cmd_parms * parms, void *mconfig, const char *arg)
 		vhr->suphp_config_path = apr_pstrdup(parms->pool, arg);
 		break;
 #endif /* HAVE_MOD_SUPHP_SUPPRT */
+	/* Flag to set the correct mode (LDAP or DBD) when module has both support */
+	case 11:
+	    	if (strcmp(arg, "ldap") == 0) {
+	        	vhr->db_mode = 1;
+	    	}
+		else if (strcmp(arg, "dbd") == 0) {
+			vhr->db_mode = 2;
+		}
+		else {
+			vhr->db_mode = 0;
+			return "Unrecognized value for vhs_dbmode directive. Use ldap or dbd ! Module is disabled.";
+		}
+		break;
 	}
 
 	return NULL;
@@ -514,10 +533,10 @@ static const char * set_flag(cmd_parms * parms, void *mconfig, int flag)
 
 #ifdef HAVE_MPM_ITK_SUPPORT
 typedef struct {
-	uid_t uid;
-	gid_t gid;
-	char   *username;
-        int nice_value;
+	uid_t 	uid;
+	gid_t	gid;
+	char	*username;
+        int	nice_value;
 } itk_conf;
 #endif /* HAVE_MPM_ITK_SUPPORT  */
 
@@ -714,6 +733,7 @@ static int vhs_itk_post_read(request_rec *r)
 		/* VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: variable reqc does not already exists.... creating ! pid=%d request_rec=%d @request_config='%d'", getpid(), r, &(r->request_config)); */
 	  }
 
+/* XXX: allow dynamic DBD vs LDAP config */
 #ifdef HAVE_LDAP_SUPPORT
 		vhost_found_by_request = getldaphome(r, vhr, r->hostname, reqc);
 #endif
@@ -734,6 +754,7 @@ static int vhs_itk_post_read(request_rec *r)
 				char           *lhost;
 				lhost = apr_pstrdup(r->pool, r->hostname + 5 - 1);
 			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_itk_post_read: Found a lamer for %s -> %s", r->hostname, lhost);
+/* XXX: allow dynamic DBD vs LDAP config */
 #ifdef HAVE_LDAP_SUPPORT
 			  vhost_found_by_request = getldaphome(r, vhr, lhost, reqc);
 #endif
@@ -782,10 +803,11 @@ static int vhs_itk_post_read(request_rec *r)
        		cfg->uid = libhome_uid;
 		cfg->gid = libhome_gid;
 
-			/* set the username - otherwise MPM-ITK will not work */
+		/* set the username - otherwise MPM-ITK will not work */
 		/* itk_username = apr_psprintf(r->pool, "%s", pw->pw_name); */
+		/* Why root ? */
 		itk_username = apr_psprintf(r->pool, "root");
-       	       cfg->username = itk_username;
+       	        cfg->username = itk_username;
 		}
 	  VH_AP_LOG_RERROR(APLOG_MARK, APLOG_DEBUG, 0, r, "vhs_itk_post_read: itk uid='%d' itk gid='%d' itk username='%s' after change", cfg->uid, cfg->gid, cfg->username);
 	}
@@ -800,9 +822,9 @@ static int vhs_itk_post_read(request_rec *r)
  * This function will configure suPHP
  */
 typedef struct {
-	int			engine;			/* Status of suPHP_Engine */
+	int		engine;			/* Status of suPHP_Engine */
 	char		*php_config;
-	int			cmode;			/* Server of directory configuration? */
+	int		cmode;			/* Server of directory configuration? */
 	char		*target_user;
 	char		*target_group;
 	apr_table_t	*handlers;
@@ -1060,7 +1082,13 @@ start_over:
 	else if (strcasecmp (ldap_attributes[i], "apacheSuexecUid") == 0) {
 	  reqc->uid = apr_pstrdup(r->pool, vals[i]);
 	}
+	else if (strcasecmp (ldap_attributes[i], "uidNumber") == 0) {
+	  reqc->uid = apr_pstrdup(r->pool, vals[i]);
+	}
 	else if (strcasecmp (ldap_attributes[i], "apacheSuexecGid") == 0) {
+	  reqc->gid = apr_pstrdup(r->pool, vals[i]);
+	}
+	else if (strcasecmp (ldap_attributes[i], "gidNumber") == 0) {
 	  reqc->gid = apr_pstrdup(r->pool, vals[i]);
 	}
 	else if (strcasecmp (ldap_attributes[i], "associatedDomain") == 0) {
@@ -1105,6 +1133,12 @@ static int vhs_translate_name(request_rec * r)
 	/* If VHS is not enabled, then don't process request */
 	if (!vhr->enable) {
 		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled ");
+		return DECLINED;
+	}
+
+	/* if not dbmode is set then decline */
+	if (vhr->db_mode == 0) {
+		VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: VHS Disabled because vhs_dbmode is not specified.");
 		return DECLINED;
 	}
 
@@ -1165,10 +1199,14 @@ static int vhs_translate_name(request_rec * r)
 		 * Trying to get vhost information
 		 */
 #ifdef HAVE_LDAP_SUPPORT
-		vhost_found_by_request = getldaphome(r, vhr, (char *) host, reqc);
+		if(vhr->db_mode == 1) {
+			vhost_found_by_request = getldaphome(r, vhr, (char *) host, reqc);
+		} 
 #endif
 #ifdef HAVE_MOD_DBD_SUPPORT
-		vhost_found_by_request = getmoddbdhome(r, vhr, (char *) host, reqc);
+		if(vhr->db_mode == 2) {
+			vhost_found_by_request = getmoddbdhome(r, vhr, (char *) host, reqc);
+		}
 #endif
 		
 		if (vhost_found_by_request != OK) { 
@@ -1183,10 +1221,14 @@ static int vhs_translate_name(request_rec * r)
 				lhost = apr_pstrdup(r->pool, host + 5 - 1);
 			  VH_AP_LOG_ERROR(APLOG_MARK, APLOG_DEBUG, 0, r->server, "vhs_translate_name: Found a lamer for %s -> %s", host, lhost);
 #ifdef HAVE_LDAP_SUPPORT
-			  vhost_found_by_request = getldaphome(r, vhr, lhost, reqc);
+			  if(vhr->db_mode == 1) {
+			  	vhost_found_by_request = getldaphome(r, vhr, lhost, reqc);
+			  }
 #endif
 #ifdef HAVE_MOD_DBD_SUPPORT
-			  vhost_found_by_request = getmoddbdhome(r, vhr, lhost, reqc);
+			  if(vhr->db_mode == 2) {
+			  	vhost_found_by_request = getmoddbdhome(r, vhr, lhost, reqc);
+			  }
 #endif
 			  if (vhost_found_by_request != OK) {
 					if (vhr->log_notfound) {
@@ -1282,6 +1324,10 @@ static int vhs_translate_name(request_rec * r)
  */
 static const command_rec vhs_commands[] = {
 	AP_INIT_FLAG( "EnableVHS", set_flag, (void *)5, RSRC_CONF, "Enable VHS module"),
+
+	AP_INIT_TAKE1("vhs_dbmode",set_field, (void *)10, RSRC_CONF,
+						"Use mod_ldap or mod_dbd as database source. Values are "
+			            		"\"ldap\" or \"dbd\". You MUST specify a dbmode or mod_vhs be disabled.");
 
 	AP_INIT_TAKE1("vhs_Path_Prefix", set_field, (void *)1, RSRC_CONF, "Set path prefix."),
 	AP_INIT_TAKE1("vhs_Default_Host", set_field, (void *)2, RSRC_CONF, "Set default host if HTTP/1.1 is not used."),

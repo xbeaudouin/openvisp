@@ -1,3 +1,13 @@
+Since mod_vhs 1.1.1
+-------------------
+o Allow posixAccount uidNumber and gidNumber to be used as suexec if needed.
+  Note the override the apacheSuexecUid and apacheSuexecGid.
+  (Xavier Beaudouin)
+o New configuration option : vhs_dbmode ldap or vhs_dbmode dbd, to allow
+  a module compiled with both support to be on virtualhost directive to use
+  LDAP or DBD according to local configuration.
+  (Xavier Beaudouin)
+
 Since mod_vhs 1.1.0
 -------------------
 o Add documentation about LDAP setup.

@@ -33,6 +33,9 @@ server configuration block (ie <VirtualHost></VirtualHost>).
 
 EnableVHS:		Enable or Disable mod_vhs. Per default VHS is NOT
 			enabled.
+vhs_dbmode:		Use mod_ldap or mod_dbd as database source.
+			Values are "ldap" or "dbd". You MUST specify a source
+			or module will be disabled.
 vhs_LogNotFound:	Enable or Disable logging into error log when
 			mod_vhs cannot find the hostname in database.
 			Per default this option is disabled.

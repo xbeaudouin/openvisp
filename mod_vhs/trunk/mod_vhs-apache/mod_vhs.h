@@ -1,7 +1,7 @@
 /*
  * Version of mod_vhs
  */
-#define VH_VERSION	"mod_vhs/1.1.0"
+#define VH_VERSION	"mod_vhs/1.1.1"
 
 
 /*
@@ -143,6 +143,9 @@
  */
 typedef struct {
 	unsigned short int	enable;			/* Enable the module */
+	unsigned short int	db_mode;		/* Mode when module have dbd and ldap support */
+							/* 1 = LDAP */
+							/* 2 = DBD */
 	char           		*path_prefix;		/* Prefix to add to path returned by database/ldap */
 	char           		*default_host;		/* Default host to redirect to */
 

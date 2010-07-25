@@ -44,6 +44,8 @@ With URIFiler, per default : objectClass=apacheConfig
 
 For my example, I don't want to use the default filter so, I use in httpd.conf :
 
+EnableVHS			On
+vhs_dbmode			ldap
 vhs_Lamer                       On
 vhs_Default_Host                http://kazar.net
 vhs_PHPopen_basedir             Off
