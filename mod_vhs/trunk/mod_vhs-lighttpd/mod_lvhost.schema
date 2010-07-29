@@ -1,0 +1,45 @@
+##
+## OIDs are owned by Camberlin Stéphane
+##
+## 1.3.6.1.4.1.21357.1.x   - mod_vhost_ldap
+## 1.3.6.1.4.1.21357.1.1.x - attributetypes
+## 1.3.6.1.4.1.21357.1.2.x - objectclasses
+##
+
+attributetype ( 1.3.6.1.4.1.21357.1.1.1 NAME 'servername'
+	SUP name
+	DESC 'mod_lvhost: servername'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256}
+	)
+	
+attributetype ( 1.3.6.1.4.1.21357.1.1.2 NAME 'documentroot'
+	SUP name
+	DESC 'mod_lvhost: documentroot'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256}
+	SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.21357.1.1.3 NAME 'uid'
+	SUP name
+	DESC 'mod_lvhost: uid'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256}
+	SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.21357.1.1.4 NAME 'gid'
+	SUP name
+	DESC 'mod_lvhost: gid'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256}
+	SINGLE-VALUE )
+
+objectclass ( 1.3.6.1.4.1.21357.1.2.1 NAME 'vhost'
+	SUP 'top'
+	MUST ( cn $ serverName $ documentRoot )
+        MAY ( userUid $ userGid ) 
+	)
