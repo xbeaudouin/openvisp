@@ -1,5 +1,7 @@
 Since mod_vhs 1.1.1
 -------------------
+o Fix suPHP support that never work.
+  (Superbaloo)
 o Allow posixAccount uidNumber and gidNumber to be used as suexec if needed.
   Note the override the apacheSuexecUid and apacheSuexecGid.
   (Xavier Beaudouin)

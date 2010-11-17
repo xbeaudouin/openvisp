@@ -888,6 +888,7 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	// TODO: is this used ? 
 	//       warning passwd var doesn't exist anymore
 	//cfg->engine       = (strstr(passwd,"engine=Off") == NULL);
+	cfg->engine       = 1;
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
 
 	transformedUid    = apr_psprintf(r->pool, "#%d", (int) uid);
