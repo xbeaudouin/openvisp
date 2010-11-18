@@ -891,10 +891,10 @@ static void vhs_suphp_config(request_rec *r, vhs_config_rec *vhr, char *path, ch
 	cfg->engine       = 1;
 	cfg->php_config   = apr_pstrdup(r->pool,transformedPath);
 
-	transformedUid    = apr_psprintf(r->pool, "#%d", (int) uid);
+	transformedUid    = apr_psprintf(r->pool, "#%d", atoi(uid));
 	cfg->target_user  = apr_pstrdup(r->pool,transformedUid);
 
-	transformedGid    = apr_psprintf(r->pool, "#%d", (int) gid);
+	transformedGid    = apr_psprintf(r->pool, "#%d", atoi(gid));
 	cfg->target_group = apr_pstrdup(r->pool,transformedGid);
 
 	ap_set_module_config(r->server->module_config, suphp_module, cfg);
