@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Valery Kholodkov
+ * Copyright (C) 2011 Xavier BEAUDOUIN
  *
  * NOTE: Some small fragments have been copied from original nginx log module due to exports problem.
  */
@@ -226,6 +227,8 @@ ngx_http_udplog_handler(ngx_http_request_t *r)
     ulcf = ngx_http_get_module_loc_conf(r, ngx_http_udplog_module);
 
     if(ulcf->off) {
+        ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "http udplog not enabled");
         return NGX_OK;
     }
 
@@ -368,6 +371,9 @@ ngx_http_udplogger_send(ngx_udp_endpoint_t *l, u_char *buf, size_t len)
     ssize_t                n;
     ngx_udp_connection_t  *uc;
 
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> send()");
+
     uc = l->udp_connection;
 
     if (uc->connection == NULL) {
@@ -421,6 +427,9 @@ ngx_http_udplog_create_loc_conf(ngx_conf_t *cf)
 {
     ngx_http_udplog_conf_t  *conf;
 
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> create_loc_conf()");
+
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_udplog_conf_t));
     if (conf == NULL) {
         return NGX_CONF_ERROR;
@@ -437,6 +446,9 @@ ngx_http_udplog_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_http_udplog_conf_t *prev = parent;
     ngx_http_udplog_conf_t *conf = child;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> merge_loc_conf()");
 
     if(conf->tag == NULL) {
         conf->tag = prev->tag;
@@ -462,6 +474,9 @@ ngx_http_udplog_add_endpoint(ngx_conf_t *cf, ngx_udplog_addr_t *peer_addr)
 {
     ngx_http_udplog_main_conf_t    *umcf;
     ngx_udp_endpoint_t             *endpoint;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> add_endpoint()");
 
     umcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_udplog_module);
 
@@ -496,6 +511,9 @@ ngx_http_udplog_set_log(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     value = cf->args->elts;
 
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> access_udplog : %s", &(value[1].data));
+
     if (ngx_strcmp(value[1].data, "off") == 0) {
         ulcf->off = 1;
         return NGX_CONF_OK;
@@ -505,6 +523,8 @@ ngx_http_udplog_set_log(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (ulcf->logs == NULL) {
         ulcf->logs = ngx_array_create(cf->pool, 2, sizeof(ngx_http_udplog_t));
         if (ulcf->logs == NULL) {
+		ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+				   "invalid parameter \"%V\"", &value[2]);	
             return NGX_CONF_ERROR;
         }
     }
@@ -589,6 +609,9 @@ ngx_http_udplog_set_priority(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     f = ngx_udplog_facilities;
 
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> set_priority () : %s", &(value[1].data));
+
     while(f->name.data != NULL) {
         if(ngx_strncmp(f->name.data, value[1].data, f->name.len) == 0)
             break;
@@ -639,6 +662,9 @@ ngx_http_udplog_set_tag(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     field = (ngx_http_log_tag_template_t**) (((u_char*)conf) + cmd->offset);
 
     value = cf->args->elts;
+
+    ngx_log_debug0(NGX_LOG_DEBUG_CORE, ngx_cycle->log, 0,
+                   "udplogger -> set_tag() : %s", &(value[1].data));
 
     if (*field == NULL) {
         *field = ngx_palloc(cf->pool, sizeof(ngx_http_log_tag_template_t));
@@ -711,3 +737,4 @@ ngx_http_udplog_init(ngx_conf_t *cf)
 
     return NGX_OK;
 }
+
