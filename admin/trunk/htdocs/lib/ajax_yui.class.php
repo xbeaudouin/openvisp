@@ -10,7 +10,7 @@ class AJAX_YUI
 		$this->db_link = $db_link;
 	}
 	
-	function start($primary_key = NULL){
+	function yui2_start($primary_key = NULL){
 	  $this->buffer = "
     <script type=\"text/javascript\">    
     var myBuildUrl".$this->info['data_div']." = function(datatable,record) {
@@ -26,7 +26,7 @@ class AJAX_YUI
 	  ";
 	}
 	
-	function create_celleditor(){
+	function yui2_create_celleditor(){
 	  
 	  $this->buffer .="
 	  
@@ -93,7 +93,7 @@ class AJAX_YUI
 	}
 
 
-	function create_listener(){
+	function yui2_create_listener(){
 
 		$this->buffer .= ' DynamicData'.$this->info['data_div'].' = function() {';
 
@@ -417,7 +417,7 @@ class AJAX_YUI
 
 	}
 
-	function create_search(){
+	function yui2_create_search(){
 
 	  foreach ($this->search_form as $item => $value) {
 
@@ -460,32 +460,20 @@ class AJAX_YUI
 	}
 
 	
-	function end(){
-	  print $this->buffer;
-	  print "</script>";
-	}
-	
-	function item_add($item_list){
-	  $this->item_list=$item_list;
-	}
-	
-	function ajax_info($item_list){
-	  $this->ajax_info=$item_list;
-	}
-	
-	function attr_add($item, $value){
-	  $this->info[$item]=$value;
-	}
-	
-	function add_search_form($item_list){
-	  $this->search_form=$item_list;
-	}
+  function yui2_end(){
+    print $this->buffer;
+    print "</script>";
+  }
+  
 
-	function add_function($function_name, $function_content){
 
-		$this->buffer .= 'this.'.$function_name.' = '.$function_content."\n\n"; 
+  function add_search_form($item_list){
+    $this->search_form=$item_list;
+  }
 
-	}
+  function add_function($function_name, $function_content){
+    $this->buffer .= 'this.'.$function_name.' = '.$function_content."\n\n"; 
+  }
 	
 	function generate_search_form($size){
 	  foreach ($this->search_form as $item => $value) {
@@ -500,6 +488,211 @@ class AJAX_YUI
 	  }
 
 	}
+
+/*
+  Global function not specific to yui but to ova project.
+*/
+
+  function item_add($item_list){
+    $this->item_list=$item_list;
+  }
+
+  function ajax_info($item_list){
+    $this->ajax_info=$item_list;
+  }
+
+  function attr_add($item, $value){
+    $this->info[$item]=$value;
+  }
+
+
+  function start ($primary_key = NULL){
+    $this->name=$primary_key;
+    $this->buffer = " ";
+    $this->cnt_lib = 0;
+    $this->loaded_lib = array();
+    $this->load_lib = "<script>
+
+YUI().use(";
+
+  }
+
+  function load_yui_lib ($lib){
+    $this->cnt_lib++;
+    if ( !in_array($lib,$this->loaded_lib)){
+      $this->loaded_lib[]=$lib;
+      if ($this->cnt_lib > 1 ){$this->load_lib.=",";}
+      $this->load_lib.='"'.$lib.'"';
+    }
+    
+  }
+
+
+  function end(){
+    print $this->load_lib;
+    print ", function (Y) {\n";
+    print $this->buffer."\n";
+    print "})\n";
+    print "</script>\n";
+  }
+
+/*
+  YUI 3 lib
+*/
+
+  /*
+    Function create_datasource
+    function to create a yui datasource with the item_list array
+  */
+  
+
+  function create_datasource(){
+    $this->load_yui_lib("datasource-get");
+    $this->load_yui_lib("datasource-jsonschema");
+
+    $this->buffer .= "\n\n";
+    $this->buffer .= "  var DS_".$this->name." = new Y.DataSource.Get({source:\"".$this->ajax_info['url']."\"});
+
+  DS_".$this->name.".plug(Y.Plugin.DataSourceJSONSchema, {
+    schema: {
+      resultListLocator: \"records\",
+      resultFields: [\n";
+
+                $boucle=1;
+                foreach ($this->item_list as $item => $attributes) {
+                  if ( $item != "delete" ){
+                    //
+                    // 
+                    // $temp_attributes = preg_replace('/.*(parser:"number")/', '$1', $attributes);
+                    //$this->buffer .= '        {key:"'.$item.'", '.$temp_attributes.'}';
+                    $this->buffer .= '        {key:"'.$item.'"}';
+                    if ( $boucle < sizeof($this->item_list)){
+                      $this->buffer .= ",\n";
+                    }
+                  }
+                  $boucle++;
+                }
+
+    $this->buffer .= "\n      ]
+    }
+  });
+
+  // This request string will get appended to the URI
+  DS_".$this->name.".sendRequest({
+          
+    callback: {
+      success: function(e){ alert(e.response);},
+      failure: function(e){ alert(\"Could not retrieve data: \" + e.error.message);}
+    }
+  });
+  ";
+    
+    $this->buffer .= "\n\n";
+
+  }
+
+/*
+  Function create_table
+  To create a table with yui object.
+  you must link the table with a datasource.
+*/
+
+  function create_datatable(){
+    $this->load_yui_lib("datatable-datasource");
+    
+    $this->buffer.="  table_".$this->name." = new Y.DataTable.Base({\n";
+    $this->buffer.="    columnset: [\n";
+
+        $boucle=1;
+        foreach ($this->item_list as $item => $attributes){
+
+          if ( !isset($attributes['display']) ) { $attributes['display'] = TRUE;}
+          
+          if ( $attributes['display'] == TRUE ){
+
+            if ( preg_match("/children.*/", $item) ){
+              $item = "children";
+            }
+
+            switch ($item){
+              case "children":
+                $this->buffer .= '      { ';
+                if ( isset($attributes['label']) )
+                { $this->buffer .= 'label:"'.$attributes['label'].'",'; }
+                $this->buffer .= " children:\n";
+                $this->buffer .= "        [\n";
+
+                $total_child = sizeof($attributes) - 3;
+                $boucle_child = 0;
+                foreach ($attributes as $child_array){
+                  if ( is_array($child_array) ){
+                    $this->buffer .= '          { key:"'.$child_array['key'].'"';
+
+/*
+                    if ( ! empty($child_array['sortable']) ){
+                      $this->buffer .= ', sortable:'.$child_array['sortable'];
+                    }
+
+                    if ( ! empty($child_array['resizeable']) ){
+                      $this->buffer .= ', resizeable:'.$child_array['resizeable'];
+                    }
+*/                
+                    if ( ! empty($child_array['label']) ) {
+                      //$child_array['label'];
+                      $this->buffer .= ', label:"'.$child_array['label'].'"';
+                    }
+
+                    $this->buffer .= "}";
+
+                    if ( $boucle_child < $total_child ) { $this->buffer .= ",\n"; }
+                    $boucle_child++;
+
+                  }
+                }
+
+                $this->buffer .= "\n        ]\n";
+                $this->buffer .= "      }";
+                if ( $boucle < sizeof($this->item_list) -1 ){
+                  $this->buffer .= ",\n";
+                }
+                else {$this->buffer .= ",";}
+                
+                
+                break;
+
+                default:
+                  if ( empty($attributes['label']) ) { $attributes['label']="";}
+                  
+                  $this->buffer .= '      { key:"'.$item.'", label:"'.$attributes['label'].'"';
+                  $this->buffer .= '} ';
+                  if ( $boucle < sizeof($this->item_list) -1 ){
+                    $this->buffer .= ",\n";
+                  }
+
+            }
+          }
+          $boucle++;
+        }
+/*
+            \"Title\",
+            \"Phone\",
+            { key:\"Rating.AverageRating\", label:\"Rating\" }
+            
+*/
+$this->buffer .="
+    ],
+    summary: \"Pizza places near 98089\",
+    caption: \"Table with JSON data from YQL\"
+    });
+    ";
+    
+    $this->buffer .= "\n";
+    $this->buffer .= "table_".$this->name.".plug(Y.Plugin.DataTableDataSource, { datasource: DS_".$this->name." });\n";
+    $this->buffer .= "table_".$this->name.".render(\"#".$this->name."\");\n";
+    $this->buffer .= "table_".$this->name.".datasource.load()";
+    $this->buffer .= "\n";
+        
+  }
 	
 }
 
