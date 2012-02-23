@@ -3886,6 +3886,42 @@ function clean_empty_line ($filename){
 
 }
 
+// print_yahoo_menu()
+// Action: print a menu link with Absolute URI system for a yahoo menu object
+// Call: print_yahoo_menu(string $uri,string $text)
+// Returns: html text : <a target="_top" href=absoluteuri()+$uri>$text</a>
+//
+function print_yahoo_menu($uri, $text) {
+  print "<a class=\"yui3-menuitem-content\" href=\"".getabsoluteuri().$uri."\">".$text."</a>";
+}
+
+
+function ova_array_to_xml ($dataarray, $tabcount=2, $tagname) { 
+  
+  $xmldata = "";  
+  $tabcount++;
+  $tabSpace = "\t"; 
+  $extraTabSpace = ""; 
+  for ($i = 0; $i<$tabcount; $i++) { 
+    $tabSpace .= "\t"; 
+  }
+
+  for ($i = 0; $i<$tabcount+1; $i++) { 
+    $extraTabSpace .= "\t"; 
+  } 
+
+  foreach($dataarray as $tag => $val) {
+    if (!is_array($val)) { 
+      $xmldata .= PHP_EOL.$tabSpace.'<'.$tag.'>'.htmlentities($val).'</'.$tag.'>'; 
+    }
+    else { 
+      $xmldata .= PHP_EOL.$extraTabSpace.'<'.$tagname.'>'.ova_array_to_xml($val, $tabcount,"$tagname"); 
+      $xmldata .= PHP_EOL.$extraTabSpace.'</'.$tagname.'>'; 
+    } 
+  } 
+    
+return $xmldata; 
+}
 
 /*
  * If you visit a file that doesn't contain these lines at its end, please

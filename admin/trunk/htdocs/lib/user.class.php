@@ -47,6 +47,7 @@ class USER
 			{
 				throw new Exception ("DSL vous n'avez pas les droits de gerer la partie $part");
 			}
+		return true;
 	}
 
 	//
@@ -271,6 +272,8 @@ class USER
 	    $query = "SELECT COUNT(domain.id) AS count_domain FROM domain WHERE domain != 'ova.local'";
 	    $result = $this->db_link->sql_query($query);
 	    $this->data_managed['domains'] = $result['result'][0]['count_domain'];
+
+			$query = "SELECT ";
 	    
 	  }
 		else{
@@ -307,8 +310,8 @@ class USER
 				}
 				return FALSE;
 	    }
-			return TRUE;
 	  }
+		return TRUE;
 	}
 
 	function check_domain_admin()

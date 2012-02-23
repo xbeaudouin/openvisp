@@ -381,67 +381,97 @@ WHERE domain='".$domain_name."'
 		global $CONF;
 		global $server_info;
 		global $PALANG;
+		global $user_info;
 
-		$query = "INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active)
+		$error = 0;
+
+		if ( $user_info->check_access('domain') ){
+
+			if ( $user_info->can_add_item("1","domains") == FALSE ){
+				$array['message'] = sprintf($PALANG['pMassive_import_domain_overquota_part'], sizeof($new_domains), $user_info->data_quota['domains'] - $user_info->data_managed['domains']);
+				$array['message'] .= $PALANG['pMassive_import_domain_overquota']."<br/>";
+				$error++;
+			}
+
+			if ( $user_info->can_add_item($domain_array['mailboxes'],"mailboxes") == FALSE ){
+				$array['message'] .= sprintf($PALANG['pMassive_import_mailbox_allocation_overquota_part'], $new['mailboxes'], $user_info->data_quota['mailboxes'] - $user_info->data_managed['mailboxes'] );
+				$array['message'] .= $PALANG['pMassive_import_mailbox_allocation_overquota']."<br/>";
+				$error++;
+			}
+
+			if ( $user_info->can_add_item($domain_array['mailbox_aliases'],"aliases") == FALSE ){
+				$array['message'] .= sprintf($PALANG['pMassive_import_aliases_allocation_overquota_part'], $new['aliases'], $user_info->data_quota['aliases'] - $user_info->data_managed['aliases'] );
+				$array['message'] .= $PALANG['pMassive_import_aliases_allocation_overquota']."<br/>";
+				$error++;
+			}
+	
+			
+		}
+
+		if ( $error == 0 ){
+
+			$query = "INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active)
 VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domain_array['mailbox_aliases']."','".$domain_array['mailboxes']."','".$domain_array['maxquota']."','".$domain_array['backupmx']."','".$domain_array['antivirus']."','".$domain_array['vrfydomain']."','".$domain_array['vrfysender']."','".$domain_array['greylisting']."','".$domain_array['spf']."',NOW(),NOW(),'".$domain_array['active']."')";
 
-		$result = $this->db_link->sql_query($query);
+			$result = $this->db_link->sql_query($query);
 
 
-		if ($result['rows'] != 1){
-			$array['result'] = 1;
-			$array['message'] = $PALANG['pAdminCreate_domain_result_error'] . " <b>".$domain_array['name']."</b></br/>";
-			$array['message'] .= "SQL : ".$result['sql_log']."</br/>";
-		}
-		else{
-			$array['result'] = 0;
-			$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$domain_array['name']."</b></br/>";
-		}
+			if ($result['rows'] != 1){
+				$array['result'] = 1;
+				$array['message'] = $PALANG['pAdminCreate_domain_result_error'] . " <b>".$domain_array['name']."</b></br/>";
+				$array['message'] .= "SQL : ".$result['sql_log']."</br/>";
+			}
+			else{
+				$array['result'] = 0;
+				$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$domain_array['name']."</b></br/>";
+			}
 
-		debug_info("CREATION DOM : " .$array['result']);
 
-		$this->fetch_by_domainname($domain_array['name']);
-		$this->associate_domain_admin();
+			$this->fetch_by_domainname($domain_array['name']);
+			$this->associate_domain_admin();
 
-		if ( $CONF['greylisting'] == "YES" ){
+			if ( $CONF['greylisting'] == "YES" && $array['result'] == 0 ){
  
-			if ( $server_info->check_server_role_exist('policy') ){
+				if ( $server_info->check_server_role_exist('policy') ){
 
-				$server_info->fetch_server_role_list('policy');
+					$server_info->fetch_server_role_list('policy');
 
-				for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
+					for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
 
-					$db_name = $server_info->list_server_role[$i]['instance'];
-					$db_user = $server_info->list_server_role[$i]['login'];
-					$db_pass = $server_info->list_server_role[$i]['password'];
-					$db_port = $server_info->list_server_role[$i]['port'];
-					$db_type = "mysql";
-					$db_host = $server_info->list_server_role[$i]['ip_public'];
-					if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
+						$db_name = $server_info->list_server_role[$i]['instance'];
+						$db_user = $server_info->list_server_role[$i]['login'];
+						$db_pass = $server_info->list_server_role[$i]['password'];
+						$db_port = $server_info->list_server_role[$i]['port'];
+						$db_type = "mysql";
+						$db_host = $server_info->list_server_role[$i]['ip_public'];
+						if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
 
-					$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-					$policy_info = new POLICYD($policydb);
+						$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
+						$policy_info = new POLICYD($policydb);
 					
 
-					$policy_info_rcpt = $policy_info->add_new_domain_policy($this->data_domain['domain']);
-					if ( $policy_info_rcpt['result'] != 1){
-						$array['message'] .= $policy_info_rcpt['message'];
-					}
-					$array['result'] += $policy_info_rcpt['result'];
+						$policy_info_rcpt = $policy_info->add_new_domain_policy($this->data_domain['domain']);
+						if ( $policy_info_rcpt['result'] != 1){
+							$array['message'] .= $policy_info_rcpt['message'];
+						}
+						$array['result'] += $policy_info_rcpt['result'];
 		
 		
-					$policy_info_helo = $policy_info->add_forbidden_helo($this->data_domain['domain']);
-					if ( $policy_info_helo['result'] != 1){
-						$array['message'] .= $policy_info_helo['message'];
+						$policy_info_helo = $policy_info->add_forbidden_helo($this->data_domain['domain']);
+						if ( $policy_info_helo['result'] != 1){
+							$array['message'] .= $policy_info_helo['message'];
+						}
+						$array['result'] += $policy_info_helo['result'];
+
 					}
-					$array['result'] += $policy_info_helo['result'];
 
 				}
 
 			}
 
 		}
-		debug_info("FIN CREATION DOM : " .$array['result']);
+
+
 		return $array;
 
 	}

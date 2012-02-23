@@ -547,20 +547,20 @@ YUI().use(";
   
 
   function create_datasource(){
-    $this->load_yui_lib("datasource-get");
-    $this->load_yui_lib("datasource-jsonschema");
+    $this->load_yui_lib("datasource-io");
+    $this->load_yui_lib("datasource-xmlschema");
 
     $this->buffer .= "\n\n";
-    $this->buffer .= "  var DS_".$this->name." = new Y.DataSource.Get({source:\"".$this->ajax_info['url']."\"});
+    $this->buffer .= "  var DS_".$this->name." = new Y.DataSource.IO({source:\"".$this->ajax_info['url']."?\"});
 
-  DS_".$this->name.".plug(Y.Plugin.DataSourceJSONSchema, {
+  DS_".$this->name.".plug(Y.Plugin.DataSourceXMLSchema, {
     schema: {
-      resultListLocator: \"records\",
+      resultListLocator: \"Result\",
       resultFields: [\n";
 
                 $boucle=1;
                 foreach ($this->item_list as $item => $attributes) {
-                  if ( $item != "delete" ){
+//                  if ( $item != "delete" ){
                     //
                     // 
                     // $temp_attributes = preg_replace('/.*(parser:"number")/', '$1', $attributes);
@@ -569,23 +569,26 @@ YUI().use(";
                     if ( $boucle < sizeof($this->item_list)){
                       $this->buffer .= ",\n";
                     }
-                  }
+//                  }
+                  
                   $boucle++;
                 }
 
     $this->buffer .= "\n      ]
     }
-  });
-
+  });";
+  
   // This request string will get appended to the URI
-  DS_".$this->name.".sendRequest({
-          
-    callback: {
-      success: function(e){ alert(e.response);},
-      failure: function(e){ alert(\"Could not retrieve data: \" + e.error.message);}
-    }
-  });
-  ";
+//  DS_".$this->name.".sendRequest({
+//    request:\"output=xml\",
+//    callback: {
+//      success: function(e){ alert('NGO' + e.response);},
+//      failure: function(e){ alert(\"Could not retrieve data: \" + e.error.message);}
+//    },
+//    cfg:{method:\"".$this->ajax_info['method']."\"}
+//    
+//  });
+//  ";
     
     $this->buffer .= "\n\n";
 
@@ -599,9 +602,14 @@ YUI().use(";
 
   function create_datatable(){
     $this->load_yui_lib("datatable-datasource");
-    
-    $this->buffer.="  table_".$this->name." = new Y.DataTable.Base({\n";
-    $this->buffer.="    columnset: [\n";
+
+//    $this->buffer.="
+//  function getIOCfg() {
+//    var dscfg_".$this->name."={method: '".$this->ajax_info['method']."'};
+//    return dscfg_".$this->name.";
+//  }\n";
+
+    $this->buffer.="    var Nestedcolset_".$this->name." = [\n";
 
         $boucle=1;
         foreach ($this->item_list as $item => $attributes){
@@ -664,8 +672,8 @@ YUI().use(";
                   if ( empty($attributes['label']) ) { $attributes['label']="";}
                   
                   $this->buffer .= '      { key:"'.$item.'", label:"'.$attributes['label'].'"';
-                  $this->buffer .= '} ';
-                  if ( $boucle < sizeof($this->item_list) -1 ){
+                  $this->buffer .= '}';
+                  if ( $boucle < sizeof($this->item_list) ){
                     $this->buffer .= ",\n";
                   }
 
@@ -680,7 +688,11 @@ YUI().use(";
             
 */
 $this->buffer .="
-    ],
+    ];\n";
+
+    $this->buffer .= "Colset_".$this->name." = new Y.Columnset({defintions:Nestedcolset_".$this->name."});";
+    $this->buffer .="  var table_".$this->name." = new Y.DataTable.Base({\n
+    columnset:Nestedcolset_".$this->name.",
     summary: \"Pizza places near 98089\",
     caption: \"Table with JSON data from YQL\"
     });
@@ -688,8 +700,9 @@ $this->buffer .="
     
     $this->buffer .= "\n";
     $this->buffer .= "table_".$this->name.".plug(Y.Plugin.DataTableDataSource, { datasource: DS_".$this->name." });\n";
-    $this->buffer .= "table_".$this->name.".render(\"#".$this->name."\");\n";
-    $this->buffer .= "table_".$this->name.".datasource.load()";
+//    $this->buffer .= "DS_".$this->name.".after(\"response\", function(){ table_".$this->name.".render(\"#".$this->name."\") });";
+//    $this->buffer .= "table_".$this->name.".render(\"#".$this->name."\");\n";
+    $this->buffer .= "table_".$this->name.".datasource.load();";
     $this->buffer .= "\n";
         
   }
