@@ -764,13 +764,15 @@ $PALANG['pGenerate_new_password'] = 'Generate a new password';
 
 $PALANG['pAdminImport_file'] = 'domains file';
 $PALANG['pAdminImport_help'] = 'The file must contains the informations like the following exemple :';
-$PALANG['pAdminImport_help2'] = 'domain ; backup_mx* ; quota email ; quota alias ; quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*; Active* ; Create Default Mail Aliases*';
+$PALANG['pAdminImport_help2'] = 'domain ; backup_mx* ; quota email ; quota alias ;mailbox quota size ; description ; antivirus* ; antispam* ; sender email verify* ; sender domain verify* ; greylisting* ; SPF*; Active* ; Create Default Mail Aliases*';
 $PALANG['pAdminImport_help3'] = 'the options followed by  a  * can be 0 or 1 ';
 
 $PALANG['pImport_Users_file'] = 'users file';
 $PALANG['pImport_Users_help'] = 'The file must contains the informations like the following exemple :';
-$PALANG['pImport_Users_help2'] = 'mailbox ; FirstName LastName or Description ; password ; Mb quota';
+$PALANG['pImport_Users_help2'] = 'mailbox ; FirstName LastName or Description ; password ; Mb quota; SmtpAuth Activated';
 $PALANG['pImport_Users_help3'] = 'the options followed by  a  * can be 0 or 1<br/>The email can contain or not the @domain.tld';
+$PALANG['pGlobalImport_Users_help2'] = 'mailbox ; FirstName LastName or Description ; password ; Mb quota ; SmtpAuth Activated ; pop3 enabled, imap enabled';
+$PALANG['pGlobalImport_Users_help3'] = 'the options followed by  a  * can be 0 or 1<br/>The email can contain or not the @domain.tld';
 $PALANG['pImport_Users_return'] = 'Return to the domain details';
 
 $PALANG['pImport_Alias_file'] = 'Alias file';
@@ -1085,5 +1087,10 @@ $PALANG['pMassive_import_disk_allocation_overquota_part'] = '<div class="standou
 $PALANG['pGeneric_paid'] = 'Paid';
 $PALANG['pGeneric_used'] = 'Used';
 $PALANG['pGeneric_left'] = 'Left';
+
+
+$PALANG['pYMenu_welcome'] = 'Welcome';
+$PALANG['pYMenu_mail'] = 'Mail';
+$PALANG['pYMenu_ova'] = 'OpenVisp'
 
 ?>
