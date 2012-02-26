@@ -20,6 +20,8 @@ include ("../languages/" . check_language () . ".lang");
 
 $SESSID_USERNAME = check_user_session ();
 
+$body_class = 'class="yui3-skin-sam"';
+
 if ($_SERVER["REQUEST_METHOD"] == "GET")
 {
 
