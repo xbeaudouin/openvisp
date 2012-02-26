@@ -10,14 +10,14 @@ z-index:9000;
 <?php 
 
 
-print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
-print load_js("../lib/yui/connection/connection-min.js");
-print load_js("../lib/yui/json/json-min.js");
-print load_js("../lib/yui/element/element-min.js");
-print load_js("../lib/yui/paginator/paginator-min.js");
-//print load_js("../lib/yui/autocomplete/autocomplete-debug.js");
-print load_js("../lib/yui/datasource/datasource-min.js");
-print load_js("../lib/yui/datatable/datatable-min.js");
+/* print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js"); */
+/* print load_js("../lib/yui/connection/connection-min.js"); */
+/* print load_js("../lib/yui/json/json-min.js"); */
+/* print load_js("../lib/yui/element/element-min.js"); */
+/* print load_js("../lib/yui/paginator/paginator-min.js"); */
+/* //print load_js("../lib/yui/autocomplete/autocomplete-debug.js"); */
+/* print load_js("../lib/yui/datasource/datasource-min.js"); */
+/* print load_js("../lib/yui/datatable/datatable-min.js"); */
 
 print load_css("../css/datatable.css");
 
