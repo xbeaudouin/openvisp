@@ -27,21 +27,21 @@ $user_info->fetch_info($SESSID_USERNAME);
 $domain_info = new DOMAIN($ovadb);
 $mail_info = new MAIL($ovadb);
 
-$fDomain_name = $_GET["domainName"];
+//$fDomain_name = $_GET["domainName"];
 
 $json_data_array = array();
 $json_array = array();
 
 if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
-	if ( strlen($fDomain_name) == 0 ){
-		$fDomain_name = get_post('domainName');
-	}
+	//	if ( strlen($fDomain_name) == 0 ){
+	$fDomain_name = get_post('domainName');
+	//	}
 
 
   $fMethod = get_post('method');
 	$fDir = get_post('dir');
-	$fResults = get_post('results');
+	$fResults = get_post('resultCount');
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
 
@@ -59,16 +59,18 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 	}
 
+	debug_info("NGO : DOMAINE : $fDomain_name");
+
 	$domain_info->fetch_by_domainname($fDomain_name);
 	$user_info->check_domain_access($domain_info->data_domain['id']);
 
-	$domain_info->fetch_mailboxes(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir );
+	$domain_info->fetch_mailboxes(NULL, "$fStartIndex, $fResults", $fSort, $fDir );
 
  
   if ( (is_array($domain_info->list_mailboxes)) and sizeof ($domain_info->list_mailboxes > 0))
   {
-    
-    $json_array['totalRecords'] = intval($domain_info->used_quota['mailbox']);
+
+    $json_array['totalRecords'] = intval($domain_info->used_quota['mailboxes']);
     $json_array['startIndex'] = intval($fStartIndex);
     $json_array['recordsReturned'] = sizeof($domain_info->list_mailboxes);
     $json_array['sort'] = $fSort;
