@@ -25,21 +25,22 @@ $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
 $domain_info = new DOMAIN($ovadb);
 
-$fDomain_name = $_GET["domainName"];
+//$fDomain_name = $_GET["domainName"];
+
 
 $json_data_array = array();
 $json_array = array();
 
 if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
-	if ( strlen($fDomain_name) == 0 ){
-		$fDomain_name = get_post('domainName');
-	}
+	//	if ( strlen($fDomain_name) == 0 ){
+	$fDomain_name = get_post('domainName');
+	//	}
 
-
+	
   $fMethod = get_post('method');
 	$fDir = get_post('dir');
-	$fResults = get_post('results');
+	$fResults = get_post('resultCount');
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
 
@@ -47,13 +48,13 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	$domain_info->fetch_by_domainname($fDomain_name);
 	$user_info->check_domain_access($domain_info->data_domain['id']);
 
-	$domain_info->fetch_mail_aliases(NULL, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir );
-
+	$domain_info->fetch_mail_aliases(NULL, "$fStartIndex, $fResults", $fSort, $fDir );
+	debug_info ("ALIAS FETCH : $fStartIndex / ($fStartIndex + $fResults) /".sizeof($domain_info->list_mail_aliases));
  
   if ( (is_array($domain_info->list_mail_aliases)) and sizeof ($domain_info->list_mail_aliases > 0))
   {
     
-    $json_array['totalRecords'] = intval($domain_info->used_quota['mail_alias']);
+    $json_array['totalRecords'] = intval($domain_info->used_quota['aliases']);
     $json_array['startIndex'] = intval($fStartIndex);
     $json_array['recordsReturned'] = sizeof($domain_info->list_mail_aliases);
     $json_array['sort'] = $fSort;
