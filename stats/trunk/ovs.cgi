@@ -17,7 +17,7 @@
 use RRDs;
 use POSIX qw(uname);
 
-my $VERSION = "1.04";
+my $VERSION = "1.05";
 
 my $host = (POSIX::uname())[1];
 my $scriptname = 'ovs.cgi';
