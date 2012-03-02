@@ -633,8 +633,8 @@ sub process_line($)
 
 	#print $prog."\n";
 
-        if($prog =~ /^postfix\/(.*)/ ) {
-		my $prog = $1;
+        if($prog =~ /^postfix(-\w+)?\/(.*)/ ) {
+		my $prog = $2;
 		if($prog eq 'smtp') {
 			if($text =~ /\bstatus=sent\b/) {
 				return if $opt{'ignore-localhost'} and
@@ -656,8 +656,8 @@ sub process_line($)
 				event($time, 'bounced');
 			}
 		}
-		elsif($prog eq 'smtpd') {
-			if($text =~ /^[0-9A-Z]+: client=(\S+)/) {
+		elsif($prog eq 'smtpd' or $prog eq 'postscreen') {
+			if($text =~ /^[0-9A-Za-z]+: client=(\S+)/) {
 				my $client = $1;
 				return if $opt{'ignore-localhost'} and
 					$client =~ /\[127\.0\.0\.1\]$/;
@@ -665,60 +665,60 @@ sub process_line($)
 					$client =~ /$opt{'ignore-host'}/oi;
 				event($time, 'received');
 			}
-			elsif($opt{'virbl-is-virus'} and $text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using virbl.dnsbl.bit.nl/) {
+			elsif($opt{'virbl-is-virus'} and $text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 554.* blocked using virbl.dnsbl.bit.nl/) {
 				event($time, 'virus');
 				event($time, 'rejected');
 			}
-			elsif($opt{'rbl-is-spam'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 554.* blocked using/) {
+			elsif($opt{'rbl-is-spam'} and $text    =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 554.* blocked using/) {
 				event($time, 'spam');
 				event($time, 'rejected');
 			}
-			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*[Gg]reylist(ed|ing)?/) {
+			elsif($opt{'greylist'} and $text    =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: [^:]*: 450 .* Recipient address rejected: .*[Gg]reylist(ed|ing)?/) {
 				event($time, 'greylist');
 			}
-			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
+			elsif($opt{'helo'} and $text    =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 504.*Helo command rejected: need fully-qualified hostname/) {
 				event($time, 'helo');
 				event($time, 'rejected');
 			}
-			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 55\d.*(Sender|Recipient) address rejected: Please see (www.openspf.org|.*spf)/) {
+			elsif($opt{'spf'} and $text    =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 55\d.*(Sender|Recipient) address rejected: Please see (www.openspf.org|.*spf)/) {
 				event($time, 'spf');
 				event($time, 'rejected');
 			}
-			elsif($opt{'domain-not-found'} and $text    =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: Domain not found/) {
+			elsif($opt{'domain-not-found'} and $text    =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: Domain not found/) {
 				event($time, 'dnf');
 				event($time, 'rejected');
 			}
 			# Verify stuff
-			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: unverified address: /) {
+			elsif($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 450.*Sender address rejected: unverified address: /) {
 				event($time, 'vrfytmp');
 				event($time, 'rejected');
 			}
-			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 550.*Sender address rejected: undeliverable address: /) {
+			elsif($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 550.*Sender address rejected: undeliverable address: /) {
 				event($time, 'vrfyrjt');
 				event($time, 'rejected');
 			}
-			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: 450.*Recipient address rejected: Policy Rejection/) {
+			elsif ($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: 450.*Recipient address rejected: Policy Rejection/) {
 				event($time, 'policydbl');
 				event($time, 'rejected');
 			}
 			# Policyd-weight
-			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Mail appeared to be SPAM or forged. Ask your Mail\/DNS-Administrator to correct HELO and DNS MX settings or to get removed from DNSBLs/) {
+			elsif ($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Mail appeared to be SPAM or forged. Ask your Mail\/DNS-Administrator to correct HELO and DNS MX settings or to get removed from DNSBLs/) {
 				event($time, 'policydbl');
 				event($time, 'rejected');
 			}
-			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Your MTA is listed in too many DNSBLs/) {
+			elsif ($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: Your MTA is listed in too many DNSBLs/) {
 				event($time, 'policydbl');
 				event($time, 'rejected');
 			}
-			elsif ($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: temporarily blocked because of previous errors - retrying too fast/) {
+			elsif ($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: .*: [45]50.*Sender address rejected: temporarily blocked because of previous errors - retrying too fast/) {
 				event($time, 'policydbl');
 				event($time, 'rejected');
 			}
 			# default reject
-			 elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?reject: /) {
+			 elsif($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?reject: /) {
 				event($time, 'rejected');
 			}
-			elsif($text =~ /^(?:[0-9A-Z]+: |NOQUEUE: )?milter-reject: /) {
+			elsif($text =~ /^(?:[0-9A-Za-z]+: |NOQUEUE: )?milter-reject: /) {
 				if($text =~ /Blocked by SpamAssassin/) {
 					event($time, 'spam');
 				}
@@ -733,7 +733,7 @@ sub process_line($)
 			}
 		}
 		elsif($prog eq 'cleanup') {
-			if($text =~ /^[0-9A-Z]+: (?:reject|discard): /) {
+			if($text =~ /^[0-9A-Za-z]+: (?:reject|discard): /) {
 				event($time, 'rejected');
 			}
 		}

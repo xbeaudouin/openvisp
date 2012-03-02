@@ -1,3 +1,20 @@
+1.04
+----
+* Multiple Postfix instances support
+  syslog starting with postfix may be extented by "-instancename"
+  logging: postfix/cleanup <-> postfix-incomming/cleanup
+* Long queue IDs for Postfix 2.9
+* Multiple smtpd instances + postscreen
+  It's usefull to distinguish smtpd on differents ports by adding
+  -o syslog_name="postfix/submission" to the master.cf entry to the submission
+  smtpd. Also Postscreen may takeover jobs done former by smtpd
+  logging : postfix/smtpd <-> postfix/submission/smtpd
+            postfix/smtpd <-> postfix/postscreen
+
+  All these 3 modifications are from Andreas Schulze from mailgraph mailing 
+  list.
+  
+
 1.03
 ----
 * Rejected mail now are updated in totality (eg vrfy rejection IS a rejection).
