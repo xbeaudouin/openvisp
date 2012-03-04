@@ -1,3 +1,7 @@
+<?php
+  if ( isset($SESSID_USERNAME)){
+?>
+
 <script>
 
 YUI().use("node-menunav", function(Y) {
@@ -24,6 +28,9 @@ YUI().use("node-menunav", function(Y) {
 
 
 <?php
+
+}
+
 if( (preg_match('/\blogin.php\b/', $_SERVER['SCRIPT_NAME'])) || (preg_match('/\bmain.php\b/', $_SERVER['SCRIPT_NAME'])) )
 {
   print "<div class=\"submenu\">";
