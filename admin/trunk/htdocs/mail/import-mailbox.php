@@ -32,6 +32,8 @@ $SESSID_USERNAME = check_user_session ();
 $list_domains = list_local_domains_for_admin ($SESSID_USERNAME);
 $overview2 = "YES";
 
+$body_class = 'class="yui3-skin-sam"';
+
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
 

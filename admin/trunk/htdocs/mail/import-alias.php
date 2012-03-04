@@ -33,6 +33,7 @@ $user_info->fetch_info($SESSID_USERNAME);
 
 $domain_info = new DOMAIN($ovadb);
 
+$body_class = 'class="yui3-skin-sam"';
 //$list_domains = list_local_domains_for_admin ($SESSID_USERNAME);
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")

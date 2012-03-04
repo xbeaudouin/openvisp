@@ -43,7 +43,7 @@ $user_info->fetch_active_domains();
 $domain_info = new DOMAIN($ovadb);
 
 $user_info->fetch_quota_status();
-
+$body_class = 'class="yui3-skin-sam"';
 
 //$list_domains = list_local_domains_for_admin ($SESSID_USERNAME);
 $overview2 = "YES";
