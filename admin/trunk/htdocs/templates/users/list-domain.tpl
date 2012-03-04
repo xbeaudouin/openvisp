@@ -42,6 +42,4 @@ $ajax_domain->end();
 
   print "<p />\n";
 
-}
-
 ?>
