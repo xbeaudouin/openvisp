@@ -1,4 +1,4 @@
-<div id="menu">
+<div id="menu"></div>
 <?php
 	 if ( isset($template) && ($template == "edit-filter.tpl" || $template == "list-filter.tpl" || $template == "add-filter.tpl") ){
 ?>
