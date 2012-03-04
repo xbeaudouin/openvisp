@@ -260,3 +260,17 @@ img.png {
 img.png_main {
 	behavior: url(../lib/png_main.htc);
 }
+
+.yui3-skin-sam .yui3-menu-horizontal .yui3-menu-content {
+  line-height:2 !important ;
+}
+
+.menu_domain_input {
+ padding:3px;
+ border:0px solid #F5C5C5;
+ text-align:center;
+ border-radius:5px;
+ width:200px;
+ box-shadow:1px 1px 2px #C0C0C0 inset;
+ }
+}
