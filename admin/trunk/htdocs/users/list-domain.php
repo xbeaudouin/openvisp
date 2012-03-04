@@ -49,7 +49,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
 
   $ajax_domain = new AJAX_YUI($ovadb);
 
-  $item_list = array(
+  $item_list_domain = array(
     "domain" => array(
       "label" => "'".$PALANG['pAdminList_domain_domain']."'",
       "parser" => "'"."text"."'"
@@ -127,7 +127,36 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     ),
   );
 
+  $item_list_domain_alias = array(
+    "domain_alias" => array(
+      "label" => "'".$PALANG['pAdminList_domain_domain']."'",
+      "parser" => "'"."text"."'"
+    ),
+    "domain" => array(
+      "label" => "'".$PALANG['pAdminList_domain_alias_aliasto']."'",
+      "parser" => "'"."text"."'"
+    ),
+    "modified" => array(
+      "label" => "'".$PALANG['pAdminList_domain_modified']."'",
+      "parser" => "'"."text"."'",
+      "sortable" => "false"
+    ),
+    "active" => array(
+      "label" => "'".$PALANG['pAdminList_domain_active']."'",
+      "parser" => "'"."text"."'",
+      "sortable" => "false"
+    ),
+    "delete" => array(
+      "label" => "'"."delete"."'",
+      "sortable" => "false",
+      "resizeable" => "false",
+      "link" => "'"."/ajax/domain/manage_domain.php"."'",
+      "url_param" => "'"."action=delete"."'",
+      "key_item" => "'"."domain"."'"
+    ),
 
+  );
+  
   $ajax_info = array(
     "url" => "../ajax/domain/domain_list.php",
     "method" => "get",
@@ -136,11 +165,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     "name" => "domain_list",
     "params" => array (
       "startIndex" => "0",
-      "results" => "100",
+      "results" => "10",
       "sort" => "domain",
       "sortdir" => "asc"
     )  ,
-    "item_list" => $item_list,
+    "item_list" => $item_list_domain,
   );
 
   $ajax_info2 = array(
@@ -152,10 +181,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     "params" => array (
       "startIndex" => "0",
       "results" => "10",
-      "sort" => "domain",
-      "sortdir" => "asc"
+      "sort" => "dalias",
+      "sortdir" => "asc",
+      "domain_alias" => "1"
     ),
-    "item_list" => $item_list,
+    "item_list" => $item_list_domain_alias,
   );
 
 /*
@@ -179,20 +209,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
   $ajax_domain->create_datasource($ajax_info2);
   $ajax_domain->create_datatable($ajax_info2);
 
-
-
-  $fUsername = $SESSID_USERNAME;
-
-   if ($fUsername != NULL)
-   {
-
-      $list_domains_alias = list_domains_alias_for_admin ($fUsername);
-      if ((is_array ($list_domains_alias) and sizeof ($list_domains_alias) > 0))
-         for ($i = 0; $i < sizeof ($list_domains_alias); $i++)
-         {
-            $domain_alias_properties[$i] = get_domain_alias_properties ($list_domains_alias[$i]['dalias']);
-         }
-   }
 
    $body_class = 'class="yui3-skin-sam"';
 

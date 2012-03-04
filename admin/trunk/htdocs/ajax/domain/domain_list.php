@@ -34,62 +34,85 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET" ){
 
   $fDomain = get_get('domain');
   $fMethod = get_get('method');
-  $fDir = get_get('dir');
+  $fDir = get_get('sortdir');
   $fResults = get_get('results');
   $fSort = get_get('sort');
   $fStartIndex =  get_get('startIndex');
+  $fDomainAlias = get_get('domain_alias');
 
   if ( $fStartIndex == NULL ) { $fStartIndex = 0;}
   if ( $fResults == NULL ) { $fResults = 10;}
 
 
-  $user_info->fetch_quota_status();
 
-  $user_info->fetch_domains($fDomain, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);    
-
-  $json_array['totalRecords'] = $user_info->data_managed['domains'];
   $json_array['startIndex'] = intval($fStartIndex);
-  $json_array['recordsReturned'] = $user_info->total_managed_domain;
   $json_array['sort'] = $fSort;
   $json_array['dir'] = $fDir;
   $json_array['pageSize'] = intval($fResults);
+
+
+
+  $user_info->fetch_quota_status();
+  if ( $fDomainAlias == "1"){
+    $user_info->fetch_domains_aliases($fDomain, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
+    $json_array['recordsReturned'] = $user_info->total_managed_domain_alias;
+    $json_array['totalRecords'] = $user_info->data_managed['domains_alias'];
+    
+    for ( $i=0; $i < $user_info->total_managed_domain_alias; $i++){
+      $json_data_array[] = array(
+        'domain_alias' => $user_info->data_managed_domain_alias[$i]['dalias'],
+        'domain' => $user_info->data_managed_domain_alias[$i]['domain'],
+        'modified' => $user_info->data_managed_domain_alias[$i]['modified'],
+        'active' => $user_info->data_managed_domain_alias[$i]['active'],
+        'delete' => 'delete'
+      );
+    }
+    
+  }
+  else{
+    $user_info->fetch_domains($fDomain, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
+    $json_array['recordsReturned'] = $user_info->total_managed_domain;
+    $json_array['totalRecords'] = $user_info->data_managed['domains'];  
+    
+    for ( $i=0; $i < $user_info->total_managed_domain; $i++){
+
+      $domain_info->fetch_by_domainname($user_info->data_managed_domain[$i]['domain']);
+
+      $json_data_array[] = array(
+        'domain' => $domain_info->data_domain['domain'],
+        'description' => $domain_info->data_domain['description'], 
+        'aliases' => $domain_info->used_quota['aliases'],
+        'quota_aliases' => ($domain_info->quota['aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['aliases'],
+        'aliases_w_quota' => ($domain_info->data_domain['backupmx'] == 1) ? "" : $domain_info->used_quota['aliases']."/".(($domain_info->quota['aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['aliases']),
+        'mails' => $domain_info->used_quota['mailboxes'],
+        'quota_mails' => ($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes'],
+        'mails_w_quota' => ($domain_info->data_domain['backupmx'] == 1) ? "" : $domain_info->used_quota['mailboxes']."/".(($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes']),
+        'backupmx' => ($domain_info->data_domain['backupmx'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+        'ftp' => $domain_info->used_quota['ftpaccount'],
+        'quota_ftp' => ($domain_info->quota['ftp_account'] == "-1" ) ? "&infin;" : $domain_info->quota['ftp_account'],
+        'ftp_w_quota' => $domain_info->used_quota['ftpaccount']."/".(($domain_info->quota['ftp_account'] == "-1" ) ? "&infin;" : $domain_info->quota['ftp_account']),
+        'web' => $domain_info->used_quota['http'],
+        'quota_web' => ($domain_info->quota['whost_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['whost_quota'],
+        'web_w_quota' => $domain_info->used_quota['http']."/".(($domain_info->quota['whost_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['whost_quota']),
+        'databases' => $domain_info->used_quota['db'],
+        'quota_databases' => ($domain_info->quota['db_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['db_quota'],
+        'databases_w_quota' => $domain_info->used_quota['db']."/".(($domain_info->quota['db_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['db_quota']),
+        'state' => $domain_info->data_domain['status'],
+        'active'  => ($domain_info->data_domain['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+        'paid'  => ($domain_info->data_domain['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
+        'modified' => $domain_info->data_domain['modified'],
+        'delete' => "delete",
+        'edit' => "<a href=\"edit-domain.php?domain=".urlencode($domain_info->data_domain['domain'])."\">".$PALANG['edit']."</a>"
+      );
+    }
+    
+  }
+
+
   
 
 
 //  for ( $i=0; $i < sizeof($user_info->data_managed_domain); $i++){
-  for ( $i=0; $i < $user_info->total_managed_domain; $i++){
-  
-
-    $domain_info->fetch_by_domainname($user_info->data_managed_domain[$i]['domain']);
-    //$mail_alias = 
-
-    $json_data_array[] = array(
-                               'domain' => $domain_info->data_domain['domain'],
-                               'description' => $domain_info->data_domain['description'], 
-                               'aliases' => $domain_info->used_quota['aliases'],
-                               'quota_aliases' => ($domain_info->quota['aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['aliases'],
-                               'aliases_w_quota' => ($domain_info->data_domain['backupmx'] == 1) ? "" : $domain_info->used_quota['aliases']."/".(($domain_info->quota['aliases'] == "-1" ) ? "&infin;" : $domain_info->quota['aliases']),
-                               'mails' => $domain_info->used_quota['mailboxes'],
-                               'quota_mails' => ($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes'],
-                               'mails_w_quota' => ($domain_info->data_domain['backupmx'] == 1) ? "" : $domain_info->used_quota['mailboxes']."/".(($domain_info->quota['mailboxes'] == "-1" ) ? "&infin;" : $domain_info->quota['mailboxes']),
-                               'backupmx' => ($domain_info->data_domain['backupmx'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-                               'ftp' => $domain_info->used_quota['ftpaccount'],
-                               'quota_ftp' => ($domain_info->quota['ftp_account'] == "-1" ) ? "&infin;" : $domain_info->quota['ftp_account'],
-                               'ftp_w_quota' => $domain_info->used_quota['ftpaccount']."/".(($domain_info->quota['ftp_account'] == "-1" ) ? "&infin;" : $domain_info->quota['ftp_account']),
-                               'web' => $domain_info->used_quota['http'],
-                               'quota_web' => ($domain_info->quota['whost_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['whost_quota'],
-                               'web_w_quota' => $domain_info->used_quota['http']."/".(($domain_info->quota['whost_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['whost_quota']),
-                               'databases' => $domain_info->used_quota['db'],
-                               'quota_databases' => ($domain_info->quota['db_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['db_quota'],
-                               'databases_w_quota' => $domain_info->used_quota['db']."/".(($domain_info->quota['db_quota'] == "-1" ) ? "&infin;" : $domain_info->quota['db_quota']),
-                               'state' => $domain_info->data_domain['status'],
-                               'active'  => ($domain_info->data_domain['active'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-                               'paid'  => ($domain_info->data_domain['paid'] == 0) ? $PALANG['NO'] : $PALANG['YES'],
-                               'modified' => $domain_info->data_domain['modified'],
-                               'delete' => "delete",
-                               'edit' => "<a href=\"edit-domain.php?domain=".urlencode($domain_info->data_domain['domain'])."\">".$PALANG['edit']."</a>"
-                               );
-  }
 
 
   

@@ -95,6 +95,54 @@ class USER
 
 	}
 
+  //
+  // function fetch_domains_aliases
+  // This function list the domain, redirected to another one, associated with the user account
+  // Call fetch_domains()
+  
+  function fetch_domains_aliases($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
+  {
+    if ( $this->rights['manage'] == 1 )
+      {
+        $query = "SELECT domain_alias.dalias, domain_alias.domain_id, domain_alias.modified, domain_alias.active, domain.domain
+          FROM domain_alias, domain
+          WHERE domain_alias.domain_id = domain.id
+        ";
+      }
+    else
+      {
+
+        $query = "SELECT domain_alias.dalias, domain_alias.domain_id, domain_alias.modified, domain_alias.active, domain.domain
+          FROM domain_alias, domain_admins
+          WHERE domain_admins.accounts_id = ".$this->data['id']."
+          AND domain_admins.domain_id=domain_alias.domain_id
+          AND domain_alias.domain_id=domain.id
+      ";
+      }
+
+    if ( $search_param != NULL ){
+      $query .= "AND domain_alias.dalias like '".$search_param."%' ";
+    }
+    
+    if ( $order_by_field == NULL ){
+      $query .= "ORDER BY domain_alias.dalias ";
+    }
+    else {
+      $query .= "ORDER BY $order_by_field $order_dir ";
+    }
+
+    if ( $result_limit != NULL ){
+      $query .= "LIMIT $result_limit ";
+    }
+
+    $result = $this->db_link->sql_query($query);
+
+    $this->data_managed_domain_alias = $result['result'];
+    $this->total_managed_domain_alias = $result['rows'];
+
+  }
+
+
 	function fetch_active_domains($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
 	{
 		if ( $this->rights['manage'] == 1 )
@@ -273,7 +321,10 @@ class USER
 	    $result = $this->db_link->sql_query($query);
 	    $this->data_managed['domains'] = $result['result'][0]['count_domain'];
 
-			$query = "SELECT ";
+	    $query = "SELECT COUNT(domain_alias.id) AS count_domain_alias FROM domain_alias";
+	    $result = $this->db_link->sql_query($query);
+	    $this->data_managed['domains_alias'] = $result['result'][0]['count_domain_alias'];
+
 	    
 	  }
 		else{
@@ -281,6 +332,11 @@ class USER
 			if ( !isset($this->total_managed_domain)) {
 				$this->fetch_domains();
 			}
+
+			if ( !isset($this->total_managed_domain_aliases)) {
+				$this->fetch_domains_aliases();
+			}
+
 
 			$this->data_managed['domains'] = $this->total_managed_domain;
 			
