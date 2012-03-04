@@ -133,13 +133,32 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     "method" => "get",
     "table_summary" => "List of domains",
     "table_caption" => "List of domains",
+    "name" => "domain_list",
     "params" => array (
       "startIndex" => "0",
-      "results" => "100"
-    )
+      "results" => "100",
+      "sort" => "domain",
+      "sortdir" => "asc"
+    )  ,
+    "item_list" => $item_list,
   );
 
+  $ajax_info2 = array(
+    "url" => "../ajax/domain/domain_list.php",
+    "method" => "get",
+    "table_summary" => "List of domains aliased",
+    "table_caption" => "List of domains aliased",
+    "name" => "domain_alias_list",
+    "params" => array (
+      "startIndex" => "0",
+      "results" => "10",
+      "sort" => "domain",
+      "sortdir" => "asc"
+    ),
+    "item_list" => $item_list,
+  );
 
+/*
   $ajax_domain->ajax_info($ajax_info);
   $ajax_domain->attr_add('root','records');
   $ajax_domain->attr_add('sort','domain');
@@ -149,12 +168,16 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
   $ajax_domain->attr_add('data_div','domain');
   $ajax_domain->attr_add('nav_div','domain-nav');
   $ajax_domain->item_add($item_list);
-
+*/
 
   $ajax_domain->start("domain");
   //$ajax_domain->create_listener();
-  $ajax_domain->create_datasource();
-  $ajax_domain->create_datatable();
+  $ajax_domain->create_datasource($ajax_info);
+  $ajax_domain->create_datatable($ajax_info);
+
+
+  $ajax_domain->create_datasource($ajax_info2);
+  $ajax_domain->create_datatable($ajax_info2);
 
 
 

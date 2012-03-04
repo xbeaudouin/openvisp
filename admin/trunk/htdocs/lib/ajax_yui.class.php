@@ -193,7 +193,7 @@ YUI().use(";
   */
   
 
-  function create_datasource(){
+  function create_datasource($ds_param){
     $this->load_yui_lib("datasource-io");
     $this->load_yui_lib("datasource-jsonschema");
     $this->load_yui_lib("gallery-paginator");
@@ -201,8 +201,8 @@ YUI().use(";
     $this->buffer .= "\n\n";
 
     $add_request = "";
-    if ( isset($this->ajax_info['params']) && gettype($this->ajax_info['params']) == "array" ){
-      foreach ( $this->ajax_info['params'] as $key => $value ){
+    if ( isset($ds_param['params']) && gettype($ds_param['params']) == "array" ){
+      foreach ( $ds_param['params'] as $key => $value ){
         if ( $add_request != "" ){ $add_request .= "&";}
         $add_request .= "$key=$value";
       }
@@ -211,9 +211,9 @@ YUI().use(";
 
     $this->buffer .= "
 
-  function sendRequest_".$this->name."(){
-    table_".$this->name.".datasource.load({
-      request: \"".$add_request."&startIndex=\"+".$this->name."_pg.getStartIndex() + \"&results=\" + ".$this->name."_pg.getRowsPerPage()
+  function sendRequest_".$ds_param['name']."(){
+    table_".$ds_param['name'].".datasource.load({
+      request: \"".$add_request."&startIndex=\"+".$ds_param['name']."_pg.getStartIndex() + \"&results=\" + ".$ds_param['name']."_pg.getRowsPerPage()
     })
 
   }
@@ -221,9 +221,9 @@ YUI().use(";
 
     $this->buffer .= "\n\n";
 
-    $this->buffer .= "  var DS_".$this->name." = new Y.DataSource.IO({source:\"".$this->ajax_info['url']."?\", ioConfig: { method: '".$this->ajax_info['method']."'}});
+    $this->buffer .= "  var DS_".$ds_param['name']." = new Y.DataSource.IO({source:\"".$ds_param['url']."?\", ioConfig: { method: '".$ds_param['method']."'}});
 
-  DS_".$this->name.".plug(Y.Plugin.DataSourceJSONSchema, {
+  DS_".$ds_param['name'].".plug(Y.Plugin.DataSourceJSONSchema, {
     schema: {
       resultListLocator: \"records\",
       metaFields: {
@@ -232,7 +232,7 @@ YUI().use(";
       resultFields: [\n";
 
     $boucle=1;
-    foreach ($this->item_list as $item => $attributes) {
+    foreach ($ds_param['item_list'] as $item => $attributes) {
 
       if ( preg_match("/children.*/", $item) ){
         $item = "children";
@@ -261,7 +261,7 @@ YUI().use(";
             if ( isset($attributes['parser']) ) { $this->buffer .= ', parser:'.$attributes['parser'];}
             $this->buffer .= '}';
 
-            if ( $boucle < sizeof($this->item_list)){
+            if ( $boucle < sizeof($ds_param['item_list'])){
               $this->buffer .= ",\n";
             }
 
@@ -296,31 +296,31 @@ YUI().use(";
 
 		$this->buffer .= "
 
-	var ".$this->name."_pg = new Y.Paginator(
+	var ".$ds_param['name']."_pg = new Y.Paginator(
 	{
-		rowsPerPage: ".$this->ajax_info['params']['results'].",
+		rowsPerPage: ".$ds_param['params']['results'].",
 		rowsPerPageOptions: [1,2,5,10,25,50,100],
 		template: '{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} <span class=\"pg-rpp-label\">Rows per page:</span> {RowsPerPageDropdown}'
 	});
-	".$this->name."_pg.render('#".$this->name."-nav');
+	".$ds_param['name']."_pg.render('#".$ds_param['name']."-nav');
 
-	function updatePaginator(state)
+	function updatePaginator_".$ds_param['name']."(state)
 	{
 		this.setPage(state.page, true);
 		this.setRowsPerPage(state.rowsPerPage, true);
 		this.setTotalRecords(state.totalRecords, true);
-		sendRequest_".$this->name."();
+		sendRequest_".$ds_param['name']."();
 	}
-	".$this->name."_pg.on('changeRequest', updatePaginator, ".$this->name."_pg);
+	".$ds_param['name']."_pg.on('changeRequest', updatePaginator_".$ds_param['name'].", ".$ds_param['name']."_pg);
 
-	DS_".$this->name.".on('response', function(e)
+	DS_".$ds_param['name'].".on('response', function(e)
 	{
-		".$this->name."_pg.setTotalRecords(e.response.meta.totalRecords, true);
-		".$this->name."_pg.render();
+		".$ds_param['name']."_pg.setTotalRecords(e.response.meta.totalRecords, true);
+		".$ds_param['name']."_pg.render();
 	});
 
-//        startIndex: ".$this->name."_pg.getStartIndex(),
-//       resultCount: ".$this->name."_pg.getRowsPerPage(),
+//        startIndex: ".$ds_param['name']."_pg.getStartIndex(),
+//       resultCount: ".$ds_param['name']."_pg.getRowsPerPage(),
 
 ";
 
@@ -334,16 +334,16 @@ YUI().use(";
   you must link the table with a datasource.
 */
 
-  function create_datatable(){
+  function create_datatable($dt_param){
     $this->load_yui_lib("datatable-datasource");
 
 
 		//    $this->buffer .= "Colset_".$this->name." = new Y.Columnset({defintions:Nestedcolset_".$this->name."});";
-    $this->buffer .="  var table_".$this->name." = new Y.DataTable({\n
+    $this->buffer .="  var table_".$dt_param['name']." = new Y.DataTable({\n
     columns: [\n";
 
     $boucle=1;
-    foreach ($this->item_list as $item => $attributes){
+    foreach ($dt_param['item_list'] as $item => $attributes){
 
       if ( !isset($attributes['display']) ) { $attributes['display'] = TRUE;}
       
@@ -396,7 +396,7 @@ YUI().use(";
 
             $this->buffer .= "\n        ]\n";
             $this->buffer .= "      }";
-            if ( $boucle < sizeof($this->item_list) -1 ){
+            if ( $boucle < sizeof($dt_param['item_list']) -1 ){
               $this->buffer .= ",\n";
             }
             else {$this->buffer .= ",";}
@@ -414,7 +414,7 @@ YUI().use(";
                 $this->buffer .= "$att_key:$att_value,\n";
               }
               $this->buffer .= "      }\n";
-              if ( $boucle < sizeof($this->item_list) ){
+              if ( $boucle < sizeof($dt_param['item_list']) ){
                 $this->buffer .= ",\n";
               }
 
@@ -430,24 +430,24 @@ YUI().use(";
 */
     $this->buffer .="
     ],\n
-    summary: \"".$this->ajax_info['table_summary']."\",
-    caption: \"".$this->ajax_info['table_caption']."\"
+    summary: \"".$dt_param['table_summary']."\",
+    caption: \"".$dt_param['table_caption']."\"
     });
     ";
 
     $add_request = "";
-    if ( isset($this->ajax_info['params']) && gettype($this->ajax_info['params']) == "array" ){
-      foreach ( $this->ajax_info['params'] as $key => $value ){
+    if ( isset($dt_param['params']) && gettype($dt_param['params']) == "array" ){
+      foreach ( $dt_param['params'] as $key => $value ){
         if ( $add_request != "" ){ $add_request .= "&";}
         $add_request .= "$key=$value";
       }
     }
 
     $this->buffer .= "\n";
-    $this->buffer .= "table_".$this->name.".plug(Y.Plugin.DataTableDataSource, { datasource: DS_".$this->name." });\n";
-    $this->buffer .= "table_".$this->name.".datasource.load({ request: \"startIndex=0&results=10&$add_request\" })\n";
-    $this->buffer .= "DS_".$this->name.".after(\"response\", function(){ table_".$this->name.".render(\"#".$this->name."\") });";
-    $this->buffer .= "table_".$this->name.".render(\"#".$this->name."\");\n";
+    $this->buffer .= "table_".$dt_param['name'].".plug(Y.Plugin.DataTableDataSource, { datasource: DS_".$dt_param['name']." });\n";
+    $this->buffer .= "table_".$dt_param['name'].".datasource.load({ request: \"startIndex=0&results=10&$add_request\" })\n";
+    $this->buffer .= "DS_".$dt_param['name'].".after(\"response\", function(){ table_".$dt_param['name'].".render(\"#".$dt_param['name']."\") });";
+    $this->buffer .= "table_".$dt_param['name'].".render(\"#".$dt_param['name']."\");\n";
     $this->buffer .= "\n";
 
   }

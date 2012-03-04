@@ -25,12 +25,14 @@ if ( $domain_overquota == 1 ){
 <br/>
 <br/>
 
-<div id="domain-nav"></div>
-<div id="domain"></div>
+<div id="domain_list-nav"></div>
+<div id="domain_list"></div>
 
 <br/>
 <br/>
 
+<div id="domain_alias_list-nav"></div>
+<div id="domain_alias_list"></div>
 
 
 <p />
