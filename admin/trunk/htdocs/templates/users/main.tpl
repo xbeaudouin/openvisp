@@ -1,15 +1,23 @@
 <div id="toppage">
 <div class="menu"><?php print $PALANG['main_welcome'] . " (". $SESSID_USERNAME . ")"; ?></div>
 <br />
+<?php 
+
+
+$ajax_domain->end();
+
+?>
 <table class="main">
 <tr>
 <?php
+//print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
+
 
 if(check_mail_admin($SESSID_USERNAME,"1"))
   {
-		print "<td><a target=\"_top\" href=\"../mail/overview.php\"><img src=\"../images/ico-email.png\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
+    print "<td><a target=\"_top\" href=\"../mail/overview.php\"><img src=\"../images/ico-email.png\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
 		print "<td><a target=\"_top\" href=\"../mail/overview.php\">" . $PALANG['pMainMain_mail_admin'] . "</td>\n";
-		print "</tr>";
+    print "</tr>";
 
 
 		if( check_policyhosting() )
