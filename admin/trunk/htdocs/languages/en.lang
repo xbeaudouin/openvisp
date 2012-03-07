@@ -1091,6 +1091,26 @@ $PALANG['pGeneric_left'] = 'Left';
 
 $PALANG['pYMenu_welcome'] = 'Welcome';
 $PALANG['pYMenu_mail'] = 'Mail';
-$PALANG['pYMenu_ova'] = 'OpenVisp'
+$PALANG['pYMenu_mail_overview'] = 'Mail Overview';
+$PALANG['pYMenu_mail_add_mbox'] = 'Add a new mailbox';
+$PALANG['pYMenu_mail_add_alias'] = 'Add a new alias';
+$PALANG['pYMenu_mail_domain_details'] = 'Mails details for current domain';
+$PALANG['pYMenu_mail_import'] = 'Import Mailboxes / Aliases';
+$PALANG['pYMenu_mail_pdf'] = 'PDF Overall mailbox details';
+$PALANG['pYMenu_mail_filter'] = 'Personnal Mailbox Filters';
+$PALANG['pYMenu_mail_ooo'] = 'Personnal OutofOffice';
+$PALANG['pYMenu_ova'] = 'OpenVisp';
+$PALANG['pYMenu_domain'] = 'Domain';
+$PALANG['pYMenu_domain_overview'] = 'Domain overview';
+$PALANG['pYMenu_domain_add'] = 'Add a new Domain';
+$PALANG['pYMenu_hosting_overview'] = 'Mail Overview';
+$PALANG['pYMenu_hosting_add_www'] = 'Add a new webhosting';
+$PALANG['pYMenu_hosting_add_ftp'] = 'Add a new ftp account';
+$PALANG['pYMenu_hosting_add_db'] = 'Add a new DB';
+$PALANG['pYMenu_hosting_domain_details'] = 'Hosting details for current domain';
+$PALANG['pYMenu_hosting_import'] = 'Import webosting / ftp Account / db ';
+$PALANG['pYMenu_hosting_pdf'] = 'PDF Overall hosting details';
+
+
 
 ?>

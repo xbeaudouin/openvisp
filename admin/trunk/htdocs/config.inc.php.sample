@@ -22,6 +22,10 @@ if (preg_match ("/config\.inc\.php/", $_SERVER['PHP_SELF']))
 // To help SQL debug
 $CONF['SQL_DEBUG'] = 'NO';
 
+// To help YUI Debug
+$CONF['YUI_DEBUG'] = 'NO';
+
+
 // Language config
 // Language files are located in './languages'.
 $CONF['default_language'] = 'en';

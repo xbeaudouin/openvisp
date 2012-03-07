@@ -23,7 +23,8 @@
         print load_js ("../lib/yui/yui/yui.js");
       }
       else{
-        print load_js ("../lib/yui/yui/yui-min.js");
+        //print load_js ("../lib/yui/yui/yui-min.js");
+        print '<script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js" type="text/javascript"></script>';
       }
 
   ?>
