@@ -24,7 +24,6 @@ include ("../languages/" . check_language () . ".lang");
 require_once ("MDB2.php");
 require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
-
 require_once ("../lib/domain.class.php");
 require_once ("../lib/whost.class.php");
 
@@ -45,7 +44,7 @@ $userinfo->check_access("domain");
 
 $domain_info = new DOMAIN($ovadb);
 $userinfo->check_quota("domains");
-
+$body_class = 'class="yui3-skin-sam"';
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
