@@ -113,7 +113,7 @@ class USER
       {
 
         $query = "SELECT domain_alias.dalias, domain_alias.domain_id, domain_alias.modified, domain_alias.active, domain.domain
-          FROM domain_alias, domain_admins
+          FROM domain_alias, domain_admins, domain
           WHERE domain_admins.accounts_id = ".$this->data['id']."
           AND domain_admins.domain_id=domain_alias.domain_id
           AND domain_alias.domain_id=domain.id
@@ -370,15 +370,23 @@ class USER
 		return TRUE;
 	}
 
-	function check_domain_admin()
+	//
+	// check_domain_admin
+	// Action: Check if user is a domain admin or exit
+	// Call: check_domain_admin
+	//
+	function check_domain_admin($exit=1)
 	{
 	  if ( $this->rights['domain'] != 1) {
-	      session_unset ();
-	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
-	    
+	  		if ( $exit == 1 ){
+		      session_unset ();
+		      session_destroy ();
+		      header ("Location: ../login.php");
+		      exit;
+	  		}
+	  		return 0;
 	  }
+	  return 1;
 	}
 
 
