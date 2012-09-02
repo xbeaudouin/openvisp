@@ -16,7 +16,7 @@ print load_css("../css/datatable.css");
 
 if ( $domain_overquota == 1 ){
 	print $PALANG['pAdminList_domain_overquota']."<br>";
-	print "(".$total_used['domains']."/".$account_quota['domains'].")";
+	print "(".$user_info->data_managed['domains']."/".$user_info->data_quota['domains'].")";
  }
 
 ?>
