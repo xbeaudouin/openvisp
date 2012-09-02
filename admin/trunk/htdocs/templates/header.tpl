@@ -65,7 +65,7 @@
         $domain_overquota = 0;
 ?>
                 <li class="yui3-menuitem">
-                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>"><?php print $PALANG['pAdminMenu_create_domain'];?></a>
+                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>domain/create-domain.php"><?php print $PALANG['pAdminMenu_create_domain'];?></a>
                 </li>
 
                 <li class="yui3-menuitem">
@@ -90,6 +90,8 @@
 
 <?php
   }
+
+  if ( $user_info->check_domain_admin("0") ){
 ?>
 
         <!-- Mail Menu -->
@@ -148,6 +150,11 @@
           </div>
         </li>
 
+<?php
+    
+  }
+
+?>
 
         <!-- Hosting Menu -->
 
