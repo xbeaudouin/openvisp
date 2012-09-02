@@ -187,8 +187,11 @@ VALUES ('".$userinfo->data['id']."','$domain_id', '$domain', '".$userinfo->remot
 
 		$update_query .= " WHERE id='".$newdata['id']."'";
 
-		$result = $this->connect->query($update_query);
-
+		$result =& $this->connect->exec($update_query);
+		if (PEAR::isError($result)) {
+    	return ($result->getMessage());
+		}
+		return "1";
 	}
 
 	function __destruct() {
