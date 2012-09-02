@@ -30,6 +30,8 @@ $domain_info = new DOMAIN($ovadb);
 $json_data_array = array();
 $json_array = array();
 
+$user_info->fetch_quota_status();
+
 if ( $_SERVER['REQUEST_METHOD'] == "GET" ){
 
   $fDomain = get_get('domain');
@@ -51,8 +53,6 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET" ){
   $json_array['pageSize'] = intval($fResults);
 
 
-
-  $user_info->fetch_quota_status();
   if ( $fDomainAlias == "1"){
     $user_info->fetch_domains_aliases($fDomain, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
     $json_array['recordsReturned'] = $user_info->total_managed_domain_alias;
@@ -72,7 +72,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET" ){
   else{
     $user_info->fetch_domains($fDomain, "$fStartIndex,". ($fStartIndex + $fResults), $fSort, $fDir);
     $json_array['recordsReturned'] = $user_info->total_managed_domain;
-    $json_array['totalRecords'] = $user_info->data_managed['domains'];  
+    $json_array['totalRecords'] = $user_info->data_managed['domains']; //"20";#$user_info->data_managed['domains'];  
     
     for ( $i=0; $i < $user_info->total_managed_domain; $i++){
 
