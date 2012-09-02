@@ -1,6 +1,6 @@
 <?php
 //
-// File: import-domain.php
+// File: domain/import-domain.php
 //
 // Template File: admin_import-domain.tpl
 //
@@ -22,6 +22,24 @@ require ("../lib/functions.inc.php");
 require ("../lib/accounts.inc.php");
 include ("../languages/" . check_language () . ".lang");
 
+require_once ("MDB2.php");
+require_once ("../lib/db.class.php");
+require_once ("../lib/user.class.php");
+require_once ("../lib/domain.class.php");
+require_once ("../lib/whost.class.php");
+
+$SESSID_USERNAME = check_admin_session();
+$list_admins = list_admins();
+
+
+$ovadb = new DB();
+$user_info = new USER($ovadb);
+$user_info->fetch_info($SESSID_USERNAME);
+
+$user_info->check_domain_admin();
+$user_info->fetch_quota_status();
+
+
 $SESSID_USERNAME = check_admin_session();
 $list_admins = list_admins();
 
@@ -30,8 +48,10 @@ $account_information = get_account_info($SESSID_USERNAME);
 $account_quota = get_account_quota($account_information['id']);
 $total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
 
+$body_class = 'class="yui3-skin-sam"';
+
 include ("../templates/header.tpl");
-include ("../templates/users/menu.tpl");
+//include ("../templates/users/menu.tpl");
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 	{
