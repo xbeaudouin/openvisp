@@ -91,6 +91,7 @@ class USER
 		$result = $this->db_link->sql_query($query);
 
 		$this->data_managed_domain = $result['result'];
+//		$this->data_managed['domains'] = $result['rows'];
 		$this->total_managed_domain = $result['rows'];
 
 	}
@@ -138,6 +139,7 @@ class USER
     $result = $this->db_link->sql_query($query);
 
     $this->data_managed_domain_alias = $result['result'];
+    // $this->data_managed['domains_alias'] = $result['rows'];
     $this->total_managed_domain_alias = $result['rows'];
 
   }
@@ -338,10 +340,10 @@ class USER
 			}
 
 
-			$this->data_managed['domains'] = $this->total_managed_domain;
+			//$this->data_managed['domains'] = $this->total_managed_domain;
 			
-			$domain_info = $this->check_quota('aliases');
-			$domain_info = $this->check_quota('mailboxes');
+			//$domain_info = $this->check_quota('aliases');
+			//$domain_info = $this->check_quota('mailboxes');
 
 			
 		}
