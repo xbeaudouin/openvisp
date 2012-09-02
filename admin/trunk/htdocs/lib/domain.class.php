@@ -109,7 +109,7 @@ class DOMAIN
 	
 	//
 	// fetch_quota_status
-	// Action: fetch the quota consumned for a domain
+	// Action: fetch the quota consumned for current domain
 	// Call: fetch_quota_status ()
 	//
 	function fetch_quota_status()
