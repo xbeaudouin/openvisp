@@ -210,15 +210,16 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
   $ajax_domain->create_datatable($ajax_info2);
 
 
-   $body_class = 'class="yui3-skin-sam"';
+  $body_class = 'class="yui3-skin-sam"';
 
-   include ("../templates/header.tpl");
-//   include ("../templates/users/menu.tpl");
-   include ("../templates/users/list-domain.tpl");
-   include ("../templates/footer.tpl");
+  include ("../templates/header.tpl");
+  //include ("../templates/users/menu.tpl");
+  include ("../templates/users/list-domain.tpl");
+  include ("../templates/footer.tpl");
 }
 
-if ( ($_SERVER['REQUEST_METHOD'] == "POST") && (check_domain_admin($SESSID_USERNAME)) )
+/*
+if ( ($_SERVER['REQUEST_METHOD'] == "POST") && ($user_info->check_domain_admin()) )
 {
    $fUsername = get_post('fUsername');
 
@@ -246,4 +247,6 @@ if ( ($_SERVER['REQUEST_METHOD'] == "POST") && (check_domain_admin($SESSID_USERN
    include ("../templates/users/list-domain.tpl");
    include ("../templates/footer.tpl");
 }
+*/
+
 ?>
