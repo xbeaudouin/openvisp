@@ -14,21 +14,21 @@ $ajax_domain->end();
 
 
 if(check_mail_admin($SESSID_USERNAME,"1"))
-  {
-    print "<td><a target=\"_top\" href=\"../mail/overview.php\"><img src=\"../images/ico-email.png\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
-		print "<td><a target=\"_top\" href=\"../mail/overview.php\">" . $PALANG['pMainMain_mail_admin'] . "</td>\n";
-    print "</tr>";
+{
+  print "<td><a target=\"_top\" href=\"../mail/overview.php\"><img src=\"../images/ico-email.png\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
+	print "<td><a target=\"_top\" href=\"../mail/overview.php\">" . $PALANG['pMainMain_mail_admin'] . "</td>\n";
+  print "</tr>";
 
 
-		if( check_policyhosting() )
-			{
-				print "<tr>";
-				print "<td><a target=\"_top\" href=\"../mail/policyd.php\"><img src=\"../images/copwhite.gif\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
-				print "<td><a target=\"_top\" href=\"../mail/policyd.php\">" . $PALANG['pMainMain_policyd'] . "</td>\n";
-				print "</tr>";
-			}
+	if( check_policyhosting() )
+		{
+			print "<tr>";
+			print "<td><a target=\"_top\" href=\"../mail/policyd.php\"><img src=\"../images/copwhite.gif\" width=\"64\" height=\"64\" class=\"png_main\" border=\"0\"></a></td>";
+			print "<td><a target=\"_top\" href=\"../mail/policyd.php\">" . $PALANG['pMainMain_policyd'] . "</td>\n";
+			print "</tr>";
+		}
 
-  }
+}
 
 if ( check_domain_admin($SESSID_USERNAME) )
 {
