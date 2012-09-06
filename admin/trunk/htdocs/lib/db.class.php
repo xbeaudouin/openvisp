@@ -62,6 +62,9 @@ class DB
 	 
 	}
 
+	function __destruct() {
+	}
+
 
 	//
 	// sql_query
@@ -92,34 +95,36 @@ class DB
 			$result =& $this->connect->exec($query);
 		}
 
-		if ( $die_on_error == 1 && PEAR::isError($result) )
-			{
-			 die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . " // " . $result->getDebugInfo() . "<br/>Query on (".$this->sql_param['db_name']."/".$this->sql_param['db_host'].")<b>\"$query\"</b><br/>".$this->debug_text );
-			}
+		if ( $die_on_error == 1 && PEAR::isError($result) ){
+			die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . " // " . $result->getDebugInfo() . "<br/>Query on (".$this->sql_param['db_name']."/".$this->sql_param['db_host'].")<b>\"$query\"</b><br/>".$this->debug_text );
+		}
 
-		if ( $die_on_error == 2 && PEAR::isError($result) )
-			{
-				$return_code = "500"; 
-				//print ("<p />SQL Query Failed <br /> query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
-				$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\n<br/>Query :\n\"$query\"\n<br/>".$this->debug_text_txt."<br/>";
-				$sql_log .= "DB TYPE : ".$this->sql_param['db_type']."<br/>";
-				$sql_log .= "DB HOST : ".$this->sql_param['db_host']."<br/>";
-				$sql_log .= "DB NAME : ".$this->sql_param['db_name']."<br/>";
+		elseif ( $die_on_error == 2 && PEAR::isError($result) ){
+			$return_code = "500"; 
+			//print ("<p />SQL Query Failed <br /> query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+			$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\n<br/>Query :\n\"$query\"\n<br/>".$this->debug_text_txt."<br/>";
+			$sql_log .= "DB TYPE : ".$this->sql_param['db_type']."<br/>";
+			$sql_log .= "DB HOST : ".$this->sql_param['db_host']."<br/>";
+			$sql_log .= "DB NAME : ".$this->sql_param['db_name']."<br/>";
 
-			}
+			$number_rows = 0;
+			$row_results[] = "";
 
-		if (eregi ("^select", $query))
-			{ 
-				while (($row = $result->fetchRow()))
-					{	$row_results[] = $row; }
+		}
+		else{
+
+			if (eregi ("^select", $query)){ 
+				while (($row = $result->fetchRow())){
+					$row_results[] = $row;
+				}
 				$number_rows = $result->numRows();
 			}
-		else
-			{ 
+			else{ 
 				$row_results[] = "";
 				$number_rows = $result;
 			}
-		
+
+		}
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA ".$number_rows." result(s) \n"); }
 		
@@ -133,27 +138,28 @@ class DB
 
 	}
 
-	function log ($domain_id, $domain, $userinfo, $text, $data="")
-	{
 
-		global $CONF;
+// 	function log ($domain_id, $domain, $userinfo, $text, $data="")
+// 	{
 
-		if ( $CONF['logging'] == 'YES' )
-			{
-				$query = "INSERT INTO log (accounts_id, domain_id, domain_name, ip, action, data)
-VALUES ('".$userinfo->data['id']."','$domain_id', '$domain', '".$userinfo->remote_host."','$text','$data')";
+// 		global $CONF;
+
+// 		if ( $CONF['logging'] == 'YES' )
+// 			{
+// 				$query = "INSERT INTO log (accounts_id, domain_id, domain_name, ip, action, data)
+// VALUES ('".$userinfo->data['id']."','$domain_id', '$domain', '".$userinfo->remote_host."','$text','$data')";
 				
-				$result = $this->sql_query($query);
+// 				$result = $this->sql_query($query);
 
-				if ( PEAR::isError($result) )
-					{
-						die("Impossible d'ajouter la log");
-					}
+// 				if ( PEAR::isError($result) )
+// 					{
+// 						die("Impossible d'ajouter la log");
+// 					}
 
-		}
+// 		}
 
 
-	}
+// 	}
 
 
 	//
@@ -194,8 +200,39 @@ VALUES ('".$userinfo->data['id']."','$domain_id', '$domain', '".$userinfo->remot
 		return "1";
 	}
 
-	function __destruct() {
+
+	//
+	// db_log
+	// Action: Logs actions from admin
+	// Call: db_log (string action, string data, string domain2)
+	//
+	function db_log ($action,$data, $domain2=""){
+
+		global $CONF;
+		global $user_info;
+		global $domain_info;
+
+		$REMOTE_ADDR = $_SERVER['REMOTE_ADDR'];
+		//$username_id = get_admin_id($SESSID_USERNAME);
+		//$domain_id  =  get_domain_id($domain);
+
+		if ( $CONF['logging'] == 'YES' ){
+
+			$sql_query = "
+			INSERT INTO log (accounts_id, domain_id, domain_name, ip, action, data)
+			VALUES ('".$user_info->data['id']."','".$domain_info->data_domain['id']."', '$domain2', '$REMOTE_ADDR','$action','$data')
+			";
+
+			$result = db_query ($sql_query);
+			if ($result['result'] != 1){
+				return false;
+			}
+			else{
+				return true;
+			}
+		}
 	}
+
 
 
 }
