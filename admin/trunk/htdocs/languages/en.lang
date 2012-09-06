@@ -215,7 +215,7 @@ $PALANG['pCreate_domain_alias_text_error1'] = '<br><div class="standout">Please 
 $PALANG['pCreate_domain_alias_text_error2'] = '<br><div class="standout">This domain already exist in local domains</div>';
 $PALANG['pCreate_domain_alias_text_error3'] = '<br><div class="standout">This domains has been already added into domain aliases</div>';
 $PALANG['pCreate_domain_alias_result_error'] = '<div class="standout">Unable to add the domain alias into domain alias table!</div>';
-$PALANG['pCreate_domain_alias_result_succes'] = 'The domain alias has been added !';
+$PALANG['pCreate_domain_alias_result_success'] = 'The domain alias has been added !';
 
 $PALANG['pEdit_alias_welcome'] = 'Edit an alias for your domain.<br />One entry per line.';
 $PALANG['pEdit_alias_address'] = 'Alias';
@@ -1111,6 +1111,6 @@ $PALANG['pYMenu_hosting_domain_details'] = 'Hosting details for current domain';
 $PALANG['pYMenu_hosting_import'] = 'Import webosting / ftp Account / db ';
 $PALANG['pYMenu_hosting_pdf'] = 'PDF Overall hosting details';
 
-
+$PALANG['DB_Error'] = 'An error occured when trying to access DB / alter data<br/>\nPlease contact support';
 
 ?>
