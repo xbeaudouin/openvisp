@@ -251,11 +251,17 @@ class USER
 				}
 				$this->data_quota_used[$type] = 0;
 
-				for ( $i = 0; $i < $this->total_managed_domain; $i++ )
-					{
-						$domain_info->fetch_by_domainname($this->data_managed_domain[$i]['domain']);
-						$this->data_quota_used[$type] += $domain_info->used_quota[$type];
-					}
+
+				if ( $type != "domains" ){
+					for ( $i = 0; $i < $this->total_managed_domain; $i++ )
+						{
+							$domain_info->fetch_by_domainname($this->data_managed_domain[$i]['domain']);
+							$this->data_quota_used[$type] += $domain_info->used_quota[$type];
+						}					
+				}
+				else {
+					$this->data_quota_used[$type] = $this->total_managed_domain;
+				}
 
 			}
 		 
