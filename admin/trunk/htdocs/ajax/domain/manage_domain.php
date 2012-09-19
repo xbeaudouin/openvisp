@@ -45,33 +45,6 @@ $json_array = array();
 
 
 
-if ( $_SERVER['REQUEST_METHOD'] == "GET" ){
-
-//	$fAction = get_get('action');
-//  $fDomain = get_get('domain');
-//  if ($fDomain == NULL){}
-  // $fMethod = get_get('method');
-  // $fDir = get_get('sortdir');
-  // $fResults = get_get('results');
-  // $fSort = get_get('sort');
-  // $fStartIndex =  get_get('startIndex');
-  // $fDomainAlias = get_get('domain_alias');
-
-  if ( $fStartIndex == NULL ) { $fStartIndex = 0;}
-  if ( $fResults == NULL ) { $fResults = 10;}
-
-
-  $json_array['startIndex'] = intval($fStartIndex);
-  $json_array['sort'] = $fSort;
-  $json_array['dir'] = $fDir;
-  $json_array['pageSize'] = intval($fResults);
-
-
-
-
-}
-
-
 if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
 	$fDomain = get_post("domain");
