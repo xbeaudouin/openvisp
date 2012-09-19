@@ -65,42 +65,6 @@ class MAIL
 		else{
 			$array['message'] .= $PALANG['pDelete_alias_ok'];
 			
-			if ( $CONF['greylisting'] == "YES" ){
- 
-				if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$this->data_alias['address'])) ){
-
-					$server_info->fetch_server_role_list('policy');
-
-					for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
-
-						$db_name = $server_info->list_server_role[$i]['instance'];
-						$db_user = $server_info->list_server_role[$i]['login'];
-						$db_pass = $server_info->list_server_role[$i]['password'];
-						$db_port = $server_info->list_server_role[$i]['port'];
-						$db_type = "mysql";
-						$db_host = $server_info->list_server_role[$i]['ip_public'];
-						if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
-
-						$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-						$policy_server = new POLICYD($policydb);
-						$policy_search_result = $policy_server->search_policy($this->data_alias['address']);
-
-						if ( $policy_search_result['rows'] == 1 ){
-							$policy_result = $policy_server->remove_policy($this->data_alias['address']);
-							if ( $policy_result['status'] == 1 ){
-								$array['status_code'] = 500;
-								$array['message'] .= $policy_result['message'];
-								return $array;
-							}
-
-							$array['message'] .= $policy_result['message'];
-						}
-					}
-
-				}
-
-			}
-
 			$array['status_code'] = 201;
 			$ova_info->do_log ($domain_info->data_domain['id'], "delete alias", $this->data_alias['address'] . " -> " . $this->data_alias['goto']);
 		}
@@ -342,40 +306,6 @@ AND mailbox.username=alias.address
 					$array['message'] .= $PALANG['pCreate_alias_result_succes'] . " <b>($alias -> $email_to)</b><br/>";
           $ova_info->do_log ($domain_info->data_domain['id'], "create alias", "$alias -> $email_to");
 
-					if ( $CONF['greylisting'] == "YES" && $greylisting == 1){
- 
-						if ( $server_info->check_server_role_exist('policy') && (!preg_match ('/^@/',$alias)) ){
-
-							$server_info->fetch_server_role_list('policy');
-
-							for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
-
-								$db_name = $server_info->list_server_role[$i]['instance'];
-								$db_user = $server_info->list_server_role[$i]['login'];
-								$db_pass = $server_info->list_server_role[$i]['password'];
-								$db_port = $server_info->list_server_role[$i]['port'];
-								$db_type = "mysql";
-								$db_host = $server_info->list_server_role[$i]['ip_public'];
-								if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
-
-								$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-								$policy_server = new POLICYD($policydb);
-								$policy_result = $policy_server->add_new_policy($alias, $greylisting);
-
-								if ( $policy_result['status'] == 1 ){
-									$array['status'] = $policy_result['status'];
-									$array['message'] .= $policy_result['message'];
-									return $array;
-								}
-
-								$array['message'] .= $server_info->list_server_role[$i]['name'] . " : ".$policy_result['message'];
-
-							}
-
-						}
-
-					}
-
         }
 
 			}
@@ -435,9 +365,6 @@ AND mailbox.username=alias.address
 				$query = "INSERT INTO mailbox(username,domain_id,password,maildir,quota, smtp_enabled,pop3_enabled, imap_enabled,created,active)
         VALUES ('$mbx_name',".$domain_info->data_domain['id'].",'$mbx_pass','$mbx_mdir','$mbx_quota','$mbx_smtpauth','$mbx_pop3','$mbx_imap',NOW(),'1')";
 				$result = $this->db_link->sql_query($query);
-
-				debug_info("NG : $query");
-				debug_info("NG : ".$result['sql_log']);
 
 				if ( !isset($array['message'])){ $array['message']="";}
 
