@@ -5,7 +5,7 @@ class USER
 
 	private $db_link;
 	
-	function USER($db_link)
+	function __construct ($db_link)
 	{
 		$this->db_link = $db_link;
 		$this->remote_host = $_SERVER['REMOTE_ADDR'];
