@@ -23,6 +23,7 @@ class DOMAIN
       $this->data_domain = $result['result'][0];
       $this->domain_name = $this->data_domain['domain'];
       $this->domain_status = 1;
+      $this->check_user_access();
       $this->storhash();
       $this->fetch_quota();
       $this->fetch_quota_status();
@@ -49,6 +50,7 @@ class DOMAIN
       $this->data_domain = $result['result'][0];
       $this->domain_name = $this->data_domain['domain'];
       $this->domain_status = 1;
+      $this->check_user_access();
       $this->storhash();
       $this->fetch_quota();
       $this->fetch_quota_status();
@@ -855,6 +857,36 @@ class DOMAIN
 
   }
 
+  /**
+   * This method check if the requested domain is under control of the user
+   * 
+   * @param int $destroy destroy the session if value = 1
+   *
+   */
+
+  function check_user_access($destroy = 1){
+
+    global $user_info;
+
+    if ($user_info->rights['manage'] != 1){
+      $query = "SELECT domain_id
+      FROM domain_admins
+      WHERE domain_admins.accounts_id = ".$user_info->data['id']."
+      AND domain_admins.domain_id='".$this->data_domain['domain_id']."'";
+      
+      $result = $this->db_link->sql_query($query);
+      if ( $result['rows'] == 0){
+        if ( $destroy == 1 ){
+          session_unset ();
+          session_destroy ();
+          header ("Location: ../login.php");
+          exit;
+        }
+      }
+    }
+    
+
+  }
 
 }
 
