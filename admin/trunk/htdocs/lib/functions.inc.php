@@ -3425,7 +3425,7 @@ function OVA_getenv($var_name) {
 //
 // Check if we are using https connection or not.
 //
-function OVA_isHttps() {
+function OVA_ishttps() {
         $is_https = false;
 
         $url = array();
