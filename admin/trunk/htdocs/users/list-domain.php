@@ -1,8 +1,8 @@
 <?php
 //
-// File: hosting/list-domain.php
+// File: users/list-domain.php
 //
-// Template File: hosting/list-domain.tpl
+// Template File: users/list-domain.tpl
 //
 // Template Variables:
 //
@@ -59,16 +59,16 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
       "parser" => "'"."text"."'"
     ),
     "aliases_w_quota" => array(
-       "label" => "'".$PALANG['pAdminList_domain_aliases']."'",
-       "parser" => "'"."text"."'",
-       "sortable" => "false",
-        "allowHTML" => "true"
+      "label" => "'".$PALANG['pAdminList_domain_aliases']."'",
+      "parser" => "'"."text"."'",
+      "sortable" => "false",
+      "allowHTML" => "true"
     ),
     "mails_w_quota" => array(
-       "label" => "'".$PALANG['pAdminList_domain_mailboxes']."'",
-       "parser" => "'"."text"."'",
-       "sortable" => "false",
-       "allowHTML" => "true"
+      "label" => "'".$PALANG['pAdminList_domain_mailboxes']."'",
+      "parser" => "'"."text"."'",
+      "sortable" => "false",
+      "allowHTML" => "true"
     ),
     "backupmx" => array(
       "label" => "'"."Backup MX"."'",
@@ -104,7 +104,8 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     "paid" => array(
       "label" => "'".$PALANG['pGeneric_paid']."'",
       "parser" => "'"."text"."'",
-      "sortable" => "false"
+      "sortable" => "false",
+      "name" => "'paid'"
     ),
     "modified" => array(
       "label" => "'".$PALANG['pAdminList_domain_modified']."'",
@@ -113,11 +114,15 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
     ),
     "delete" => array(
       "label" => "'"."delete"."'",
-      "sortable" => "false",
-      "resizeable" => "false",
-      "link" => "'"."/ajax/domain/manage_domain.php"."'",
-      "url_param" => "'"."action=delete"."'",
-      "key_item" => "'"."domain"."'"
+      // "sortable" => "false",
+      // "resizeable" => "false",
+      // "link" => "'"."/ajax/domain/manage_domain.php"."'",
+      // "url_param" => "'"."action=delete"."'",
+      // "class_name" => "'cell-delete'",
+      "key" => "'delete'",
+      "className" => "'cell-delete'",
+      "name" => "'delete'",
+      // "key_item" => "'"."domain"."'"
     ),
     "edit" => array(
       "label" => "''",
@@ -152,38 +157,52 @@ if ( $_SERVER['REQUEST_METHOD'] == "GET"  ){
       "resizeable" => "false",
       "link" => "'"."/ajax/domain/manage_domain.php"."'",
       "url_param" => "'"."action=delete"."'",
-      "key_item" => "'"."domain"."'"
+      "key_item" => "'"."domain"."'",
+      "name" => "'delete'"
     ),
 
   );
   
   $ajax_info = array(
-    "url" => "../ajax/domain/domain_list.php",
-    "method" => "get",
+    //"url" => "../ajax/domain/domain_list.php",
+    "url" => "../ajax/domain/manage_domain.php",
+    "method" => "post",
     "table_summary" => "List of domains",
     "table_caption" => "List of domains",
     "name" => "domain_list",
+    "delete_msg" => "delete domain name : ",
+    "table_pkey" => "domain",
+    "action_key" => "domain",
+    "action_target" => "domain",
     "params" => array (
       "startIndex" => "0",
       "results" => "10",
       "sort" => "domain",
-      "sortdir" => "asc"
+      "sortdir" => "asc",
+      "domain_alias" => "0",
+      "action" => "list"
     )  ,
     "item_list" => $item_list_domain,
   );
 
   $ajax_info2 = array(
-    "url" => "../ajax/domain/domain_list.php",
-    "method" => "get",
+    //"url" => "../ajax/domain/domain_list.php",
+    "url" => "../ajax/domain/manage_domain.php",
+    "method" => "post",
     "table_summary" => "List of domains aliased",
     "table_caption" => "List of domains aliased",
     "name" => "domain_alias_list",
+    "table_pkey" => "domain_alias",
+    "action_key" => "domain",
+    "action_target" => "domain_alias",
+    "delete_msg" => "delete domain alias name : ",
     "params" => array (
       "startIndex" => "0",
       "results" => "10",
       "sort" => "dalias",
       "sortdir" => "asc",
-      "domain_alias" => "1"
+      "domain_alias" => "1",
+      "action" => "list"
     ),
     "item_list" => $item_list_domain_alias,
   );
