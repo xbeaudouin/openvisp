@@ -433,9 +433,8 @@ class DOMAIN
 
 		if ( $error == 0 ){
 
-			$query = "
-      INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active)
-      VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domain_array['mailbox_aliases']."','".$domain_array['mailboxes']."','".$domain_array['maxquota']."','".$domain_array['backupmx']."','".$domain_array['antivirus']."','".$domain_array['vrfydomain']."','".$domain_array['vrfysender']."','".$domain_array['greylisting']."','".$domain_array['spf']."',NOW(),NOW(),'".$domain_array['active']."')";
+			$query  = "INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active)";
+      $query .= "VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domain_array['mailbox_aliases']."','".$domain_array['mailboxes']."','".$domain_array['maxquota']."','".$domain_array['backupmx']."','".$domain_array['antivirus']."','".$domain_array['vrfydomain']."','".$domain_array['vrfysender']."','".$domain_array['greylisting']."','".$domain_array['spf']."',NOW(),NOW(),'".$domain_array['active']."')";
 
 			$result = $this->db_link->sql_query($query);
 
@@ -453,45 +452,6 @@ class DOMAIN
 
 			$this->fetch_by_domainname($domain_array['name']);
 			$this->associate_domain_admin();
-
-			if ( $CONF['greylisting'] == "YES" && $array['result'] == 0 ){
- 
-				if ( $server_info->check_server_role_exist('policy') ){
-
-					$server_info->fetch_server_role_list('policy');
-
-					for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
-
-						$db_name = $server_info->list_server_role[$i]['instance'];
-						$db_user = $server_info->list_server_role[$i]['login'];
-						$db_pass = $server_info->list_server_role[$i]['password'];
-						$db_port = $server_info->list_server_role[$i]['port'];
-						$db_type = "mysql";
-						$db_host = $server_info->list_server_role[$i]['ip_public'];
-						if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
-
-						$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-						$policy_info = new POLICYD($policydb);
-					
-
-						$policy_info_rcpt = $policy_info->add_new_domain_policy($this->data_domain['domain']);
-						if ( $policy_info_rcpt['result'] != 1){
-							$array['message'] .= $policy_info_rcpt['message'];
-						}
-						$array['result'] += $policy_info_rcpt['result'];
-		
-		
-						$policy_info_helo = $policy_info->add_forbidden_helo($this->data_domain['domain']);
-						if ( $policy_info_helo['result'] != 1){
-							$array['message'] .= $policy_info_helo['message'];
-						}
-						$array['result'] += $policy_info_helo['result'];
-
-					}
-
-				}
-
-			}
 
 		}
 
@@ -658,6 +618,12 @@ class DOMAIN
 		return $array;
 	
 	}
+
+  /**
+   * delete_domain
+   * Action: delete a domain and all related stuff
+   * Call: object->delete_domain();
+   */
   
 	function delete_domain(){
 
@@ -668,53 +634,45 @@ class DOMAIN
 
 		$array['message'] = "";
 
-		if ( $CONF['greylisting'] == "YES" ){
- 
-			if ( $server_info->check_server_role_exist('policy') ){
-
-				$server_info->fetch_server_role_list('policy');
-
-				for ( $i=0; $i < sizeof($server_info->list_server_role); $i++){
-
-					$db_name = $server_info->list_server_role[$i]['instance'];
-					$db_user = $server_info->list_server_role[$i]['login'];
-					$db_pass = $server_info->list_server_role[$i]['password'];
-					$db_port = $server_info->list_server_role[$i]['port'];
-					$db_type = "mysql";
-					$db_host = $server_info->list_server_role[$i]['ip_public'];
-					if ( $server_info->list_server_role[$i]['ip_private'] != "") {$db_host = $server_info->list_server_role[$i]['ip_private'];}
-
-					$policydb = new DB($db_name, $db_type, $db_host, $db_user, $db_pass, $db_port);
-					$policy_info = new POLICYD($policydb);
-
-					$policy_info_rcpt = $policy_info->remove_domain_policy($this->data_domain['domain']);
-					if ( $policy_info_rcpt['result'] != 1){
-						$array['message'] .= $policy_info_rcpt['message'];
-					}
-					$array['result'] = $policy_info_rcpt['result'];
-		
-		
-					$policy_info_helo = $policy_info->remove_forbidden_helo($this->data_domain['domain']);
-					if ( $policy_info_helo['result'] != 1){
-						$array['message'] .= $policy_info_helo['message'];
-					}
-					$array['result'] += $policy_info_helo['result'];
-
-				}
-
-			}
-
-		}
-
-
 		$this->policy_message = $array['message'];
 
 		$query = "DELETE FROM domain WHERE id=".$this->data_domain['id'];
     $this->sql_result = $this->db_link->sql_query($query,2);
 
-
-
 	}
+
+  /**
+   * delete_domain_alias
+   * Action: delete a domain alias
+   * Call: object->delete_domain_alias();
+   */
+  
+  function delete_domain_alias($domain_alias_name){
+
+    global $PALANG;
+    global $CONF;
+    global $server_info;
+    global $user_info;
+
+    if ( !($this->domain_alias_exist($domain_alias_name)) ){
+      $this->action_result['code']=0;
+      $this->action_result['text']="Domain alias does not exist";
+    }
+    else {
+
+      if ( !($this->domain_alias_status) || $this->domain_alias_status != 1 ){
+        $this->fetch_domain_alias($domain_alias_name);
+      }
+
+      $this->fetch_by_domainid($this->domain_alias['id']);
+      $query = "DELETE FROM domain_alias WHERE id=".$this->domain_alias['id'];
+      $this->sql_result = $this->db_link->sql_query($query,2);
+      $this->action_result['code']=1;
+      $this->action_result['text']="Domain alias deleted";
+
+    }
+  }
+
 
 	//
 	// generate_path
@@ -726,7 +684,6 @@ class DOMAIN
 
 		$directory = $this->data_domain['domain'][0] . "/" . $this->data_domain['domain'][1] . "/" . $this->data_domain['domain'][2];
 
-			
 		return $directory;
 
 	}
@@ -738,14 +695,11 @@ class DOMAIN
   //  Call: fetch_domain_alias (domain alias name)
   function fetch_domain_alias ($domain_alias_name) {
 
-    $query = "
-    SELECT *
-    FROM domain_alias
-    WHERE domain_id='".$this->data_domain['id']."'
-      AND dalias='".$domain_alias_name."'
-    ";
+    $query  = "SELECT *\n";
+    $query .= "FROM domain_alias\n";
+    $query .= "WHERE dalias='".$domain_alias_name."'\n";
 
-    $result = $this->db_link->sql_query($query);
+    $result = $this->db_link->sql_query($query,2);
     $this->domain_alias_status = 0;
 
     if ( $result['rows'] == 1 ){
@@ -763,12 +717,9 @@ class DOMAIN
   //  Call: domain_alias_exist (domain alias name)
   function domain_alias_exist ($domain_alias_name) {
 
-    $query = "
-    SELECT dalias
-    FROM domain_alias
-    WHERE domain_id='".$this->data_domain['id']."'
-      AND dalias='".$domain_alias_name."'
-    ";
+    $query  = "SELECT dalias\n";
+    $query  .= "FROM domain_alias\n";
+    $query  .= "WHERE dalias='".$domain_alias_name."'\n";
 
     $result = $this->db_link->sql_query($query);
     
@@ -778,7 +729,6 @@ class DOMAIN
     else{
       return FALSE;
     }
-
 
   }
 
