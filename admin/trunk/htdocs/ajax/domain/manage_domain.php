@@ -76,11 +76,13 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
     // break;
 
       if ( $fAction_target == "domain_alias" ){
-
-        $json_array['replyText'] = "Delete domain alias : $fDomain";
+        $domain_info->delete_domain_alias($fDomain);
+        $json_array['replyText'] = "Deleted domain alias : $fDomain";
       }
       else{
-        $json_array['replyText'] = "Delete domain : $fDomain";
+        $domain_info->fetch_by_domainname($fDomain);
+        $domain_info->delete_domain();
+        $json_array['replyText'] = "Deleted domain : $fDomain";
       }
       
       $json_array['replyCode'] = 200;
