@@ -289,10 +289,9 @@ ngx_http_udplog_handler(ngx_http_request_t *r)
         /*
          * BSD syslog message header (see RFC 3164)
          */
-/*
+	/* XXX Kiwi
         p = ngx_sprintf(line, "<%ui>%s %2d %02d:%02d:%02d %V %V: ", pri, months[tm.ngx_tm_mon - 1], tm.ngx_tm_mday,
-            tm.ngx_tm_hour, tm.ngx_tm_min, tm.ngx_tm_sec, &ngx_cycle->hostname, &tag);
-*/
+	*/
         p = ngx_sprintf(line, "<%ui>%s %2d %02d:%02d:%02d %V %V ", pri, months[tm.ngx_tm_mon - 1], tm.ngx_tm_mday,
             tm.ngx_tm_hour, tm.ngx_tm_min, tm.ngx_tm_sec, &ngx_cycle->hostname, &tag);
 
