@@ -2,7 +2,7 @@
 # TODO: test if speedycgi works ?
 
 # ovs -- mail traffic statistics
-# copyright (c) 2007 Xavier Beaudouin <kiwi@oav.net>
+# copyright (c) 2007-2012 Xavier Beaudouin <kiwi@oav.net>
 # released under the GNU General Public License
 #
 # Based upon mailgraph, which 
