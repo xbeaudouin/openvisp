@@ -40,7 +40,7 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 	
   $fMethod = get_post('method');
 	$fDir = get_post('dir');
-	$fResults = get_post('resultCount');
+	$fResults = get_post('results');
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
 
