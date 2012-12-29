@@ -61,8 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     $ajax_alias = new AJAX_YUI($ovadb);
     $ajax_mailbox = new AJAX_YUI($ovadb);
 
+    //
+    // Create mailboxes table list
+    //
 
-      $item_list = array(
+    $item_list_alias = array(
       "address" => array(
         "label" => '"'.$PALANG['pOverview_alias_address'].'"',
         "parser" => '"text"'
@@ -115,14 +118,31 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     );
 
 
-    $ajax_info = array(
-      "url" => "../ajax/mail/domain_alias_detail.php?domainName=$fDomain",
+    $ajax_info_alias = array(
+      //"url" => "../ajax/mail/domain_alias_detail.php?domainName=$fDomain",
+      "url" => "../ajax/mail/domain_alias_detail.php",
       "method" => "post",
-      "params" => array ( "domainName" => $fDomain )
+
+      "table_summary" => "List of mailboxes aliases",
+      "table_caption" => "List of mailboxes aliases",
+      "name" => "aliases",
+      "delete_msg" => "delete domain name : ",
+      "table_pkey" => "domain",
+      "action_key" => "domain",
+      "action_target" => "domain",
+      "params" => array (
+        "startIndex" => "0",
+        "results" => "10",
+        "sort" => "address",
+        "sortdir" => "asc",
+        "domainName" => $fDomain,
+        "action" => "list"
+      )  ,
+      "item_list" => $item_list_alias
     );
 
 
-    $ajax_alias->ajax_info($ajax_info);
+    $ajax_alias->ajax_info($ajax_info_alias);
     $ajax_alias->attr_add('root','records');
     $ajax_alias->attr_add('sort','address');
     $ajax_alias->attr_add('sortdir','asc');
@@ -130,21 +150,21 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     $ajax_alias->attr_add('maxrows','10');
     $ajax_alias->attr_add('data_div','aliases');
     $ajax_alias->attr_add('nav_div','aliases-nav');
-    $ajax_alias->item_add($item_list);
+    $ajax_alias->item_add($item_list_alias);
 
     $ajax_alias->start("aliases");
 
 
     //$ajax_alias->create_listener();
 
-    $ajax_alias->create_datasource();
-    $ajax_alias->create_datatable();
+    $ajax_alias->create_datasource($ajax_info_alias);
+    $ajax_alias->create_datatable($ajax_info_alias);
 
+    //
+    // Create mailboxes table list
+    //
 
-  // Create mailbox list
-
-
-    $item_list = array(
+    $item_list_mailbox = array(
       "username" => array(
         "label" => '"'.$PALANG['pOverview_mailbox_username'].'"',
         "parser" => '"text"'
@@ -156,12 +176,15 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
       "quota_used" => array(
         "label" => '"'.$PALANG['pOverview_mailbox_size'].'"',
         "parser" => '"number"',
-        "sortable" => "false"
+        "sortable" => "false",
+        "allowHTML" => "true"
       ),
       "quota" => array(
         "label" => '"'.$PALANG['pOverview_mailbox_quota'].'"',
         "parser" => '"text"',
-        "sortable" => "true"
+        "sortable" => "true",
+        "allowHTML" => "true"
+
       ),
       "paid" => array(
         "label" => '"'.$PALANG['pOverview_mailbox_paid'].'"',
@@ -247,14 +270,31 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     );
 
 
-    $ajax_info = array(
+    $ajax_info_mailbox = array(
       "url" => "../ajax/mail/domain_mailbox_detail.php",
       "method" => "post",
-      "params" => array ( "domainName" => $fDomain )
+
+      "table_summary" => "List of mailboxes",
+      "table_caption" => "List of mailboxes",
+      "name" => "mailboxes",
+      "delete_msg" => "delete domain name : ",
+      "table_pkey" => "domain",
+      "action_key" => "domain",
+      "action_target" => "domain",
+      "params" => array (
+        "startIndex" => "0",
+        "results" => "10",
+        "sort" => "username",
+        "sortdir" => "asc",
+        "domainName" => $fDomain,
+        "action" => "list"
+      )  ,
+      "item_list" => $item_list_mailbox
+
     );
 
 
-    $ajax_mailbox->ajax_info($ajax_info);
+    $ajax_mailbox->ajax_info($ajax_info_mailbox);
     //$ajax_yui->attr_add('domain_name',$fDomain);
     $ajax_mailbox->attr_add('root','records');
     $ajax_mailbox->attr_add('sort','username');
@@ -263,12 +303,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     $ajax_mailbox->attr_add('maxrows','10');
     $ajax_mailbox->attr_add('data_div','mailboxes');
     $ajax_mailbox->attr_add('nav_div','mailboxes-nav');
-    $ajax_mailbox->item_add($item_list);
+    $ajax_mailbox->item_add($item_list_mailbox);
 
     $ajax_mailbox->start("mailboxes");
 
-    $ajax_mailbox->create_datasource();
-    $ajax_mailbox->create_datatable();
+    $ajax_mailbox->create_datasource($ajax_info_mailbox);
+    $ajax_mailbox->create_datatable($ajax_info_mailbox);
     
     $template = "overview.tpl";
 
@@ -278,7 +318,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     $ajax_domain = new AJAX_YUI($ovadb);
 
     if ( $CONF['quota'] == 'YES') {
-      $item_list = array(
+      $item_list_domain = array(
         "domain" => array(
           "label" => '"'.$PALANG['pOverview_get_domain'].'"',
           "sortable" => "true",
@@ -301,6 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
              "key" => "quota_aliases",
              "label" => '"'.$PALANG['pGeneric_left'].'"',
              "sortable" => "false",
+             "allowHTML" => "true",
              "parser" => '"number"',
              "editor" => '"textarea"'
            ),
@@ -317,6 +358,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
             "key" => "quota_mailboxes",
             "label" => '"'.$PALANG['pGeneric_left'].'"',
             "sortable" => "false",
+            "allowHTML" => "true",
             "parser" => '"number"',
             "editor" => '"textarea"'
           ),
@@ -325,6 +367,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
           "label" => '"'.$PALANG['pOverview_get_quota'].'"',
           "sortable" => "false",
           "parser" => '"number"',
+          "allowHTML" => "true",
           "editor" => '"textarea"'
         ),
         "diskspace_mailboxes" => array(
@@ -346,7 +389,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
 
     }
     else{
-      $item_list = array(
+      $item_list_domain = array(
         "domain"  => array(
           "label" => '\"'.$PALANG['pOverview_get_domain'].'\"',
           "sortable" => "true",
@@ -391,13 +434,29 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
      
 
 
-    $ajax_info = array(
+    $ajax_info_domain = array(
       "url" => "../ajax/mail/domain_mail_overview.php",
-      "method" => "POST"
+      "method" => "post",
+      "table_summary" => "List of domains",
+      "table_caption" => "List of domains",
+      "name" => "domain_list",
+      "delete_msg" => "delete domain name : ",
+      "table_pkey" => "domain",
+      "action_key" => "domain",
+      "action_target" => "domain",
+      "params" => array (
+        "startIndex" => "0",
+        "results" => "10",
+        "sort" => "domain",
+        "sortdir" => "asc",
+        "domain_alias" => "0",
+        "action" => "list"
+      )  ,
+      "item_list" => $item_list_domain
     );
 
 
-    $ajax_domain->ajax_info($ajax_info);
+    $ajax_domain->ajax_info($ajax_info_domain);
     $ajax_domain->attr_add('root','records');
     $ajax_domain->attr_add('sort','domain');
     $ajax_domain->attr_add('sortdir','asc');
@@ -407,12 +466,12 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
     $ajax_domain->attr_add('nav_div','domain-nav');
 
 
-    $ajax_domain->item_add($item_list);
+    //$ajax_domain->item_add($item_list);
 
     $ajax_domain->start("domain");
 
-    $ajax_domain->create_datasource();
-    $ajax_domain->create_datatable();
+    $ajax_domain->create_datasource($ajax_info_domain);
+    $ajax_domain->create_datatable($ajax_info_domain);
 //    $ajax_domain->
 
     $template = "overview-get.tpl";
