@@ -1,4 +1,21 @@
 <?php
+/**
+ * DB
+ *
+ * Copyright (c) 2004-2012,
+ * Association Kazar
+ * Xavier BEAUDOUIN
+ * Nicolas GORALSKI
+ * All right reserved
+ *
+ * @copyright 2006-2012 Kazar, the authors
+ *
+ */
+
+/**
+ * This class handle all mail operation
+ * @package mail
+ */
 
 class MAIL
 {

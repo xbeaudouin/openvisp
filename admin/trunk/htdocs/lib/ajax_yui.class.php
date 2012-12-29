@@ -1,12 +1,15 @@
 <?php
+
 /**
  * AJAX_YUI
  *
- * Copyright (c) 2012,
- * Nicolas GORALSKI for the association Kazar
+ * Copyright (c) 2004-2012,
+ * Association Kazar
+ * Xavier BEAUDOUIN
+ * Nicolas GORALSKI
  * All right reserved
  *
- * @copyright 2012 Kazar, the authors
+ * @copyright 2006-2012 Kazar, the authors
  *
  */
 
@@ -14,6 +17,7 @@
  * This class create and manage all yui code block
  * @package ova-yui
  */
+
 
 class AJAX_YUI
 {
@@ -728,7 +732,7 @@ class AJAX_YUI
 
 
     $this->buffer .= "     var updateStatus = function(o) {\n";
-    $this->buffer .= "         Y.one(\"#status\").append(o+'<br/>');\n";
+    $this->buffer .= "         Y.one(\"#status\").value = (o+'<br/>');\n";
     $this->buffer .= "     }\n";
 
     $this->buffer .= "     /** \n";

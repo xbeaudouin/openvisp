@@ -1,4 +1,21 @@
 <?php
+/**
+ * DOMAIN
+ *
+ * Copyright (c) 2004-2012,
+ * Association Kazar
+ * Xavier BEAUDOUIN
+ * Nicolas GORALSKI
+ * All right reserved
+ *
+ * @copyright 2006-2012 Kazar, the authors
+ *
+ */
+
+/**
+ * This class handle all domain relative operations
+ * @package domain
+ */
 
 class DOMAIN
 {
@@ -619,9 +636,10 @@ class DOMAIN
 	
 	}
 
+
   /**
    * delete_domain
-   * Action: delete a domain and all related stuff
+   * Action: delete the actual linked domain and all related stuff
    * Call: object->delete_domain();
    */
   
@@ -788,7 +806,7 @@ class DOMAIN
     if ( $result['rows'] == 1 ){
       $this->msg['status'] = 1;
       $this->msg['text'] = $PALANG['pCreate_domain_alias_result_success'];
-      $this->db_link->db_log("create domain alias", "$domain_alias_name -> ".$this->data_domain['domain'],"'.$this->data_domain['domain'].'");
+      $this->db_link->db_log("create domain alias", $domain_alias_name." -> ".$this->data_domain['domain'],$this->data_domain['domain']['domain']);
     }
     else{
 
