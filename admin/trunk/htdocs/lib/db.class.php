@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * DB
+ *
+ * Copyright (c) 2004-2012,
+ * Association Kazar
+ * Xavier BEAUDOUIN
+ * Nicolas GORALSKI
+ * All right reserved
+ *
+ * @copyright 2006-2012 Kazar, the authors
+ *
+ */
+
+/**
+ * This class create and manage all db connection
+ * @package db
+ */
+
 class DB
 {
 
@@ -12,6 +30,7 @@ class DB
 	private $db_user;
 	private $db_pass;
 	private $database;
+
 
 
 	//
@@ -66,15 +85,16 @@ class DB
 	}
 
 
-	//
-	// sql_query
-	// Action: Sends a query to the database and returns query result as a row and number of rows
-	// Call: db_query (string query, int die, pear:mdb2 link)
-	// int die should have
-	//    0= don't die on error 
-	//    1= die on error and send debug test (DEFAULT)
-	//    2= don't die, but throw error
-	//
+
+  /**
+   * Sends a query to the database and returns query result as a row and number of rows
+   *
+   * @param text $query the sql query to execute.
+   * @param int $die_on_error the type of exit in case of error.<br/>
+   * 				0= don't die on error.<br/>
+	 * 				1= die on error and send debug test (DEFAULT).<br/>
+	 * 				2= don't die, but throw error.<br/>
+   */
 
 	function sql_query ($query, $die_on_error=1)
 	{
@@ -161,14 +181,14 @@ class DB
 
 // 	}
 
+  /**
+   * update_record
+   * Action: Update a result array from a db->sql_query object with new value
+	 * before the update we fetch the old value from the table_from with the id.
+	 * All column's data that are different are used to generate the update sql order.
+	 * Call: update_record ( array newdata, string table_from)
+   */
 
-	//
-	// update_record
-	// Action: Update a result array from a db->sql_query object with new value
-	// before the update we fetch the old value from the table_from with the id.
-	// All column's data that are different are used to generate the update sql order.
-	// Call: update_record ( array newdata, string table_from)
-	//
 
 	function update_record ( $newdata, $table_from )
 	{
@@ -201,11 +221,12 @@ class DB
 	}
 
 
-	//
-	// db_log
-	// Action: Logs actions from admin
-	// Call: db_log (string action, string data, string domain2)
-	//
+
+	/**
+	 * db_log
+   * Action: Logs actions from users
+	 * Call: db_log (string action, string data, string domain2)
+	 */
 	function db_log ($action,$data, $domain2=""){
 
 		global $CONF;
