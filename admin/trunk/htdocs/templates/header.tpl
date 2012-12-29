@@ -102,7 +102,7 @@
             <div class="yui3-menu-content">
               <ul>
                 <li class="yui3-menuitem">
-                  <a class="yui3-menuitem-content" href=""><?php print $PALANG['pYMenu_mail_overview'];?></a>
+                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>mail/overview.php"><?php print $PALANG['pYMenu_mail_overview'];?></a>
                 </li>
 
                 <li class="yui3-menuitem">
@@ -110,7 +110,7 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                  <a class="yui3-menuitem-content" href=""><?php print $PALANG['pYMenu_mail_add_mbox'];?></a>
+                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>mail/create-mailbox.php"><?php print $PALANG['pYMenu_mail_add_mbox'];?></a>
                 </li>
 
                 <li class="yui3-menuitem">
@@ -244,7 +244,7 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                  <?php  print_yahoo_menu("users/viewlog.php", "Users Overviews"); ?>
+                  <?php  print_yahoo_menu("accounts/list-accounts.php", "Users Overviews"); ?>
                 </li>
 
                 <li class="yui3-menuitem">
