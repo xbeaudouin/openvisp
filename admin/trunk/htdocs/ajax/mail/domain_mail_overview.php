@@ -36,9 +36,11 @@ if ( $_SERVER['REQUEST_METHOD'] == "POST" ){
 
   $fMethod = get_post('method');
 	$fDir = get_post('dir');
-	$fResults = get_post('resultCount');
+	$fResults = get_post('results');
 	$fSort = get_post('sort');
 	$fStartIndex =  get_post('startIndex');
+  $fDomain_name = get_post('domainName');
+
 
 	$user_info->fetch_active_domains_with_mail($fDomain_name);
 	$total_domain_with_mail = $user_info->total_managed_active_domain_with_mail;
