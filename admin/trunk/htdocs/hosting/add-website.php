@@ -44,6 +44,7 @@ try {
 	$userinfo->fetch_info ($SESSID_USERNAME);
 	$userinfo->check_access("http");
 
+	$domain = new DOMAIN($ovadb);
 	$userinfo->check_quota("http");
 
 
