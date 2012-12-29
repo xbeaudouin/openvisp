@@ -28,8 +28,8 @@ z-index:9000;
 
 </style>
 
-<div id="domain-nav"></div>
-<div id="domain"></div>
+<div id="domain_list-nav"></div>
+<div id="domain_list"></div>
 
 
 <?php
