@@ -19,17 +19,17 @@
          <?php print $PALANG['pCreate_domain_alias_is']; ?>
       </td>
       <td>
-         <select name="fDomain">
+         <select name="fDomain_id">
          <?php
          for ($i = 0; $i < sizeof ($list_domains); $i++)
          {
             if ($tDomain == $list_domains[$i])
             {
-               print "            <option value=\"$list_domains[$i]\" selected>$list_domains[$i]</option>\n";
+               print "            <option value=\"".$list_domains[$i]['id']."\" selected>".$list_domains[$i]['domain']."</option>\n";
             }
             else
             {
-               print "            <option value=\"$list_domains[$i]\">$list_domains[$i]</option>\n";
+               print "            <option value=\"".$list_domains[$i]['id']."\">".$list_domains[$i]['domain']."</option>\n";
             }
          }
          ?>
