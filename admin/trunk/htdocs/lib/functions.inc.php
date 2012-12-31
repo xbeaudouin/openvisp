@@ -766,7 +766,7 @@ function associate_domain_admin ($domain, $admin)
 			$sql_query = "INSERT INTO domain_admins (accounts_id,domain_id,created,active)
 VALUES ('".$admin_id."','".$domain_id."',NOW(),'1')";
 
-			$result = db_query ();
+			$result = db_query ($sql_query);
 			if ($result['rows'] != 1)
 				{
 					$error = 1;

@@ -23,7 +23,7 @@ if (sizeof ($admin_accounts->admin_account_list) > 0)
       if ((is_array ($admin_accounts->admin_account_list) and sizeof ($admin_accounts->admin_account_list) > 0))
       {
         print "<tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">\n";
-      	print "<td><a href=\"details.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $admin_accounts->admin_account_list[$i]['username'] . "</a></td>";
+      	print "<td><a href=\"details.php?username=" . $admin_accounts->admin_account_list[$i]['username'] . "\">" . $admin_accounts->admin_account_list[$i]['username'] . "</a></td>";
         $sadmin = ($account_properties[$i]['manage'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $sadmin . "</td>\n";
         $datacenter = ($account_properties[$i]['datacenter'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
@@ -46,8 +46,8 @@ if (sizeof ($admin_accounts->admin_account_list) > 0)
 //        print "<td></td>";
        	print "<td>" . $account_properties[$i]['modified'] . "</td>";
         $active = ($account_properties[$i]['enabled'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
-       	print "<td><a href=\"edit-active-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $active . "</a></td>";
-       	print "<td><a href=\"edit-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $PALANG['edit'] . "</a></td>";
+       	print "<td><a href=\"edit-active-account.php?username=" . $admin_accounts->admin_account_list[$i]['username'] . "\">" . $active . "</a></td>";
+       	print "<td><a href=\"edit-account.php?username=" . $admin_accounts->admin_account_list[$i]['username'] . "\">" . $PALANG['edit'] . "</a></td>";
        	print "<td><a href=\"delete-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\" onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>";
        	print "</tr>\n";
       }
