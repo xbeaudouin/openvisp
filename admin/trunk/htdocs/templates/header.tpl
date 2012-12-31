@@ -69,7 +69,7 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>users/create-domain-alias.php"><?php print $PALANG['pAdminMenu_create_domain_alias'];?></a>
+                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>domain/create-domain-alias.php"><?php print $PALANG['pAdminMenu_create_domain_alias'];?></a>
                 </li>
 
                 <li class="yui3-menuitem">
@@ -118,7 +118,7 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                <a class="yui3-menuitem-content" href=""><?php print $PALANG['pYMenu_mail_import'];?></a>
+                <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>mail/massive_import.php"><?php print $PALANG['pYMenu_mail_import'];?></a>
                 </li>
 
                 <li class="yui3-menuitem">
