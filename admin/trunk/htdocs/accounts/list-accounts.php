@@ -37,30 +37,25 @@ $user_info->fetch_quota_status();
 
 
 $admin_accounts = new ADMIN($ovadb);
-//$admin_accounts->list();
+$admin_accounts->list_admin_accounts();
 
 
 $body_class = 'class="yui3-skin-sam"';
 
-/*
 
-$list_accounts = list_accounts ();
-if ((is_array ($list_accounts) and sizeof ($list_accounts) > 0))
-{
-   for ($i = 0; $i < sizeof ($list_accounts); $i++)
-   {
-      $account_properties[$i] = get_account_properties ($list_accounts[$i]);
-   }
+if ((is_array ($admin_accounts->admin_account_list) and sizeof ($admin_accounts->admin_account_list) > 0)){
+  for ($i = 0; $i < sizeof ($admin_accounts->admin_account_list); $i++){
+    $admin_accounts->fetch_admin_rights($admin_accounts->admin_account_list[$i]['username']);
+    $account_properties[$i] = $admin_accounts->account_rights;
+  }
+
 }
 
-*/
 
-//if ( $admin_accounts->admin_l)
 
 if ($_SERVER["REQUEST_METHOD"] == "GET")
 {
    include ("../templates/header.tpl");
-//   include ("../templates/accounts/menu.tpl");
    include ("../templates/accounts/list-accounts.tpl");
    include ("../templates/footer.tpl");
 }
@@ -68,7 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET")
 if ($_SERVER["REQUEST_METHOD"] == "POST")
 {
    include ("../templates/header.tpl");
-//   include ("../templates/accounts/menu.tpl");
    include ("../templates/accounts/list-accounts.tpl");
    include ("../templates/footer.tpl");
 }

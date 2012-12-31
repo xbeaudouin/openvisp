@@ -1,5 +1,5 @@
 <?php 
-if (sizeof ($list_accounts) > 0)
+if (sizeof ($admin_accounts->admin_account_list) > 0)
 {
    print "<table>\n";
    print "   <tr class=\"header\">\n";
@@ -18,38 +18,38 @@ if (sizeof ($list_accounts) > 0)
    print "      <td colspan=\"2\">&nbsp;</td>\n";
    print "   </tr>\n";
 
-   for ($i = 0; $i < sizeof ($list_accounts); $i++)
+   for ($i = 0; $i < sizeof ($admin_accounts->admin_account_list); $i++)
    {
-      if ((is_array ($list_accounts) and sizeof ($list_accounts) > 0))
+      if ((is_array ($admin_accounts->admin_account_list) and sizeof ($admin_accounts->admin_account_list) > 0))
       {
         print "<tr class=\"hilightoff\" onMouseOver=\"className='hilighton';\" onMouseOut=\"className='hilightoff';\">\n";
-      	print "<td><a href=\"details.php?username=" . $list_accounts[$i] . "\">" . $list_accounts[$i] . "</a></td>";
-          $sadmin = ($account_properties[$i]['manage'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
+      	print "<td><a href=\"details.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $admin_accounts->admin_account_list[$i]['username'] . "</a></td>";
+        $sadmin = ($account_properties[$i]['manage'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $sadmin . "</td>\n";
-          $datacenter = ($account_properties[$i]['datacenter'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $datacenter = ($account_properties[$i]['datacenter'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $datacenter . "</td>";
-          $datacenter_sadmin = ($account_properties[$i]['datacenter_manage'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
-	print "<td>". $datacenter_sadmin. "</td>";
-          $mailadmin = ($account_properties[$i]['mail'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
+        $datacenter_sadmin = ($account_properties[$i]['datacenter_manage'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+      	print "<td>". $datacenter_sadmin. "</td>";
+        $mailadmin = ($account_properties[$i]['mail'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $mailadmin . "</td>\n";
-          $ftp = ($account_properties[$i]['ftp'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $ftp = ($account_properties[$i]['ftp'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $ftp . "</td>";
-          $http = ($account_properties[$i]['http'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $http = ($account_properties[$i]['http'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $http . "</td>";
-          $domain = ($account_properties[$i]['domain'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $domain = ($account_properties[$i]['domain'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $domain . "</td>";
-          $mysql = ($account_properties[$i]['mysql'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $mysql = ($account_properties[$i]['mysql'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $mysql . "</td>";
-          $postgresql = ($account_properties[$i]['postgresql'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
+        $postgresql = ($account_properties[$i]['postgresql'] ==1) ? $PALANG['YES'] : $PALANG['NO'];
         print "<td>" . $postgresql . "</td>";
 
 //        print "<td></td>";
-   	print "<td>" . $account_properties[$i]['modified'] . "</td>";
+       	print "<td>" . $account_properties[$i]['modified'] . "</td>";
         $active = ($account_properties[$i]['enabled'] == 1) ? $PALANG['YES'] : $PALANG['NO'];
-   	print "<td><a href=\"edit-active-account.php?username=" . $list_accounts[$i] . "\">" . $active . "</a></td>";
-   	print "<td><a href=\"edit-account.php?username=" . $list_accounts[$i] . "\">" . $PALANG['edit'] . "</a></td>";
-   	print "<td><a href=\"delete-account.php?username=" . $list_accounts[$i] . "\" onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>";
-   	print "</tr>\n";
+       	print "<td><a href=\"edit-active-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $active . "</a></td>";
+       	print "<td><a href=\"edit-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\">" . $PALANG['edit'] . "</a></td>";
+       	print "<td><a href=\"delete-account.php?username=" . $admin_accounts->admin_account_list[$i] . "\" onclick=\"return confirm ('" . $PALANG['confirm'] . "')\">" . $PALANG['del'] . "</a></td>";
+       	print "</tr>\n";
       }
    }
 
