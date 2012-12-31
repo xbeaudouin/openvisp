@@ -12,6 +12,8 @@
 //
 // -none-
 //
+
+require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
 require ("../lib/accounts.inc.php");
@@ -25,17 +27,20 @@ require_once ("../lib/user.class.php");
 require_once ("../lib/ajax_yui.class.php");
 require_once ("../lib/admin.class.php");
 
+$SESSID_USERNAME = check_user_session ();
 $SESSID_USERNAME = check_admin_session ();
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
-$user_info->check_domain_admin();
-$user_info->fetch_quota_status();
+
+
 
 $admin_accounts = new ADMIN($ovadb);
 //$admin_accounts->list();
 
+
+$body_class = 'class="yui3-skin-sam"';
 
 /*
 
