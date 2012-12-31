@@ -36,11 +36,31 @@ class ADMIN
   }
 
 
-  function list_admin()
-  {
+  //
+  // list_admin_accounts()
+  // get list of all admin account
+  // Call: list_admin_accounts()
+  //
+  function list_admin_accounts(){
+
     $query = "SELECT username FROM accounts ORDER BY username";
     $result = $this->db_link->sql_query($query);
-    $this->admin_list = $result['result'];
+    $this->admin_account_list = $result['result'];
+
+  }
+
+  //
+  // fetch_admin_rights()
+  // get account rights
+  // Call: get_account_rights(string username)
+  //
+  function fetch_admin_rights($username)
+  {
+
+    $query = "SELECT * FROM accounts, rights WHERE accounts.username='$username' AND accounts.id=rights.accounts_id";
+    $result = $this->db_link->sql_query($query);
+    $this->account_rights = $result['result'][0];
+
   }
 
 
@@ -54,11 +74,9 @@ class ADMIN
 
     $query = "SELECT * FROM accounts WHERE username='$username'";
     $result = $this->db_link->sql_query($query);
-    $this->account_info = $result[$result][0];
+    $this->account_info = $result['result'][0];
 
   }
-
-
 
 
 
