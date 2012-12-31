@@ -363,7 +363,7 @@ function update_quota_admin(	$id, $fNmysqlusers, $fNmysqldb, $fNposgresqlusers, 
 {
 
 	$query = "UPDATE quota SET diskspace='$fDiskspace', ftp='$fNftpaccount', mysqldb='$fNmysqldb', mysqlusers='$fNmysqlusers', postgresqldb='$fNposgresqldb',
-	postgresqlusers='$fNposgresqlusers', domains='$fNdomains', mailboxes='$fNbemail', aliases='$fNbemailalias', http='$fNwebsite', http_alias='$fNwebsitealias'
+	postgresqlusers='$fNposgresqlusers', domains='$fNdomains', emails='$fNbemail', emails_alias='$fNbemailalias', http='$fNwebsite', http_alias='$fNwebsitealias'
 WHERE accounts_id='$id'";
 	$result = db_query ($query);
 }
