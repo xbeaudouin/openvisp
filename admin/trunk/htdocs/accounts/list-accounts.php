@@ -33,7 +33,7 @@ $SESSID_USERNAME = check_admin_session ();
 $ovadb = new DB();
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
-
+$user_info->fetch_quota_status();
 
 
 $admin_accounts = new ADMIN($ovadb);
