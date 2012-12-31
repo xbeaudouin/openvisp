@@ -344,7 +344,7 @@ class USER
 
 			if ( !isset($this->total_managed_domain_aliases)) {
 				$this->fetch_domains_aliases();
-				$this->data_managed['domain_alias'] = $this->total_managed_domain_alias;
+				$this->data_managed['domains_alias'] = $this->total_managed_domain_alias;
 			}
 
 
