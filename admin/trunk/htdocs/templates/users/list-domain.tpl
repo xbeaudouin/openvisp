@@ -29,11 +29,15 @@ if ( $domain_overquota == 1 ){
 <div id="domain_list"></div>
 
 <br/>
+
+<td valign="top" class="tdstatus">
+   Status Messages:<div id="status"></div>
+</td></tr>
+
 <br/>
 
 <div id="domain_alias_list-nav"></div>
 <div id="domain_alias_list"></div>
-
 
 <p />
 <?php 
