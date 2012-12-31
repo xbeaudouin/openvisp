@@ -20,13 +20,16 @@ $version = "1.0-RC1";
 //
 function check_session ()
 {
-   session_start ();
+   if(!isset($_SESSION)) {
+    session_start ();
+  }
+   
    if (!session_is_registered ("sessid"))
    {
       redirect_login();
       exit;
    }
-   $SESSID_USERNAME = $_SESSION['sessid']['username'];
+   $SESSID_USERNAME = $_SESSION['userid']['username'];
    return $SESSID_USERNAME;
 }
 
@@ -53,7 +56,7 @@ function check_user_session ()
 {
    //session_start ();
    $USERID_USERNAME = check_session();
-   if (!session_is_registered ("userid"))
+   if (!session_is_registered ("sessid"))
    {
 		 	redirect_login();
       exit;
