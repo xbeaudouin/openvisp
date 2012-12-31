@@ -252,7 +252,7 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                  <?php  print_yahoo_menu("users/viewlog.php", "Add an account"); ?>
+                  <?php  print_yahoo_menu("accounts/add-account.php",$PALANG['pAccountMenu_add_account']); ?>
                 </li>
 
               </ul>
