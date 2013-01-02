@@ -744,7 +744,10 @@ sub process_line($)
 			elsif($text =~ /DISCONNECT/) {
 				event($time, 'spam');
 			}
-			elsif($text =~ /HANGHUP/) {
+			elsif($text =~ /HANGUP/) {
+				event($time, 'greylist');
+			}
+			elsif($text =~ /PREGREET/) {
 				event($time, 'greylist');
 			}
 		}
