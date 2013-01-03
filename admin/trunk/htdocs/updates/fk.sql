@@ -100,27 +100,27 @@ ADD FOREIGN KEY ( `domain_id` ) REFERENCES `domain` (`id`) ON DELETE CASCADE;
 
 
 ALTER TABLE `domain_dns_status`
-ADD FOREIGN KEY ( `domain_id` ) REFERENCES `dbopenvisp_prod`.`domain` (`id`)
+ADD FOREIGN KEY ( `domain_id` ) REFERENCES `domain` (`id`) 
 ON DELETE CASCADE ;
 
 
 ALTER TABLE `ftpaccount`
-ADD FOREIGN KEY ( `whost_id` ) REFERENCES `dbopenvisp_prod`.`whost` (`id`)
+ADD FOREIGN KEY ( `whost_id` ) REFERENCES `whost` (`id`)
 ON DELETE CASCADE ;
 
 ALTER TABLE `msgrcpt`
-ADD FOREIGN KEY ( `mail_id` ) REFERENCES `dbopenvisp`.`msgs` (`mail_id`)
+ADD FOREIGN KEY ( `mail_id` ) REFERENCES `msgs` (`mail_id`)
 ON DELETE CASCADE ;
 
 
 ALTER TABLE `server_apps`
-ADD FOREIGN KEY ( `server_jobmodel_id` ) REFERENCES `dbopenvisp_prod`.`server_jobmodel` (`id`)
+ADD FOREIGN KEY ( `server_jobmodel_id` ) REFERENCES `server_jobmodel` (`id`)
 ON DELETE CASCADE ;
 
 ALTER TABLE `stats_wwwusage`
-ADD FOREIGN KEY (  `whost_id` ) REFERENCES  `dbopenvisp_prod`.`whost` (`id`)
+ADD FOREIGN KEY (  `whost_id` ) REFERENCES  `whost` (`id`)
 ON DELETE CASCADE ;
 
 ALTER TABLE  `whost_alias`
-ADD FOREIGN KEY (  `whost_id` ) REFERENCES  `dbopenvisp_prod`.`whost` (`id`)
+ADD FOREIGN KEY (  `whost_id` ) REFERENCES  `whost` (`id`)
 ON DELETE CASCADE ;

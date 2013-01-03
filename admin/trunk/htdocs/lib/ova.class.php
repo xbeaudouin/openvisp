@@ -88,11 +88,14 @@ class OVA
 					{
 						while (!feof ($fp))
 							{
-								$buf = fgets($fp, 4096);
+								$buf = preg_replace('~[[:cntrl:]]~', '', fgets($fp, 4096));
 								
 								// Ajout ligne si non commentaire
-								if ((! eregi('^--',$buf)) && (! eregi('^#',$buf)))  $buffer .= $buf;
+								if ((! eregi('^--',$buf)) && (! eregi('^#',$buf)) && (! eregi('^ ',$buf)) && (! eregi('^\n\r',$buf))){
+									$buffer .= $buf." ";
+								}
 								//          print $buf.'<br>';
+								
 								
 								if (eregi(';',$buffer))
 									{
@@ -101,15 +104,13 @@ class OVA
 										$buffer='';
 									}
 							}
-						
-						if ($buffer) $arraysql[]=trim($buffer);
+						if ($buffer && !empty($buffer)) $arraysql[]=trim($buffer);
 						fclose($fp);
 					}
 
 				foreach($arraysql as $sql)
 					{
 
-						debug_info("UPG : $sql");
 						$this->sql_result = $this->db_link->sql_query($sql,2);
 						if ( $this->sql_result['return_code'] != 200 ){
 							print('upgrade: Failed to execute SQL request : '.$sql."\n<br/><br/>");
@@ -117,7 +118,7 @@ class OVA
 						}
 					}
 
-				if ( $this->sql_query['return_code'] != 200 ){
+				if ( ($this->sql_query['return_code'] != 200) && ($file != "fk.sql") ){
 					$this->update_version(preg_replace("/.sql/","",$file));
 				}
 

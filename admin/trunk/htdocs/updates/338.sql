@@ -8,7 +8,7 @@ DROP TABLE stats_mailbox;
 
 ALTER TABLE `ftpaccount` ADD INDEX ( `whost_id` );
 
-ALTER TABLE `ftpaccount` CHANGE `whost_id` `whost_id` INT( 11 ) UNSIGNED NOT NULL
+ALTER TABLE `ftpaccount` CHANGE `whost_id` `whost_id` INT( 11 ) UNSIGNED NOT NULL;
 
 ALTER TABLE `whost_alias` DROP PRIMARY KEY ,
 ADD PRIMARY KEY (  `id` );
