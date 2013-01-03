@@ -1,20 +1,21 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('createlink-base', function(Y) {
+YUI.add('createlink-base', function (Y, NAME) {
 
 
     /**
-     * Adds prompt style link creation. Adds an override for the <a href="Plugin.ExecCommand.html#method_COMMANDS.createlink">createlink execCommand</a>.
+     * Adds prompt style link creation. Adds an override for the
+     * <a href="Plugin.ExecCommand.html#method_COMMANDS.createlink">createlink execCommand</a>.
      * @class Plugin.CreateLinkBase
      * @static
      * @submodule createlink-base
      * @module editor
      */
-    
+
     var CreateLinkBase = {};
     /**
     * Strings used by the plugin
@@ -87,4 +88,4 @@ YUI.add('createlink-base', function(Y) {
 
 
 
-}, '3.6.0' ,{skinnable:false, requires:['editor-base']});
+}, '3.8.0', {"requires": ["editor-base"]});

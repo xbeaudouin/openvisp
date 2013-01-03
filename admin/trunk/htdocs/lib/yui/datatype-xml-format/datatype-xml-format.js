@@ -1,34 +1,28 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('datatype-xml-format', function(Y) {
+YUI.add('datatype-xml-format', function (Y, NAME) {
 
 /**
- * Format XML submodule.
+ * The Number Utility provides type-conversion and string-formatting
+ * convenience methods for Numbers.
  *
- * @module datatype
+ * @module datatype-xml
  * @submodule datatype-xml-format
  */
 
 /**
- * XML submodule.
+ * XML provides a set of utility functions to operate against XML documents.
  *
- * @module datatype
- * @submodule datatype-xml
- */
-
-/**
- * DataType.XML provides a set of utility functions to operate against XML documents.
- *
- * @class DataType.XML
+ * @class XML
  * @static
  */
 var LANG = Y.Lang;
 
-Y.mix(Y.namespace("DataType.XML"), {
+Y.mix(Y.namespace("XML"), {
     /**
      * Converts data to type XMLDocument.
      *
@@ -38,6 +32,10 @@ Y.mix(Y.namespace("DataType.XML"), {
      */
     format: function(data) {
         try {
+            if(!LANG.isUndefined(data.getXml)) {
+                return data.getXml();
+            }
+
             if(!LANG.isUndefined(XMLSerializer)) {
                 return (new XMLSerializer()).serializeToString(data);
             }
@@ -53,6 +51,8 @@ Y.mix(Y.namespace("DataType.XML"), {
     }
 });
 
+Y.namespace("DataType");
+Y.DataType.XML = Y.XML;
 
 
-}, '3.6.0' );
+}, '3.8.0');

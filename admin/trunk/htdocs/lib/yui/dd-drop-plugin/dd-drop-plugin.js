@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('dd-drop-plugin', function(Y) {
+YUI.add('dd-drop-plugin', function (Y, NAME) {
 
 
        /**
@@ -25,16 +25,16 @@ YUI.add('dd-drop-plugin', function(Y) {
             config.node = config.host;
             Drop.superclass.constructor.apply(this, arguments);
         };
-        
+
         /**
+        * dd-drop-plugin
         * @property NAME
-        * @description dd-drop-plugin
         * @type {String}
         */
         Drop.NAME = "dd-drop-plugin";
         /**
+        * The Drop instance will be placed on the Node instance under the drop namespace. It can be accessed via Node.drop;
         * @property NS
-        * @description The Drop instance will be placed on the Node instance under the drop namespace. It can be accessed via Node.drop;
         * @type {String}
         */
         Drop.NS = "drop";
@@ -47,4 +47,4 @@ YUI.add('dd-drop-plugin', function(Y) {
 
 
 
-}, '3.6.0' ,{skinnable:false, requires:['dd-drop']});
+}, '3.8.0', {"requires": ["dd-drop"]});

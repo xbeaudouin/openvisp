@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('editor-tab', function(Y) {
+YUI.add('editor-tab', function (Y, NAME) {
 
 
     /**
@@ -15,7 +15,7 @@ YUI.add('editor-tab', function(Y) {
      * @module editor
      * @submodule editor-tab
      */
-    
+
     var EditorTab = function() {
         EditorTab.superclass.constructor.apply(this, arguments);
     }, HOST = 'host';
@@ -71,4 +71,4 @@ YUI.add('editor-tab', function(Y) {
     Y.Plugin.EditorTab = EditorTab;
 
 
-}, '3.6.0' ,{skinnable:false, requires:['editor-base']});
+}, '3.8.0', {"requires": ["editor-base"]});

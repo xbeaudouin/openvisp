@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('dump', function(Y) {
+YUI.add('dump', function (Y, NAME) {
 
 /**
  * Returns a simple string representation of the object or array.
@@ -108,4 +108,4 @@ YUI.add('dump', function(Y) {
 
 
 
-}, '3.6.0' ,{requires:['yui-base']});
+}, '3.8.0', {"requires": ["yui-base"]});

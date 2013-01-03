@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('datasource-local', function(Y) {
+YUI.add('datasource-local', function (Y, NAME) {
 
 /**
  * The DataSource utility provides a common configurable interface for widgets to
@@ -401,4 +401,4 @@ Y.extend(DSLocal, Y.Base, {
 Y.namespace("DataSource").Local = DSLocal;
 
 
-}, '3.6.0' ,{requires:['base']});
+}, '3.8.0', {"requires": ["base"]});

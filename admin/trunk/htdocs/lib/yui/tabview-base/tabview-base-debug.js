@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('tabview-base', function(Y) {
+YUI.add('tabview-base', function (Y, NAME) {
 
 var getClassName = Y.ClassNameManager.getClassName,
     TABVIEW = 'tabview',
@@ -30,7 +30,7 @@ var getClassName = Y.ClassNameManager.getClassName,
         tabview: DOT + _classNames.tabview,
         tabviewList: '> ul',
         tab: '> ul > li',
-        tabLabel: '> ul > li > a ',
+        tabLabel: '> ul > li > a',
         tabviewPanel: '> div',
         tabPanel: '> div > div',
         selectedTab: '> ul > ' + DOT + _classNames.selectedTab,
@@ -147,4 +147,4 @@ Y.mix(TabviewBase.prototype, {
 Y.TabviewBase = TabviewBase;
 
 
-}, '3.6.0' ,{requires:['node-event-delegate', 'classnamemanager', 'skin-sam-tabview']});
+}, '3.8.0', {"requires": ["node-event-delegate", "classnamemanager", "skin-sam-tabview"]});

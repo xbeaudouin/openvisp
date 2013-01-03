@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('yui-log-nodejs', function(Y) {
+YUI.add('yui-log-nodejs', function (Y, NAME) {
 
 var sys = require(process.binding('natives').util ? 'util' : 'sys'),
     hasColor = false;
@@ -83,4 +83,4 @@ if (!Y.config.logFn) {
 
 
 
-}, '3.6.0' ,{requires:['yui-log']});
+}, '3.8.0');

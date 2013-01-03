@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('event-key', function(Y) {
+YUI.add('event-key', function (Y, NAME) {
 
 /**
  * Functionality to listen for one or more specific key combinations.
@@ -157,7 +157,7 @@ eventDef.detachDelegate = eventDef.detach;
  * <p>Examples:</p>
  * <ul>
  *   <li><code>Y.on("key", callback, "press:12,65+shift+ctrl", "#my-input");</code></li>
- *   <li><code>Y.delegate("key", preventSubmit, "enter", "#forms", "input[type=text]");</code></li>
+ *   <li><code>Y.delegate("key", preventSubmit, "#forms", "enter", "input[type=text]");</code></li>
  *   <li><code>Y.one("doc").on("key", viNav, "j,k,l,;");</code></li>
  * </ul>
  *   
@@ -174,4 +174,4 @@ eventDef.detachDelegate = eventDef.detach;
 Y.Event.define('key', eventDef, true);
 
 
-}, '3.6.0' ,{requires:['event-synthetic']});
+}, '3.8.0', {"requires": ["event-synthetic"]});

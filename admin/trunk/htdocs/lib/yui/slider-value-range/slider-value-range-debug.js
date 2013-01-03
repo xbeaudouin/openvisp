@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('slider-value-range', function(Y) {
+YUI.add('slider-value-range', function (Y, NAME) {
 
 /**
  * Adds value support for Slider as a range of integers between a configured
@@ -421,4 +421,4 @@ Y.SliderValueRange = Y.mix( SliderValueRange, {
 }, true );
 
 
-}, '3.6.0' ,{requires:['slider-base']});
+}, '3.8.0', {"requires": ["slider-base"]});

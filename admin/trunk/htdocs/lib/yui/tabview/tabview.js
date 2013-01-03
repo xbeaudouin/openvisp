@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('tabview', function(Y) {
+YUI.add('tabview', function (Y, NAME) {
 
 /**
  * The TabView module 
@@ -404,4 +404,14 @@ Y.Tab = Y.Base.create('tab', Y.Widget, [Y.WidgetChild], {
 });
 
 
-}, '3.6.0' ,{requires:['node-pluginhost', 'node-focusmanager', 'tabview-base', 'widget', 'widget-parent', 'widget-child']});
+}, '3.8.0', {
+    "requires": [
+        "widget",
+        "widget-parent",
+        "widget-child",
+        "tabview-base",
+        "node-pluginhost",
+        "node-focusmanager"
+    ],
+    "skinnable": true
+});

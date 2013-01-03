@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('pjax-base', function(Y) {
+YUI.add('pjax-base', function (Y, NAME) {
 
 /**
 `Y.Router` extension that provides the core plumbing for enhanced navigation
@@ -38,7 +38,7 @@ var win = Y.config.win,
       even in browsers without HTML5 history.
     @param {String} [hash] The hash-fragment (including "#") of the `url`. This
       will be present when the `url` differs from the current URL only by its
-      hash and `navigateOnHash` has ben set to `true`.
+      hash and `navigateOnHash` has been set to `true`.
     @param {Event} [originEvent] The event that caused the navigation. Usually
       this would be a click event from a "pjax" anchor element.
     @param {Boolean} [replace] Whether or not the current history entry will be
@@ -112,7 +112,9 @@ PjaxBase.prototype = {
     },
 
     destructor: function () {
-        this._pjaxEvents && this._pjaxEvents.detach();
+        if (this._pjaxEvents) {
+            this._pjaxEvents.detach();
+        }
     },
 
     // -- Public Methods -------------------------------------------------------
@@ -169,7 +171,7 @@ PjaxBase.prototype = {
     the same origin as the page's current location.
 
     This normalize browser inconsistencies with how the `port` is reported for
-    anchor elements (IE reports a value for the defualt port, e.g. "80").
+    anchor elements (IE reports a value for the default port, e.g. "80").
 
     @method _isLinkSameOrigin
     @param {Node} link The anchor element to test whether its `href` is of the
@@ -242,7 +244,7 @@ PjaxBase.prototype = {
         // Make a copy of `options` before modifying it.
         options = Y.merge(options, {url: url});
 
-        var currentURL = this._upgradeURL(this._getURL()),
+        var currentURL = this._getURL(),
             hash, hashlessURL;
 
         // Captures the `url`'s hash and returns a URL without that hash.
@@ -271,11 +273,11 @@ PjaxBase.prototype = {
         // on `window.location`.
         if (this.get('html5') || options.force) {
             this.fire(EVT_NAVIGATE, options);
-        } else {
+        } else if (win) {
             if (options.replace) {
-                win && win.location.replace(url);
+                win.location.replace(url);
             } else {
-                win && (win.location = url);
+                win.location = url;
             }
         }
 
@@ -347,7 +349,7 @@ PjaxBase.prototype = {
     @since 3.5.0
     **/
     _onLinkClick: function (e) {
-        var link, url;
+        var link, url, navigated;
 
         // Allow the native behavior on middle/right-click, or when Ctrl or
         // Command are pressed.
@@ -372,7 +374,13 @@ PjaxBase.prototype = {
 
         // Try and navigate to the URL via the router, and prevent the default
         // link-click action if we do.
-        url && this._navigate(url, {originEvent: e}) && e.preventDefault();
+        if (url) {
+            navigated = this._navigate(url, {originEvent: e});
+
+            if (navigated) {
+                e.preventDefault();
+            }
+        }
     }
 };
 
@@ -434,4 +442,4 @@ PjaxBase.ATTRS = {
 Y.PjaxBase = PjaxBase;
 
 
-}, '3.6.0' ,{requires:['classnamemanager', 'node-event-delegate', 'router']});
+}, '3.8.0', {"requires": ["classnamemanager", "node-event-delegate", "router"]});

@@ -1,10 +1,10 @@
 /*
-YUI 3.6.0 (build 5521)
+YUI 3.8.0 (build 5744)
 Copyright 2012 Yahoo! Inc. All rights reserved.
 Licensed under the BSD License.
 http://yuilibrary.com/license/
 */
-YUI.add('loader-rollup', function(Y) {
+YUI.add('loader-rollup', function (Y, NAME) {
 
 /**
  * Optional automatic rollup logic for reducing http connections
@@ -73,7 +73,7 @@ Y.Loader.prototype._rollup = function() {
                         // increment the counter if this module is required.
                         // if we are beyond the rollup threshold, we will
                         // use the rollup module
-                        } else if (r[s[j]] && m.type == smod.type) {
+                        } else if (r[s[j]] && m.type === smod.type) {
                             c++;
                             // Y.log("adding to thresh: " + c + ", " + s[j]);
                             roll = (c >= m.rollup);
@@ -105,4 +105,4 @@ Y.Loader.prototype._rollup = function() {
 };
 
 
-}, '3.6.0' ,{requires:['loader-base']});
+}, '3.8.0', {"requires": ["loader-base"]});
