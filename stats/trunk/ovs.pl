@@ -372,7 +372,7 @@ use File::Tail;
 use Getopt::Long;
 use POSIX 'setsid';
 
-my $VERSION = "1.05";
+my $VERSION = "1.06";
 
 # config
 my $rrdstep = 60;
@@ -656,7 +656,7 @@ sub process_line($)
 				event($time, 'bounced');
 			}
 		}
-		elsif($prog eq 'smtpd' or $prog eq 'postscreen') {
+		elsif($prog eq 'smtpd') {
 			if($text =~ /^[0-9A-Za-z]+: client=(\S+)/) {
 				my $client = $1;
 				return if $opt{'ignore-localhost'} and
@@ -735,6 +735,20 @@ sub process_line($)
 		elsif($prog eq 'cleanup') {
 			if($text =~ /^[0-9A-Za-z]+: (?:reject|discard): /) {
 				event($time, 'rejected');
+			}
+		}
+		elsif($prog eq 'postscreen') {
+			if($text =~ /NOQUEUE: reject:/) {
+				event($time, 'spam');
+			}
+			elsif($text =~ /DISCONNECT/) {
+				event($time, 'spam');
+			}
+			elsif($text =~ /HANGUP/) {
+				event($time, 'greylist');
+			}
+			elsif($text =~ /PREGREET/) {
+				event($time, 'greylist');
 			}
 		}
 	}
@@ -991,6 +1005,11 @@ sub process_line($)
 	elsif($prog eq 'sta_scanner') {
 		if($text =~ /^[0-9A-F]+: virus/) {
 			event($time, 'virus');
+		}
+	}
+	elsif($prog eq 'clapf') {
+		if($text =~ /SPAM/) {
+			event($time, 'spam');
 		}
 	}
 	# Courrier IMAP
