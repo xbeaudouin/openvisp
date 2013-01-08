@@ -740,9 +740,11 @@ sub process_line($)
 		elsif($prog eq 'postscreen') {
 			if($text =~ /NOQUEUE: reject:/) {
 				event($time, 'spam');
+				event($time, 'rejected');
 			}
 			elsif($text =~ /DISCONNECT/) {
 				event($time, 'spam');
+				event($time, 'rejected');
 			}
 			elsif($text =~ /HANGUP/) {
 				event($time, 'greylist');
