@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
         // If we don't use cryptograph, then start the session
         session_start(); 
       }
-      session_register("sessid");
+      ova_session_register("sessid");
       $absoluteuri = OVA_getabsoluteuri();
       switch ($user_priv) {
       	case "superadmin": 
