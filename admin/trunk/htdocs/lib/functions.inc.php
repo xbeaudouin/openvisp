@@ -1127,16 +1127,10 @@ function check_email ($email)
 //
 function escape_string ($string)
 {
-   if (get_magic_quotes_gpc () == 0)
-   {
-      $search = array ("/'/", "/\"/", "/;/");
-      $replace = array ("\\\'", "\\\"", "\\;");
-      $escaped_string = preg_replace ($search, $replace, $string); 
-   }
-   else
-   {
-       $escaped_string = $string;
-   }
+   $search = array ("/'/", "/\"/", "/;/");
+   $replace = array ("\\\'", "\\\"", "\\;");
+   $escaped_string = preg_replace ($search, $replace, $string); 
+
    return $escaped_string;
 }
 
