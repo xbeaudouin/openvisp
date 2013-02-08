@@ -50,7 +50,7 @@ if (($CONF['show_footer_text'] == "YES") and ($CONF['footer_link']))
 </center>
 
 <?php
-  if ( session_is_registered ("sessid") ){
+  if ( ova_session_is_registered ("sessid") ){
 ?>
 <?php
   }

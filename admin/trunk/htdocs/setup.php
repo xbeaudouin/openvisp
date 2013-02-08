@@ -26,7 +26,6 @@ function check_php() {
   /* Check for availablilty functions */
   $f_phpversion = function_exists ("phpversion");
   $f_apache_get_version = function_exists ("apache_get_version");
-  $f_get_magic_quotes_gpc = function_exists ("get_magic_quotes_gpc");
   $f_fileowner = function_exists ("fileowner");
   $f_posix_getpwuid = function_exists ("posix_getpwuid");
   $f_mysql_connect = function_exists ("mysql_connect");
@@ -60,28 +59,7 @@ function check_php() {
   }
   else
   {
-     print "<li><b>Unable to check for Apache version. (missing function: apache_get_version())</b><br />\n";
-  }
-  print "<p />\n";
-
-  print "Checking for dependencies:<br />\n";
-  print "<p />\n";
-
-  /* Check for Magic Quotes */
-  if ($f_get_magic_quotes_gpc == 1)
-  {
-     if (get_magic_quotes_gpc () == 1)
-     {
-        print "- Magic Quotes: ON<br /><p />\n";
-     }
-     else
-     {
-        print "<li><b>Warning: Magic Quotes: OFF (using internal function!)</b><br /><p />\n";   
-     }
-  }
-  else
-  {
-     print "<li><b>Unable to check for Magic Quotes. (missing function: get_magic_quotes_gpc())</b><br />\n";
+     print "<li><b>Unable to check for Apache version. (missing function: apache_get_version())</b> maybe you don't use Apache (good !)<br />\n";
   }
   print "<p />\n";
 
