@@ -24,7 +24,7 @@ function check_session ()
     session_start ();
   }
    
-   if (!session_is_registered ("sessid"))
+   if (!ova_session_is_registered ("sessid"))
    {
       redirect_login();
       exit;
@@ -2760,12 +2760,10 @@ function md5crypt ($pw, $salt="", $magic="")
    $salt = substr ($salt, 0, 8);
    $ctx = $pw . $magic . $salt;
    $final = ova_hex2bin (md5 ($pw . $salt . $pw));
-<<<<<<< .merge_file_hEtRQt
+
    file_put_contents('php://stderr', "DEBUG OVA ova_hex2bin".ova_hex2bin (md5 ($pw . $salt . $pw))."\n");
    file_put_contents('php://stderr', "DEBUG OVA php_hex2bin".hex2bin (md5 ($pw . $salt . $pw))."\n");
-=======
 
->>>>>>> .merge_file_tmFFjG
    for ($i=strlen ($pw); $i>0; $i-=16)
    {
       if ($i > 16)
