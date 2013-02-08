@@ -2765,8 +2765,9 @@ function md5crypt ($pw, $salt="", $magic="")
 
    $salt = substr ($salt, 0, 8);
    $ctx = $pw . $magic . $salt;
-   $final = hex2bin (md5 ($pw . $salt . $pw));
-
+   $final = ova_hex2bin (md5 ($pw . $salt . $pw));
+   file_put_contents('php://stderr', "DEBUG OVA ova_hex2bin".ova_hex2bin (md5 ($pw . $salt . $pw))."\n");
+   file_put_contents('php://stderr', "DEBUG OVA php_hex2bin".hex2bin (md5 ($pw . $salt . $pw))."\n");
    for ($i=strlen ($pw); $i>0; $i-=16)
    {
       if ($i > 16)
@@ -2786,7 +2787,7 @@ function md5crypt ($pw, $salt="", $magic="")
       else $ctx .= $pw[0];
       $i = $i >> 1;
    }
-   $final = hex2bin (md5 ($ctx));
+   $final = ova_hex2bin (md5 ($ctx));
 
    for ($i=0;$i<1000;$i++)
    {
@@ -2809,7 +2810,7 @@ function md5crypt ($pw, $salt="", $magic="")
       {
          $ctx1 .= $pw;
       }
-      $final = hex2bin (md5 ($ctx1));
+      $final = ova_hex2bin (md5 ($ctx1));
    }
    $passwd = "";
    $passwd .= to64 (((ord ($final[0]) << 16) | (ord ($final[6]) << 8) | (ord ($final[12]))), 4);
@@ -2829,7 +2830,7 @@ function create_salt ()
    return $salt;
 }
 
-function hex2bin ($str)
+function ova_hex2bin ($str)
 {
    $len = strlen ($str);
    $nstr = "";
