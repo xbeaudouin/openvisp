@@ -44,7 +44,7 @@
       
         <!-- Domain Menu -->
 <?php
-  if ( check_domain_admin($SESSID_USERNAME) ){
+  if ( $user_info->check_domain_admin("0") ){
 ?>
         <li>
           <a class="yui3-menu-label" href="#"><?php print $PALANG['pYMenu_domain'];?></a>
@@ -59,7 +59,6 @@
                 </li>
 
 <?php
-    if ( $user_info->rights['domain'] == 1){
       $domain_overquota = 1;
       if ( ( $user_info->data_managed['domains'] < $user_info->data_quota['domains'] ) || $user_info->data_quota['domains'] == "-1" ) {
         $domain_overquota = 0;
@@ -78,7 +77,7 @@
 
 <?php
       }
-    }
+
 ?>
 
               </ul>
@@ -91,7 +90,7 @@
 <?php
   }
 
-  if ( $user_info->check_domain_admin("0") ){
+  if ( $user_info->check_mail_admin("0") ){
 ?>
 
         <!-- Mail Menu -->
@@ -151,9 +150,9 @@
         </li>
 
 <?php
-    
   }
 
+  if ( $user_info->check_hosting_admin("0") ){
 ?>
 
         <!-- Hosting Menu -->
@@ -201,6 +200,12 @@
           </div>
         </li>
 
+<?php
+  }
+
+  if ( $user_info->check_datacenter_admin("0") ){
+?>
+
 
         <!-- Datacenter Menu -->
 
@@ -230,7 +235,11 @@
           </div>
         </li>
 
+<?php
+  }
 
+  if ( $user_info->check_ova_admin("0") ){
+?>
         <!-- OVA Menu-->                                                                                                                                                                           
    
         <li>
@@ -260,6 +269,12 @@
           </div>
         </li>
 
+<?php
+  }
+
+  if ( $user_info->username != "admin@ova.local" ){
+
+?>
         <li><span style="padding-left:240px"></span>
         </li>
 
@@ -272,8 +287,13 @@
         <li><span style="padding-left:30px"></span>
         </li>
         <li>
-          <span id="CurDomain">Current domain : <?php if(isset($_SESSION['sessid']['wdomain'])){print $_SESSION['sessid']['wdomain'];} ?></span>
+          <span id="CurDomain">Current domain : <?php if (isset($_SESSION['sessid']['wdomain'])){print $_SESSION['sessid']['wdomain'];} ?></span>
         </li>
+
+<?php
+  }
+
+?>        
         
       </ul>
     </div>
@@ -296,7 +316,7 @@
 
 print "<center>\n";
 
-if ( isset($SESSID_USERNAME)){
+if ( (isset($SESSID_USERNAME)) && ($user_info->username != "admin@ova.local") ){
 
 
 
@@ -304,24 +324,25 @@ if ( isset($SESSID_USERNAME)){
 
   if ( $user_info->rights['manage'] == 1 ){
 
-    echo "Domain ".$user_info->data_managed['domains']."/&infin;, ";
-    echo "Mailboxes ".$user_info->data_managed['mailboxes']."/&infin;, ";
-    echo "Aliases ".$user_info->data_managed['aliases']."/&infin;, ";
-    echo "WebHost ".$user_info->data_managed['web_host']."/&infin;, ";
-    echo "FTP ".$user_info->data_managed['ftp_account']."/&infin;, ";
-    echo "DB ".($user_info->data_managed['mysql_db']+$user_info->data_managed['pgsql_db'])."/&infin;, ";
-    echo "DB Users ".($user_info->data_managed['mysql_user']+$user_info->data_managed['pgsql_user'])."/&infin;, ";
+    print "Domain ".$user_info->data_managed['domains']."/&infin;, ";
+    print "Mailboxes ".$user_info->data_managed['mailboxes']."/&infin;, ";
+    print "Aliases ".$user_info->data_managed['aliases']."/&infin;, ";
+    print "WebHost ".$user_info->data_managed['web_host']."/&infin;, ";
+    print "FTP ".$user_info->data_managed['ftp_account']."/&infin;, ";
+    print "DB ".($user_info->data_managed['mysql_db']+$user_info->data_managed['pgsql_db'])."/&infin;, ";
+    print "DB Users ".($user_info->data_managed['mysql_user']+$user_info->data_managed['pgsql_user'])."/&infin;, ";
  
   }
   else{
 
-    echo "Domain  ".$user_info->total_managed_domain."/".$user_info->data_quota['domains']."\n";
-    echo "Mailbox ";
+    print "Domain  ".$user_info->total_managed_domain."/".$user_info->data_quota['domains']."\n";
+    print "Mailbox ";
 
   }
 
+
+  //Storage 20/80G,
   print "<br/>
-  Storage 20/80G,
   <hr>";
 }
 
