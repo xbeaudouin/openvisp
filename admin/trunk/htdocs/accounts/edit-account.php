@@ -32,15 +32,18 @@ require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
 
-
-$SESSID_USERNAME = check_admin_session();
 
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
+$ova = new OVA($ovadb); 
+
+$SESSID_USERNAME = $ova->check_session();
+
 $user_info->fetch_info($SESSID_USERNAME);
-$user_info->check_domain_admin();
+$user_info->check_ova_admin();
 $user_info->fetch_active_domains();
 
 $domain_info = new DOMAIN($ovadb);
@@ -48,16 +51,16 @@ $domain_info = new DOMAIN($ovadb);
 $user_info->fetch_quota_status();
 
 
-$account_information = get_account_info($SESSID_USERNAME);
-$account_quota = get_account_quota($account_information['id']);
-$account_rights = get_account_right($account_information['id']);
-$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
+//$account_information = get_account_info($SESSID_USERNAME);
+//$account_quota = get_account_quota($account_information['id']);
+//$account_rights = get_account_right($account_information['id']);
+//$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
 
 $body_class = 'class="yui3-skin-sam"';
 
 
-if ($_SERVER['REQUEST_METHOD'] == "GET")
-{
+
+if ($_SERVER['REQUEST_METHOD'] == "GET"){
    $username = get_get('username');
    $list_domains = list_domains_local ();
    $tDomains = list_domains_for_users($username);
@@ -74,9 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
    include ("../templates/footer.tpl");
 }
 
-if ($_SERVER['REQUEST_METHOD'] == "POST")
-{
+if ($_SERVER['REQUEST_METHOD'] == "POST"){
+   
    $username           = get_post('username');
+   $list_domains = list_domains_local ();
+   
    $account_information= get_account_info($username);
    $fPassword1         = get_post('fPassword1');
    $fPassword2         = get_post('fPassword2');
@@ -159,26 +164,26 @@ WHERE username='$username'");
 
 
       if ( $fManage == "on" ){
-	transform_sadmin($account_information['id'], $account_information['id']);
+      	transform_sadmin($account_information['id'], $account_information['id']);
       } else {
-	update_right_admin($account_information['id'],	$fMail,$fDomains,$fDatacenter,$fFTP,$fHTTP,$fMysql,$fPostgresql);
-	update_quota_admin($account_information['id'],	$fNmysqlusers, $fNmysqldb, $fNpostgresqlusers, $fNpostgresqldb, $fNdomains,
+      	update_right_admin($account_information['id'],	$fMail,$fDomains,$fDatacenter,$fFTP,$fHTTP,$fMysql,$fPostgresql);
+      	update_quota_admin($account_information['id'],	$fNmysqlusers, $fNmysqldb, $fNpostgresqlusers, $fNpostgresqldb, $fNdomains,
 										 $fNwebsite, $fNwebsitealias, $fNftpaccount, $fNbemail, $fNbemailalias, $fDiskspace);
       }
       if ( $fDCManage == "on" ) {
-	transform_datacenter_sadmin($account_information['id'],1);
+      	transform_datacenter_sadmin($account_information['id'],1);
       } else {
-	transform_datacenter_sadmin($account_information['id'],0);
+      	transform_datacenter_sadmin($account_information['id'],0);
       }
 
       if (isset ($fDomainslist[0]))
       {
-	$result = db_query ("DELETE FROM domain_admins WHERE accounts_id='".$account_information['id']."'");
-	for ($i = 0; $i < sizeof ($fDomainslist); $i++)
-	{
-		$domain = $fDomainslist[$i];
-		$result = db_query ("INSERT INTO domain_admins (accounts_id,domain_id,created) VALUES ('".$account_information['id']."','$domain',NOW())");
-	}
+      	$result = db_query ("DELETE FROM domain_admins WHERE accounts_id='".$account_information['id']."'");
+      	for ($i = 0; $i < sizeof ($fDomainslist); $i++)
+      	{
+      		$domain = $fDomainslist[$i];
+      		$result = db_query ("INSERT INTO domain_admins (accounts_id,domain_id,created) VALUES ('".$account_information['id']."','$domain',NOW())");
+      	}
       }
 
       header("Location: list-accounts.php");

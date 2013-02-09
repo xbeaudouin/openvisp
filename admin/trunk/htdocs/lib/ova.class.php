@@ -396,7 +396,7 @@ class OVA
   //
   // redirect_logout()
   // Action: redirect to login page and exit
-  // call: redirect_login();
+  // call: redirect_logout();
   //
   function redirect_logout(){
      // $path = getrelativepath(dirname(__FILE__));   
@@ -425,6 +425,7 @@ class OVA
     }
 
     if ( ! $this->ova_session_is_registered("sessid")){
+      $this->debug_info("Session not registered redirect to login ");
       $this->redirect_login();
       exit;
     }

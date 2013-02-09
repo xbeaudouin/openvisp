@@ -197,7 +197,7 @@
       <td>Disk Space</td>
 		  <td align="right">&nbsp;</td>
       <td align="right">
-        UNK / <input type="text" name="fDiskspace" value="<?php print $account_quota['diskspace'];?>" size="7">
+        UNK / <input type="text" name="fDiskspace" value="<?php print $user_info->data_quota['diskspace'];?>" size="7">
 			</td>
    </tr>
    <tr>
@@ -207,14 +207,14 @@
         <input type="checkbox" name="fMail" <?php print $checked;?> />
       </td>
       <td align="right">
-        <?php print $total_used['emails'];?> / <input type="text" name="fNbmail" value="<?php print $account_quota['emails'];?>" size="7">
+        <?php print $user_info->data_managed['mailboxes'];?> / <input type="text" name="fNbmail" value="<?php print $user_info->data_quota['mailboxes'];?>" size="7">
 			</td>
    </tr>
    <tr>
       <td>Email Aliases</td>
       <td>&nbsp;</td>
       <td align="right">
-        <?php print $total_used['emailsaliases'];?> / <input type="text" name="fNbmailalias" value="<?php print $account_quota['emails_alias'];?>" size="7">
+        <?php print $user_info->data_managed['aliases'];?> / <input type="text" name="fNbmailalias" value="<?php print $user_info->data_quota['aliases'];?>" size="7">
 			</td>
    </tr>
    <tr>
@@ -234,7 +234,7 @@
         <input type="checkbox" name="fFtp" <?php print $checked; ?> />
       </td>
       <td align="right">
-	 <?php print $total_used['ftp'];?>  / <input type="text" name="fNftpaccount" value="<?php print $account_quota['ftp'];?>" size="7">
+	 <?php print $user_info->data_managed['ftp_account'];?>  / <input type="text" name="fNftpaccount" value="<?php print $user_info->data_quota['ftp'];?>" size="7">
 			</td>
    </tr>
    <tr>
@@ -244,7 +244,7 @@
         <input type="checkbox" name="fWebsite" <?php print $checked; ?> />
       </td>
       <td align="right">
-	 <?php print $total_used['http'];?> / <input type="text" name="fNwebsite" value="<?php print $account_quota['http'];?>" size="7">
+	 <?php print $user_info->data_managed['web_host'];?> / <input type="text" name="fNwebsite" value="<?php print $user_info->data_quota['http'];?>" size="7">
 			</td>
    </tr>
 
@@ -252,7 +252,7 @@
       <td>Web Site Alias</td>
       <td>&nbsp;</td>
       <td align="right">
-       <?php print $total_used['http_alias'];?> / <input type="text" name="fNwebsitealias" value="<?php print $account_quota['http_alias'];?>" size="7">
+       / <input type="text" name="fNwebsitealias" value="<?php print $user_info->data_quota['http_alias'];?>" size="7">
 			</td>
    </tr>
 
@@ -263,7 +263,7 @@
 	 <input type="checkbox" name="fDomains" <?php print $checked; ?> />
       </td>
       <td align="right">
-	 <?php print $total_used['domains'];?> / <input type="text" name="fNdomains" value="<?php print $account_quota['domains'];?>" size="7">
+	 <?php print $user_info->data_managed['domains'];?> / <input type="text" name="fNdomains" value="<?php print $user_info->data_quota['domains'];?>" size="7">
 			</td>
    </tr>
 
@@ -274,7 +274,7 @@
         <input type="checkbox" name="fMysql" <?php print $checked; ?> />
       </td>
       <td align="right">
-	 <?php print $total_used['mysqldb'];?> / <input type="text" name="fNmysqldb" value="<?php print $account_quota['mysqldb'];?>" size="7">
+	 <?php print $user_info->data_managed['mysql_db'];?> / <input type="text" name="fNmysqldb" value="<?php print $user_info->data_quota['mysqldb'];?>" size="7">
 			</td>
    </tr>
 
@@ -282,7 +282,7 @@
       <td>Mysql Users</td>
       <td>&nbsp;</td>
       <td align="right">
-	 <?php print $total_used['mysqlusers'];?> / <input type="text" name="fNmysqlusers" value="<?php print $account_quota['mysqlusers'];?>" size="7">
+	 <?php print $user_info->data_managed['mysql_user'];?> / <input type="text" name="fNmysqlusers" value="<?php print $user_info->data_quota['mysqlusers'];?>" size="7">
 			</td>
    </tr>
 
@@ -293,7 +293,7 @@
         <input type="checkbox" name="fPostgresql" <?php print $checked; ?> />
       </td>
       <td align="right">
-	 <?php print $total_used['postgresqldb'];?> / <input type="text" name="fNpostgresqldb" value="<?php print $account_quota['postgresqldb'];?>" size="7">
+	 <?php print $user_info->data_managed['pgsql_db'];?> / <input type="text" name="fNpostgresqldb" value="<?php print $user_info->data_quota['postgresqldb'];?>" size="7">
 			</td>
    </tr>
 
@@ -301,7 +301,7 @@
       <td>Mysql Users</td>
       <td>&nbsp;</td>
       <td align="right">
-	 <?php print $total_used['postgresqlusers'];?> / <input type="text" name="fNpostgresqlusers" value="<?php print $account_quota['postgresqlusers'];?>" size="7">
+	 <?php print $user_info->data_managed['pgsql_user'];?> / <input type="text" name="fNpostgresqlusers" value="<?php print $user_info->data_quota['postgresqlusers'];?>" size="7">
 			</td>
    </tr>
 
@@ -341,7 +341,10 @@
 
 for ($i = 0; $i < sizeof ($list_domains); $i++)
 {  
-	if (in_array ($list_domains[$i]['domain'], $tDomains) and ($tDomains['0'] != "ALL" ) and (!(check_admin($username))) )
+	if (in_array ($list_domains[$i]['domain'], $tDomains) 
+      and ($tDomains['0'] != "ALL" )
+      and (!($user_info->check_ova_admin()))
+     )
    {
       print "<option value=\"" . $list_domains[$i]['id'] . "\" selected=\"selected\">" . $list_domains[$i]['domain'] . "</option>\n";
    }

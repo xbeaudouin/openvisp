@@ -390,8 +390,7 @@ class USER
 				if ( $destroy == 1 ){
 					session_unset ();
 					session_destroy ();
-					header ("Location: ../login.php");
-					exit;
+					$ova->redirect_logout();
 				}
 				return FALSE;
 	    }
@@ -410,8 +409,7 @@ class USER
   		if ( $exit == 1 ){
 	      session_unset ();
 	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+				$ova->redirect_logout();
   		}
   		return 0;
 	  }
@@ -429,8 +427,7 @@ class USER
   		if ( $exit == 1 ){
 	      session_unset ();
 	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+				$ova->redirect_logout();
   		}
   		return 0;
 	  }
@@ -448,8 +445,7 @@ class USER
   		if ( $exit == 1 ){
 	      session_unset ();
 	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+				$ova->redirect_logout();
   		}
   		return 0;
 	  }
@@ -467,8 +463,7 @@ class USER
   		if ( $exit == 1 ){
 	      session_unset ();
 	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+				$ova->redirect_logout();
   		}
   		return 0;
 	  }
@@ -486,8 +481,7 @@ class USER
   		if ( $exit == 1 ){
 	      session_unset ();
 	      session_destroy ();
-	      header ("Location: ../login.php");
-	      exit;
+				$ova->redirect_logout();
   		}
   		return 0;
 	  }
