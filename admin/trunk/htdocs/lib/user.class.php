@@ -5,44 +5,66 @@ class USER
 
 	private $db_link;
 	
-	function __construct ($db_link)
-	{
+	function __construct ($db_link){
 		$this->db_link = $db_link;
 		$this->remote_host = $_SERVER['REMOTE_ADDR'];
 	}
 
 
-	function fetch_info($username)
-	{
+	function fetch_info($username){
 
 		global $PALANG;
 
 		$query = "SELECT * FROM accounts WHERE username='$username'";
 		$result = $this->db_link->sql_query($query);
-		$this->data = $result['result'][0];
-		$this->total_row = $result['rows'];
-		$this->username = $username;
-		$this->fetch_rights();
-		$this->fetch_quota();
+
+		if ( $result['rows'] == 1 ){
+			$this->data = $result['result'][0];
+			$this->total_row = $result['rows'];
+			$this->username = $username;
+			$this->usertype = "ova";
+			$this->fetch_rights();
+			$this->fetch_quota();
+		}
+		else{
+			$query = "SELECT * FROM mailbox WHERE username='$username'";
+			$result = $this->db_link->sql_query($query);
+			$this->$data = $result['result'][0];
+			$this->total_row = $result['rows'];
+			$this->username = $username;
+			$this->usertype = "mailbox";
+		}
 	}
 
-	function fetch_rights()
-	{
+	//
+	// check_passwd
+	// Action: check user password
+	// Call: check_passwd(string)
+	//
+	function check_passwd($passwd){
+		global $ova;
+		if ( $this->data['password'] == $ova->pacrypt($passwd,$this->data['password']) ){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	function fetch_rights(){
 		$query = "SELECT * FROM rights WHERE accounts_id = ".$this->data['id'];
 		$result = $this->db_link->sql_query($query);
 		$this->rights = $result['result'][0];
 	}
 
-	function fetch_quota()
-	{
+	function fetch_quota(){
 		$query = "SELECT * FROM quota WHERE accounts_id = ".$this->data['id'];
 		$result = $this->db_link->sql_query($query);
 		$this->data_quota = $result['result'][0];
 	}
 
 
-	function check_access($part)
-	{
+	function check_access($part){
 		if ( $this->rights[$part] != 1 )
 			{
 				throw new Exception ("DSL vous n'avez pas les droits de gerer la partie $part");
@@ -55,23 +77,20 @@ class USER
 	// This function list the domain associated with the user account
 	// Call fetch_domains()
 
-	function fetch_domains($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL)
-	{
-		if ( $this->rights['manage'] == 1 )
-			{
-				$query = "SELECT domain.domain, domain.id, domain.modified
-				FROM domain
-				WHERE domain.domain != 'ova.local'
-        ";
-			}
-		else
-			{
-				$query = "SELECT domain.domain, domain.id, domain.modified
-				FROM domain, domain_admins
-				WHERE domain_admins.accounts_id = ".$this->data['id']."
-				AND domain_admins.domain_id=domain.id
-				";
-			}
+	function fetch_domains($search_param = NULL, $result_limit = NULL, $order_by_field = NULL, $order_dir = NULL){
+		if ( $this->rights['manage'] == 1 ){
+			$query = "SELECT domain.domain, domain.id, domain.modified
+			FROM domain
+			WHERE domain.domain != 'ova.local'
+      ";
+		}
+		else{
+			$query = "SELECT domain.domain, domain.id, domain.modified
+			FROM domain, domain_admins
+			WHERE domain_admins.accounts_id = ".$this->data['id']."
+			AND domain_admins.domain_id=domain.id
+			";
+		}
 
 		if ( $search_param != NULL ){
 		  $query .= "AND domain.domain like '".$search_param."%' ";
@@ -387,18 +406,93 @@ class USER
 	//
 	function check_domain_admin($exit=1)
 	{
-	  if ( $this->rights['domain'] != 1) {
-	  		if ( $exit == 1 ){
-		      session_unset ();
-		      session_destroy ();
-		      header ("Location: ../login.php");
-		      exit;
-	  		}
-	  		return 0;
+  	if ( $this->rights['domain'] != 1){
+  		if ( $exit == 1 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+  		}
+  		return 0;
 	  }
 	  return 1;
 	}
 
+	//
+	// check_mail_admin
+	// Action: Check if user is a mail admin or exit
+	// Call: check_mail_admin
+	//
+	function check_mail_admin($exit=1)
+	{
+  	if ( $this->rights['mail'] != 1){
+  		if ( $exit == 1 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+  		}
+  		return 0;
+	  }
+	  return 1;
+	}
+
+	//
+	// check_hosting_admin
+	// Action: Check if user is a hosting admin or exit
+	// Call: check_hosting_admin
+	//
+	function check_hosting_admin($exit=1)
+	{
+  	if ( $this->rights['http'] != 1){
+  		if ( $exit == 1 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+  		}
+  		return 0;
+	  }
+	  return 1;
+	}
+
+	//
+	// check_datacenter_admin
+	// Action: Check if user is a datacenter admin or exit
+	// Call: check_datacenter_admin
+	//
+	function check_datacenter_admin($exit=1)
+	{
+  	if ( $this->rights['datacenter'] != 1){
+  		if ( $exit == 1 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+  		}
+  		return 0;
+	  }
+	  return 1;
+	}
+
+	//
+	// check_ova_admin
+	// Action: Check if user is a ova admin or exit
+	// Call: check_ova_admin
+	//
+	function check_ova_admin($exit=1)
+	{
+  	if ( $this->rights['manage'] != 1){
+  		if ( $exit == 1 ){
+	      session_unset ();
+	      session_destroy ();
+	      header ("Location: ../login.php");
+	      exit;
+  		}
+  		return 0;
+	  }
+	  return 1;
+	}
 
 	function all_user_mailbox_size(){
 
