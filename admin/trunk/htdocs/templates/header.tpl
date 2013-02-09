@@ -18,7 +18,7 @@
 
   <body <?php if (isset($body_class)) print $body_class; ?>>
   <?php
-    if ( ova_session_is_registered ("sessid") ){
+    if ( $ova->ova_session_is_registered("sessid") ){
       if ( $CONF['YUI_DEBUG'] == "YES" ){
         print load_js ("../lib/yui/yui/yui.js");
       }
@@ -44,7 +44,7 @@
       
         <!-- Domain Menu -->
 <?php
-  if ( $user_info->check_domain_admin("0") ){
+      if ( $user_info->check_domain_admin("0") ){
 ?>
         <li>
           <a class="yui3-menu-label" href="#"><?php print $PALANG['pYMenu_domain'];?></a>
@@ -60,8 +60,8 @@
 
 <?php
       $domain_overquota = 1;
-      if ( ( $user_info->data_managed['domains'] < $user_info->data_quota['domains'] ) || $user_info->data_quota['domains'] == "-1" ) {
-        $domain_overquota = 0;
+        if ( ( $user_info->data_managed['domains'] < $user_info->data_quota['domains'] ) || $user_info->data_quota['domains'] == "-1" ) {
+          $domain_overquota = 0;
 ?>
                 <li class="yui3-menuitem">
                   <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>domain/create-domain.php"><?php print $PALANG['pAdminMenu_create_domain'];?></a>
@@ -76,7 +76,7 @@
                 </li>
 
 <?php
-      }
+        } //( ( $user_info->data_managed['domains'] < $user_info->data_quota['domains'] ) || $user_info->data_quota['domains'] == "-1" ) {
 
 ?>
 
@@ -88,9 +88,9 @@
         </li>
 
 <?php
-  }
+      } // if ( $user_info->check_domain_admin("0") ){
 
-  if ( $user_info->check_mail_admin("0") ){
+      if ( $user_info->check_mail_admin("0") ){
 ?>
 
         <!-- Mail Menu -->
@@ -150,9 +150,9 @@
         </li>
 
 <?php
-  }
+      } //  if ( $user_info->check_mail_admin("0") ){
 
-  if ( $user_info->check_hosting_admin("0") ){
+      if ( $user_info->check_hosting_admin("0") ){
 ?>
 
         <!-- Hosting Menu -->
@@ -201,9 +201,9 @@
         </li>
 
 <?php
-  }
+      } // if ( $user_info->check_hosting_admin("0") ){
 
-  if ( $user_info->check_datacenter_admin("0") ){
+      if ( $user_info->check_datacenter_admin("0") ){
 ?>
 
 
@@ -236,9 +236,9 @@
         </li>
 
 <?php
-  }
+      } // if ( $user_info->check_datacenter_admin("0") ){
 
-  if ( $user_info->check_ova_admin("0") ){
+      if ( $user_info->check_ova_admin("0") ){
 ?>
         <!-- OVA Menu-->                                                                                                                                                                           
    
@@ -270,9 +270,9 @@
         </li>
 
 <?php
-  }
+      } // if ( $user_info->check_ova_admin("0") ){
 
-  if ( $user_info->username != "admin@ova.local" ){
+      if ( $user_info->username != "admin@ova.local" ){
 
 ?>
         <li><span style="padding-left:240px"></span>
@@ -291,7 +291,7 @@
         </li>
 
 <?php
-  }
+      } // if ( $user_info->username != "admin@ova.local" ){
 
 ?>        
         
@@ -301,7 +301,7 @@
 
   <?php
 
-    }
+    } // if ( $ova->session_is_registered("sessid") ){
 
 
 /*
