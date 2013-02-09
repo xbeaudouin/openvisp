@@ -3,8 +3,9 @@
 <br />
 <?php 
 
-
-$ajax_domain->end();
+if ( isset($ajax_domain) ){
+  $ajax_domain->end();  
+}
 
 ?>
 <table class="main">

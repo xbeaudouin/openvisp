@@ -22,16 +22,23 @@ include ("../languages/" . check_language () . ".lang");
 
 require_once ("MDB2.php");
 require_once ("../lib/db.class.php");
+require_once ("../lib/ova.class.php");
 require_once ("../lib/user.class.php");
 //require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
 require_once ("../lib/admin.class.php");
 
-$SESSID_USERNAME = check_user_session ();
-$SESSID_USERNAME = check_admin_session ();
+//$SESSID_USERNAME = check_user_session ();
+//$SESSID_USERNAME = check_admin_session ();
+
+
 
 $ovadb = new DB();
+$ova = new OVA($ovadb); 
 $user_info = new USER($ovadb);
+
+$SESSID_USERNAME = $ova->check_session();
+
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->fetch_quota_status();
 
