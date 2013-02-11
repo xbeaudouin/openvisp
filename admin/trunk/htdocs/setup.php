@@ -283,11 +283,11 @@ BODY,TABLE,TR,TD
 						<p>Please make sure you have configured you copy of OpenVSIP Admin. If
 						you didn't have configured it yet, please take a moment to do the following
 						UNIX commands before click on "Next" button :</p>
-						<p class="code">$ cd /usr/local/directory/where/is/openvisp-admin<br/>
+						<p class="code">$ cd <?php echo dirname($_SERVER['REQUEST_URI']); ?><br/>
 						$ cp config.inc.php.sample config.inc.php</p>
 						<p>Edit the file :</p>
 						<p class="code">$ vi config.inc.php</p>
-						<p>with your favourite editor (in this case <i>vi</i>),
+						<p>with your favourite editor,
 						and update the configuration according to what you would like.</p>
 						<p>And : </p>
 						<p>Also you have to create the Database using doc/DATABASE.TXT <b>
