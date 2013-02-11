@@ -71,14 +71,13 @@ class DB
 		$this->sql_param['db_host'] = $db_host;
 		$this->sql_param['db_name'] = $database;
 
-		$this->connect =& MDB2::factory($db_type."://".$db_user.":".$db_pass."@".$db_host.":".$db_port."/".$database."?new_link=true");
-		$this->connect->setFetchMode(MDB2_FETCHMODE_ASSOC);
-
-		if (PEAR::isError($this->connect))
-			{
-				die($this->connect->getMessage());
-			}
-	 
+		try {
+			$this->connect = new pdo($db_type.":dbname=".$database.';host='.$db_host.';port='.$db_port, $db_user, $db_pass);
+			$this->connect->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH); 
+		}
+		catch (PDOException $e) {
+			echo 'Connexion échouée : ' . $e->getMessage();	
+		}	 
 	}
 
 	function __destruct() {
@@ -108,46 +107,40 @@ class DB
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA \n\n$query \n\n"); }
 
-		if (eregi ("^select", $query)){
-			$result =& $this->connect->query($query);
-		}
-		else{
-			$result =& $this->connect->exec($query);
-		}
-
-		if ( $die_on_error == 1 && PEAR::isError($result) ){
-			die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $result->getMessage() . " // " . $result->getDebugInfo() . "<br/>Query on (".$this->sql_param['db_name']."/".$this->sql_param['db_host'].")<b>\"$query\"</b><br/>".$this->debug_text );
-		}
-
-		elseif ( $die_on_error == 2 && PEAR::isError($result) ){
-			$return_code = "500"; 
-			//print ("<p />SQL Query Failed <br /> query: " . $result->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
-			$sql_log = "SQL Query Failed\n" . $result->getMessage() . "\n<br/>Query :\n\"$query\"\n<br/>".$this->debug_text_txt."<br/>";
-			$sql_log .= "DB TYPE : ".$this->sql_param['db_type']."<br/>";
-			$sql_log .= "DB HOST : ".$this->sql_param['db_host']."<br/>";
-			$sql_log .= "DB NAME : ".$this->sql_param['db_name']."<br/>";
-
-			$number_rows = 0;
-			$row_results[] = "";
-
-		}
-		else{
-
-			if (eregi ("^select", $query)){ 
-				while (($row = $result->fetchRow())){
+		try {
+			if (eregi ("^select", $query)){
+				$result =& $this->connect->query($query);
+			}
+			else{
+				$result =& $this->connect->exec($query);
+			}
+			//get the results row numbers
+			if (eregi ("^select", $query)){
+				$number_rows = $result;
+				while (($row = $result->fetch())){
 					$row_results[] = $row;
 				}
-				$number_rows = $result->numRows();
 			}
 			else{ 
 				$row_results[] = "";
 				$number_rows = $result;
 			}
-
+		}
+		catch (PDOException $e) {
+			if ( $die_on_error == 1) {
+				die ("<p />DEBUG INFORMATION:<br />Invalid query: " . $e->getMessage() . " // " . $e->getDebugInfo() . "<br/>Query on (".$this->sql_param['db_name']."/".$this->sql_param['db_host'].")<b>\"$query\"</b><br/>".$this->debug_text );
+			}
+			elseif ( $die_on_error == 2 ){
+				$return_code = "500"; 
+				//print ("<p />SQL Query Failed <br /> query: " . $e->getMessage() . "<br/>Query <b>\"$query\"</b><br/>".$this->debug_text );
+				$sql_log = "SQL Query Failed\n" . $e->getMessage() . "\n<br/>Query :\n\"$query\"\n<br/>".$this->debug_text_txt."<br/>";
+				$sql_log .= "DB TYPE : ".$this->sql_param['db_type']."<br/>";
+				$sql_log .= "DB HOST : ".$this->sql_param['db_host']."<br/>";
+				$sql_log .= "DB NAME : ".$this->sql_param['db_name']."<br/>";
+			}
 		}
 
 		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA ".$number_rows." result(s) \n"); }
-		
 		$return = array (
 										 "result" => $row_results,
 										 "rows" => $number_rows,

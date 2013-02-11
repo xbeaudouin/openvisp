@@ -320,6 +320,7 @@ BODY,TABLE,TR,TD
 						<?php } elseif ($_REQUEST["step"] == "4") { ?>
 						<p>Installing default User...</p>
 						<p>Please wait for Complete loading of this page. This can take a while...</p>
+            <p>Note: if connection fails while you created and configured a user, try with mysql type instead of mysqli</p>
 						<?php
 							require("./variables.inc.php");
 							require("./config.inc.php");

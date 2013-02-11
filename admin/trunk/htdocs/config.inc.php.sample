@@ -47,8 +47,9 @@ $CONF['slapd_perl'] = 0;
 // 
 // NOTICE: mysqli is not completly tested and may have some bug.
 //         See bug #3 about this issue.
-$CONF['database_type'] = 'mysqli';
+$CONF['database_type'] = 'mysql';
 $CONF['database_host'] = 'localhost';
+$CONF['database_host'] = '3306';
 $CONF['database_user'] = 'openvispadmin';
 $CONF['database_password'] = 'openvispadmin';
 $CONF['database_name'] = 'openvispadmin';

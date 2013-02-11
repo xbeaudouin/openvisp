@@ -16,13 +16,13 @@
 //  fCookie
 //  fCode
 //
+
 require ("./variables.inc.php");
 require ("./config.inc.php");
 require ("./lib/functions.inc.php");
 require ("./lib/versions.inc.php");
 include ("./languages/" . check_language () . ".lang");
 
-require_once ("MDB2.php");
 require_once ("./lib/db.class.php");
 require_once ("./lib/ova.class.php");
 require_once ("./lib/user.class.php");
@@ -30,7 +30,6 @@ require_once ("./lib/user.class.php");
 $ovadb = new DB();
 $ova = new OVA($ovadb); 
 $user = new USER($ovadb); 
-
 
 if (getcryptograph()) {
   $cryptinstall="./lib/crypt/cryptographp.fct.php";
