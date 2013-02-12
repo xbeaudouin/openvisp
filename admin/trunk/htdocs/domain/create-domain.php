@@ -114,11 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
 
   $domain_array['active'] = 1;
 
-
-
   $domain_info->create_domain($domain_array);
-
-  //$domain_info = add_domain ( $fDomain, $fDescription, $fAliases, $fMailboxes, $fMaxquota, $fBackupmx, $fAntivirus, $fVrfyDomain, $fVrfySender, $fGreyListing, $fSPF, $fForbidden_helo, $fImap_enabled, $fPop_enabled, $fSmtp_enabled);
 
 	if ( $domain_info->last_operation['result'] == 0 ){
 
