@@ -460,7 +460,32 @@ class OVA
     unset($_SESSION[$variable]);
   }
 
+  //
+  // check_webhosting_available
+  // Action: check if any server are tagged as web server
+  // Call: check_webhosting_available
+  // 
 
+  function check_webhosting_available(){
+
+    $sql_query = "SELECT count(*) as total_http_server
+FROM server_jobmodel, server_job
+WHERE server_jobmodel.role='httpd'
+AND server_jobmodel.id=server_job.server_jobmodel_id";
+
+    $result = $this->db_link->sql_query($query);
+    $this->data = $result['result'][0];
+    //$this->total_row = $result['rows'];
+
+    if ( $result['rows'] == 1 ){
+      if ( $this->data['total_http_server'] > 0 ){
+        return TRUE;
+      }
+      else{
+        return FALSE;
+      }
+    }
+  }
 }
 
 ?>
