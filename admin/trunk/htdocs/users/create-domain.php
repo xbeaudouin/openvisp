@@ -63,18 +63,6 @@ $user_info->fetch_info($SESSID_USERNAME);
 
 $user_info->check_domain_admin();
 
-/*
-if ( check_domain_admin($SESSID_USERNAME) == false ){
-  header ("Location: main.php");
-}
-*/
-
-
-
-$account_information = get_account_info($SESSID_USERNAME);
-$account_quota = get_account_quota($account_information['id']);
-$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
-
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
