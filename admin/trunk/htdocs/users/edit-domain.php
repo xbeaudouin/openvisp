@@ -44,11 +44,15 @@ require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
 
-$SESSID_USERNAME = check_user_session();
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
+$ova = new OVA($ovadb); 
+
+$SESSID_USERNAME = $ova->check_session();
+
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->check_domain_admin();
 $user_info->fetch_quota_status();
@@ -68,7 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
   //$domain_properties = $domain_info->fetch_quota_status();
 
   //$domain_properties = get_domain_properties ($domain);
-	$domain_policy = get_domain_policy($domain);
+  $domain_info->fetch_policy();
+	//$domain_policy = get_domain_policy($domain);
 
 /*
   $tDescription = $domain_info->data_domain['description'];
