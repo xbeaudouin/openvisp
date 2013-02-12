@@ -71,7 +71,6 @@ class DOMAIN
       $this->storhash();
       $this->fetch_quota();
       $this->fetch_quota_status();
-      $this->fetch_policy_id();
     }
     else{
       $this->domain_status = 0;
@@ -387,10 +386,14 @@ class DOMAIN
 	//
   function fetch_policy(){
 
+    if ( ! isset($this->data['policy_id']) ){
+      $this->fetch_policy_id();
+    }
+
     $query = "
     SELECT policy.id
     FROM policy
-    WHERE id='".$this->policy_id."'
+    WHERE id='".$this->data['policy_id']."'
     ";
 
     $result = $this->db_link->sql_query($query);
@@ -450,32 +453,79 @@ class DOMAIN
 
 		if ( $error == 0 ){
 
-			$query  = "INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,created,modified,active)";
-      $query .= "VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domain_array['mailbox_aliases']."','".$domain_array['mailboxes']."','".$domain_array['maxquota']."','".$domain_array['backupmx']."','".$domain_array['antivirus']."','".$domain_array['vrfydomain']."','".$domain_array['vrfysender']."','".$domain_array['greylisting']."','".$domain_array['spf']."',NOW(),NOW(),'".$domain_array['active']."')";
+			$query  = "INSERT INTO domain (domain,description,aliases,mailboxes,maxquota,backupmx,antivirus,vrfydomain,vrfysender,greylist,spf,smtp_enabled,pop3_enabled,imap_enabled,created,modified,active)";
+      $query .= "VALUES ('".$domain_array['name']."','".$domain_array['description']."','".$domain_array['mailbox_aliases']."','".$domain_array['mailboxes']."','".$domain_array['maxquota']."','";
+      $query .= $domain_array['backupmx']."','".$domain_array['antivirus']."','".$domain_array['vrfydomain']."','".$domain_array['vrfysender']."','".$domain_array['greylisting']."','".$domain_array['spf'];
+      $query .= "','".$domain_array['smtp_enabled']."','".$domain_array['pop3_enabled']."','".$domain_array['imap_enabled']."',"."NOW(),NOW(),'".$domain_array['active']."')";
 
 			$result = $this->db_link->sql_query($query);
 
 
 			if ($result['rows'] != 1){
 				$array['result'] = 1;
-				$array['message'] = $PALANG['pAdminCreate_domain_result_error'] . " <b>".$domain_array['name']."</b></br/>";
+				$array['message'] = "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_result_error'] . "</br>";
 				$array['message'] .= "SQL : ".$result['sql_log']."</br/>";
 			}
 			else{
+
+        $this->fetch_by_domainname($domain_array['name']);
+        $this->associate_domain_admin();
 				$array['result'] = 0;
-				$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$domain_array['name']."</b></br/>";
+				$array['message'] = "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_result_succes'] . "</br>";
+
 			}
-
-
-			$this->fetch_by_domainname($domain_array['name']);
-			$this->associate_domain_admin();
 
 		}
 
-
-		return $array;
+    $this->last_operation=$array;
 
 	}
+
+  function create_domain_mailaliases($backupmx,$default_aliases){
+
+    global $CONF;
+    global $PALANG;
+
+
+    if ( $backupmx == 1 ){
+      $domain_addr = "@" . $this->domain_name;
+      $query ("INSERT INTO alias (address,goto,policy_id,created,active,domain_id) VALUES ('$domain_addr','$domain_addr','".$this->data['policy_id']."',NOW(),'1','".$this->data_domain['id']."')");
+      $result = $this->db_link->sql_query($query);
+
+      if ($result['rows'] != 1){
+        $array['result'] = 1;
+        $array['message'] .= "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_backupmx_aliases_error']."</br>";
+        $array['message'] .= "SQL : ".$result['sql_log']."</br/>";
+      }
+      else{
+        $array['result'] = 0;
+        $array['message'] .= "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_backupmx_aliases_success'] . "</br>";
+      }
+
+    }
+    elseif ( $default_aliases == 1  ) {
+    
+      foreach ($CONF['default_aliases'] as $address=>$goto){
+        $address = $address . "@" . $this->domain_name;
+        $query = "INSERT INTO alias (address,goto,created,active,policy_id,domain_id) VALUES ('$address','$goto',NOW(),'1','".$this->data['policy_id']."','".$this->data_domain['id']."')";
+        $result = $this->db_link->sql_query($query);
+
+        if ($result['rows'] != 1){
+          $array['result'] = 1;
+          $array['message'] .= "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_default_aliases_error']."</br>";
+          $array['message'] .= "SQL : ".$result['sql_log']."</br/>";
+        }
+        else{
+          $array['result'] = 0;
+          $array['message'] .= "<b>".$this->data_domain['domain']."</b> : " . $PALANG['pAdminCreate_domain_default_aliases_success'] . "</br/>";
+        }
+
+      }
+
+    }
+
+
+  }
 
 	function create_domain_policy($policy_array){
 		
@@ -497,7 +547,8 @@ class DOMAIN
 			$array['message'] = $PALANG['pAdminCreate_domain_result_succes'] . " <b>".$this->data_domain['domain']."</b></br/>";
 		}
 
-		return $array;
+    $this->fetch_policy_id();
+		$this->last_operation=$array;
 
 	}
 

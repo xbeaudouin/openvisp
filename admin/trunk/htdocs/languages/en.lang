@@ -477,6 +477,10 @@ $PALANG['pAdminCreate_domain_button'] = 'Add Domain';
 $PALANG['pAdminCreate_domain_result_error'] = '<div class="standout">Unable to add domain!</div>';
 $PALANG['pAdminCreate_domain_result_error2'] = '<div class="standout">Unable to add domain(2)!</div>';
 $PALANG['pAdminCreate_domain_result_error3'] = '<div class="standout">Unable to add domain(3)!</div>';
+$PALANG['pAdminCreate_domain_default_aliases_error'] = '<div class="standout">Unable to add domain default aliases!</div>';
+$PALANG['pAdminCreate_domain_default_aliases_success'] = '<div class="standout">domain default aliases created!</div>';
+$PALANG['pAdminCreate_domain_backupmx_aliases_error'] = '<div class="standout">Unable to add backupmx domain default aliases!</div>';
+$PALANG['pAdminCreate_domain_backupmx_aliases_success'] = '<div class="standout">backupmx default aliases created!</div>';
 $PALANG['pAdminCreate_domain_result_succes'] = 'Domain has been added!';
 $PALANG['pAdminDelete_domain_result_succes'] = 'Domain has been deleted!';
 
