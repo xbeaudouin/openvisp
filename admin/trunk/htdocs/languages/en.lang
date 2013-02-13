@@ -24,7 +24,7 @@ $PALANG['pLogin_password_incorrect'] = '<div class="standout">Your password is n
 $PALANG['pLogin_session_stolen'] = 'Your session seems to be stolen, please login in again.';
 $PALANG['pLogin_update_warning'] = 'Warning! Current version in database is older than the currently running version. Please proceed to upgrade.';
 $PALANG['pLogin_update_button'] = 'Upgrade to ';
-$PALANG['pLogin_update_error_unknown'] = 'Warning! The current version in database is unknown. Please check your batabase setup and have a check if you ran /setup.php';
+$PALANG['pLogin_update_error_unknown'] = 'Warning! The current version in database is unknown. Please check your database setup and have a check if you ran /setup.php';
 
 $PALANG['pMenu_overview'] = 'Overview';
 $PALANG['pMenu_addfilter'] = 'Add a mail filter';
