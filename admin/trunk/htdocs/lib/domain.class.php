@@ -404,6 +404,8 @@ class DOMAIN
 
 	function domain_exist($domain_name){
 
+    global $ova;
+
 		$query = "
     SELECT domain
     FROM domain
@@ -411,7 +413,7 @@ class DOMAIN
     ";
 
     $result = $this->db_link->sql_query($query);
-		debug_info("$query");
+		//$ova->debug_info("$query");
 		if ($result['rows'] == 1){
 			return TRUE;
 		}
@@ -784,7 +786,7 @@ class DOMAIN
   //  domain_alias_exist
   //  Action: check if a domain alias exist
   //  Call: domain_alias_exist (domain alias name)
-  function domain_alias_exist ($domain_alias_name) {
+  function domain_alias_exist($domain_alias_name) {
 
     $query  = "SELECT dalias\n";
     $query  .= "FROM domain_alias\n";
@@ -806,7 +808,7 @@ class DOMAIN
   //  add_domain_alias
   //  Action: add a new domain_alias
   //  Call: add_domain_alias (domain alias name)
-  function add_domain_alias ($domain_alias_name) {
+  function add_domain_alias($domain_alias_name) {
 
     global $PALANG;
 
@@ -848,8 +850,8 @@ class DOMAIN
     }
 
     $query = "
-    INSERT INTO alias (address,goto,policy_id,created,active)
-    VALUES ('@".$domain_alias_name."','@".$this->data_domain['domain']."','".$this->data['policy_id']."',NOW(),'1')
+    INSERT INTO alias (address,goto,policy_id,created,modified,active,domain_id)
+    VALUES ('@".$domain_alias_name."','@".$this->data_domain['domain']."','".$this->data['policy_id']."',NOW(),NOW(),'1',".$this->data_domain['id'].")
     ";
 
     $result = $this->db_link->sql_query($query,2);

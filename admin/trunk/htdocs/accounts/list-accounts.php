@@ -34,10 +34,10 @@ require_once ("../lib/admin.class.php");
 
 
 $ovadb = new DB();
-$ova = new OVA($ovadb); 
+$ova_info = new OVA($ovadb); 
 $user_info = new USER($ovadb);
 
-$SESSID_USERNAME = $ova->check_session();
+$SESSID_USERNAME = $ova_info->check_session();
 
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->fetch_quota_status();

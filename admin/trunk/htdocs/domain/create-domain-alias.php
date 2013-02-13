@@ -19,7 +19,6 @@
 require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
-require ("../lib/accounts.inc.php");
 include ("../languages/" . check_language () . ".lang");
 
 require_once ("MDB2.php");
@@ -28,14 +27,13 @@ require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
 require_once ("../lib/ova.class.php");
-//require_once ("../lib/whost.class.php");
 
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
-$ova = new OVA($ovadb); 
+$ova_info = new OVA($ovadb); 
 
-$SESSID_USERNAME = $ova->check_session();
+$SESSID_USERNAME = $ova_info->check_session();
 
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->check_domain_admin();
@@ -64,10 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
   $pCreate_domain_alias_goto_text = $PALANG['pCreate_domain_alias_goto_text'];
 
   $domain_info->fetch_by_domainid(get_post('fDomain_id'));
+  $domain_info->fetch_policy_id();
   $domain_info->add_domain_alias(get_post('fNewDomain'));
 
 
-  $tMessage = $domain->msg['text'];
+  $tMessage = $domain_info->msg['text'];
 
   include ("../templates/header.tpl");
   include ("../templates/domain/create-domain-alias.tpl");

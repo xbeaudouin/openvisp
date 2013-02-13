@@ -13,25 +13,25 @@ require_once ("../lib/db.class.php");
 require_once ("../lib/ova.class.php");
 
 $ovadb = new DB();
-$ova = new OVA($ovadb); 
+$ova_info = new OVA($ovadb); 
 
-$ova->directory_update = "./";
+$ova_info->directory_update = "./";
 
-$ova->fetch_running_version();
+$ova_info->fetch_running_version();
 
-$ova->fetch_latest_version();
+$ova_info->fetch_latest_version();
 
-if ( $ova->latest_version == $ova->running_version ){
+if ( $ova_info->latest_version == $ova_info->running_version ){
 
 	print "OK running the lastest version<br/>";
 
 }
 
-$ova->fetch_latest_sql();
+$ova_info->fetch_latest_sql();
 
 //$ova->show_latest_sql();
 
-$ova->apply_latest_sql();
+$ova_info->apply_latest_sql();
 
 print "Allright, everything is up to date<br/>";
 print "You can <a href='../login.php'>login</a> now";

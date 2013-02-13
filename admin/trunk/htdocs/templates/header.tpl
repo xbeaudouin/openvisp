@@ -18,7 +18,7 @@
 
   <body <?php if (isset($body_class)) print $body_class; ?>>
   <?php
-    if ( $ova->ova_session_is_registered("sessid") ){
+    if ( $ova_info->ova_session_is_registered("sessid") ){
       if ( $CONF['YUI_DEBUG'] == "YES" ){
         print load_js ("../lib/yui/yui/yui.js");
       }

@@ -421,7 +421,7 @@ class OVA
   function check_session(){
  
     if(!isset($_SESSION)) {
-      session_start ();
+      session_start();
     }
 
     if ( ! $this->ova_session_is_registered("sessid")){
@@ -486,6 +486,27 @@ AND server_jobmodel.id=server_job.server_jobmodel_id";
       }
     }
   }
+
+  //
+  // list_server_model
+  // Action: list all server model in the database
+  // Call: list_server_model
+  //
+  function list_server_model(){
+
+    $sql_query = "
+SELECT *
+FROM server_jobmodel
+WHERE active=1
+ORDER BY role
+";
+
+    $result = $this->db_link->sql_query($query);
+    $this->list_server_model = $result['result'];
+
+  }
+
+
 }
 
 ?>

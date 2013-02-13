@@ -29,9 +29,9 @@ require_once ("../lib/ova.class.php");
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
-$ova = new OVA($ovadb); 
+$ova_info = new OVA($ovadb); 
 
-$SESSID_USERNAME = $ova->check_session();
+$SESSID_USERNAME = $ova_info->check_session();
 $ova->debug_info("USERNAME $SESSID_USERNAME");
 
 $user_info->fetch_info($SESSID_USERNAME);

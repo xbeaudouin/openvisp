@@ -146,7 +146,10 @@ class DB
 
 		}
 
-		if ( $this->debug == "YES" ) { 	file_put_contents('php://stderr', "SQL DEBUG OVA ".$number_rows." result(s) \n"); }
+		if ( $this->debug == "YES" ) {
+			file_put_contents('php://stderr', "SQL DEBUG OVA SQL LOG : \n".$sql_log."\n\n");
+			file_put_contents('php://stderr', "SQL DEBUG OVA ".$number_rows." result(s) \n\n");
+		}
 		
 		$return = array (
 										 "result" => $row_results,

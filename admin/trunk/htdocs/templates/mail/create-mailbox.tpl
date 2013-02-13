@@ -114,23 +114,6 @@ if ($CONF['quota'] == 'YES')
          &nbsp;
       </td>
    </tr>
-<?php
-			if ( check_policyhosting() ){
-?>
-   <tr>
-      <td>
-         <?php print $PALANG['pGreylisting_active'] . ":\n"; ?>
-       </td>
-      <td>
-         <input type="checkbox" name="fGreyListing" checked />
-      </td>
-      <td>
-         &nbsp;
-      </td>
-   </tr>
-<?php
-					}
-?>
    <tr>
       <td>
          <?php print $PALANG['pSmtp_auth_active'] . ":\n"; ?>

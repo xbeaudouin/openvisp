@@ -28,7 +28,7 @@ require_once ("./lib/ova.class.php");
 require_once ("./lib/user.class.php");
 
 $ovadb = new DB();
-$ova = new OVA($ovadb); 
+$ova_info = new OVA($ovadb); 
 $user = new USER($ovadb); 
 
 
@@ -94,8 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
       // If we don't use cryptograph, then start the session
       session_start(); 
     }
-    $ova->ova_session_register("sessid");
-    $absoluteuri = $ova->setabsoluteuri();
+    $ova_info->ova_session_register("sessid");
+    $absoluteuri = $ova_info->setabsoluteuri();
 
     $_SESSION['userid']['username'] = $fUsername;
     $_SESSION['absoluteuri'] = $absoluteuri;

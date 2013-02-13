@@ -18,23 +18,26 @@
 // fDomain
 // limit
 //
+
 require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
-require ("../lib/accounts.inc.php");
 include ("../languages/" . check_language () . ".lang");
-
 
 require_once ("MDB2.php");
 require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
 
-$SESSID_USERNAME = check_user_session ();
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
+$ova_info = new OVA($ovadb); 
+
+$SESSID_USERNAME = $ova_info->check_session();
+
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->fetch_active_domains();
 $domain_info = new DOMAIN($ovadb);
@@ -480,7 +483,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
   $tDomain = $fDomain;
    
   include ("../templates/header.tpl");
-  include ("../templates/mail/menu.tpl");
+//  include ("../templates/mail/menu.tpl");
   include ("../templates/$template");
   include ("../templates/footer.tpl");
 

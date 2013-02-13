@@ -37,8 +37,8 @@ class MAIL
 
 	function alias_en_disable(){
 		$query = "UPDATE alias
-    SET active=1-active
-    WHERE address='".$this->data_alias['address']."'";
+SET active=1-active
+WHERE address='".$this->data_alias['address']."'";
 		$this->sql_result = $this->db_link->sql_query($query,2);
 	}
 
@@ -279,6 +279,10 @@ AND mailbox.username=alias.address
 		global $ova_info;
 		global $server_info;
 
+    if ( ! isset($domain_info->data['policy_id']) ){
+      $domain_info->fetch_policy();
+    }
+
     $message = "";
     
 		$error = 0;
@@ -353,15 +357,15 @@ AND mailbox.username=alias.address
 		global $ova_info;
 		global $server_info;
 
-    $message = "";
+    $array['message'] = "";
     
-		$error = 0;
+		$array['error'] = 0;
 
 		if (!preg_match ('/@/',$mbx_name)) $mbx_name = $mbx_name . "@" . $domain_info->data_domain['domain'];
 
     if (empty ($mbx_name) or !($this->check_email_struct ($mbx_name)) )
     {
-      $error = 1;
+      $array['error'] = 1;
       $array['message'] .= $PALANG['pCreate_mailbox_address_text_error1']." ".$mbx_name;
     }
 
@@ -373,9 +377,9 @@ AND mailbox.username=alias.address
 
 		//TODO call to mdir generator
 		$mbx_mdir = $domain_info->generate_path() . "/$mbx_name/";
-		debug_info("$mbx_mdir");
+		$ova_info->debug_info("$mbx_mdir");
 
-		if ( $error == 0 ){
+		if ( $array['error'] == 0 ){
 
 
 			if ( $this->check_mailbox_not_exist($mbx_name) ){
@@ -386,14 +390,14 @@ AND mailbox.username=alias.address
 				if ( !isset($array['message'])){ $array['message']="";}
 
         if ($result['rows'] != 1){
-          $error = 1;
+          $array['error'] = 1;
           $array['message'] .= $PALANG['pCreate_mailbox_result_error'] . " <b>($mbx_name)</b></br/>";
           $array['message'] .= "SQL : ".$result['sql_log']."</br/>";
         }
 				else{
 					$create_alias = $this->add_mail_alias($mbx_name, $mbx_name);
 					if ($create_alias['status'] > 0 ){
-						$error++;
+						$array['error']++;
 						$array['message'] .= "### TO CHANGE un soucis a la creation de l'alias est apparu";
 						$this->fetch_mailbox_info($mbx_name);
 						$this->mailbox_delete();
@@ -403,11 +407,14 @@ AND mailbox.username=alias.address
 
 			}
 			else{
-				$error = 1;
+				$array['error'] = 1;
 				$array['message'] .= $PALANG['pCreate_mailbox_username_text_error2'] . " <b>($mbx_name)</b></br/>";
 			}
 
 		}
+
+    $this->last_operation=$array;
+
 	}
 
 	function check_mailbox_not_exist($mailbox){
