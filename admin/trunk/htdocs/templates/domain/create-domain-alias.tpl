@@ -21,15 +21,15 @@
       <td>
          <select name="fDomain_id">
          <?php
-         for ($i = 0; $i < sizeof ($list_domains); $i++)
+         for ($i = 0; $i < sizeof($user_info->data_managed_domain); $i++)
          {
-            if ($tDomain == $list_domains[$i])
+            if ($tDomain == $user_info->data_managed_domain[$i]['domain'])
             {
-               print "            <option value=\"".$list_domains[$i]['id']."\" selected>".$list_domains[$i]['domain']."</option>\n";
+               print "            <option value=\"".$user_info->data_managed_domain[$i]['id']."\" selected>".$user_info->data_managed_domain[$i]['domain']."</option>\n";
             }
             else
             {
-               print "            <option value=\"".$list_domains[$i]['id']."\">".$list_domains[$i]['domain']."</option>\n";
+               print "            <option value=\"".$user_info->data_managed_domain[$i]['id']."\">".$user_info->data_managed_domain[$i]['domain']."</option>\n";
             }
          }
          ?>

@@ -15,6 +15,7 @@
 // fNewDomain
 // fDomain
 //
+
 require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
@@ -25,25 +26,24 @@ require_once ("MDB2.php");
 require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
-require_once ("../lib/whost.class.php");
-
-
-$SESSID_USERNAME = check_admin_session();
-
-$account_information = get_account_info($SESSID_USERNAME);
-$account_quota = get_account_quota($account_information['id']);
-$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
-
-$list_domains = list_domains_local ();
+require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
+//require_once ("../lib/whost.class.php");
 
 
 $ovadb = new DB();
 $user_info = new USER($ovadb);
-$user_info->fetch_info ($SESSID_USERNAME);
+$ova = new OVA($ovadb); 
+
+$SESSID_USERNAME = $ova->check_session();
+
+$user_info->fetch_info($SESSID_USERNAME);
+$user_info->check_domain_admin();
+$user_info->fetch_quota_status();
 $user_info->check_access("domain");
+$user_info->fetch_domains();
 
 $domain_info = new DOMAIN($ovadb);
-$user_info->fetch_quota_status();
 
 $body_class = 'class="yui3-skin-sam"';
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
   $tDomain = get_get('domain');
 
   include ("../templates/header.tpl");
-  include ("../templates/users/create-domain-alias.tpl"); 
+  include ("../templates/domain/create-domain-alias.tpl"); 
   include ("../templates/footer.tpl");
 }
 
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST"){
   $tMessage = $domain->msg['text'];
 
   include ("../templates/header.tpl");
-  include ("../templates/users/create-domain-alias.tpl");
+  include ("../templates/domain/create-domain-alias.tpl");
   include ("../templates/footer.tpl");
 
 }
