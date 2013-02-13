@@ -263,11 +263,11 @@ BODY,TABLE,TR,TD
                                 <tr>
                                         <td width="100%" style="font-size: 12px;">
 					  	<?php if($_REQUEST["step"] == "1") { ?>
-						<p>Thank for taking the time to download and install OpenVISP Admin.</p>
+						<p>Thanks for taking the time to download and install OpenVISP Admin.</p>
 						<p>Before you can start to create mail accounts, and manage your whole
 						   datacenter and hosting solutions, this setup.php will help you install
-						   and configure the minimalist user to access to OpenVISP Admin.</p>
-						<p>OpenVISP Admin is licencied under MPL 1.1, you must agree to its
+						   and configure a minimalist user to access to OpenVISP Admin.</p>
+						<p>OpenVISP Admin is licensed under MPL 1.1, you must agree to its
 						   provisions before continuing :
 						<p class="code">The contents of this file are subject to the Mozilla Public License
      						Version 1.1 (the "License"); you may not use this file except in
@@ -312,7 +312,7 @@ BODY,TABLE,TR,TD
 								the method used is the right one.</p>
 							<?php } else { 
 								$_REQUEST["step"] = "2"; ?>
-								<p>Your PHP install is lacking some <b>required</b> modules
+								<p>Your PHP install is lacking some <b>required</b> extensions
 								or you didn't configured OpenVISP Admin. Please read the 
 								information shown in this screen and press Next when you have
 								updated your system.</p>
