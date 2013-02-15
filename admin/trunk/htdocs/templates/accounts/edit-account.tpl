@@ -10,12 +10,12 @@
 			<td align="center">
 	       <form name="block" method="post" action="block-account.php">
            <?php
-	 $block_action = "unblock";
-   $button_text = $PALANG['pAccountEdit_account_unblock'];
-	 if ( $account_information['paid'] == 1 ){
-		 $block_action = "block";
-		 $button_text = $PALANG['pAccountEdit_account_block'];
-	 }
+        	 $block_action = "unblock";
+           $button_text = $PALANG['pAccountEdit_account_unblock'];
+        	 if ( $account_information['paid'] == 1 ){
+        		 $block_action = "block";
+        		 $button_text = $PALANG['pAccountEdit_account_block'];
+        	 }
            ?>
            <input type="hidden" name="action" value="<?php print $block_action;?>">
            <input type="hidden" name="username" value="<?php print $username; ?>">

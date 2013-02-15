@@ -32,7 +32,7 @@ $user_info = new USER($ovadb);
 $ova_info = new OVA($ovadb); 
 
 $SESSID_USERNAME = $ova_info->check_session();
-$ova_info->debug_info("USERNAME $SESSID_USERNAME");
+$ova->debug_info("USERNAME $SESSID_USERNAME");
 
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->fetch_active_domains();
