@@ -42,8 +42,8 @@ class USER
 	// Call: check_passwd(string)
 	//
 	function check_passwd($passwd){
-		global $ova;
-		if ( $this->data['password'] == $ova->pacrypt($passwd,$this->data['password']) ){
+		global $ova_info;
+		if ( $this->data['password'] == $ova_info->pacrypt($passwd,$this->data['password']) ){
 			return true;
 		}
 		else{
