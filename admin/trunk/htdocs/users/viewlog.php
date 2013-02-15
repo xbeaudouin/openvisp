@@ -25,10 +25,12 @@ require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
 
 $SESSID_USERNAME = check_user_session ();
 
 $ovadb = new DB();
+$ova_info = new OVA($ovadb);
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
 $user_info->fetch_domains();

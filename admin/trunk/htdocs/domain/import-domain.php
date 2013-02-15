@@ -27,12 +27,14 @@ require_once ("../lib/db.class.php");
 require_once ("../lib/user.class.php");
 require_once ("../lib/domain.class.php");
 require_once ("../lib/whost.class.php");
+require_once ("../lib/ova.class.php");
 
 $SESSID_USERNAME = check_admin_session();
 $list_admins = list_admins();
 
 
 $ovadb = new DB();
+$ova_info  = new OVA($ovadb);
 $user_info = new USER($ovadb);
 $user_info->fetch_info($SESSID_USERNAME);
 
