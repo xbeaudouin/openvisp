@@ -125,7 +125,8 @@
                 </li>
 
                 <li class="yui3-menuitem">
-                  <?php print_yahoo_menu("sendmail.php", $PALANG['pMenu_sendmail']); ?>
+                  <a class="yui3-menuitem-content" href="<?php print $_SESSION['absoluteuri'];?>mail/sendmail.php"><?php print $PALANG['pMenu_sendmail'];?></a>
+                  </li>
                 </li>
 
               </ul>

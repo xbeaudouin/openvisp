@@ -29,7 +29,7 @@ require_once ("./lib/user.class.php");
 
 $ovadb = new DB();
 $ova_info = new OVA($ovadb); 
-$user = new USER($ovadb); 
+$user_info = new USER($ovadb); 
 
 
 if (getcryptograph()) {
@@ -86,9 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     }
   }
 
-  $user->fetch_info($fUsername);
+  $user_info->fetch_info($fUsername);
 
-  if ( $user->check_passwd($fPassword) ){
+  if ( $user_info->check_passwd($fPassword) ){
 
     if (!getcryptograph()) {
       // If we don't use cryptograph, then start the session
@@ -108,8 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     $tMessage = $PALANG['pLogin_password_incorrect'];
     $tUsername = $fUsername;
   }
-
-
 
   include ("./templates/header.tpl");
   include ("./templates/login.tpl");
