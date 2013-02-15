@@ -834,6 +834,7 @@ $PALANG['pAccountEdit_account_button'] = 'Validate changements';
 $PALANG['pAccountEdit_account_result_error1'] = 'An error occure while updating password';
 $PALANG['pAccountEdit_account_result_error2'] = 'An error occure while updating services';
 $PALANG['pAccountEdit_account_active_error'] = 'An error occure while updating user status';
+$PALANG['pAccountEdit_account_deactive_myself_error'] = 'Could not deactivate my own account';
 
 $PALANG['pAccountList_details'] = 'Details for';
 
