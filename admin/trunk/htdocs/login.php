@@ -17,13 +17,6 @@
 //  fCode
 //
 
-//Redirect if logged in
-session_start();
-
-if (isset($_SESSION)) {
-  header('Location: ./users/main.php');
-}
-
 require ("./variables.inc.php");
 require ("./config.inc.php");
 require ("./lib/functions.inc.php");
@@ -50,14 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] == "GET")
    include ("./templates/header.tpl");
    $needs_upgrade = needs_upgrade();
    if ($needs_upgrade == 2) {
-   	include ("./templates/login_error_unknown.tpl");
+    include ("./templates/login_error_unknown.tpl");
    } else {
         if ($needs_upgrade == 1) { 
            print "Warning ! Unkown upgrade type. You have some big problems inside your database. Please check with developers what it is.";
         } else {
            if ($needs_upgrade == 0) 
-   	     include ("./templates/login.tpl");
-	}
+         include ("./templates/login.tpl");
+  }
    }
    include ("./templates/footer.tpl");
 }
@@ -76,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     // Session seems to be cached or stolen
     // Remove it from webserver and start a new one.
     // Write a message, but it should be never read.
-    //		 print $PALANG['pLogin_session_stolen'];
+    //     print $PALANG['pLogin_session_stolen'];
     session_unset ();
     session_destroy ();
     header("Location: login.php");
