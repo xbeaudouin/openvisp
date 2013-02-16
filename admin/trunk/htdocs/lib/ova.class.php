@@ -91,7 +91,7 @@ class OVA
                 $buf = preg_replace('~[[:cntrl:]]~', '', fgets($fp, 4096));
                 
                 // Ajout ligne si non commentaire
-                if ((! eregi('^--',$buf)) && (! eregi('^#',$buf)) && (! eregi('^ ',$buf)) && (! eregi('^\n\r',$buf))){
+                if ((! eregi('^--',$buf)) && (! eregi('^#',$buf)) && (! eregi('^ ',$buf)) && (! eregi('^\n\r',$buf)) && (! eregi('^\n',$buf)) && ($buf != "") ){
                   $buffer .= $buf." ";
                 }
                 //          print $buf.'<br>';
