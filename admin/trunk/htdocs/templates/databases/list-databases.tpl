@@ -4,10 +4,10 @@
 
   print load_js("../lib/yui/yahoo-dom-event/yahoo-dom-event.js");
   print load_js("../lib/yui/connection/connection-min.js");
+  print load_js("../lib/yui/datasource/datasource-min.js");
   print load_js("../lib/yui/autocomplete/autocomplete-min.js");
-  print load_js("../lib/yui/element/element-beta.js");
-  print load_js("../lib/yui/datasource/datasource-beta-min.js");
-  print load_js("../lib/yui/datatable/datatable-beta-min.js");
+  print load_js("../lib/yui/element/element-min.js");
+  print load_js("../lib/yui/datatable/datatable-min.js");
 
   print load_css("../css/datatable.css");
 
@@ -33,7 +33,7 @@
 	};
 
 	YAHOO.widget.DataTable.prototype.saveCellEditor = function() {
-	  
+
 	  
 	  // ++++ this is the inner function to handle the several possible failure conditions
 	  var onFailure = function (msg) {
@@ -104,6 +104,8 @@
 
 YAHOO.util.Event.addListener(window, "load", function() { 
 
+
+
 	var Dom = YAHOO.util.Dom, Event = YAHOO.util.Event;
 
 	//'datatable=yes&zip=' + query + '&query=' + Dom.get('dt_input').value + queryString,
@@ -119,100 +121,100 @@ YAHOO.util.Event.addListener(window, "load", function() {
 														 myDataTable.onDataReturnInitializeTable, myDataTable); 
 	}; 
 
+	/*
 	var getDbname = function(query) { 
 		myDataSource.sendRequest('domain_name=' + Dom.get('dt_input_domainname').value + '&db_name=' + Dom.get('dt_input_dbname').value,
 														 myDataTable.onDataReturnInitializeTable, myDataTable); 
 	}; 
 
+	*/
+
 
 	Event.onDOMReady(function() { 
-			//				zip = Dom.get('dt_input_zip').value; 
-	         
-			var oACDS_domainname = new YAHOO.widget.DS_JSFunction(getDomainname); 
+
+
+			var oACDS_domainname = new YAHOO.util.FunctionDataSource(getDomainname);
 			oACDS_domainname.queryMatchContains = true; 
+
 
 			var oAutoCompDomain = new YAHOO.widget.AutoComplete("dt_input_domainname","dt_ac_domainname_container", oACDS_domainname); 
 			oAutoCompDomain.minQueryLength = 3;
 
-			var oACDS_dbname = new YAHOO.widget.DS_JSFunction(getDbname); 
+
+			var oACDS_dbname = new YAHOO.util.FunctionDataSource(getDbname); 
 			oACDS_dbname.queryMatchContains = true; 
 
 			var oAutoCompDbname = new YAHOO.widget.AutoComplete("dt_input_dbname","dt_ac_dbname_container", oACDS_dbname); 
 			oAutoCompDbname.minQueryLength = 3; 
-	 
-/* 				var oACDSZip = new YAHOO.widget.DS_JSFunction(getZip);  */
-/* 				oACDSZip.queryMatchContains = true;  */
-/* 				var oAutoCompZip = new YAHOO.widget.AutoComplete("dt_input_zip","dt_ac_zip_container", oACDSZip);  */
-/* 				//Don't query until we have 5 numbers for the zip code  */
-/* 				oAutoCompZip.minQueryLength = 5;  */
-	 
-				var formatUrl = function(elCell, oRecord, oColumn, sData) { 
-					elCell.innerHTML = "<a href='" + oRecord.getData("ClickUrl") + "' target='_blank'>" + sData + "</a>"; 
-				}; 
-	 
-				var myColumnDefs = [
-														{key:"domain", sortable:true},
-														{key:"db_name", sortable:true},
-														{key:"description", sortable:true, editor:"textarea"},
-														{key:"db_type", sortable:true},
-														{key:"server_name", sortable:true},
-														{key:"server_port", sortable:true},
-														{key:"server_id", hidden:true},
-														{key:"server_ip_id", hidden:true},
-														{key:"db_id", hidden:true},
-														//														{key:"active", sortable:true, editor:"radio", editorOptions:{radioOptions:["Yes","No"],disableBtns:true}},
-														{key:'pdf',label:' ',formatter:function(elCell) {
-																elCell.innerHTML = '<img src="../images/pdf.png" title="Display PDF" width="20"/>';
-																elCell.style.cursor = 'pointer';
-															}
-														},
-														{key:'delete',label:' ',formatter:function(elCell) {
-																elCell.innerHTML = '<img src="../images/ico-exit.png" title="delete row" height="20" width="20"/>';
-																elCell.style.cursor = 'pointer';
-															}
-														}
-														];
 
-				myDataSource = new YAHOO.util.DataSource("../ajax/database_info.php");
-				myDataSource.connMethodPost = true;
-				myDataSource.responseType = YAHOO.util.DataSource.TYPE_XML;
-				
-				myDataSource.responseSchema = {
-        resultNode: "database",
-        fields: ["domain", "db_name","db_id","db_type", "description", "server_name","server_port","server_id","server_ip_id"]
-				};
- 
-				myDataTable = new YAHOO.widget.DataTable("xml", myColumnDefs,
-																								 myDataSource,{initialRequest: 'domain_name=' + Dom.get('dt_input_domainname').value});
+	 
+			var formatUrl = function(elCell, oRecord, oColumn, sData) { 
+				elCell.innerHTML = "<a href='" + oRecord.getData("ClickUrl") + "' target='_blank'>" + sData + "</a>"; 
+			}; 
+	 
+			var myColumnDefs = [
+													{key:"domain", sortable:true},
+													{key:"db_name", sortable:true},
+													{key:"description", sortable:true, editor:"textarea"},
+													{key:"db_type", sortable:true},
+													{key:"server_name", sortable:true},
+													{key:"server_port", sortable:true},
+													{key:"server_id", hidden:true},
+													{key:"server_ip_id", hidden:true},
+													{key:"db_id", hidden:true},
+													//														{key:"active", sortable:true, editor:"radio", editorOptions:{radioOptions:["Yes","No"],disableBtns:true}},
+													{key:'pdf',label:' ',formatter:function(elCell) {
+															elCell.innerHTML = '<img src="../images/pdf.png" title="Display PDF" width="20"/>';
+															elCell.style.cursor = 'pointer';
+														}
+													},
+													{key:'delete',label:' ',formatter:function(elCell) {
+															elCell.innerHTML = '<img src="../images/ico-exit.png" title="delete row" height="20" width="20"/>';
+															elCell.style.cursor = 'pointer';
+														}
+													}
+													];
+
+			myDataSource = new YAHOO.util.DataSource("../ajax/database_info.php");
+			myDataSource.connMethodPost = true;
+			myDataSource.responseType = YAHOO.util.DataSource.TYPE_XML;
+			
+			myDataSource.responseSchema = {
+			resultNode: "database",
+			fields: ["domain", "db_name","db_id","db_type", "description", "server_name","server_port","server_id","server_ip_id"]
+			};
+			
+			myDataTable = new YAHOO.widget.DataTable("xml", myColumnDefs,
+																							 myDataSource,{initialRequest: 'domain_name=' + Dom.get('dt_input_domainname').value});
 
 
 
 			// Set up editing flow
-			this.highlightEditableCell = function(oArgs) {
+			var highlightEditableCell = function(oArgs) {
 				var elCell = oArgs.target;
 				if(YAHOO.util.Dom.hasClass(elCell, "yui-dt-editable")) {
 					this.highlightCell(elCell);
 				}
 			};
 
-			this.myDataTable.subscribe("cellMouseoverEvent", this.highlightEditableCell);
-			this.myDataTable.subscribe("cellMouseoutEvent", this.myDataTable.onEventUnhighlightCell);
-
-        
-/* 				myDataTable.subscribe("cellDblclickEvent",myDataTable.onEventShowCellEditor); */
-/*         myDataTable.subscribe("editorBlurEvent", myDataTable.onEventSaveCellEditor); */
 
 
+			myDataTable.subscribe("cellMouseoverEvent", highlightEditableCell);
+			myDataTable.subscribe("cellMouseoutEvent", myDataTable.onEventUnhighlightCell);
+			myDataTable.subscribe("cellDblclickEvent",myDataTable.onEventShowCellEditor); 
+			myDataTable.subscribe("editorBlurEvent", myDataTable.onEventSaveCellEditor); 
 
-				myDataTable.subscribe('cellClickEvent',function(ev) {
-						var target = YAHOO.util.Event.getTarget(ev);
-						var column = this.getColumn(target);
 
-						if (column.key == 'description') {
-							this.onEventShowCellEditor(ev);
-						}
 
-						if (column.key == 'delete') {
+			myDataTable.subscribe('cellClickEvent',function(ev) {
+					var target = YAHOO.util.Event.getTarget(ev);
+					var column = this.getColumn(target);
+
+					if (column.key == 'description') {
+						this.onEventShowCellEditor(ev);
+					}
+
+					if (column.key == 'delete') {
 
 							var record = this.getRecord(target);
 
@@ -249,13 +251,13 @@ YAHOO.util.Event.addListener(window, "load", function() {
 
 				
 			// Hook into custom event to customize save-flow of "radio" editor
-			this.myDataTable.subscribe("editorUpdateEvent", function(oArgs) {
+			myDataTable.subscribe("editorUpdateEvent", function(oArgs) {
 					if(oArgs.editor.column.key === "active") {
 						this.saveCellEditor();
 					}
         });
 
-			this.myDataTable.subscribe("editorBlurEvent", function(oArgs) {
+			myDataTable.subscribe("editorBlurEvent", function(oArgs) {
 					this.cancelCellEditor();
         });
 

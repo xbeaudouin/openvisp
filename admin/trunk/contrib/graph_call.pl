@@ -48,15 +48,15 @@ print FILEOUT 'digraph G  {
   ';
 
 #$FCTUSAGE{$CURFUNCTION}{$FILE2PARSE}{$current_line}
-foreach my $discfunction (keys %FCTUSAGE) {
+foreach my $discfunction (sort keys %FCTUSAGE) {
   #print "$discfunction\n";
 
-  foreach my $file (keys %{$FCTUSAGE{$discfunction}}){
+  foreach my $file (sort keys %{$FCTUSAGE{$discfunction}}){
     #print "$file\n";
     print FILEOUT " \"$discfunction\" -> \"$discfunction\_$file\";\n";
     print FILEOUT " \"$discfunction\_$file\" [ label = \"$file\" ];\n";
 
-    foreach my $line (keys %{$FCTUSAGE{$discfunction}{$file}}){
+    foreach my $line (sort keys %{$FCTUSAGE{$discfunction}{$file}}){
       #print "$line\n";
       print FILEOUT " \"$discfunction\_$file\" -> \"$discfunction\_$file\_$line\";\n";
       print FILEOUT " \"$discfunction\_$file\_$line\" [ label = \"$line\" ];\n\n";
@@ -75,7 +75,7 @@ close FILEOUT;
 
 print "List of unused functions : \n";
 
-foreach my $CURFUNCTION (keys %FUNCTIONS){
+foreach my $CURFUNCTION (sort keys %FUNCTIONS){
 
   #print "$CURFUNCTION declared in FUNCTIONS\n";
 
@@ -84,7 +84,7 @@ foreach my $CURFUNCTION (keys %FUNCTIONS){
     #print "$CURFUNCTION :: (".$FUNCTIONS{$CURFUNCTION}{'counter'}.") // ";
     if ( $FUNCTIONS{$CURFUNCTION}{'counter'} == 0 ){
       #print FILEOUT "$function\-is-not-used\n";
-      print "function $CURFUNCTION not used (".$FUNCTIONS{$CURFUNCTION}{'counter'}.")\n";
+      print "function $CURFUNCTION referenced in ".$FUNCTIONS{$CURFUNCTION}{'file'}." not used (".$FUNCTIONS{$CURFUNCTION}{'counter'}." occurence)\n";
     }
 
   }
@@ -106,24 +106,24 @@ print FILEOUT 'digraph G  {
 ';
 
 #$FCTUSAGE{$CURFUNCTION}{$FILE2PARSE}{$current_line}
-foreach my $discclasses (keys %CLASSUSAGE) {
+foreach my $discclasses (sort keys %CLASSUSAGE) {
   #print "$discfunction\n";
 
   print FILEOUT " OVAHTDOCS -> $discclasses;\n";
 
-  foreach my $method (keys %{$CLASSUSAGE{$discclasses}}){
+  foreach my $method (sort keys %{$CLASSUSAGE{$discclasses}}){
 
     print FILEOUT " \"$discclasses\" -> \"$discclasses-$method\";\n";
     print FILEOUT " \"$discclasses-$method\" [ label = \"$method\" ];\n";
 
-    foreach my $file (keys %{$CLASSUSAGE{$discclasses}{$method}}) {
+    foreach my $file (sort keys %{$CLASSUSAGE{$discclasses}{$method}}) {
       #print "$file\n";
       if ( $file ne "counter"){
 
         print FILEOUT " \"$discclasses-$method\" -> \"$discclasses-$method\_$file\";\n";
         print FILEOUT " \"$discclasses-$method\_$file\" [ label = \"$file\" ];\n";
 
-        foreach my $line (keys %{$CLASSUSAGE{$discclasses}{$method}{$file}}) {
+        foreach my $line (sort keys %{$CLASSUSAGE{$discclasses}{$method}{$file}}) {
           #print "$line\n";
           print FILEOUT " \"$discclasses-$method\_$file\" -> \"$discclasses-$method\_$file\_$line\";\n";
           print FILEOUT " \"$discclasses-$method\_$file\_$line\" [ label = \"$line\" ];\n\n";
@@ -149,7 +149,7 @@ sub parse_lib {
   $FILE2PARSE=$_;
   if ( $FILE2PARSE =~ /.*\.php$/ ){
 
-    if ( $FILE2PARSE !~ /\.svn|lib\/yui.*|lib\/fpdf/ ){
+    if ( $FILE2PARSE !~ /\.svn|\.git|lib\/yui.*|lib\/fpdf/ ){
 
       if ( $FILE2PARSE =~ /.*\.class\.php$/ ){
         open (FILE, $FILE2PARSE);
@@ -214,9 +214,9 @@ sub parse_lib {
 
 sub wanted {
 
-  if ( $_ =~ /.*\.php$/ ){
+  if ( $_ =~ /.*\.(php|tpl)$/ ){
 
-    if ( $_ !~ /\.svn|lib\/yui.*|setup.php|\/lib\/(fpdf|crypt)/ ){
+    if ( $_ !~ /\.svn|\.git|lib\/yui.*|setup.php|\/lib\/(fpdf|crypt)/ ){
       #print "Working on : ".$_."\n";
       $FILE2PARSE=$_;
       open (FILE, $FILE2PARSE);
@@ -266,25 +266,34 @@ sub wanted {
           }
 
           # if ( $LINE !~ /\s*(\/\/|\/\*|\*\/)/ && $LINE =~ /.*=.([0-9a-z_-]*)\s.\(.*\);/i ){
-          if ( $LINE !~ /\s*( = db_query\s*\(")|\$sql_query = |\$query = "|(.*->.*|^\s*(this|document)\..*;$)|.* = new .*;/ && $LINE =~ /\s*([0-9a-z_-]*)\s*\(.*\).*;$/i ){
-            $CURFUNCTION = $1;
-            if ( !(grep(/$CURFUNCTION/, @IGNFUNCTION)) && $CURFUNCTION ne "" ){
+          #if ( $LINE !~ /\s*( = db_query\s*\(")|\$sql_query = |\$query = "|(.*->.*|^\s*(this|document)\..*;$)|.* = new .*;/ && $LINE =~ /([0-9a-z_-]*)\s*\(.*\).*$/i ){
+          #if ( check_webhosting() ){
+          if ( $LINE !~ /\s*( = db_query\s*\(")|\$sql_query = |\$query = "|(.*->.*|^\s*(this|document)\..*;$)|.* = new .*;/ && $LINE =~ /\s*[0-9a-z_-]*\s*\(.*\).*;$/i ){
+            my @myfunctions = ( $LINE =~ /\s*([0-9a-z_-]*)\s*\(.*\).*;$/i );
 
-              if ( exists($FUNCTIONS{$CURFUNCTION}) ){
-                #print "Function : $CURFUNCTION on $LINE\n";
-                #print FILEOUT "   \"$CURFUNCTION\" -> \"$FILE2PARSE\" [ label = \"line $current_line\" ];\n";
-                $FCTUSAGE{$CURFUNCTION}{$FILE2PARSE}{$current_line} = 1;
-                $FUNCTIONS{$CURFUNCTION}{'counter'}++;
-              }
-              else {
-                print "found an unkown function ($CURFUNCTION) in file $FILE2PARSE line $current_line ($LINE)\n";
-                #print "unkown function in : $LINE\n\n";
+            foreach my $CURFUNCTION (@myfunctions){
+
+              if ( !(grep(/$CURFUNCTION/, @IGNFUNCTION)) && $CURFUNCTION ne "" ){
+
+                if ( exists($FUNCTIONS{$CURFUNCTION}) ){
+                  #print "Function : $CURFUNCTION on $LINE\n";
+                  #print FILEOUT "   \"$CURFUNCTION\" -> \"$FILE2PARSE\" [ label = \"line $current_line\" ];\n";
+                  $FCTUSAGE{$CURFUNCTION}{$FILE2PARSE}{$current_line} = 1;
+                  $FUNCTIONS{$CURFUNCTION}{'counter'}++;
+                }
+                else {
+                  print "found an unkown function ($CURFUNCTION) in file $FILE2PARSE line $current_line ($LINE)\n";
+                  #print "unkown function in : $LINE\n\n";
+                }
+
               }
 
             }
-            $CURFUNCTION = "";
+            # $CURFUNCTION = $1;
+            # $CURFUNCTION = "";
             
           }
+          #print "NO MATCH $LINE\n";
 
 
         }

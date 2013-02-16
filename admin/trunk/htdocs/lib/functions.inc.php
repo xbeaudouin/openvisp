@@ -20,18 +20,17 @@ $version = "1.0-RC1";
 //
 function check_session ()
 {
-   if(!isset($_SESSION)) {
+  if(!isset($_SESSION)) {
     session_start ();
   }
-   
-   if (!ova_session_is_registered ("sessid"))
-   {
-      redirect_login();
-      exit;
-   }
-   $SESSID_USERNAME = $_SESSION['userid']['username'];
-   return $SESSID_USERNAME;
-}
+  if (!ova_session_is_registered("sessid"))
+  {
+    redirect_login();
+    exit;
+  }
+  $SESSID_USERNAME = $_SESSION['userid']['username'];
+  return $SESSID_USERNAME;
+  }
 
 //
 // check_admin_session
@@ -56,7 +55,7 @@ function check_user_session ()
 {
    //session_start ();
    $USERID_USERNAME = check_session();
-   if (!ova_session_is_registered ("sessid"))
+   if (! ova_session_is_registered("sessid"))
    {
 		 	redirect_login();
       exit;
@@ -64,6 +63,41 @@ function check_user_session ()
    $USERID_USERNAME = $_SESSION['userid']['username'];
    return $USERID_USERNAME;
 }
+
+// Compat stuff to be PHP >= 4.3 compatible
+function ova_session_register($variable) {
+  global $session_started;
+
+  if ($session_started == true) {
+    if (PHP_VERSION < 4.3) {
+      return session_register($variable);
+    } else {
+      if (isset($GLOBALS[$variable])) {
+        $_SESSION[$variable] =& $GLOBALS[$variable];
+      } else {
+        $_SESSION[$variable] = null;
+      }
+    }
+  }
+  return false;
+}
+
+function ova_session_is_registered($variable) {
+  if (PHP_VERSION < 4.3) {
+    return session_is_registered($variable);
+  } else {
+    return isset($_SESSION) && array_key_exists($variable, $_SESSION);
+  }
+}
+
+function ova_session_unregister($variable) {
+  if (PHP_VERSION < 4.3) {
+    return session_unregister($variable);
+  } else {
+    unset($_SESSION[$variable]);
+  }
+}
+
 
 //
 // check_service_admin
@@ -2761,8 +2795,8 @@ function md5crypt ($pw, $salt="", $magic="")
    $ctx = $pw . $magic . $salt;
    $final = ova_hex2bin (md5 ($pw . $salt . $pw));
 
-   file_put_contents('php://stderr', "DEBUG OVA ova_hex2bin".ova_hex2bin (md5 ($pw . $salt . $pw))."\n");
-   file_put_contents('php://stderr', "DEBUG OVA php_hex2bin".hex2bin (md5 ($pw . $salt . $pw))."\n");
+   // file_put_contents('php://stderr', "DEBUG OVA ova_hex2bin".ova_hex2bin (md5 ($pw . $salt . $pw))."\n");
+   // file_put_contents('php://stderr', "DEBUG OVA php_hex2bin".hex2bin (md5 ($pw . $salt . $pw))."\n");
 
    for ($i=strlen ($pw); $i>0; $i-=16)
    {
@@ -3921,40 +3955,6 @@ function ova_array_to_xml ($dataarray, $tabcount=2, $tagname) {
   } 
     
 return $xmldata; 
-}
-
-// Compat stuff to be PHP >= 4.3 compatible
-function ova_session_register($variable) {
-  global $session_started;
-
-  if ($session_started == true) {
-    if (PHP_VERSION < 4.3) {
-      return session_register($variable);
-    } else {
-      if (isset($GLOBALS[$variable])) {
-        $_SESSION[$variable] =& $GLOBALS[$variable];
-      } else {
-        $_SESSION[$variable] = null;
-      }
-    }
-  }
-  return false;
-}
-
-function ova_session_is_registered($variable) {
-  if (PHP_VERSION < 4.3) {
-    return session_is_registered($variable);
-  } else {
-    return isset($_SESSION) && array_key_exists($variable, $_SESSION);
-  }
-}
-
-function ova_session_unregister($variable) {
-  if (PHP_VERSION < 4.3) {
-    return session_unregister($variable);
-  } else {
-    unset($_SESSION[$variable]);
-  }
 }
 
 /*

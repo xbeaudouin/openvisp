@@ -8,8 +8,8 @@
         print_dot();
         print_menu("domain/import-domain.php",$PALANG['pAdminMenu_import_domain']);
         print_dot();
-        print_menu("users/create-domain-alias.php",$PALANG['pAdminMenu_create_domain_alias']);
-        print_dot();
+        // print_menu("users/create-domain-alias.php",$PALANG['pAdminMenu_create_domain_alias']);
+        // print_dot();
      }
      print_menu("users/list-domain.php",$PALANG['pAdminMenu_list_domain']);
      print "<p>";
