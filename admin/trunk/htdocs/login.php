@@ -16,6 +16,14 @@
 //  fCookie
 //  fCode
 //
+
+//Redirect if logged in
+session_start();
+
+if (isset($_SESSION)) {
+  header('Location: ./users/main.php');
+}
+
 require ("./variables.inc.php");
 require ("./config.inc.php");
 require ("./lib/functions.inc.php");
@@ -92,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
     if (!getcryptograph()) {
       // If we don't use cryptograph, then start the session
-      session_start(); 
+      //session_start(); 
     }
     $ova_info->ova_session_register("sessid");
     $absoluteuri = $ova_info->setabsoluteuri();
