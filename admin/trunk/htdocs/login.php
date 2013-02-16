@@ -17,13 +17,6 @@
 //  fCode
 //
 
-//Redirect if logged in
-session_start();
-
-if (isset($_SESSION)) {
-  header('Location: ./users/main.php');
-}
-
 require ("./variables.inc.php");
 require ("./config.inc.php");
 require ("./lib/functions.inc.php");
