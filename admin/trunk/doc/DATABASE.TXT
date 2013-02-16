@@ -28,10 +28,7 @@
 
 # You have to create the postfix database BEFORE using this file as is.
 
-# CREATE DATABASE openvispadmin;
-
-#USE openvispadmin;
-
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `accounts`
@@ -61,7 +58,14 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `paid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `username` (`username`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Accounts';
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Accounts' AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `accounts`
+--
+
+INSERT INTO `accounts` (`id`, `username`, `password`, `created`, `modified`, `enabled`, `tech`, `company`, `address`, `city`, `postal_code`, `weburl`, `email`, `phone`, `fax`, `logo`, `emailsupport`, `phonesupport`, `websupport`, `webfaq`, `paid`) VALUES
+(1, 'admin@ova.local', '$1$1c2f3163$uKyKZ2fTOgrTmKBEKqZIn1', '2013-02-16 20:31:36', '2013-02-16 19:31:36', 1, 1, '', '', '', '', '', '', '', '', '', '', '', '', '', 1);
 
 -- --------------------------------------------------------
 
@@ -76,8 +80,10 @@ CREATE TABLE IF NOT EXISTS `alias` (
   `created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `active` tinyint(1) NOT NULL DEFAULT '1',
+  `domain_id` int(11) unsigned NOT NULL,
   PRIMARY KEY (`address`),
-  KEY `policy_id` (`policy_id`)
+  KEY `policy_id` (`policy_id`),
+  KEY `domain_id` (`domain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Aliases';
 
 -- --------------------------------------------------------
@@ -96,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `apc` (
   `modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='APC Masterswitch List';
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='APC Masterswitch List' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -169,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `dbname` (
   KEY `dbtype_id` (`dbtype_id`),
   KEY `server_id` (`server_id`),
   KEY `server_ip_id` (`server_ip_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Openvisp databases table';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases table' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -184,7 +190,14 @@ CREATE TABLE IF NOT EXISTS `dbtype` (
   `created` timestamp NULL DEFAULT NULL,
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `dbtype`
+--
+
+INSERT INTO `dbtype` (`id`, `name`, `active`, `created`, `modified`) VALUES
+(1, 'mysql', 1, '2013-02-16 19:31:02', '2013-02-16 19:31:02');
 
 -- --------------------------------------------------------
 
@@ -215,7 +228,7 @@ CREATE TABLE IF NOT EXISTS `dbusers` (
   KEY `server_id` (`server_id`),
   KEY `dalias_id` (`dalias_id`),
   KEY `server_ip_id` (`server_ip_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Openvisp databases users table';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases users table' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -259,7 +272,14 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `status` tinyint(1) NOT NULL COMMENT 'Domain Status',
   PRIMARY KEY (`id`),
   UNIQUE KEY `domain` (`domain`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Domains';
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Domains' AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `domain`
+--
+
+INSERT INTO `domain` (`id`, `domain`, `description`, `aliases`, `mailboxes`, `ftp_account`, `db_count`, `db_users`, `db_quota`, `whost_quota`, `maxquota`, `transport`, `backupmx`, `antivirus`, `vrfysender`, `vrfydomain`, `greylist`, `spf`, `allowchangefwd`, `allowchangepwd`, `created`, `modified`, `active`, `pdf_pop`, `pdf_imap`, `pdf_smtp`, `pdf_webmail`, `pdf_custadd`, `paid`, `pop3_enabled`, `imap_enabled`, `smtp_enabled`, `status`) VALUES
+(1, 'ova.local', '', -1, -1, 0, 0, 0, 0, 0, -1, NULL, 0, 0, 1, 1, 0, 0, 0, 0, '2013-02-16 19:31:36', '2013-02-16 19:31:36', 1, '', '', '', '', '', 1, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -275,6 +295,13 @@ CREATE TABLE IF NOT EXISTS `domain_admins` (
   PRIMARY KEY (`accounts_id`,`domain_id`),
   KEY `domain_id` (`domain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain Admins';
+
+--
+-- Dumping data for table `domain_admins`
+--
+
+INSERT INTO `domain_admins` (`accounts_id`, `domain_id`, `created`, `active`) VALUES
+(1, 1, '2013-02-16 19:31:36', 1);
 
 -- --------------------------------------------------------
 
@@ -292,7 +319,7 @@ CREATE TABLE IF NOT EXISTS `domain_alias` (
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`),
   KEY `dalias` (`dalias`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain aliases eg domain copys';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain aliases eg domain copys' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -331,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `filter` (
   KEY `filter_field_id` (`filter_field_id`),
   KEY `filteraction_id` (`filteraction_id`),
   KEY `id` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -346,7 +373,7 @@ CREATE TABLE IF NOT EXISTS `filteraction_field` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 PACK_KEYS=0;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 PACK_KEYS=0 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -361,7 +388,7 @@ CREATE TABLE IF NOT EXISTS `filter_field` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -374,7 +401,7 @@ CREATE TABLE IF NOT EXISTS `ftpaccount` (
   `login` varchar(40) NOT NULL DEFAULT '',
   `password` varchar(64) NOT NULL DEFAULT '',
   `domain_id` int(11) unsigned NOT NULL,
-  `whost_id` int(11) NOT NULL,
+  `whost_id` int(11) unsigned NOT NULL,
   `uid` int(3) NOT NULL DEFAULT '80',
   `gid` int(3) NOT NULL DEFAULT '80',
   `dir` varchar(128) NOT NULL DEFAULT '',
@@ -394,8 +421,9 @@ CREATE TABLE IF NOT EXISTS `ftpaccount` (
   `paid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `server_id` (`server_id`),
-  KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+  KEY `domain_id` (`domain_id`),
+  KEY `whost_id` (`whost_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -426,7 +454,7 @@ CREATE TABLE IF NOT EXISTS `lmtp` (
   KEY `mailbox` (`mailbox`(10)),
   KEY `rcpt` (`rcpt`(10)),
   KEY `stamp` (`stamp`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -463,7 +491,7 @@ CREATE TABLE IF NOT EXISTS `maddr` (
   UNIQUE KEY `maddr_idx_email` (`email`),
   KEY `maddr_idx_domain` (`domain`),
   KEY `email` (`email`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -497,7 +525,7 @@ CREATE TABLE IF NOT EXISTS `mailbox` (
   UNIQUE KEY `username` (`username`),
   KEY `maildir` (`maildir`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Mailboxes';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Mailboxes' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -545,6 +573,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `host` varchar(255) NOT NULL DEFAULT '',
   `quar_loc` varchar(255) DEFAULT '',
   `partition_tag` int(11) DEFAULT '0',
+  PRIMARY KEY (`mail_id`),
   KEY `sid` (`sid`),
   KEY `time_num` (`time_num`),
   KEY `mail_id` (`mail_id`),
@@ -562,6 +591,13 @@ CREATE TABLE IF NOT EXISTS `ovavers` (
   `ova` char(20) DEFAULT NULL,
   `query` smallint(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `ovavers`
+--
+
+INSERT INTO `ovavers` (`ova`, `query`) VALUES
+('1.0-RC1', 338);
 
 -- --------------------------------------------------------
 
@@ -627,7 +663,14 @@ CREATE TABLE IF NOT EXISTS `policy` (
   `spam_quarantine_cutoff_level` float DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Policy Table';
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Policy Table' AUTO_INCREMENT=2 ;
+
+--
+-- Dumping data for table `policy`
+--
+
+INSERT INTO `policy` (`domain_id`, `id`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `modified`, `clean_quarantine_to`, `other_quarantine_to`, `spam_quarantine_cutoff_level`) VALUES
+(1, 1, 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'spam-quarantine', 'banned-quarantine', 'bad-header-quarantine', 0, 3, 7, 10, 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 0, '0', '0000-00-00 00:00:00', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -644,8 +687,8 @@ CREATE TABLE IF NOT EXISTS `quota` (
   `postgresqldb` int(11) NOT NULL,
   `postgresqlusers` int(11) NOT NULL,
   `domains` int(11) NOT NULL,
-  `emails` int(11) NOT NULL,
-  `emails_alias` int(11) NOT NULL,
+  `mailboxes` int(11) NOT NULL,
+  `aliases` int(11) NOT NULL,
   `http` int(11) NOT NULL,
   `http_alias` int(11) NOT NULL,
   `created` timestamp NULL DEFAULT NULL,
@@ -653,6 +696,13 @@ CREATE TABLE IF NOT EXISTS `quota` (
   PRIMARY KEY (`accounts_id`),
   KEY `id` (`accounts_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp admin quota';
+
+--
+-- Dumping data for table `quota`
+--
+
+INSERT INTO `quota` (`accounts_id`, `diskspace`, `ftp`, `mysqldb`, `mysqlusers`, `postgresqldb`, `postgresqlusers`, `domains`, `mailboxes`, `aliases`, `http`, `http_alias`, `created`, `modified`) VALUES
+(1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, '2013-02-16 19:31:37', '2013-02-16 19:31:37');
 
 -- --------------------------------------------------------
 
@@ -674,6 +724,13 @@ CREATE TABLE IF NOT EXISTS `rights` (
   PRIMARY KEY (`accounts_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Rights';
 
+--
+-- Dumping data for table `rights`
+--
+
+INSERT INTO `rights` (`accounts_id`, `mail`, `datacenter`, `datacenter_manage`, `ftp`, `http`, `domain`, `postgresql`, `mysql`, `manage`) VALUES
+(1, 1, 1, 0, 1, 1, 1, 1, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -693,7 +750,7 @@ CREATE TABLE IF NOT EXISTS `server` (
   UNIQUE KEY `public_name` (`public_name`),
   KEY `private_name` (`private_name`),
   KEY `servername` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -712,7 +769,17 @@ CREATE TABLE IF NOT EXISTS `server_apps` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `server_jobmodel_id` (`server_jobmodel_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+
+--
+-- Dumping data for table `server_apps`
+--
+
+INSERT INTO `server_apps` (`id`, `apps`, `version`, `server_jobmodel_id`, `description`, `active`, `created`, `modified`) VALUES
+(1, 'lighttpd', '1.4', 2, 'Serveur lighttpd', 1, '2008-06-01 12:04:58', '2008-06-01 12:04:58'),
+(2, 'postfix', '2.2', 4, '', 1, '2008-06-01 12:09:07', '2008-06-01 12:09:07'),
+(3, 'mysql', '5.0', 1, '', 1, '2008-06-01 12:09:25', '2008-06-01 12:09:25'),
+(4, 'dovecot', '0.9', 6, 'serveur pop imap', 1, '2008-06-01 12:14:41', '2008-06-01 12:14:41');
 
 -- --------------------------------------------------------
 
@@ -730,7 +797,7 @@ CREATE TABLE IF NOT EXISTS `server_ip` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `hostname` (`hostname`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -745,6 +812,7 @@ CREATE TABLE IF NOT EXISTS `server_job` (
   `server_ip_id` int(11) unsigned NOT NULL,
   `login` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
+  `instance` varchar(50) NOT NULL,
   `port` smallint(2) unsigned NOT NULL,
   `description` tinytext NOT NULL,
   `active` tinyint(4) NOT NULL,
@@ -772,7 +840,20 @@ CREATE TABLE IF NOT EXISTS `server_jobmodel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `role` (`role`),
   KEY `role_2` (`role`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+
+--
+-- Dumping data for table `server_jobmodel`
+--
+
+INSERT INTO `server_jobmodel` (`id`, `role`, `description`, `active`, `created`, `modified`) VALUES
+(1, 'database', 'Database Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:01'),
+(2, 'httpd', 'HTTPD Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
+(3, 'policy', 'Policyd Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
+(4, 'smtpd', 'SMTPD Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
+(5, 'pop', 'POP3 Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
+(6, 'imap', 'IMAP Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
+(7, 'ftpd', 'FTP Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02');
 
 -- --------------------------------------------------------
 
@@ -832,7 +913,7 @@ CREATE TABLE IF NOT EXISTS `stats_datacenter_sw` (
   KEY `router` (`router`),
   KEY `port` (`port`),
   KEY `rrdfile` (`rrdfile`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Switch files and stats';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Switch files and stats' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -861,19 +942,6 @@ CREATE TABLE IF NOT EXISTS `stats_ftptransfert` (
   `date` datetime NOT NULL,
   PRIMARY KEY (`ftpaccount_id`,`server_id`,`date`),
   KEY `server_id` (`server_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `stats_mailbox`
---
-
-CREATE TABLE IF NOT EXISTS `stats_mailbox` (
-  `mailbox_id` int(11) unsigned NOT NULL,
-  `size` int(15) NOT NULL DEFAULT '0',
-  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`mailbox_id`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -983,7 +1051,7 @@ CREATE TABLE IF NOT EXISTS `whost` (
   `synced` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Web Hosting Table';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Web Hosting Table' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -998,10 +1066,10 @@ CREATE TABLE IF NOT EXISTS `whost_alias` (
   `active` tinyint(1) NOT NULL DEFAULT '1',
   `created` timestamp NULL DEFAULT NULL,
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`,`whost_id`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `vhost_alias` (`vhost_alias`),
   KEY `whost_id` (`whost_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 COMMENT='Alias Web Hosting Table';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Alias Web Hosting Table' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1039,7 +1107,7 @@ CREATE TABLE IF NOT EXISTS `whost_options` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Table with option list for webhosting';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Table with option list for webhosting' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1106,18 +1174,25 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Constraints for table `alias`
 --
 ALTER TABLE `alias`
+  ADD CONSTRAINT `alias_ibfk_9` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_1` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_2` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_3` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_4` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_5` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `alias_ibfk_6` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `alias_ibfk_7` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `alias_ibfk_7` FOREIGN KEY (`policy_id`) REFERENCES `policy` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `alias_ibfk_8` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `dbname`
 --
 ALTER TABLE `dbname`
+  ADD CONSTRAINT `dbname_ibfk_36` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_37` FOREIGN KEY (`dbtype_id`) REFERENCES `dbtype` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_38` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_39` FOREIGN KEY (`server_ip_id`) REFERENCES `server_ip` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbname_ibfk_40` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbname_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbname_ibfk_10` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbname_ibfk_11` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1158,6 +1233,11 @@ ALTER TABLE `dbname`
 -- Constraints for table `dbusers`
 --
 ALTER TABLE `dbusers`
+  ADD CONSTRAINT `dbusers_ibfk_36` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_37` FOREIGN KEY (`dbtype_id`) REFERENCES `dbtype` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_38` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_39` FOREIGN KEY (`server_ip_id`) REFERENCES `server_ip` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `dbusers_ibfk_40` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbusers_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbusers_ibfk_10` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `dbusers_ibfk_11` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1198,6 +1278,8 @@ ALTER TABLE `dbusers`
 -- Constraints for table `domain_admins`
 --
 ALTER TABLE `domain_admins`
+  ADD CONSTRAINT `domain_admins_ibfk_15` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `domain_admins_ibfk_16` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_admins_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_admins_ibfk_10` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_admins_ibfk_11` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1217,6 +1299,7 @@ ALTER TABLE `domain_admins`
 -- Constraints for table `domain_alias`
 --
 ALTER TABLE `domain_alias`
+  ADD CONSTRAINT `domain_alias_ibfk_8` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_alias_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_alias_ibfk_2` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `domain_alias_ibfk_3` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
@@ -1226,9 +1309,18 @@ ALTER TABLE `domain_alias`
   ADD CONSTRAINT `domain_alias_ibfk_7` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `domain_dns_status`
+--
+ALTER TABLE `domain_dns_status`
+  ADD CONSTRAINT `domain_dns_status_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `filter`
 --
 ALTER TABLE `filter`
+  ADD CONSTRAINT `filter_ibfk_22` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `filter_ibfk_23` FOREIGN KEY (`filter_field_id`) REFERENCES `filter_field` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `filter_ibfk_24` FOREIGN KEY (`filteraction_id`) REFERENCES `filteraction_field` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `filter_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `filter_ibfk_10` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `filter_ibfk_11` FOREIGN KEY (`filter_field_id`) REFERENCES `filter_field` (`id`) ON DELETE CASCADE,
@@ -1255,12 +1347,15 @@ ALTER TABLE `filter`
 -- Constraints for table `ftpaccount`
 --
 ALTER TABLE `ftpaccount`
+  ADD CONSTRAINT `ftpaccount_ibfk_17` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_10` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_11` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_12` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_13` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_14` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `ftpaccount_ibfk_15` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `ftpaccount_ibfk_16` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_2` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_3` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ftpaccount_ibfk_4` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
@@ -1274,6 +1369,8 @@ ALTER TABLE `ftpaccount`
 -- Constraints for table `log`
 --
 ALTER TABLE `log`
+  ADD CONSTRAINT `log_ibfk_15` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `log_ibfk_16` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `log_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `log_ibfk_10` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `log_ibfk_11` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1293,6 +1390,7 @@ ALTER TABLE `log`
 -- Constraints for table `mailbox`
 --
 ALTER TABLE `mailbox`
+  ADD CONSTRAINT `mailbox_ibfk_8` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mailbox_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mailbox_ibfk_2` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mailbox_ibfk_3` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
@@ -1302,9 +1400,16 @@ ALTER TABLE `mailbox`
   ADD CONSTRAINT `mailbox_ibfk_7` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `msgrcpt`
+--
+ALTER TABLE `msgrcpt`
+  ADD CONSTRAINT `msgrcpt_ibfk_1` FOREIGN KEY (`mail_id`) REFERENCES `msgs` (`mail_id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `quota`
 --
 ALTER TABLE `quota`
+  ADD CONSTRAINT `quota_ibfk_8` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quota_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quota_ibfk_2` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quota_ibfk_3` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1317,6 +1422,7 @@ ALTER TABLE `quota`
 -- Constraints for table `rights`
 --
 ALTER TABLE `rights`
+  ADD CONSTRAINT `rights_ibfk_8` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `rights_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `rights_ibfk_2` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `rights_ibfk_3` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1326,9 +1432,19 @@ ALTER TABLE `rights`
   ADD CONSTRAINT `rights_ibfk_7` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `server_apps`
+--
+ALTER TABLE `server_apps`
+  ADD CONSTRAINT `server_apps_ibfk_1` FOREIGN KEY (`server_jobmodel_id`) REFERENCES `server_jobmodel` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `server_job`
 --
 ALTER TABLE `server_job`
+  ADD CONSTRAINT `server_job_ibfk_29` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_30` FOREIGN KEY (`server_jobmodel_id`) REFERENCES `server_jobmodel` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_31` FOREIGN KEY (`server_apps_id`) REFERENCES `server_apps` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `server_job_ibfk_32` FOREIGN KEY (`server_ip_id`) REFERENCES `server_ip` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `server_job_ibfk_1` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `server_job_ibfk_10` FOREIGN KEY (`server_jobmodel_id`) REFERENCES `server_jobmodel` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `server_job_ibfk_11` FOREIGN KEY (`server_apps_id`) REFERENCES `server_apps` (`id`) ON DELETE CASCADE,
@@ -1362,6 +1478,7 @@ ALTER TABLE `server_job`
 -- Constraints for table `spamreport`
 --
 ALTER TABLE `spamreport`
+  ADD CONSTRAINT `spamreport_ibfk_8` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `spamreport_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `spamreport_ibfk_2` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `spamreport_ibfk_3` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
@@ -1374,6 +1491,7 @@ ALTER TABLE `spamreport`
 -- Constraints for table `stats_admin`
 --
 ALTER TABLE `stats_admin`
+  ADD CONSTRAINT `stats_admin_ibfk_8` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_admin_ibfk_1` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_admin_ibfk_2` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_admin_ibfk_3` FOREIGN KEY (`accounts_id`) REFERENCES `accounts` (`id`) ON DELETE CASCADE,
@@ -1386,6 +1504,7 @@ ALTER TABLE `stats_admin`
 -- Constraints for table `stats_ftpaccount`
 --
 ALTER TABLE `stats_ftpaccount`
+  ADD CONSTRAINT `stats_ftpaccount_ibfk_8` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftpaccount_ibfk_1` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftpaccount_ibfk_2` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftpaccount_ibfk_3` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
@@ -1398,6 +1517,8 @@ ALTER TABLE `stats_ftpaccount`
 -- Constraints for table `stats_ftptransfert`
 --
 ALTER TABLE `stats_ftptransfert`
+  ADD CONSTRAINT `stats_ftptransfert_ibfk_15` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `stats_ftptransfert_ibfk_16` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftptransfert_ibfk_1` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftptransfert_ibfk_10` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_ftptransfert_ibfk_11` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE,
@@ -1414,21 +1535,10 @@ ALTER TABLE `stats_ftptransfert`
   ADD CONSTRAINT `stats_ftptransfert_ibfk_9` FOREIGN KEY (`ftpaccount_id`) REFERENCES `ftpaccount` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `stats_mailbox`
---
-ALTER TABLE `stats_mailbox`
-  ADD CONSTRAINT `stats_mailbox_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_2` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_3` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_4` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_5` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_6` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `stats_mailbox_ibfk_7` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
-
---
 -- Constraints for table `stats_mail_login`
 --
 ALTER TABLE `stats_mail_login`
+  ADD CONSTRAINT `stats_mail_login_ibfk_8` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_login_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_login_ibfk_2` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_login_ibfk_3` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
@@ -1441,6 +1551,7 @@ ALTER TABLE `stats_mail_login`
 -- Constraints for table `stats_mail_user`
 --
 ALTER TABLE `stats_mail_user`
+  ADD CONSTRAINT `stats_mail_user_ibfk_8` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_user_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_user_ibfk_2` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `stats_mail_user_ibfk_3` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
@@ -1450,9 +1561,16 @@ ALTER TABLE `stats_mail_user`
   ADD CONSTRAINT `stats_mail_user_ibfk_7` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `stats_wwwusage`
+--
+ALTER TABLE `stats_wwwusage`
+  ADD CONSTRAINT `stats_wwwusage_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `vacation`
 --
 ALTER TABLE `vacation`
+  ADD CONSTRAINT `vacation_ibfk_8` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vacation_ibfk_1` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vacation_ibfk_2` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `vacation_ibfk_3` FOREIGN KEY (`mailbox_id`) REFERENCES `mailbox` (`id`) ON DELETE CASCADE,
@@ -1465,6 +1583,7 @@ ALTER TABLE `vacation`
 -- Constraints for table `whost`
 --
 ALTER TABLE `whost`
+  ADD CONSTRAINT `whost_ibfk_8` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_ibfk_1` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_ibfk_2` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_ibfk_3` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE,
@@ -1474,9 +1593,18 @@ ALTER TABLE `whost`
   ADD CONSTRAINT `whost_ibfk_7` FOREIGN KEY (`domain_id`) REFERENCES `domain` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `whost_alias`
+--
+ALTER TABLE `whost_alias`
+  ADD CONSTRAINT `whost_alias_ibfk_2` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `whost_alias_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `whost_config`
 --
 ALTER TABLE `whost_config`
+  ADD CONSTRAINT `whost_config_ibfk_15` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `whost_config_ibfk_16` FOREIGN KEY (`option_id`) REFERENCES `whost_options` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_config_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_config_ibfk_10` FOREIGN KEY (`option_id`) REFERENCES `whost_options` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_config_ibfk_11` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
@@ -1496,6 +1624,8 @@ ALTER TABLE `whost_config`
 -- Constraints for table `whost_server`
 --
 ALTER TABLE `whost_server`
+  ADD CONSTRAINT `whost_server_ibfk_15` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `whost_server_ibfk_16` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_server_ibfk_1` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_server_ibfk_10` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_server_ibfk_11` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
@@ -1510,23 +1640,3 @@ ALTER TABLE `whost_server`
   ADD CONSTRAINT `whost_server_ibfk_7` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_server_ibfk_8` FOREIGN KEY (`server_id`) REFERENCES `server` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `whost_server_ibfk_9` FOREIGN KEY (`whost_id`) REFERENCES `whost` (`id`) ON DELETE CASCADE;
-
-
-
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('database', 'Database Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('httpd', 'HTTPD Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('policy', 'Policyd Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('smtpd', 'SMTPD Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('pop', 'POP3 Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('imap', 'IMAP Server',  '1',  'NOW()');
-INSERT INTO server_jobmodel (role, description, active, created ) VALUES ('ftpd', 'FTP Server',  '1',  'NOW()');
-
-INSERT INTO `server_apps` (`id`, `apps`, `version`, `description`, `server_jobmodel_id`, `active`, `created`, `modified`) VALUES
-(1, 'lighttpd', '1.4', 'Serveur lighttpd', 2, 1, '2008-06-01 14:04:58', '2008-06-01 14:04:58'),
-(2, 'postfix', '2.2', '', 4, 1, '2008-06-01 14:09:07', '2008-06-01 14:09:07'),
-(3, 'mysql', '5.0', '', 1, 1, '2008-06-01 14:09:25', '2008-06-01 14:09:25'),
-(4, 'dovecot', '0.9', 'serveur pop imap', 6, 1, '2008-06-01 14:14:41', '2008-06-01 14:14:41');
-
-
-INSERT INTO  `dbtype` (`name` ,`active` ,`created` ,`modified`)
-VALUES ('mysql',  '1', NOW( ) , CURRENT_TIMESTAMP);
