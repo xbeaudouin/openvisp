@@ -34,40 +34,58 @@
 // fWarnBRcp
 // fWarnBHRcp
 //
+
 require ("../variables.inc.php");
 require ("../config.inc.php");
 require ("../lib/functions.inc.php");
-require ("../lib/accounts.inc.php");
 include ("../languages/" . check_language () . ".lang");
 
-$SESSID_USERNAME = check_user_session();
+require_once ("MDB2.php");
+require_once ("../lib/db.class.php");
+require_once ("../lib/user.class.php");
+require_once ("../lib/domain.class.php");
+require_once ("../lib/ajax_yui.class.php");
+require_once ("../lib/ova.class.php");
+require_once ("../lib/mail.class.php");
 
-check_mail_admin($SESSID_USERNAME);
+$ovadb = new DB();
+$user_info = new USER($ovadb);
+$ova_info = new OVA($ovadb); 
+$mailbox = new MAIL($ovadb); 
+$domain_info = new DOMAIN($ovadb);
 
-$account_information = get_account_info($SESSID_USERNAME);
-$account_quota = get_account_quota($account_information['id']);
-$total_used = get_account_used($SESSID_USERNAME,check_admin($SESSID_USERNAME));
+$SESSID_USERNAME = $ova_info->check_session();
+
+$user_info->fetch_info($SESSID_USERNAME);
+$user_info->fetch_quota_status();
+$user_info->check_mail_admin();
+//$user_info->check_quota();
+
+
+$body_class = 'class="yui3-skin-sam"';
 
 
 if ($_SERVER['REQUEST_METHOD'] == "GET")
 {
    $domain = get_get('domain');
-   $domain_policy = get_domain_policy ($domain);
+   $domain_info->fetch_by_domainname($domain);
+   $domain_info->fetch_policy();
+   //$domain_policy = get_domain_policy($domain);
 
-   $tSaActive  = $domain_policy['bypass_spam_checks'];
-   $tSaModSubj = $domain_policy['spam_modifies_subj'];
-   $tSatag     = $domain_policy['spam_tag_level'];
-   $tSavalue   = $domain_policy['spam_subject_tag'];
-   $tSavalue2  = $domain_policy['spam_tag2_level'];
-   $tSavalueK  = $domain_policy['spam_kill_level'];
+   // $tSaActive  = $domain_policy['bypass_spam_checks'];
+   // $tSaModSubj = $domain_policy['spam_modifies_subj'];
+   // $tSatag     = $domain_policy['spam_tag_level'];
+   // $tSavalue   = $domain_policy['spam_subject_tag'];
+   // $tSavalue2  = $domain_policy['spam_tag2_level'];
+   // $tSavalueK  = $domain_policy['spam_kill_level'];
  
-   $tAVactive  = $domain_policy['bypass_virus_checks'];
-   $tAVheader  = $domain_policy['bypass_header_checks'];
+   // $tAVactive  = $domain_policy['bypass_virus_checks'];
+   // $tAVheader  = $domain_policy['bypass_header_checks'];
 
-   $tAVbanned  = $domain_policy['bypass_banned_checks'];
-   $tWarnVRcp  = $domain_policy['warnvirusrecip'];
-   $tWarnBRcp  = $domain_policy['warnbannedrecip'];
-   $tWarnBHRcp = $domain_policy['warnbadhrecip'];
+   // $tAVbanned  = $domain_policy['bypass_banned_checks'];
+   // $tWarnVRcp  = $domain_policy['warnvirusrecip'];
+   // $tWarnBRcp  = $domain_policy['warnbannedrecip'];
+   // $tWarnBHRcp = $domain_policy['warnbadhrecip'];
 
    include ("../templates/header.tpl");
    include ("../templates/mail/menu.tpl");

@@ -17,7 +17,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_spamass_active'] . ":"; ?>
       </td>
       <td>
-	 <?php $checked = ($tSaActive == 'N' ) ? 'checked' : ''; ?>
+	 <?php $checked = ( $domain_info->policy[0]['bypass_spam_checks'] == 'N' ) ? 'checked' : ''; ?>
 	 <input type="checkbox" name="fSaActive" <?php print $checked; ?> />
       </td>
       <td>
@@ -29,7 +29,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_spamass_modsubj'] . ":"; ?>
       </td>
       <td>
-	 <?php $checked = ($tSaModSubj == 'Y') ? 'checked' : ''; ?>
+	 <?php $checked = ($domain_info->policy[0]['spam_modifies_subj'] == 'Y') ? 'checked' : ''; ?>
          <input type="checkbox" name="fSaModSubj" <?php print $checked; ?> />
       </td>
       <td>
@@ -41,7 +41,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_spamass_savalue'] . ":"; ?>
       </td>
       <td>
-         <input type="text" name="fSavalue" value="<?php print $tSavalue; ?>" />
+         <input type="text" name="fSavalue" value="<?php print $domain_info->policy[0]['spam_subject_tag']; ?>" />
       </td>
       <td>
          <?php print $PALANG['pAdminEdit_active_domain_spamass_savalue_text'] ; ?>
@@ -52,7 +52,7 @@
 	<?php print $PALANG['pAdminEdit_active_domain_spamass_satag'] . ":"; ?>
       </td>
       <td>
-         <input type="text" name="fSatag" value="<?php print $tSatag; ?>" />
+         <input type="text" name="fSatag" value="<?php print $domain_info->policy[0]['spam_tag_level']; ?>" />
       </td>
       <td>
          <?php print $PALANG['pAdminEdit_active_domain_spamass_satag_text'] ; ?>
@@ -63,7 +63,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_spamass_savalue2'] . ":"; ?>
       </td>
       <td>
-	 <input type="text" name="fSavalue2" value="<?php print $tSavalue2; ?>" />
+	 <input type="text" name="fSavalue2" value="<?php print $domain_info->policy[0]['spam_tag2_level']; ?>" />
       </td>
       <td>
 	 <?php print $PALANG['pAdminEdit_active_domain_spamass_savalue2_text'] ; ?>
@@ -74,7 +74,7 @@
          <?php print $PALANG['pAdminEdit_active_domain_spamass_savalueK'] . ":"; ?>
       </td>
       <td>
-         <input type="text" name="fSavalueK" value="<?php print $tSavalueK; ?>" />
+         <input type="text" name="fSavalueK" value="<?php print $domain_info->policy[0]['spam_kill_level']; ?>" />
       </td>
       <td>
          <?php print $PALANG['pAdminEdit_active_domain_spamass_savalueK_text'] ; ?>
@@ -92,7 +92,7 @@
          <?php print $PALANG['pAdminEdit_active_domain_antivir_active'] . ":"; ?>
       </td>
       <td align="left">
-         <?php $checked = ($tAVactive == 'N' ) ? 'checked' : ''; ?>
+         <?php $checked = ($domain_info->policy[0]['bypass_virus_checks'] == 'N' ) ? 'checked' : ''; ?>
          <input type="checkbox" name="fAVactive" <?php print $checked; ?> />
       </td>
       <td>
@@ -104,7 +104,7 @@
          <?php print $PALANG['pAdminEdit_active_domain_antivir_header'] . ":"; ?>
       </td>
       <td>
-         <?php $checked = ($tAVheader == 'N') ? 'checked' : ''; ?>
+         <?php $checked = ($domain_info->policy[0]['bypass_header_checks'] == 'N') ? 'checked' : ''; ?>
          <input type="checkbox" name="fAVheader" <?php print $checked; ?> />
       </td>
       <td>
@@ -116,7 +116,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_antivir_banned'] . ":"; ?>
       </td>
       <td>
-	 <?php $checked = ($tAVbanned == 'N') ? 'checked' : ''; ?>
+	 <?php $checked = ($domain_info->policy[0]['bypass_banned_checks'] == 'N') ? 'checked' : ''; ?>
 	 <input type="checkbox" name="fAVbanned" <?php print $checked; ?> />
       </td>
       <td>
@@ -134,7 +134,7 @@
 	 <?php print $PALANG['pAdminEdit_active_domain_warnvirusrecip'] . ":"; ?>
      </td>
      <td>
-	 <?php $checked = ($tWarnVRcp == 'Y') ? 'checked' : ''; ?>
+	 <?php $checked = ($domain_info->policy[0]['warnvirusrecip'] == 'Y') ? 'checked' : ''; ?>
 	 <input type="checkbox" name="fWarnVRcp" <?php print $checked; ?> />
      </td>
      <td>
@@ -146,7 +146,7 @@
          <?php print $PALANG['pAdminEdit_active_domain_warnbannedrecip'] . ":"; ?>
      </td>
      <td>
-         <?php $checked = ($tWarnBRcp == 'Y') ? 'checked' : ''; ?>
+         <?php $checked = ($domain_info->policy[0]['warnbannedrecip'] == 'Y') ? 'checked' : ''; ?>
          <input type="checkbox" name="fWarnBRcp" <?php print $checked; ?> />
      </td>
      <td>
@@ -158,7 +158,7 @@
          <?php print $PALANG['pAdminEdit_active_domain_warnbadhrecip'] . ":"; ?>
      </td>
      <td>
-         <?php $checked = ($tWarnBHRcp == 'Y') ? 'checked' : ''; ?>
+         <?php $checked = ($domain_info->policy[0]['warnbadhrecip'] == 'Y') ? 'checked' : ''; ?>
          <input type="checkbox" name="fWarnBHRcp" <?php print $checked; ?> />
      </td>
      <td>

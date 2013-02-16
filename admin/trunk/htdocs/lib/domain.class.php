@@ -32,7 +32,7 @@ class DOMAIN
 	// Action: create the object by the domain name
 	// Call: fetch_by_domainname ( string domain)
 	//
-	function fetch_by_domainname ($domain_name)
+	function fetch_by_domainname($domain_name)
 	{
 		$query = "SELECT * FROM domain WHERE domain='$domain_name'";
 		$result = $this->db_link->sql_query($query);
@@ -59,7 +59,7 @@ class DOMAIN
 	// Action: create the object by the domain id
 	// Call: fetch_by_domainid ( int domain)
 	//
-	function fetch_by_domainid ($domain_id)
+	function fetch_by_domainid($domain_id)
 	{
 		$query = "SELECT * FROM domain WHERE id='$domain_id'";
 		$result = $this->db_link->sql_query($query);
@@ -390,8 +390,7 @@ class DOMAIN
       $this->fetch_policy_id();
     }
 
-    $query = "
-    SELECT policy.id
+    $query = "SELECT *
     FROM policy
     WHERE id='".$this->data['policy_id']."'
     ";
@@ -399,15 +398,13 @@ class DOMAIN
     $result = $this->db_link->sql_query($query);
 		$this->policy = $result['result'];
 
-
   }
 
 	function domain_exist($domain_name){
 
     global $ova;
 
-		$query = "
-    SELECT domain
+		$query = "SELECT domain
     FROM domain
     WHERE domain='".$domain_name."'
     ";
