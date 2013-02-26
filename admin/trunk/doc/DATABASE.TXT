@@ -28,6 +28,9 @@
 
 # You have to create the postfix database BEFORE using this file as is.
 
+# CREATE DATABASE openvispadmin;
+# USE openvispadmin;
+
 -- --------------------------------------------------------
 
 --
@@ -58,14 +61,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `paid` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `username` (`username`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Accounts' AUTO_INCREMENT=2 ;
-
---
--- Dumping data for table `accounts`
---
-
-INSERT INTO `accounts` (`id`, `username`, `password`, `created`, `modified`, `enabled`, `tech`, `company`, `address`, `city`, `postal_code`, `weburl`, `email`, `phone`, `fax`, `logo`, `emailsupport`, `phonesupport`, `websupport`, `webfaq`, `paid`) VALUES
-(1, 'admin@ova.local', '$1$1c2f3163$uKyKZ2fTOgrTmKBEKqZIn1', '2013-02-16 20:31:36', '2013-02-16 19:31:36', 1, 1, '', '', '', '', '', '', '', '', '', '', '', '', '', 1);
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Accounts' ;
 
 -- --------------------------------------------------------
 
@@ -102,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `apc` (
   `modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `active` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='APC Masterswitch List' AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='APC Masterswitch List' ;
 
 -- --------------------------------------------------------
 
@@ -175,7 +171,7 @@ CREATE TABLE IF NOT EXISTS `dbname` (
   KEY `dbtype_id` (`dbtype_id`),
   KEY `server_id` (`server_id`),
   KEY `server_ip_id` (`server_ip_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases table' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases table' ;
 
 -- --------------------------------------------------------
 
@@ -197,7 +193,7 @@ CREATE TABLE IF NOT EXISTS `dbtype` (
 --
 
 INSERT INTO `dbtype` (`id`, `name`, `active`, `created`, `modified`) VALUES
-(1, 'mysql', 1, '2013-02-16 19:31:02', '2013-02-16 19:31:02');
+(1, 'mysql', 1, NOW(), CURRENT_TIMESTAMP );
 
 -- --------------------------------------------------------
 
@@ -228,7 +224,7 @@ CREATE TABLE IF NOT EXISTS `dbusers` (
   KEY `server_id` (`server_id`),
   KEY `dalias_id` (`dalias_id`),
   KEY `server_ip_id` (`server_ip_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases users table' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp databases users table' ;
 
 -- --------------------------------------------------------
 
@@ -272,14 +268,7 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `status` tinyint(1) NOT NULL COMMENT 'Domain Status',
   PRIMARY KEY (`id`),
   UNIQUE KEY `domain` (`domain`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Domains' AUTO_INCREMENT=2 ;
-
---
--- Dumping data for table `domain`
---
-
-INSERT INTO `domain` (`id`, `domain`, `description`, `aliases`, `mailboxes`, `ftp_account`, `db_count`, `db_users`, `db_quota`, `whost_quota`, `maxquota`, `transport`, `backupmx`, `antivirus`, `vrfysender`, `vrfydomain`, `greylist`, `spf`, `allowchangefwd`, `allowchangepwd`, `created`, `modified`, `active`, `pdf_pop`, `pdf_imap`, `pdf_smtp`, `pdf_webmail`, `pdf_custadd`, `paid`, `pop3_enabled`, `imap_enabled`, `smtp_enabled`, `status`) VALUES
-(1, 'ova.local', '', -1, -1, 0, 0, 0, 0, 0, -1, NULL, 0, 0, 1, 1, 0, 0, 0, 0, '2013-02-16 19:31:36', '2013-02-16 19:31:36', 1, '', '', '', '', '', 1, 1, 0, 0, 0);
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Domains' ;
 
 -- --------------------------------------------------------
 
@@ -295,13 +284,6 @@ CREATE TABLE IF NOT EXISTS `domain_admins` (
   PRIMARY KEY (`accounts_id`,`domain_id`),
   KEY `domain_id` (`domain_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain Admins';
-
---
--- Dumping data for table `domain_admins`
---
-
-INSERT INTO `domain_admins` (`accounts_id`, `domain_id`, `created`, `active`) VALUES
-(1, 1, '2013-02-16 19:31:36', 1);
 
 -- --------------------------------------------------------
 
@@ -319,7 +301,7 @@ CREATE TABLE IF NOT EXISTS `domain_alias` (
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`),
   KEY `dalias` (`dalias`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain aliases eg domain copys' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Domain aliases eg domain copys' ;
 
 -- --------------------------------------------------------
 
@@ -358,7 +340,7 @@ CREATE TABLE IF NOT EXISTS `filter` (
   KEY `filter_field_id` (`filter_field_id`),
   KEY `filteraction_id` (`filteraction_id`),
   KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -373,7 +355,7 @@ CREATE TABLE IF NOT EXISTS `filteraction_field` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 PACK_KEYS=0 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 PACK_KEYS=0 ;
 
 -- --------------------------------------------------------
 
@@ -388,7 +370,7 @@ CREATE TABLE IF NOT EXISTS `filter_field` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -423,7 +405,7 @@ CREATE TABLE IF NOT EXISTS `ftpaccount` (
   KEY `server_id` (`server_id`),
   KEY `domain_id` (`domain_id`),
   KEY `whost_id` (`whost_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -454,7 +436,7 @@ CREATE TABLE IF NOT EXISTS `lmtp` (
   KEY `mailbox` (`mailbox`(10)),
   KEY `rcpt` (`rcpt`(10)),
   KEY `stamp` (`stamp`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin ;
 
 -- --------------------------------------------------------
 
@@ -491,7 +473,7 @@ CREATE TABLE IF NOT EXISTS `maddr` (
   UNIQUE KEY `maddr_idx_email` (`email`),
   KEY `maddr_idx_domain` (`domain`),
   KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -525,7 +507,7 @@ CREATE TABLE IF NOT EXISTS `mailbox` (
   UNIQUE KEY `username` (`username`),
   KEY `maildir` (`maildir`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Mailboxes' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP Admin - Virtual Mailboxes' ;
 
 -- --------------------------------------------------------
 
@@ -592,13 +574,6 @@ CREATE TABLE IF NOT EXISTS `ovavers` (
   `query` smallint(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
---
--- Dumping data for table `ovavers`
---
-
-INSERT INTO `ovavers` (`ova`, `query`) VALUES
-('1.0-RC1', 338);
-
 -- --------------------------------------------------------
 
 --
@@ -663,11 +638,12 @@ CREATE TABLE IF NOT EXISTS `policy` (
   `spam_quarantine_cutoff_level` float DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Policy Table' AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 COMMENT='Policy Table' ;
 
 --
 -- Dumping data for table `policy`
 --
+-- FIXME: needed ?
 
 INSERT INTO `policy` (`domain_id`, `id`, `virus_lover`, `spam_lover`, `banned_files_lover`, `bad_header_lover`, `bypass_virus_checks`, `bypass_spam_checks`, `bypass_banned_checks`, `bypass_header_checks`, `spam_modifies_subj`, `virus_quarantine_to`, `spam_quarantine_to`, `banned_quarantine_to`, `bad_header_quarantine_to`, `spam_tag_level`, `spam_tag2_level`, `spam_kill_level`, `spam_dsn_cutoff_level`, `addr_extension_virus`, `addr_extension_spam`, `addr_extension_banned`, `addr_extension_bad_header`, `warnvirusrecip`, `warnbannedrecip`, `warnbadhrecip`, `newvirus_admin`, `virus_admin`, `banned_admin`, `bad_header_admin`, `spam_admin`, `spam_subject_tag`, `spam_subject_tag2`, `message_size_limit`, `banned_rulenames`, `modified`, `clean_quarantine_to`, `other_quarantine_to`, `spam_quarantine_cutoff_level`) VALUES
 (1, 1, 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'spam-quarantine', 'banned-quarantine', 'bad-header-quarantine', 0, 3, 7, 10, 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 0, '0', '0000-00-00 00:00:00', NULL, NULL, NULL);
@@ -697,13 +673,6 @@ CREATE TABLE IF NOT EXISTS `quota` (
   KEY `id` (`accounts_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Openvisp admin quota';
 
---
--- Dumping data for table `quota`
---
-
-INSERT INTO `quota` (`accounts_id`, `diskspace`, `ftp`, `mysqldb`, `mysqlusers`, `postgresqldb`, `postgresqlusers`, `domains`, `mailboxes`, `aliases`, `http`, `http_alias`, `created`, `modified`) VALUES
-(1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, '2013-02-16 19:31:37', '2013-02-16 19:31:37');
-
 -- --------------------------------------------------------
 
 --
@@ -724,13 +693,6 @@ CREATE TABLE IF NOT EXISTS `rights` (
   PRIMARY KEY (`accounts_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='OpenVISP - Rights';
 
---
--- Dumping data for table `rights`
---
-
-INSERT INTO `rights` (`accounts_id`, `mail`, `datacenter`, `datacenter_manage`, `ftp`, `http`, `domain`, `postgresql`, `mysql`, `manage`) VALUES
-(1, 1, 1, 0, 1, 1, 1, 1, 1, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -750,7 +712,7 @@ CREATE TABLE IF NOT EXISTS `server` (
   UNIQUE KEY `public_name` (`public_name`),
   KEY `private_name` (`private_name`),
   KEY `servername` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -769,17 +731,17 @@ CREATE TABLE IF NOT EXISTS `server_apps` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `server_jobmodel_id` (`server_jobmodel_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 ;
 
 --
 -- Dumping data for table `server_apps`
 --
 
 INSERT INTO `server_apps` (`id`, `apps`, `version`, `server_jobmodel_id`, `description`, `active`, `created`, `modified`) VALUES
-(1, 'lighttpd', '1.4', 2, 'Serveur lighttpd', 1, '2008-06-01 12:04:58', '2008-06-01 12:04:58'),
-(2, 'postfix', '2.2', 4, '', 1, '2008-06-01 12:09:07', '2008-06-01 12:09:07'),
-(3, 'mysql', '5.0', 1, '', 1, '2008-06-01 12:09:25', '2008-06-01 12:09:25'),
-(4, 'dovecot', '0.9', 6, 'serveur pop imap', 1, '2008-06-01 12:14:41', '2008-06-01 12:14:41');
+(1, 'lighttpd', '1.4', 2, 'Serveur lighttpd', 1, NOW(), NOW() ),
+(2, 'postfix', '2.2', 4, '', 1, NOW(), NOW() ),
+(3, 'mysql', '5.0', 1, '', 1, NOW(), NOW() ),
+(4, 'dovecot', '0.9', 6, 'serveur pop imap', 1, NOW(), NOW() );
 
 -- --------------------------------------------------------
 
@@ -797,7 +759,7 @@ CREATE TABLE IF NOT EXISTS `server_ip` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `hostname` (`hostname`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 ;
 
 -- --------------------------------------------------------
 
@@ -840,20 +802,20 @@ CREATE TABLE IF NOT EXISTS `server_jobmodel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `role` (`role`),
   KEY `role_2` (`role`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 ;
 
 --
 -- Dumping data for table `server_jobmodel`
 --
 
 INSERT INTO `server_jobmodel` (`id`, `role`, `description`, `active`, `created`, `modified`) VALUES
-(1, 'database', 'Database Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:01'),
-(2, 'httpd', 'HTTPD Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
-(3, 'policy', 'Policyd Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
-(4, 'smtpd', 'SMTPD Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
-(5, 'pop', 'POP3 Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
-(6, 'imap', 'IMAP Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02'),
-(7, 'ftpd', 'FTP Server', 1, '0000-00-00 00:00:00', '2013-02-16 19:31:02');
+(1, 'database', 'Database Server', 1, NOW(), NOW() ),
+(2, 'httpd', 'HTTPD Server', 1, NOW(), NOW() ),
+(3, 'policy', 'Policyd Server', 1, NOW(), NOW() ),
+(4, 'smtpd', 'SMTPD Server', 1, NOW(), NOW() ),
+(5, 'pop', 'POP3 Server', 1, NOW(), NOW() ),
+(6, 'imap', 'IMAP Server', 1, NOW(), NOW() ),
+(7, 'ftpd', 'FTP Server', 1, NOW(), NOW() );
 
 -- --------------------------------------------------------
 
@@ -913,7 +875,7 @@ CREATE TABLE IF NOT EXISTS `stats_datacenter_sw` (
   KEY `router` (`router`),
   KEY `port` (`port`),
   KEY `rrdfile` (`rrdfile`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Switch files and stats' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Switch files and stats' ;
 
 -- --------------------------------------------------------
 
@@ -1051,7 +1013,7 @@ CREATE TABLE IF NOT EXISTS `whost` (
   `synced` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `domain_id` (`domain_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Web Hosting Table' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Web Hosting Table' ;
 
 -- --------------------------------------------------------
 
@@ -1069,7 +1031,7 @@ CREATE TABLE IF NOT EXISTS `whost_alias` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `vhost_alias` (`vhost_alias`),
   KEY `whost_id` (`whost_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Alias Web Hosting Table' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Alias Web Hosting Table' ;
 
 -- --------------------------------------------------------
 
@@ -1107,7 +1069,7 @@ CREATE TABLE IF NOT EXISTS `whost_options` (
   `modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Table with option list for webhosting' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Table with option list for webhosting' ;
 
 -- --------------------------------------------------------
 
