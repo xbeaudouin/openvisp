@@ -1,3 +1,4 @@
+NOTICE: this project is archived. NO LONGER DEVELOPPED.
 # openvisp
 (former) OpenVISP is a toolset of Assoication Kazar Code.
 
